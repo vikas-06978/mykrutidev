@@ -31,3 +31,4 @@ pnpm-debug.log*
 .claude/skills/tailwind-4-docs/references/docs-index.tsx
 .agents/skills/tailwind-4-docs/references/docs/
 .agents/skills/tailwind-4-docs/references/docs-index.tsx
+node_modules
