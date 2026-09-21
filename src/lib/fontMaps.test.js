@@ -13,7 +13,9 @@ import {
   isPairUnavailable,
   isPairAccurate,
   boxLabel,
+  codeLabel,
   describeMismatch,
+  DEVLYS_DIVERGENT_RANGE,
 } from './fontMaps.js';
 
 const fixtures = JSON.parse(
@@ -127,6 +129,66 @@ describe('punctuation survives a round trip', () => {
     ]) {
       assert.equal(legacyToUnicode(unicodeToLegacy(s, KD), KD), s);
     }
+  });
+});
+
+/**
+ * DevLys 010 shares the Kruti Dev 010 layout, verified outline by outline — but
+ * only on the keys the map uses. The two fonts genuinely disagree in the
+ * 0x80-0x9F block, so sharing one object is safe exactly as long as no key lands
+ * there. This is the test that notices if one ever does.
+ */
+describe('DevLys shares the Kruti Dev layout, and only where that is true', () => {
+  const DL = FONTS.devlys.map;
+
+  test('no Kruti Dev key uses a codepoint where the two fonts differ', () => {
+    const { from, to, extra } = DEVLYS_DIVERGENT_RANGE;
+    for (const key of Object.keys(KD)) {
+      for (const ch of key) {
+        const cp = ch.codePointAt(0);
+        const bad = (cp >= from && cp <= to) || extra.includes(cp);
+        assert.ok(
+          !bad,
+          `key ${JSON.stringify(key)} uses U+${cp.toString(16).toUpperCase()}, ` +
+            'which draws a different glyph in DevLys 010. Split DEVLYS from ' +
+            'KRUTI_DEV before adding it.',
+        );
+      }
+    }
+  });
+
+  test('every Kruti Dev fixture decodes identically through the DevLys map', () => {
+    for (const [, cases] of groups) {
+      for (const { k, u } of cases) {
+        assert.equal(legacyToUnicode(k, DL), legacyToUnicode(k, KD), `on ${k}`);
+      }
+    }
+  });
+
+  test('the DevLys sample decodes to real Hindi', () => {
+    assert.equal(legacyToUnicode(FONTS.devlys.sample, DL), 'हिन्दी भारत की राजधानी भाषा है।');
+  });
+
+  test('DevLys round-trips the documented test pairs', () => {
+    for (const [k, u] of [
+      ['fgUnh', 'हिन्दी'],
+      ['Hkkjr', 'भारत'],
+      ['jk"Vªh;', 'राष्ट्रीय'],
+      ["f'k{kk", 'शिक्षा'],
+      ['Ñi;k', 'कृपया'],
+      ['iz/kkuea=h', 'प्रधानमंत्री'],
+      ['fo|ky;', 'विद्यालय'],
+      ['gS] rks', 'है, तो'],
+    ]) {
+      assert.equal(legacyToUnicode(k, DL), u);
+      assert.equal(legacyToUnicode(unicodeToLegacy(u, DL), DL), u);
+    }
+  });
+
+  test('DevLys and Kruti Dev are interchangeable end to end', () => {
+    const doc = 'राष्ट्रभाषा हिंदी है, जो देश को एकता के सूत्र में बांधती है।';
+    assert.equal(convert(doc, 'unicode', 'devlys'), convert(doc, 'unicode', 'kruti-dev'));
+    assert.equal(convert(doc, 'unicode', 'devlys', { keepEnglish: false }), unicodeToLegacy(doc, DL, { keepEnglish: false }));
   });
 });
 
@@ -247,14 +309,41 @@ describe('font registry', () => {
 
   test('isPairAccurate needs both ends verified', () => {
     assert.equal(isPairAccurate('kruti-dev', 'unicode'), true);
-    assert.equal(isPairAccurate('kruti-dev', 'devlys'), false);
+    assert.equal(isPairAccurate('kruti-dev', 'devlys'), true);
+    assert.equal(isPairAccurate('kruti-dev', 'chanakya'), false);
     assert.equal(isPairAccurate('chanakya', 'unicode'), false);
+    assert.equal(isPairAccurate('preeti', 'unicode'), false);
   });
 
   test('boxLabel disambiguates Unicode as Hindi', () => {
     // A phone keypad types Unicode, so both words have to appear.
     assert.equal(boxLabel('unicode'), 'Unicode / Hindi');
     assert.equal(boxLabel('kruti-dev'), 'Kruti Dev');
+  });
+
+  /**
+   * The copy button used to read "Copy Kruti code" on every legacy page,
+   * including the DevLys ones, because the string was typed into the shared
+   * component. It now comes from here, so the name follows the page's output
+   * font.
+   */
+  test('codeLabel names the font the button actually hands over', () => {
+    assert.equal(codeLabel('kruti-dev'), 'Kruti');
+    assert.equal(codeLabel('devlys'), 'DevLys');
+    assert.equal(codeLabel('chanakya'), 'Chanakya');
+  });
+
+  test('every legacy font can name itself on a copy button', () => {
+    const seen = new Set();
+    for (const [key, f] of Object.entries(FONTS)) {
+      if (f.kind !== 'legacy') continue;
+      const name = codeLabel(key);
+      assert.ok(name && name !== key, `${key} has no usable copy-button name`);
+      // Two legacy fonts sharing a button label would make the two pages
+      // indistinguishable at exactly the point the user has to choose.
+      assert.ok(!seen.has(name), `${key} shares the copy-button name "${name}"`);
+      seen.add(name);
+    }
   });
 });
 

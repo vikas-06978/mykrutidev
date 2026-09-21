@@ -11,6 +11,7 @@ import {
   pendingPages,
   liveConverters,
   navGroups,
+  navTools,
   allGroups,
   reversePage,
   isIndexable,
@@ -104,8 +105,8 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
   });
 
   test('ready:true alone does not make a page live', () => {
-    // devlys is deliberately not accurate; pretend someone flips ready.
-    const pretend = { ...getPage('/devlys-to-unicode'), ready: true };
+    // chanakya is deliberately not accurate; pretend someone flips ready.
+    const pretend = { ...getPage('/chanakya-to-unicode'), ready: true };
     assert.equal(isLive(pretend), false);
   });
 
@@ -121,6 +122,23 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
   test('the four Phase 1 converters are live', () => {
     for (const path of ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev']) {
       assert.ok(isLive(getPage(path)), `${path} should be live`);
+    }
+  });
+
+  test('the four Phase 2 DevLys converters are live', () => {
+    for (const path of ['/devlys-to-unicode', '/unicode-to-devlys', '/devlys-to-mangal', '/mangal-to-devlys']) {
+      assert.ok(isLive(getPage(path)), `${path} should be live`);
+    }
+  });
+
+  test('Chanakya, Shusha and Preeti stay off until their maps exist', () => {
+    for (const path of [
+      '/chanakya-to-unicode', '/unicode-to-chanakya',
+      '/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev',
+      '/shusha-to-unicode', '/unicode-to-shusha',
+      '/preeti-to-unicode', '/unicode-to-preeti',
+    ]) {
+      assert.equal(isLive(getPage(path)), false, `${path} must stay pending`);
     }
   });
 
@@ -205,11 +223,44 @@ describe('navigation', () => {
     }
   });
 
-  test('the nav groups match the example layout: Kruti Dev, Unicode / Hindi, Mangal', () => {
+  test('the nav groups are the source families that have a live page', () => {
     assert.deepEqual(
       navGroups().map((g) => g.name),
-      ['Kruti Dev', 'Unicode / Hindi', 'Mangal'],
+      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys'],
     );
+  });
+
+  test('tools sit beside the groups, never inside one', () => {
+    // A tool has no source font, so it cannot be filed under one. If it ever
+    // turns up in a group it means someone gave it a from/to it should not have.
+    const inGroups = new Set(navGroups().flatMap((g) => g.pages.map((p) => p.path)));
+    for (const t of navTools()) {
+      assert.ok(!inGroups.has(t.path), `${t.path} is a tool but also in a nav group`);
+    }
+  });
+
+  test('every tool is live, non-converter and carries its nav labels', () => {
+    assert.ok(navTools().length > 0, 'expected at least one tool');
+    for (const t of navTools()) {
+      assert.equal(t.kind, 'content', `${t.path}`);
+      assert.equal(t.from, null, `${t.path} should have no source font`);
+      assert.equal(t.to, null, `${t.path} should have no target font`);
+      assert.ok(t.nav, `${t.path} has no nav label`);
+      assert.ok(t.navSub, `${t.path} has no nav subtitle`);
+    }
+  });
+
+  test('the Roman typing page is a tool, and indexable', () => {
+    const p = getPage('/english-to-hindi-typing');
+    assert.ok(p, 'the typing page is missing from routes.js');
+    assert.ok(isLive(p));
+    assert.ok(navTools().some((t) => t.path === p.path), 'not offered in the nav');
+    assert.equal(isIndexable(new URL(p.path, SITE).href), true);
+  });
+
+  test('a tool that is not ready is not offered', () => {
+    const pretend = { ...getPage('/english-to-hindi-typing'), ready: false };
+    assert.equal(isLive(pretend), false);
   });
 
   test('all-converters lists every converter page exactly once', () => {
@@ -267,7 +318,7 @@ describe('indexing', () => {
 
   test('a trailing slash does not change the verdict', () => {
     assert.equal(isIndexable(`${SITE}/kruti-dev-to-mangal/`), true);
-    assert.equal(isIndexable(`${SITE}/devlys-to-unicode/`), false);
+    assert.equal(isIndexable(`${SITE}/chanakya-to-unicode/`), false);
   });
 
   test('an unknown URL is not indexable', () => {

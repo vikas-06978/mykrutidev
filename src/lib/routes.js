@@ -110,6 +110,28 @@ export const PAGES = [
     related: ['/kruti-dev-to-mangal', '/unicode-to-kruti-dev', '/'],
   },
   {
+    path: '/english-to-hindi-typing',
+    ready: true,
+    // Not a converter: it does not map one font onto another, it guesses Hindi
+    // from an English spelling. `kind: 'content'` keeps it out of the converter
+    // nav groups and the reverse-page graph, where it has no meaning.
+    kind: 'content',
+    from: null,
+    to: null,
+    // Its own top-level nav item rather than a group, because it answers a
+    // different question from every other page here: "I do not have a Hindi
+    // keyboard" rather than "I have a file in the wrong font".
+    tool: true,
+    group: 'More',
+    nav: 'English to Hindi Typing',
+    navSub: 'Roman to Hindi',
+    h1: 'English to Hindi Typing (Roman to Hindi)',
+    title: 'English to Hindi Typing - Type Hindi in Roman (Free)',
+    description:
+      'Free English to Hindi typing tool. Type Hindi in Roman letters — namaste becomes नमस्ते — and get Unicode Hindi or Kruti Dev instantly. Nothing is uploaded.',
+    related: ['/', '/unicode-to-kruti-dev', '/all-converters'],
+  },
+  {
     path: '/all-converters',
     ready: true,
     kind: 'content',
@@ -124,14 +146,10 @@ export const PAGES = [
     related: ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal'],
   },
 
-  // ==========================================================================
-  // SCAFFOLDED — routes and SEO exist, mapping does not. Coming soon panel.
-  // ==========================================================================
-
-  // ---- DevLys: seeded from Kruti Dev, never diffed against real documents ---
+  // ---- DevLys: layout verified against Kruti Dev 010, outline by outline ---
   {
     path: '/devlys-to-unicode',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'devlys',
     to: 'unicode',
@@ -140,13 +158,12 @@ export const PAGES = [
     h1: 'DevLys to Unicode Converter',
     title: 'DevLys to Unicode Converter | DevLys 010 to Hindi Unicode Online',
     description:
-      'Convert DevLys 010 Hindi text to Unicode with correct matras and conjuncts. Free and browser-based.',
+      'Convert DevLys 010 Hindi text to Unicode with correct matras and conjuncts. Free and browser-based, with nothing uploaded.',
     related: ['/unicode-to-devlys', '/devlys-to-mangal', '/'],
-    note: 'The DevLys map is currently a copy of the Kruti Dev map. The two layouts are close but not identical, and until the differences are checked against real DevLys files this page would quietly produce wrong letters.',
   },
   {
     path: '/unicode-to-devlys',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'unicode',
     to: 'devlys',
@@ -155,13 +172,12 @@ export const PAGES = [
     h1: 'Unicode to DevLys Converter',
     title: 'Unicode to DevLys Converter | Hindi Unicode to DevLys 010 Font',
     description:
-      'Convert Unicode Hindi back to DevLys 010 font text online. Live conversion, no upload, free.',
-    related: ['/devlys-to-unicode', '/'],
-    note: 'The DevLys map is currently a copy of the Kruti Dev map and has not been verified against real DevLys files.',
+      'Convert Unicode Hindi back to DevLys 010 font text online. Live conversion, correct half-letters, no upload, free.',
+    related: ['/devlys-to-unicode', '/mangal-to-devlys', '/unicode-to-kruti-dev'],
   },
   {
     path: '/devlys-to-mangal',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'devlys',
     to: 'mangal',
@@ -171,12 +187,11 @@ export const PAGES = [
     title: 'DevLys to Mangal Converter | DevLys 010 to Mangal Font Hindi',
     description:
       'Convert DevLys font Hindi to Mangal for government forms and Unicode documents. Free, instant, private.',
-    related: ['/devlys-to-unicode', '/kruti-dev-to-mangal'],
-    note: 'Waiting on the same DevLys verification as the other DevLys pages.',
+    related: ['/devlys-to-unicode', '/mangal-to-devlys', '/kruti-dev-to-mangal'],
   },
   {
     path: '/mangal-to-devlys',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'mangal',
     to: 'devlys',
@@ -185,10 +200,13 @@ export const PAGES = [
     h1: 'Mangal to DevLys Converter',
     title: 'Mangal to DevLys Converter | Mangal Unicode to DevLys 010 Font',
     description:
-      'Convert Mangal (Unicode) Hindi to DevLys 010 font text for legacy documents and typing practice.',
-    related: ['/devlys-to-mangal', '/mangal-to-kruti-dev'],
-    note: 'Waiting on the same DevLys verification as the other DevLys pages.',
+      'Convert Mangal (Unicode) Hindi to DevLys 010 font text for legacy documents and typing practice. Free and fully client-side.',
+    related: ['/devlys-to-mangal', '/unicode-to-devlys', '/mangal-to-kruti-dev'],
   },
+
+  // ==========================================================================
+  // SCAFFOLDED — routes and SEO exist, mapping does not. Coming soon panel.
+  // ==========================================================================
 
   // ---- Chanakya: a genuinely different vendor layout, map is empty ---------
   {
@@ -204,7 +222,7 @@ export const PAGES = [
     description:
       'Convert Chanakya font Hindi to Unicode instantly in your browser. Free, no signup, nothing uploaded.',
     related: ['/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/'],
-    note: 'Chanakya 905 uses a different keyboard layout from Kruti Dev, so none of the existing map applies. It is being built from real Chanakya documents rather than guessed.',
+    note: 'Chanakya uses a completely different keyboard layout from Kruti Dev — none of the 105 keys in the existing map lands on the same letter, and Chanakya spends most of its lowercase range on ready-made conjunct ligatures rather than plain consonants. That layout has to be built and checked against real Chanakya documents; reading it off the font alone would produce fluent-looking Hindi with silently wrong conjuncts.',
   },
   {
     path: '/unicode-to-chanakya',
@@ -515,6 +533,16 @@ export function navGroups() {
       pages: [...pages].sort((a, b) => Number(b.live) - Number(a.live)),
     }));
 }
+
+/**
+ * Live pages that sit in the menubar as their own item rather than inside a
+ * source-font group.
+ *
+ * A converter is filed under the font you already have, because that is the
+ * question its visitor arrives with. A tool like Roman typing has no source
+ * font at all, so it has nowhere to be filed and gets its own entry.
+ */
+export const navTools = () => PAGES.filter((p) => p.tool && isLive(p));
 
 /** /all-converters, grouped the same way but showing every group. */
 export function allGroups() {

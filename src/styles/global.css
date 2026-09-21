@@ -14,6 +14,11 @@
    to raw ASCII rather than breaking when a file is absent. */
 @import './legacy-fonts.css';
 
+/* The two-box converter shell: panels, buttons, segmented toggle, strips.
+   Shared by Converter.astro and Transliterator.astro — see the note at the top
+   of the file for why it is not scoped to either. */
+@import './converter.css';
+
 /* ===========================================================================
    Design tokens — see DESIGN.md
    Deep navy ink on warm paper, muted brick accent. Trustworthy, not flashy.

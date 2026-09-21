@@ -1,5 +1,5 @@
 ---
-import { FONTS, boxLabel } from '../lib/fontMaps.js';
+import { FONTS, boxLabel, codeLabel } from '../lib/fontMaps.js';
 import { previewFontFor } from '../lib/legacyFonts.js';
 
 interface Props {
@@ -32,6 +32,15 @@ const inputIsUnicode = fromFont.kind === 'unicode';
 // Hindi and needs none of it: one Copy button and nothing else.
 const outputIsLegacy = toFont.kind === 'legacy';
 const previewFont = outputIsLegacy ? previewFontFor(to) : null;
+
+// The copy button names the font THIS page outputs — "Copy DevLys code" on a
+// DevLys page, not whichever font happened to be written into the markup first.
+// Getting this wrong is not a cosmetic slip: the two buttons differ only by
+// their labels, so a stale name is an instruction to paste legacy keys under a
+// font the recipient does not have.
+const outputCodeName = outputIsLegacy ? codeLabel(to) : null;
+// The installed face name, e.g. "DevLys 010" — what Word has to resolve.
+const outputFaceName = previewFont?.label ?? toFont.label;
 
 // One preview face, no picker. The variants all shared a keyboard layout and
 // differed only in letterforms, so the dropdown looked like a setting that
@@ -148,7 +157,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
               <div class="cv-copies">
                 <div class="cv-copy">
                   <button type="button" data-role="copy-raw" class="btn btn-primary">
-                    <span data-label>Copy Kruti code</span>
+                    <span data-label>Copy {outputCodeName} code</span>
                   </button>
                   <span class="cv-sub">For MS Word / forms</span>
                 </div>
@@ -161,10 +170,20 @@ const previewStack = previewFont?.stack ?? toFont.css;
               </div>
 
               <div class="cv-secondary">
-                <button type="button" data-role="docx" class="btn btn-ghost">
+                <button
+                  type="button"
+                  data-role="docx"
+                  class="btn btn-ghost"
+                  title={`Word file with the ${outputFaceName} font already applied`}
+                >
                   Download .docx
                 </button>
-                <button type="button" data-role="docx-unicode" class="btn btn-ghost">
+                <button
+                  type="button"
+                  data-role="docx-unicode"
+                  class="btn btn-ghost"
+                  title="Word file in Unicode Hindi, readable without any legacy font"
+                >
                   Unicode .docx
                 </button>
                 <a
@@ -243,207 +262,8 @@ const previewStack = previewFont?.stack ?? toFont.css;
   )
 }
 
-<style>
-  @reference '../styles/global.css';
-
-  /* The card clips its own corners so the panel hairlines and the textarea
-     backgrounds never poke out past the radius. */
-  .cv {
-    overflow: hidden;
-  }
-
-  /* --- Panels ------------------------------------------------------------ */
-  /* Both columns are the same three-row stack: header, field, actions. The
-     field row is the one that grows, so the two textareas stay the same height
-     however tall the action rows below them end up. */
-  .cv-panel {
-    @apply grid gap-3 px-4 py-3 sm:px-5 sm:py-4;
-    grid-template-rows: auto 1fr auto;
-  }
-
-  /* The eyebrow takes the auto margin, so the toggle and count sit right and
-     wrap together onto a second line on a narrow phone rather than colliding
-     with the panel label. */
-  .cv-head {
-    @apply flex flex-wrap items-center gap-x-3 gap-y-2;
-    min-height: 34px;
-  }
-  .cv-eyebrow {
-    @apply me-auto text-xs font-semibold tracking-wide text-mute uppercase;
-  }
-  .cv-count {
-    @apply text-xs tabular-nums text-mute;
-  }
-
-  /* --- Text areas -------------------------------------------------------- */
-  /* The wrapper carries the border, radius and focus ring; the textarea itself
-     is borderless inside it. That way the focus state hugs a rounded box
-     instead of drawing a hard rectangle over the panel's own hairlines. */
-  .cv-field {
-    @apply rounded-(--radius-chrome) border border-hairline bg-surface;
-    transition:
-      border-color 120ms ease,
-      box-shadow 120ms ease;
-  }
-  .cv-field:focus-within {
-    border-color: var(--color-brick);
-    /* A soft ring rather than a hard outline. Still a 2px brick indicator, so
-       it stays as visible as the global :focus-visible rule DESIGN.md requires,
-       but it follows the radius and sits inside the panel. */
-    box-shadow: 0 0 0 3px rgb(168 68 42 / 0.14);
-  }
-
-  .cv-area {
-    @apply w-full border-0 bg-transparent px-4 py-3 text-ink outline-none;
-    @apply placeholder:font-sans placeholder:text-mute;
-    min-height: 13rem;
-    /* Vertical only: horizontal dragging breaks the two-column grid. */
-    resize: vertical;
-    /* Devanagari needs the leading; .deva sets 1.85 and this keeps the raw
-       ASCII view from looking cramped by comparison. */
-    line-height: 1.85;
-  }
-  /* The default corner grabber is a hard diagonal against a rounded box. */
-  .cv-area::-webkit-resizer {
-    display: none;
-  }
-  .cv-out {
-    font-family: var(--cv-preview);
-  }
-  /* The whole preview mechanism: one attribute on the root, one rule here. */
-  .cv[data-view='raw'] .cv-out {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-  }
-
-  /* --- Buttons ----------------------------------------------------------- */
-  /* One radius, one height, one padding for every button in the converter.
-     Fill vs outline carries the hierarchy instead of shape. */
-  .btn {
-    @apply inline-flex items-center justify-center rounded-(--radius-chrome);
-    @apply px-4 text-sm font-medium whitespace-nowrap no-underline;
-    min-height: 44px;
-    cursor: pointer;
-    transition:
-      background-color 120ms ease,
-      border-color 120ms ease,
-      color 120ms ease;
-  }
-  .btn:active {
-    transform: translateY(1px);
-  }
-
-  .btn-primary {
-    @apply border border-brick bg-brick text-white;
-  }
-  .btn-primary:hover {
-    @apply border-brick-deep bg-brick-deep;
-  }
-
-  .btn-outline {
-    @apply border border-brick bg-surface text-brick;
-  }
-  .btn-outline:hover {
-    @apply bg-warn-bg;
-  }
-
-  .btn-ghost {
-    @apply border border-hairline bg-surface text-ink;
-  }
-  .btn-ghost:hover {
-    @apply bg-inset;
-  }
-  .btn-ghost[aria-disabled='true'] {
-    @apply cursor-not-allowed text-mute;
-  }
-
-  .btn[data-copied='true'] {
-    @apply border-ok bg-ok text-white;
-  }
-
-  /* --- Preview / Raw toggle ---------------------------------------------- */
-  /* Separate segments with a real gap, not two buttons sharing an edge. The
-     previous version butted them together and read as one run-on string. */
-  .cv-seg {
-    @apply inline-flex flex-wrap items-center gap-2;
-  }
-  .cv-seg-label {
-    @apply text-xs text-mute;
-  }
-  .cv-seg button {
-    @apply rounded-(--radius-chrome) border border-hairline bg-surface;
-    @apply px-2.5 text-xs font-medium whitespace-nowrap text-body;
-    /* Full touch target on a phone; trimmed on a mouse, where this is a small
-       secondary control sitting in a header row. */
-    min-height: 44px;
-    cursor: pointer;
-    transition:
-      background-color 120ms ease,
-      border-color 120ms ease,
-      color 120ms ease;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .cv-seg button {
-      min-height: 30px;
-    }
-  }
-  .cv-seg button:hover {
-    @apply border-mute bg-inset text-ink;
-  }
-  .cv-seg button[aria-pressed='true'] {
-    @apply border-brick bg-brick text-white;
-  }
-  .cv-seg button[aria-pressed='true']:hover {
-    @apply border-brick-deep bg-brick-deep text-white;
-  }
-  .cv-seg button:active {
-    transform: translateY(1px);
-  }
-
-  /* --- Action rows ------------------------------------------------------- */
-  .cv-actions {
-    @apply flex flex-col gap-3;
-  }
-
-  /* Equal columns so neither copy button reads as the small one. */
-  .cv-copies {
-    @apply grid gap-3;
-    grid-template-columns: 1fr;
-  }
-  @media (width >= 30rem) {
-    .cv-copies {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  .cv-copy {
-    @apply flex flex-col gap-1.5;
-  }
-  /* Single line, centred under its button. These are a hint about where the
-     text is going, not a second label, so they stay muted and out of the way. */
-  .cv-sub {
-    @apply text-center text-xs leading-snug text-mute;
-  }
-
-  .cv-secondary {
-    @apply flex flex-wrap gap-2;
-  }
-  /* Full-width buttons on the narrowest phones, side by side once there is room. */
-  .cv-secondary .btn {
-    flex: 1 1 auto;
-  }
-  @media (width >= 30rem) {
-    .cv-secondary .btn {
-      flex: 0 0 auto;
-    }
-  }
-
-  /* --- Strips ------------------------------------------------------------ */
-  .cv-hint {
-    @apply border-t border-hairline bg-warn-bg px-4 py-2.5 text-sm text-body sm:px-5;
-  }
-  .cv-strip {
-    @apply border-t border-hairline px-4 py-3 text-sm sm:px-5;
-  }
-</style>
+{/* The shell's styles (.cv-*, .btn-*) live in src/styles/converter.css, shared
+    with Transliterator.astro so the two tools cannot drift apart visually. */}
 
 <script>
   import { convert, FONTS, describeMismatch } from '../lib/fontMaps.js';
@@ -744,7 +564,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
 
     whatsapp.addEventListener('click', (e) => {
       flush();
-      // Raw legacy keys are unreadable in WhatsApp: it has no Kruti Dev font.
+      // Raw legacy keys are unreadable in WhatsApp: it has no legacy font.
       // Share the Unicode wherever the output is legacy.
       const shareable = outputIsLegacy ? unicodeText() : output.value;
       if (!shareable) {

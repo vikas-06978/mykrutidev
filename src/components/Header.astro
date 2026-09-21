@@ -1,5 +1,5 @@
 ---
-import { navGroups, getPage, isLive } from '../lib/routes.js';
+import { navGroups, navTools, getPage, isLive } from '../lib/routes.js';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
@@ -7,6 +7,9 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 // inside their group but greyed and not linked — never send a visitor to a page
 // that cannot convert yet.
 const groups = navGroups();
+// Tools sit beside the groups, not inside one: they have no source font to be
+// filed under. Rendered as plain links, so they need no dropdown machinery.
+const tools = navTools();
 const allConverters = getPage('/all-converters');
 const showAll = allConverters && isLive(allConverters);
 
@@ -109,6 +112,26 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                   ),
                 )}
               </ul>
+            </li>
+          ))
+        }
+
+        {
+          tools.map((t) => (
+            <li>
+              <a
+                href={t.path}
+                aria-current={isCurrent(t.path) ? 'page' : undefined}
+                title={t.navSub}
+                class:list={[
+                  'block rounded-(--radius-chrome) px-2.5 py-2 no-underline whitespace-nowrap',
+                  isCurrent(t.path)
+                    ? 'bg-inset font-medium text-ink'
+                    : 'text-body hover:bg-inset hover:text-ink',
+                ]}
+              >
+                {t.nav}
+              </a>
             </li>
           ))
         }
@@ -228,6 +251,24 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                 )}
               </ul>
             </details>
+          </li>
+        ))
+      }
+
+      {
+        tools.map((t) => (
+          <li>
+            <a
+              href={t.path}
+              aria-current={isCurrent(t.path) ? 'page' : undefined}
+              class:list={[
+                'flex min-h-11 flex-col justify-center py-3 no-underline',
+                isCurrent(t.path) ? 'font-medium text-brick' : 'text-body',
+              ]}
+            >
+              <span class="text-base">{t.nav}</span>
+              {t.navSub && <span class="text-xs text-mute">{t.navSub}</span>}
+            </a>
           </li>
         ))
       }

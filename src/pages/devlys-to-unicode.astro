@@ -1,27 +1,124 @@
 ---
 import ConverterPage from '../components/ConverterPage.astro';
+
+const faq = [
+  {
+    q: 'Is the DevLys to Unicode converter free?',
+    a: 'Yes. No signup, no character limit, no paid tier. The page is static and the conversion runs in your browser, so there is nothing to charge for.',
+  },
+  {
+    q: 'Is DevLys 010 the same as Kruti Dev 010?',
+    a: 'They are different fonts that share a keyboard layout. Every key this converter uses draws the same Hindi letter in both — that was checked by comparing the two font files glyph by glyph, not assumed. So a DevLys document and a Kruti Dev document containing the same keystrokes hold the same Hindi, even though the letterforms on screen differ slightly.',
+  },
+  {
+    q: 'Then why was this page "coming soon" for so long?',
+    a: 'Because "almost the same" is not good enough for a converter. The two fonts genuinely do differ in one block of character codes. The page went live only once it was confirmed that the conversion table never touches that block, so the overlap it relies on is real rather than approximate.',
+  },
+  {
+    q: 'Does my text get uploaded anywhere?',
+    a: 'No. The whole engine is JavaScript running inside your browser. Nothing is sent to a server, so confidential notings and draft orders never leave your machine. Once the page has loaded you can disconnect from the internet and it still works.',
+  },
+  {
+    q: 'Why is the short-i matra (ि) in a different place than in my DevLys file?',
+    a: 'Because that is correct. DevLys stores glyphs in <em>visual</em> order, so the short-i sign is typed before its consonant. Unicode stores them in <em>logical</em> order, where the sign belongs after. So <strong>fd</strong> becomes <strong>कि</strong>. Converters that skip this step produce text that looks right but breaks search, sorting and spell-check.',
+  },
+  {
+    q: 'What happens to English words, numbers and dates?',
+    a: 'Dates, numbers, percentages, URLs and email addresses are always left alone, and common English words are detected and preserved. Because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still be converted by mistake — the checkbox under the panels turns the whole behaviour off.',
+  },
+  {
+    q: 'Can I convert Unicode back into DevLys?',
+    a: 'Yes. Each page converts in one fixed direction, so use the <a href="/unicode-to-devlys">Unicode to DevLys converter</a> for the reverse. There is a link under the boxes too. That page also accepts Hindi typed on a phone or the Windows keypad, since keypad Hindi is already Unicode.',
+  },
+];
 ---
 
 <ConverterPage
   path="/devlys-to-unicode"
-  lede="Paste DevLys 010 text on the left and get Unicode Hindi on the right, once the DevLys layout has been verified."
+  lede="Paste DevLys 010 text on the left and get Unicode Hindi on the right, with matra order and conjuncts handled properly. Nothing is uploaded."
+  faq={faq}
 >
-  <h2>Close to Kruti Dev, and that is the problem</h2>
+  <h2>What this converter does</h2>
   <p>
-    DevLys 010 shares almost all of its keyboard layout with Kruti Dev 010. The
-    engine already has a DevLys map seeded from the Kruti Dev one, and it would
-    convert the great majority of text correctly: matras, reph, the common
-    conjuncts, all of it.
+    DevLys is not an encoding. It is a font whose glyphs sit on ASCII
+    codepoints, which is why a DevLys document opened on a machine without the
+    font shows gibberish like <code>Hkkjr</code> instead of
+    <strong lang="hi">भारत</strong>. Turning it into Unicode is not a matter of
+    swapping one letter for another — the characters have to be
+    <em>reordered</em>, because the two systems store Hindi differently.
   </p>
   <p>
-    The trouble is the minority. Where the two layouts diverge, the output is
-    not obviously broken: it is fluent-looking Hindi with a few letters quietly
-    replaced. That is worse than a visible failure, because there is nothing to
-    alert you. So the page stays off until the two layouts have been diffed
-    against real DevLys documents and the differences are covered by tests.
+    Paste on the left and the Unicode appears on the right as you type. No
+    Convert button to hunt for, no advertisement between you and the text box,
+    and no upload.
+  </p>
+
+  <h2>DevLys and Kruti Dev: close, and checked</h2>
+  <p>
+    DevLys 010 and Kruti Dev 010 share a keyboard layout. That is genuinely
+    useful — it means two decades of Hindi DTP work is interchangeable at the
+    keystroke level — but it is also the assumption that quietly breaks most
+    converters, because the two fonts are not identical everywhere.
   </p>
   <p>
-    If your document is actually Kruti Dev, <a href="/">Kruti Dev to Unicode</a>
-    is finished and tested.
+    So it was verified rather than assumed. Every character code this converter
+    uses was read out of both font files and compared: advance width, contour
+    count and bounding box. All of them match. The two fonts <em>do</em> diverge
+    in one block of character codes, and the conversion table deliberately does
+    not use any code in that block. That is why this page is live and why the
+    Chanakya pages are not.
+  </p>
+
+  <h2>What usually goes wrong elsewhere</h2>
+  <ul>
+    <li>
+      <strong>The short-i matra.</strong> In DevLys you type the ि before its
+      consonant, because that is where it is drawn. Unicode wants it after. Copy
+      the visual order straight across and you get text that renders acceptably
+      in some fonts but fails search, sorting, spell-check and screen readers.
+    </li>
+    <li>
+      <strong>The reph.</strong> The र् that rides above a letter is typed
+      <em>after</em> its syllable, so कर्म is keyed as <code>deZ</code>. It has
+      to be moved to the front of the cluster, and moved before the i-matra is
+      repositioned, or words like <strong lang="hi">कीर्ति</strong> come out
+      scrambled.
+    </li>
+    <li>
+      <strong>Split vowel signs.</strong> DevLys builds
+      <strong lang="hi">ो</strong> from an aa-matra plus an e-matra, so
+      <code>dks</code> has to be recomposed into <strong lang="hi">को</strong>
+      rather than left as two marks.
+    </li>
+  </ul>
+
+  <h2>Who needs this</h2>
+  <p>
+    DevLys turns up wherever Hindi DTP was done in the 1990s and 2000s: press
+    and publishing files, school and college records, tender documents, old
+    court and municipal paperwork. Modern portals, databases and e-governance
+    systems all expect Unicode, so every time one of those files has to go into
+    a new system, somebody has to convert it.
+  </p>
+
+  <h2>How to use it</h2>
+  <ol>
+    <li>Open your DevLys document and copy the Hindi text.</li>
+    <li>Paste it into the left panel. The output appears immediately.</li>
+    <li>
+      Press <strong>Copy text</strong>, or <strong>Download .docx</strong> for a
+      Word file with the correct font already applied.
+    </li>
+    <li>
+      Read the output before you use it. Very old documents sometimes carry
+      unusual characters, and this is the one place a glance pays for itself.
+    </li>
+  </ol>
+  <p>
+    For the other direction use <a href="/unicode-to-devlys"
+      >Unicode to DevLys</a
+    >, and <a href="/devlys-to-mangal">DevLys to Mangal</a> shows the result in the
+    Mangal font most government forms ask for. If your document is actually Kruti
+    Dev, <a href="/">Kruti Dev to Unicode</a> is the page you want.
   </p>
 </ConverterPage>

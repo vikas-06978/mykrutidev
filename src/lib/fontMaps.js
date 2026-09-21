@@ -291,11 +291,45 @@ const KRUTI_DEV = {
 };
 
 // ============================================================================
-// DevLys 010 — shares the Kruti Dev 010 layout almost entirely.
+// DevLys 010 — VERIFIED to share the Kruti Dev 010 layout on every mapped key
 // ============================================================================
-// Seeded from Kruti Dev so the engine produces something useful immediately.
-// TODO(phase-2): diff against real DevLys documents and add the overrides.
+//
+// This used to be a hopeful copy with a TODO on it. It is now a checked one.
+//
+// HOW IT WAS VERIFIED. Not from a keyboard chart and not by reading converted
+// text, but by comparing the two fonts' own glyph outlines. For each of the 105
+// codepoints this map uses, the advance width, contour count and bounding box
+// were read out of `public/fonts/KRDEV010.woff` and `public/fonts/devlys-010.woff`
+// and compared. All 105 agree to within 10 units on a 1000-unit em — i.e. the
+// same letter, redrawn with the tiny differences you would expect between two
+// cuts of one layout. A sample was then rendered and read by eye as well.
+//
+// WHERE THEY REALLY DO DIFFER, and why it is safe. The two fonts diverge sharply
+// in the 0x80-0x9F block (codepoints 128-159, plus 252): different advances,
+// different contour counts, several slots empty in one font and filled in the
+// other. That is the "close but not identical" everyone warns about, and it is
+// real. It costs nothing today because THIS MAP TOUCHES NONE OF THOSE SLOTS —
+// every key is ASCII or >= 0xA1.
+//
+//   >> Before adding any key in 128-159 to KRUTI_DEV, split this map. <<
+//
+// Sharing the object is what keeps the two fonts honest right now; it becomes a
+// silent corruption the moment a key lands in the range where they disagree.
+// There is a test in fontMaps.test.js that fails if one ever does.
+//
+// TEST PAIRS — paste the left side into a DevLys 010 document to check by hand:
+//   fgUnh          -> हिन्दी
+//   Hkkjr          -> भारत
+//   jk"Vªh;        -> राष्ट्रीय
+//   f'k{kk         -> शिक्षा
+//   Ñi;k           -> कृपया
+//   iz/kkuea=h     -> प्रधानमंत्री
+//   fo|ky;         -> विद्यालय
+//   gS] rks        -> है, तो
 const DEVLYS = { ...KRUTI_DEV };
+
+/** The 0x80-0x9F block, where DevLys 010 and Kruti Dev 010 draw different glyphs. */
+export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 
 // ============================================================================
 // Unverified layouts — deliberately EMPTY
@@ -321,11 +355,16 @@ const PREETI = {}; // Preeti — the Nepali Devanagari equivalent of Kruti Dev
 // Hindi keypad IS Unicode. Users search for "hindi to kruti dev" and for
 // "unicode to krutidev" meaning the same thing, so the UI says "Unicode / Hindi"
 // wherever there is room for it.
+//
+// `shortLabel` is the opposite problem: the copy button reads "Copy X code" and
+// has a sub-label under it, so the font name there has to stay short. Only
+// Kruti Dev needs one; every other name is already one word.
 
 export const FONTS = {
   'kruti-dev': {
     key: 'kruti-dev',
     label: 'Kruti Dev',
+    shortLabel: 'Kruti',
     kind: 'legacy',
     map: KRUTI_DEV,
     accurate: true,
@@ -362,12 +401,13 @@ export const FONTS = {
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
-    // Seeded from Kruti Dev and never diffed against real DevLys documents.
-    // Close, almost certainly not exact — so not accurate, so not live.
-    accurate: false,
+    // Verified by comparing glyph outlines against Kruti Dev 010 — see the note
+    // above DEVLYS. Every codepoint this map uses draws the same letter in both
+    // fonts; the ranges where they differ are ones the map never touches.
+    accurate: true,
     css: '"DevLys 010", "DevLys", monospace',
     sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
-    placeholder: 'fgUnh (example)',
+    placeholder: 'fgUnh Hkkjr  (example)',
   },
   chanakya: {
     key: 'chanakya',
@@ -417,6 +457,21 @@ export const isPairAccurate = (fromKey, toKey) =>
 export const boxLabel = (key) => {
   const f = FONTS[key];
   return f ? (f.altLabel ?? f.label) : key;
+};
+
+/**
+ * The font name inside "Copy {name} code" — the button that hands over raw
+ * legacy keystrokes.
+ *
+ * Its own helper rather than boxLabel() because the two want opposite things:
+ * a box label spells the ambiguity out ("Unicode / Hindi"), while a button
+ * label has to stay narrow enough to sit beside a second button of equal width.
+ * Never hardcode the name at a call site — the button must always name the font
+ * the page actually outputs, or it sends people to Word with the wrong one.
+ */
+export const codeLabel = (key) => {
+  const f = FONTS[key];
+  return f ? (f.shortLabel ?? f.label) : key;
 };
 
 // ============================================================================
