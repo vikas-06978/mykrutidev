@@ -1,0 +1,777 @@
+---
+import { FONTS, boxLabel } from '../lib/fontMaps.js';
+import { previewFontFor } from '../lib/legacyFonts.js';
+
+interface Props {
+  from: string;
+  to: string;
+  /** Reverse-direction page, if one exists. Drives the swap arrow. */
+  reverse?: { path: string; h1: string } | null;
+}
+
+const { from, to, reverse = null } = Astro.props;
+
+const fromFont = FONTS[from];
+const toFont = FONTS[to];
+if (!fromFont || !toFont) throw new Error(`Converter: unknown font ${from}/${to}`);
+
+const fromLabel = boxLabel(from);
+const toLabel = boxLabel(to);
+
+// Derived from the props rather than a counter, so ids stay stable across
+// builds while still being unique if a page ever renders two converters.
+const uid = `${from}-${to}`;
+
+// Typing Hindi straight into the box only makes sense when the source IS
+// Unicode; a legacy box wants pasted ASCII, so it keeps the compact size.
+const inputIsUnicode = fromFont.kind === 'unicode';
+
+// A legacy output is ASCII keystrokes that only look like Hindi once the font
+// is applied, which drives every conditional below: the Preview/Raw toggle, the
+// two copy buttons, the second .docx. A Unicode output is already readable
+// Hindi and needs none of it: one Copy button and nothing else.
+const outputIsLegacy = toFont.kind === 'legacy';
+const previewFont = outputIsLegacy ? previewFontFor(to) : null;
+
+// One preview face, no picker. The variants all shared a keyboard layout and
+// differed only in letterforms, so the dropdown looked like a setting that
+// mattered and was not.
+const previewStack = previewFont?.stack ?? toFont.css;
+---
+
+{/*
+  No font pickers. Each page is hard-wired to one direction by its route, which
+  is the whole point of the per-page design: the user picked the conversion when
+  they picked the page, and asking again was where the old UI lost people.
+*/}
+<div
+  class="cv card"
+  data-converter
+  data-from={from}
+  data-to={to}
+  data-from-label={fromLabel}
+  data-to-label={toLabel}
+  data-reverse={reverse?.path ?? ''}
+  data-view="preview"
+  style={`--cv-preview:${previewStack}`}
+>
+  <div class="grid md:grid-cols-2 md:divide-x md:divide-hairline">
+    {/* Input */}
+    <div class="cv-panel border-b border-hairline md:border-b-0">
+      <div class="cv-head">
+        <label for={`cv-in-${uid}`} class="cv-eyebrow">{fromLabel}</label>
+        <span data-role="count-in" class="cv-count">0</span>
+      </div>
+
+      <div class="cv-field">
+        <textarea
+          id={`cv-in-${uid}`}
+          data-role="input"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+          lang={inputIsUnicode ? 'hi' : undefined}
+          placeholder={fromFont.placeholder}
+          class:list={['cv-area deva', inputIsUnicode ? 'text-lg' : 'text-base']}
+          style={`font-family:${fromFont.css}`}></textarea>
+      </div>
+
+      <div class="cv-actions">
+        <button type="button" data-role="clear" class="btn btn-ghost">Clear</button>
+        {/*
+          "Try example", not "Insert sample": users read "sample" as "upload a
+          sample file". It only fills the box with real text in THIS page's
+          source font. No file picker, here or anywhere on the page.
+        */}
+        <button
+          type="button"
+          data-role="sample"
+          class="btn btn-ghost"
+          data-sample={fromFont.sample}
+          title={`Fill the box with a real ${fromFont.label} example`}
+        >
+          Try example
+        </button>
+      </div>
+    </div>
+
+    {/*
+      Output.
+
+      THE PREVIEW TOGGLE IS PURELY VISUAL. It flips one attribute on the root,
+      and CSS swaps the output box's font-family off that. It must never reach
+      the copy buttons or the .docx exports. "The Hindi you can see" is not a
+      copyable string: the clipboard can only carry the raw keys or the Unicode,
+      so both are generated explicitly and labelled, rather than letting the
+      visible glyphs decide.
+    */}
+    <div class="cv-panel bg-surface">
+      <div class="cv-head">
+        <label for={`cv-out-${uid}`} class="cv-eyebrow">{toLabel}</label>
+        {
+          outputIsLegacy && (
+            <div data-role="view" role="group" aria-labelledby={`cv-view-${uid}`} class="cv-seg">
+              <span id={`cv-view-${uid}`} class="cv-seg-label">
+                View:
+              </span>
+              <button type="button" data-view="preview" aria-pressed="true">
+                Preview (Hindi)
+              </button>
+              <button type="button" data-view="raw" aria-pressed="false">
+                Raw code
+              </button>
+            </div>
+          )
+        }
+        <span data-role="count-out" class="cv-count">0</span>
+      </div>
+
+      <div class="cv-field">
+        <textarea
+          id={`cv-out-${uid}`}
+          data-role="output"
+          readonly
+          spellcheck="false"
+          placeholder="Your converted text appears here."
+          class="cv-area cv-out deva text-base"></textarea>
+      </div>
+
+      <div class="cv-actions">
+        {
+          outputIsLegacy ? (
+            <>
+              {/*
+                Two buttons, equal width, because the choice between them is the
+                whole point of this page and neither is an afterthought. Raw keys
+                are primary only because that is what the page's title promised.
+              */}
+              <div class="cv-copies">
+                <div class="cv-copy">
+                  <button type="button" data-role="copy-raw" class="btn btn-primary">
+                    <span data-label>Copy Kruti code</span>
+                  </button>
+                  <span class="cv-sub">For MS Word / forms</span>
+                </div>
+                <div class="cv-copy">
+                  <button type="button" data-role="copy-unicode" class="btn btn-outline">
+                    <span data-label>Copy as Hindi (Unicode)</span>
+                  </button>
+                  <span class="cv-sub">For WhatsApp / web</span>
+                </div>
+              </div>
+
+              <div class="cv-secondary">
+                <button type="button" data-role="docx" class="btn btn-ghost">
+                  Download .docx
+                </button>
+                <button type="button" data-role="docx-unicode" class="btn btn-ghost">
+                  Unicode .docx
+                </button>
+                <a
+                  data-role="whatsapp"
+                  href="#"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-ghost"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </>
+          ) : (
+            <div class="cv-secondary">
+              <button type="button" data-role="copy-raw" class="btn btn-primary">
+                <span data-label>Copy text</span>
+              </button>
+              <button type="button" data-role="docx" class="btn btn-ghost">
+                Download .docx
+              </button>
+              <a data-role="whatsapp" href="#" target="_blank" rel="noopener" class="btn btn-ghost">
+                WhatsApp
+              </a>
+            </div>
+          )
+        }
+        <span data-role="status" role="status" aria-live="polite" class="sr-only"></span>
+      </div>
+    </div>
+  </div>
+
+  {/*
+    A hint, never a block. It fires when the pasted text clearly is not this
+    page's source font. The failure mode of a one-direction page is landing on
+    the wrong one, and silently returning garbage is what confused people before.
+  */}
+  <p data-role="hint" hidden class="cv-hint"></p>
+
+  <div class="cv-strip bg-inset">
+    <label class="flex items-start gap-2.5 text-body">
+      <input
+        type="checkbox"
+        data-role="keep-english"
+        checked
+        class="mt-0.5 size-4 shrink-0 accent-[var(--color-brick)]"
+      />
+      <span>
+        <strong class="font-medium text-ink">Keep English words and numbers unchanged</strong>
+        <span class="block text-xs text-mute">
+          Dates, numbers, URLs and email addresses are always left alone. English
+          words are detected heuristically, and because a legacy font stores Hindi
+          as plain ASCII, an unusual proper noun can still slip through.
+        </span>
+      </span>
+    </label>
+  </div>
+
+  <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
+    <span class="font-medium text-body">Please review the output.</span> Matra order
+    and the common conjuncts (<span lang="hi">&#2325;&#2381;&#2359;, &#2340;&#2381;&#2352;,
+    &#2332;&#2381;&#2334;, &#2358;&#2381;&#2352;</span>) are handled, but rare
+    characters in very old documents may still differ. Nothing you type is
+    uploaded. This page converts entirely inside your browser.
+  </p>
+</div>
+
+{
+  reverse && (
+    <p class="mt-3 text-center text-sm text-body">
+      <a href={reverse.path} class="inline-flex items-center gap-1.5 no-underline hover:underline">
+        <span aria-hidden="true">&#8644;</span>
+        Need the other direction? {reverse.h1}
+      </a>
+    </p>
+  )
+}
+
+<style>
+  @reference '../styles/global.css';
+
+  /* The card clips its own corners so the panel hairlines and the textarea
+     backgrounds never poke out past the radius. */
+  .cv {
+    overflow: hidden;
+  }
+
+  /* --- Panels ------------------------------------------------------------ */
+  /* Both columns are the same three-row stack: header, field, actions. The
+     field row is the one that grows, so the two textareas stay the same height
+     however tall the action rows below them end up. */
+  .cv-panel {
+    @apply grid gap-3 px-4 py-3 sm:px-5 sm:py-4;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* The eyebrow takes the auto margin, so the toggle and count sit right and
+     wrap together onto a second line on a narrow phone rather than colliding
+     with the panel label. */
+  .cv-head {
+    @apply flex flex-wrap items-center gap-x-3 gap-y-2;
+    min-height: 34px;
+  }
+  .cv-eyebrow {
+    @apply me-auto text-xs font-semibold tracking-wide text-mute uppercase;
+  }
+  .cv-count {
+    @apply text-xs tabular-nums text-mute;
+  }
+
+  /* --- Text areas -------------------------------------------------------- */
+  /* The wrapper carries the border, radius and focus ring; the textarea itself
+     is borderless inside it. That way the focus state hugs a rounded box
+     instead of drawing a hard rectangle over the panel's own hairlines. */
+  .cv-field {
+    @apply rounded-(--radius-chrome) border border-hairline bg-surface;
+    transition:
+      border-color 120ms ease,
+      box-shadow 120ms ease;
+  }
+  .cv-field:focus-within {
+    border-color: var(--color-brick);
+    /* A soft ring rather than a hard outline. Still a 2px brick indicator, so
+       it stays as visible as the global :focus-visible rule DESIGN.md requires,
+       but it follows the radius and sits inside the panel. */
+    box-shadow: 0 0 0 3px rgb(168 68 42 / 0.14);
+  }
+
+  .cv-area {
+    @apply w-full border-0 bg-transparent px-4 py-3 text-ink outline-none;
+    @apply placeholder:font-sans placeholder:text-mute;
+    min-height: 13rem;
+    /* Vertical only: horizontal dragging breaks the two-column grid. */
+    resize: vertical;
+    /* Devanagari needs the leading; .deva sets 1.85 and this keeps the raw
+       ASCII view from looking cramped by comparison. */
+    line-height: 1.85;
+  }
+  /* The default corner grabber is a hard diagonal against a rounded box. */
+  .cv-area::-webkit-resizer {
+    display: none;
+  }
+  .cv-out {
+    font-family: var(--cv-preview);
+  }
+  /* The whole preview mechanism: one attribute on the root, one rule here. */
+  .cv[data-view='raw'] .cv-out {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  }
+
+  /* --- Buttons ----------------------------------------------------------- */
+  /* One radius, one height, one padding for every button in the converter.
+     Fill vs outline carries the hierarchy instead of shape. */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-(--radius-chrome);
+    @apply px-4 text-sm font-medium whitespace-nowrap no-underline;
+    min-height: 44px;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    @apply border border-brick bg-brick text-white;
+  }
+  .btn-primary:hover {
+    @apply border-brick-deep bg-brick-deep;
+  }
+
+  .btn-outline {
+    @apply border border-brick bg-surface text-brick;
+  }
+  .btn-outline:hover {
+    @apply bg-warn-bg;
+  }
+
+  .btn-ghost {
+    @apply border border-hairline bg-surface text-ink;
+  }
+  .btn-ghost:hover {
+    @apply bg-inset;
+  }
+  .btn-ghost[aria-disabled='true'] {
+    @apply cursor-not-allowed text-mute;
+  }
+
+  .btn[data-copied='true'] {
+    @apply border-ok bg-ok text-white;
+  }
+
+  /* --- Preview / Raw toggle ---------------------------------------------- */
+  /* Separate segments with a real gap, not two buttons sharing an edge. The
+     previous version butted them together and read as one run-on string. */
+  .cv-seg {
+    @apply inline-flex flex-wrap items-center gap-2;
+  }
+  .cv-seg-label {
+    @apply text-xs text-mute;
+  }
+  .cv-seg button {
+    @apply rounded-(--radius-chrome) border border-hairline bg-surface;
+    @apply px-2.5 text-xs font-medium whitespace-nowrap text-body;
+    /* Full touch target on a phone; trimmed on a mouse, where this is a small
+       secondary control sitting in a header row. */
+    min-height: 44px;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cv-seg button {
+      min-height: 30px;
+    }
+  }
+  .cv-seg button:hover {
+    @apply border-mute bg-inset text-ink;
+  }
+  .cv-seg button[aria-pressed='true'] {
+    @apply border-brick bg-brick text-white;
+  }
+  .cv-seg button[aria-pressed='true']:hover {
+    @apply border-brick-deep bg-brick-deep text-white;
+  }
+  .cv-seg button:active {
+    transform: translateY(1px);
+  }
+
+  /* --- Action rows ------------------------------------------------------- */
+  .cv-actions {
+    @apply flex flex-col gap-3;
+  }
+
+  /* Equal columns so neither copy button reads as the small one. */
+  .cv-copies {
+    @apply grid gap-3;
+    grid-template-columns: 1fr;
+  }
+  @media (width >= 30rem) {
+    .cv-copies {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .cv-copy {
+    @apply flex flex-col gap-1.5;
+  }
+  /* Single line, centred under its button. These are a hint about where the
+     text is going, not a second label, so they stay muted and out of the way. */
+  .cv-sub {
+    @apply text-center text-xs leading-snug text-mute;
+  }
+
+  .cv-secondary {
+    @apply flex flex-wrap gap-2;
+  }
+  /* Full-width buttons on the narrowest phones, side by side once there is room. */
+  .cv-secondary .btn {
+    flex: 1 1 auto;
+  }
+  @media (width >= 30rem) {
+    .cv-secondary .btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  /* --- Strips ------------------------------------------------------------ */
+  .cv-hint {
+    @apply border-t border-hairline bg-warn-bg px-4 py-2.5 text-sm text-body sm:px-5;
+  }
+  .cv-strip {
+    @apply border-t border-hairline px-4 py-3 text-sm sm:px-5;
+  }
+</style>
+
+<script>
+  import { convert, FONTS, describeMismatch } from '../lib/fontMaps.js';
+  import { previewFontFor } from '../lib/legacyFonts.js';
+
+  const WHATSAPP_LIMIT = 2000;
+
+  /** Long enough to skip the intermediate states of a fast typist, short
+   *  enough that the output still feels live. Below ~50ms a touch-typist
+   *  triggers a full conversion per character on text that may be pages long. */
+  const DEBOUNCE_MS = 90;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-converter]')) {
+    setup(root);
+  }
+
+  function setup(root: HTMLElement) {
+    const q = <T extends HTMLElement>(role: string) =>
+      root.querySelector<T>(`[data-role="${role}"]`)!;
+    const maybe = <T extends HTMLElement>(role: string) =>
+      root.querySelector<T>(`[data-role="${role}"]`);
+
+    const input = q<HTMLTextAreaElement>('input');
+    const output = q<HTMLTextAreaElement>('output');
+    const keepEnglish = q<HTMLInputElement>('keep-english');
+    const countIn = q<HTMLElement>('count-in');
+    const countOut = q<HTMLElement>('count-out');
+    const status = q<HTMLElement>('status');
+    const hint = q<HTMLElement>('hint');
+    const whatsapp = q<HTMLAnchorElement>('whatsapp');
+    const viewGroup = maybe<HTMLElement>('view');
+
+    // Fixed for the life of the page. This is the whole no-dropdown design.
+    const from = root.dataset.from!;
+    const to = root.dataset.to!;
+    const fromLabel = root.dataset.fromLabel!;
+    const toLabel = root.dataset.toLabel!;
+    const reversePath = root.dataset.reverse || '';
+    const outputIsLegacy = FONTS[to]?.kind === 'legacy';
+
+    let flash: ReturnType<typeof setTimeout> | undefined;
+    const say = (msg: string) => {
+      status.textContent = msg;
+      clearTimeout(flash);
+      flash = setTimeout(() => (status.textContent = ''), 2200);
+    };
+
+    /** Render the mismatch hint, with a link to the right page where we have one. */
+    function showHint(text: string) {
+      const code = describeMismatch(text, from);
+      if (!code) {
+        hint.hidden = true;
+        hint.textContent = '';
+        return;
+      }
+
+      hint.hidden = false;
+      hint.textContent = '';
+
+      const lead = document.createElement('strong');
+      lead.className = 'font-medium text-ink';
+
+      if (code === 'expected-legacy-got-unicode') {
+        lead.textContent = `This looks like Unicode Hindi, not ${fromLabel}. `;
+        hint.append(lead, 'You may want the converter that goes the other way');
+        if (reversePath) {
+          hint.append(': ');
+          const a = document.createElement('a');
+          a.href = reversePath;
+          a.textContent = `${toLabel} to ${fromLabel}`;
+          hint.append(a, '.');
+        } else {
+          hint.append('.');
+        }
+      } else if (code === 'expected-legacy-got-english') {
+        lead.textContent = `This doesn't look like ${fromLabel} text. `;
+        hint.append(
+          lead,
+          `${fromLabel} stores Hindi as ASCII, so a real ${fromLabel} document looks like gibberish here. Try the example button below the box.`,
+        );
+      } else {
+        lead.textContent = "This doesn't look like Hindi text. ";
+        hint.append(
+          lead,
+          'Type or paste Hindi in the box, or use the example button to see what this page expects.',
+        );
+      }
+    }
+
+    /**
+     * The Unicode form of what the user typed. What "Copy as Hindi" hands out.
+     *
+     * Derived from the INPUT, not from the legacy output. On every page that
+     * shows this button the source is already Unicode, so convert()'s
+     * unicode -> unicode branch returns it verbatim: lossless and free. A
+     * future legacy -> legacy page gets a real conversion from the same call.
+     * Never read the output box here. Round-tripping legacy -> unicode ->
+     * legacy is where fidelity goes to die.
+     */
+    const unicodeText = () => {
+      try {
+        return convert(input.value, from, 'unicode', {
+          keepEnglish: keepEnglish.checked,
+        });
+      } catch (err) {
+        console.error(err);
+        return '';
+      }
+    };
+
+    // ----------------------------------------------------------------------
+    // Conversion, debounced
+    // ----------------------------------------------------------------------
+    //
+    // The expensive part is not the conversion. Measured on a 14,000-character
+    // document, convert() is around 3ms; what actually stalls typing is writing
+    // output.value, because the browser then re-shapes and re-lays-out a whole
+    // textarea of Devanagari in a webfont on every keystroke.
+    //
+    // So: debounce the write, keep the character count synchronous so the box
+    // still feels live, skip the write entirely when nothing changed, and move
+    // the WhatsApp href (a second conversion plus an encodeURIComponent over
+    // the whole text, both of which ran per keystroke) to the click.
+
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    let lastConverted: string | null = null;
+
+    function convertNow() {
+      const text = input.value;
+      // Re-running on identical text is pure waste, and blur/change events
+      // fire plenty of those.
+      if (text === lastConverted) return;
+      lastConverted = text;
+
+      let result = '';
+      try {
+        result = convert(text, from, to, { keepEnglish: keepEnglish.checked });
+      } catch (err) {
+        console.error(err);
+        say('Conversion failed');
+      }
+      // The one line worth guarding: assigning to a textarea's value re-shapes
+      // the whole document even when the string is identical.
+      if (output.value !== result) {
+        output.value = result;
+        countOut.textContent = String(result.length);
+      }
+      showHint(text);
+      whatsapp.setAttribute('aria-disabled', result ? 'false' : 'true');
+    }
+
+    /** Cheap, synchronous, every keystroke. */
+    function tick() {
+      countIn.textContent = String(input.value.length);
+      clearTimeout(pending);
+      pending = setTimeout(convertNow, DEBOUNCE_MS);
+    }
+
+    /** Skip the wait when the answer is needed right now. */
+    function flush() {
+      clearTimeout(pending);
+      convertNow();
+    }
+
+    input.addEventListener('input', tick);
+    // A setting change is not typing: apply it immediately.
+    keepEnglish.addEventListener('change', () => {
+      lastConverted = null;
+      flush();
+    });
+
+    // ----------------------------------------------------------------------
+    // Preview toggle: one attribute, nothing else
+    // ----------------------------------------------------------------------
+    //
+    // No font-family is written from JavaScript and no conversion re-runs. The
+    // stylesheet reads [data-view] off the root. Keep it that way: the moment
+    // the visible glyphs influence what lands on the clipboard, the two-button
+    // design is broken.
+    if (viewGroup) {
+      const buttons = viewGroup.querySelectorAll<HTMLButtonElement>('[data-view]');
+      for (const btn of buttons) {
+        btn.addEventListener('click', () => {
+          for (const other of buttons) {
+            other.setAttribute('aria-pressed', String(other === btn));
+          }
+          root.dataset.view = btn.dataset.view!;
+        });
+      }
+
+      // If the face resolves to nothing, say so once instead of leaving the
+      // user staring at ASCII in "Preview (Hindi)" mode wondering what broke.
+      // load(), not check(): check() only reports faces already downloaded.
+      (async () => {
+        const font = previewFontFor(to);
+        if (!font) return;
+        try {
+          if (!document.fonts?.load) return;
+          const faces = await document.fonts.load(`16px "${font.family}"`);
+          if (faces.some((f) => f.status === 'loaded')) return;
+          const note = document.createElement('span');
+          note.className = 'cv-count';
+          note.textContent = `${font.label} not available`;
+          viewGroup.after(note);
+        } catch {
+          // No FontFaceSet, or a browser that throws on an unknown family.
+          // Say nothing rather than claim a font is missing on a failed probe.
+        }
+      })();
+    }
+
+    // ----------------------------------------------------------------------
+    // Copy / download. None of this reads the preview state.
+    // ----------------------------------------------------------------------
+
+    /** One clipboard path for every button, with the insecure-context fallback. */
+    async function writeClipboard(text: string) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        // Clipboard API needs a secure context; a scratch textarea always works.
+        // Not output.select(): that would only ever copy the raw keys.
+        const scratch = document.createElement('textarea');
+        scratch.value = text;
+        scratch.setAttribute('readonly', '');
+        scratch.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
+        document.body.append(scratch);
+        scratch.select();
+        try {
+          document.execCommand('copy');
+        } finally {
+          scratch.remove();
+        }
+      }
+    }
+
+    /** Wire a copy button: confirm on the button itself, announce for screen readers. */
+    function wireCopy(role: string, text: () => string) {
+      const btn = maybe<HTMLButtonElement>(role);
+      if (!btn) return;
+      const label = btn.querySelector<HTMLElement>('[data-label]')!;
+      const original = label.textContent!;
+      let reset: ReturnType<typeof setTimeout> | undefined;
+
+      btn.addEventListener('click', async () => {
+        flush();
+        const value = text();
+        if (!value) return say('Nothing to copy');
+        await writeClipboard(value);
+
+        label.textContent = 'Copied!';
+        btn.dataset.copied = 'true';
+        say('Copied to clipboard');
+        clearTimeout(reset);
+        reset = setTimeout(() => {
+          label.textContent = original;
+          delete btn.dataset.copied;
+        }, 1600);
+      });
+    }
+
+    // Always the raw string in the box: legacy keys on a Kruti page, Unicode on
+    // a Mangal page. Unaffected by the Preview/Raw toggle.
+    wireCopy('copy-raw', () => output.value);
+    // Always Unicode, whichever view is showing.
+    wireCopy('copy-unicode', unicodeText);
+
+    /** Shared .docx path. `text` is resolved at click time, never from the DOM font. */
+    function wireDocx(role: string, text: () => string, fontName: string, suffix = '') {
+      maybe<HTMLButtonElement>(role)?.addEventListener('click', async (e) => {
+        flush();
+        const body = text();
+        if (!body) return say('Nothing to download');
+        const btn = e.currentTarget as HTMLButtonElement;
+        btn.disabled = true;
+        try {
+          // Dynamic import: the zip library never touches the initial bundle.
+          const { downloadDocx } = await import('../lib/docx.js');
+          downloadDocx(body, { fontName, fileName: `mykrutidev-${to}${suffix}.docx` });
+          say('Downloaded');
+        } catch (err) {
+          console.error(err);
+          say('Download failed');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+
+    // Word resolves the real installed face name, "Kruti Dev 010", not the
+    // family label "Kruti Dev".
+    wireDocx(
+      'docx',
+      () => output.value,
+      outputIsLegacy ? (previewFontFor(to)?.label ?? FONTS[to].label) : 'Mangal',
+    );
+    wireDocx('docx-unicode', unicodeText, 'Mangal', '-unicode');
+
+    whatsapp.addEventListener('click', (e) => {
+      flush();
+      // Raw legacy keys are unreadable in WhatsApp: it has no Kruti Dev font.
+      // Share the Unicode wherever the output is legacy.
+      const shareable = outputIsLegacy ? unicodeText() : output.value;
+      if (!shareable) {
+        e.preventDefault();
+        say('Nothing to share');
+        return;
+      }
+      // Built here rather than on every keystroke.
+      whatsapp.href = `https://wa.me/?text=${encodeURIComponent(shareable.slice(0, WHATSAPP_LIMIT))}`;
+      if (shareable.length > WHATSAPP_LIMIT) {
+        say(`Sharing the first ${WHATSAPP_LIMIT} characters`);
+      }
+    });
+
+    q<HTMLButtonElement>('clear').addEventListener('click', () => {
+      input.value = '';
+      flush();
+      input.focus();
+    });
+
+    q<HTMLButtonElement>('sample').addEventListener('click', (e) => {
+      input.value = (e.currentTarget as HTMLElement).dataset.sample || '';
+      countIn.textContent = String(input.value.length);
+      flush();
+    });
+
+    tick();
+    flush();
+  }
+</script>

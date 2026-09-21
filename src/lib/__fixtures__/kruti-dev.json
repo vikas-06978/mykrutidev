@@ -1,0 +1,201 @@
+{
+  "_comment": "Kruti Dev 010 <-> Unicode ground truth. `rt: false` marks pairs whose legacy spelling is non-canonical, so unicode->kruti will produce a different (equally valid) spelling and round-trip equality is not expected.",
+
+  "basics": [
+    { "k": "d", "u": "क", "why": "bare consonant" },
+    { "k": "dk", "u": "का", "why": "consonant + aa-matra" },
+    { "k": "dh", "u": "की", "why": "consonant + ii-matra" },
+    { "k": "dq", "u": "कु", "why": "u-matra" },
+    { "k": "dw", "u": "कू", "why": "uu-matra" },
+    { "k": "ds", "u": "के", "why": "e-matra" },
+    { "k": "dS", "u": "कै", "why": "ai-matra" },
+    { "k": "t;", "u": "जय", "why": "two consonants" },
+    { "k": "dey", "u": "कमल", "why": "three bare consonants" },
+    { "k": "x;k", "u": "गया", "why": "ga + ya + aa" },
+    { "k": "?kj", "u": "घर", "why": "two-char full consonant gha" },
+    { "k": "vkt", "u": "आज", "why": "independent aa" },
+    { "k": ",d", "u": "एक", "why": "independent e" },
+    { "k": "vksj", "u": "ओर", "why": "independent o (three-char key)" },
+    { "k": "gSa", "u": "हैं", "why": "ai-matra + anusvara" }
+  ],
+
+  "split_matra": [
+    { "k": "dks", "u": "को", "why": "o-matra is typed as aa + e" },
+    { "k": "dkS", "u": "कौ", "why": "au-matra is typed as aa + ai" },
+    { "k": "yksx", "u": "लोग", "why": "o-matra mid-word" },
+    { "k": "nksuksa", "u": "दोनों", "why": "two o-matras + anusvara" }
+  ],
+
+  "i_matra": [
+    { "k": "fd", "u": "कि", "why": "THE headline case: i-matra is typed first" },
+    { "k": "fgUnh", "u": "हिन्दी", "why": "i-matra hops over ha, then half-na" },
+    { "k": "fe=", "u": "मित्र", "why": "i-matra before a conjunct glyph" },
+    { "k": "fo|ky;", "u": "विद्यालय", "why": "i-matra + dya conjunct" },
+    { "k": "fyf[kr", "u": "लिखित", "why": "two i-matras in one word" },
+    { "k": "fljk", "u": "सिरा", "why": "i-matra then aa-matra" }
+  ],
+
+  "reph": [
+    { "k": "deZ", "u": "कर्म", "why": "reph is typed AFTER the cluster it crowns" },
+    { "k": "/keZ", "u": "धर्म", "why": "reph after a two-char full consonant" },
+    { "k": "dk;Z", "u": "कार्य", "why": "reph over ya, following aa-matra" },
+    { "k": "loZ", "u": "सर्व", "why": "reph over va" },
+    { "k": "dhfrZ", "u": "कीर्ति", "why": "reph AND i-matra interacting — the hard one" },
+    { "k": "iwoZ", "u": "पूर्व", "why": "uu-matra then reph" }
+  ],
+
+  "rakar_and_conjuncts": [
+    { "k": "izdkj", "u": "प्रकार", "why": "rakar hangs under pa" },
+    { "k": "Øe", "u": "क्रम", "why": "dedicated kra glyph" },
+    { "k": "cz", "u": "ब्र", "why": "ba + rakar — the canonical spelling" },
+    { "k": "Cz", "u": "ब्र", "why": "half-ba + rakar collapses the double halant", "rt": false },
+    { "k": "cPpk", "u": "बच्चा", "why": "half-cha + cha" },
+    { "k": "lR;", "u": "सत्य", "why": "half-ta + ya" },
+    { "k": "iqLrd", "u": "पुस्तक", "why": "u-matra + half-sa + ta + ka" },
+    { "k": "{kek", "u": "क्षमा", "why": "ksha is half `{` + vertical bar `k`, like bha/sha" },
+    { "k": "ijh{kk", "u": "परीक्षा", "why": "ksha then a REAL aa-matra: `{k` + `k`" },
+    { "k": "f'k{kk", "u": "शिक्षा", "why": "i-matra + ksha + aa, all three at once" },
+    { "k": "{ks=", "u": "क्षेत्र", "why": "ksha + e-matra + tra" },
+    { "k": "y{;", "u": "लक्ष्य", "why": "bare `{` is the HALF form क्ष्, no bar" },
+    { "k": "Kku", "u": "ज्ञान", "why": "gya" },
+    { "k": "Jh", "u": "श्री", "why": "shra" },
+    { "k": "iRuh", "u": "पत्नी", "why": "half-ta + na" },
+    { "k": "jk\"VªHkk\"kk", "u": "राष्ट्रभाषा", "why": "reported broken: ष्ट्र + भाषा in one word" },
+    { "k": "fofHkUu", "u": "विभिन्न", "why": "reported broken: i-matra then the doubled न्न" },
+    { "k": "laLÑfr;ksa", "u": "संस्कृतियों", "why": "reported broken: anusvara, half-sa, kri ligature, i-matra, split o-matra" },
+    { "k": "lRrk", "u": "सत्ता", "why": "doubled त्त is half-ta + ta + bar, no dedicated glyph" },
+    { "k": "'kq}", "u": "शुद्ध", "why": "doubled द्ध, which DOES have a dedicated glyph" },
+    { "k": "i}fr", "u": "पद्धति", "why": "द्ध glyph then an i-matra that has to hop it" },
+    { "k": "vUu", "u": "अन्न", "why": "doubled न्न after an independent vowel" }
+  ],
+
+  "rakar_variants": [
+    {
+      "k": "jk\"Vªh;",
+      "u": "राष्ट्रीय",
+      "why": "`ª` is the rakar used under stemless ta/tha/da/dha — was leaking a raw Latin-1 byte"
+    },
+    { "k": "jk\"Vªifr", "u": "राष्ट्रपति", "why": "same cluster mid-word" },
+    { "k": "MªkbZo", "u": "ड्राईव", "why": "rakar under da" },
+    { "k": "iz'u", "u": "प्रश्न", "why": "pa + rakar, NOT half-pa + ra" },
+    { "k": "xzke", "u": "ग्राम", "why": "rakar under ga" },
+    { "k": "nzO;", "u": "द्रव्य", "why": "rakar under da" },
+    {
+      "k": "ç/kku",
+      "u": "प्रधान",
+      "why": "alternate pra glyph; reverse still prefers the `iz` spelling",
+      "rt": false
+    },
+    { "k": "Ñi;k", "u": "कृपया", "why": "dedicated kri ligature" },
+    { "k": "laLÑr", "u": "संस्कृत", "why": "kri ligature after a half consonant" }
+  ],
+
+  "anusvara_order": [
+    { "k": "gSa", "u": "हैं", "why": "nasal is typed AFTER the matra" },
+    { "k": "esa", "u": "में", "why": "e-matra then nasal" },
+    { "k": "ugha", "u": "नहीं", "why": "ii-matra then nasal" },
+    {
+      "k": "fganh",
+      "u": "हिंदी",
+      "why": "THE regression: i-matra AND nasal in one word. Used to reverse to `gafnh` -> हंदिी"
+    },
+    { "k": "flag", "u": "सिंह", "why": "i-matra hops over sa while the nasal stays put" },
+    { "k": "fpark", "u": "चिंता", "why": "i-matra, nasal, then aa-matra" },
+    { "k": "gksa", "u": "हों", "why": "split o-matra then nasal" },
+    { "k": "xk¡o", "u": "गाँव", "why": "chandrabindu after aa-matra" }
+  ],
+
+  "nukta": [
+    { "k": "d+", "u": "क़", "why": "nukta is a combining mark" },
+    { "k": "t+", "u": "ज़", "why": "za" },
+    { "k": "M+", "u": "ड़", "why": "rra" },
+    { "k": "Q+", "u": "फ़", "why": "fa" },
+    { "k": "dkxt+", "u": "कागज़", "why": "nukta at word end" }
+  ],
+
+  "sentences": [
+    {
+      "k": "Hkkjr",
+      "u": "भारत",
+      "why": "half-bha + bar makes bha, then bar again makes aa"
+    },
+    { "k": "ikuh", "u": "पानी", "why": "pa aa na ii" },
+    { "k": "Hkk\"kk", "u": "भाषा", "why": "two-char sha plus bars" },
+    { "k": "jkt/kkuh", "u": "राजधानी", "why": "two-char dha mid-word" },
+    {
+      "k": "fgUnh Hkkjr dh jkt/kkuh Hkk\"kk gSA",
+      "u": "हिन्दी भारत की राजधानी भाषा है।",
+      "why": "full sentence with danda"
+    },
+    {
+      "k": "iz/kkuea=h dk dk;kZy;",
+      "u": "प्रधानमंत्री का कार्यालय",
+      "why": "rakar, anusvara, conjunct, reph over an aa-matra cluster"
+    },
+    {
+      "k": "jk\"VªHkk\"kk fganh gS] tks ns'k dks ,drk ds lw= esa cka/krh gSA",
+      "u": "राष्ट्रभाषा हिंदी है, जो देश को एकता के सूत्र में बांधती है।",
+      "why": "the reported sentence: ष्ट्र, a real comma and ए (`,drk`) all in one line"
+    },
+    {
+      "k": "fofHkUu /keksZa vkSj laLÑfr;ksa ds yksx fey&tqydj jgrs gSaA",
+      "u": "विभिन्न धर्मों और संस्कृतियों के लोग मिल-जुलकर रहते हैं।",
+      "why": "the other reported sentence: न्न, reph over a split o-matra, kri ligature, and a hyphen that must stay a hyphen"
+    }
+  ],
+
+  "punctuation": [
+    { "k": "A", "u": "।", "why": "danda" },
+    {
+      "k": "lekIrAA",
+      "u": "समाप्त॥",
+      "why": "double danda beats single (longest match). Written attached to the word, as it always is in practice — a bare 'AA' token is indistinguishable from an acronym"
+    },
+    { "k": "¼d½", "u": "(क)", "why": "brackets" },
+    {
+      "k": "gS]",
+      "u": "है,",
+      "why": "THE comma regression. The comma is the `]` key; `,` is ए, so a literal comma used to come back as हैए"
+    },
+    { "k": ",d] nks] rhu", "u": "एक, दो, तीन", "why": "ए and a real comma in the same line, which is the whole ambiguity" },
+    { "k": "MkW-", "u": "डॉ.", "why": "the full stop is the `-` key, not `.` (which is ण्)" },
+    { "k": "vc] rks\\", "u": "अब, तो?", "why": "question mark is the `\\` key" },
+    { "k": "d([k", "u": "क;ख", "why": "semicolon is the `(` key; the ASCII `(` still reverses to `¼`" },
+    { "k": "vkSj@;k", "u": "और/या", "why": "slash is the `@` key, not `/` (which is ध्)" },
+    { "k": "Þfganhß", "u": "\"हिंदी\"", "why": "both double-quote slots fold onto the one ASCII quote" },
+    { "k": "*fganh^", "u": "'हिंदी'", "why": "same for the single quotes" }
+  ],
+
+  "english_safe": [
+    {
+      "k": "Hkkjr the 2024",
+      "u": "भारत the 2024",
+      "why": "word-list English and a bare number survive"
+    },
+    {
+      "k": "fnukad 15/08/1947",
+      "u": "दिनांक 15/08/1947",
+      "why": "dates are never touched"
+    },
+    {
+      "k": "esy info@mykrutidev.com",
+      "u": "मेल info@mykrutidev.com",
+      "why": "emails are never touched"
+    },
+    {
+      "k": "ns[ksa https://mykrutidev.com/help",
+      "u": "देखें https://mykrutidev.com/help",
+      "why": "URLs are never touched"
+    },
+    {
+      "k": "esjk PAN uEcj",
+      "u": "मेरा PAN नम्बर",
+      "why": "all-caps acronym survives"
+    },
+    {
+      "k": "dqy 3.14 izfr'kr",
+      "u": "कुल 3.14 प्रतिशत",
+      "why": "decimals survive; the dot would otherwise become half-na"
+    }
+  ]
+}

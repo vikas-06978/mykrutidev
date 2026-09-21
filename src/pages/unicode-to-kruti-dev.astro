@@ -1,0 +1,110 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+
+const faq = [
+  {
+    q: 'I want to convert Hindi to Kruti Dev. Is this the right page?',
+    a: 'Yes. Hindi typed on a phone keypad, the Windows Hindi keyboard, or copied from a website or WhatsApp is already Unicode. "Hindi" and "Unicode" mean the same thing here, so "Hindi to Kruti Dev" and "Unicode to Kruti Dev" are one page. Paste it into the left box and you will get Kruti Dev on the right.',
+  },
+  {
+    q: 'Can I type Hindi directly into the box instead of pasting?',
+    a: 'Yes. Switch your keyboard to Hindi and type into the left box, which is set up for Devanagari input. Typing Hindi <em>phonetically</em> in English letters ("namaste" for नमस्ते) is not supported yet; that is a separate feature called transliteration.',
+  },
+  {
+    q: 'Why would I convert Unicode back to Kruti Dev?',
+    a: 'Three common reasons: a printing press or DTP operator still works in Kruti Dev and needs the file in that font; a typing test or stenography exam is conducted in Kruti Dev and you want practice material; or an old template has to stay consistent with documents typed years ago.',
+  },
+  {
+    q: 'The output looks like random English letters. Is that a bug?',
+    a: 'No, that is exactly what Kruti Dev text is. It only becomes Hindi when the Kruti Dev font is applied to it. Paste the output into Word, select it, and set the font to <strong>Kruti Dev 010</strong>, or use the Download .docx button, which applies the font for you.',
+  },
+  {
+    q: 'Do I need the Kruti Dev font installed to use this page?',
+    a: 'Not to convert. You only need the font to <em>see</em> the result as Hindi. Without it the output panel shows the underlying ASCII, which is still correct and still pastes correctly into any application that has the font.',
+  },
+  {
+    q: 'Will the result be identical to text originally typed in Kruti Dev?',
+    a: 'It will be equivalent, but not always character-for-character identical. Several Kruti Dev key sequences produce the same letter (क can be keyed two different ways), so the converter picks one canonical spelling. Converting back to Unicode returns the original text either way.',
+  },
+  {
+    q: 'What happens to English words and numbers?',
+    a: 'They are left alone by default, which matters more in this direction than the other: converting the digits in a date or an account number would silently corrupt it. You can switch the behaviour off with the checkbox under the panels.',
+  },
+  {
+    q: 'Does it handle half letters and conjuncts?',
+    a: 'Yes. Half consonants, the reph, the rakar, nukta letters and the ligatures क्ष, त्र, ज्ञ and श्र are all mapped, and the i-matra is moved back to the front of its cluster where Kruti Dev expects it.',
+  },
+];
+---
+
+<ConverterPage
+  path="/unicode-to-kruti-dev"
+  lede="Type or paste Hindi on the left and get Kruti Dev 010 on the right. Hindi typed on a phone or Windows keypad is already Unicode, so it works here directly."
+  faq={faq}
+>
+  <h2>&ldquo;Hindi to Kruti Dev&rdquo; is this page</h2>
+  <p>
+    If you type Hindi on an Android or iPhone keypad, or with the Windows Hindi
+    keyboard, or paste it from WhatsApp or a website, that text
+    <em>is already Unicode</em>. There is no separate &ldquo;Hindi&rdquo; format
+    to convert from. So this one page covers both &ldquo;Hindi to Kruti Dev&rdquo;
+    and &ldquo;Unicode to Kruti Dev&rdquo;. They are the same conversion.
+  </p>
+  <p>
+    The same goes for Mangal and Nirmala UI: both are Unicode fonts, so text in
+    either of them can be pasted straight into the box on the left.
+  </p>
+
+  <h2>Unicode to Kruti Dev, the right way round</h2>
+  <p>
+    Converting <em>into</em> a legacy font is harder than converting out of one,
+    because the text has to be put back into visual order. Every short-i matra
+    has to move to the front of its consonant cluster, every reph has to move to
+    the end of the syllable it belongs to, and the composed vowel signs
+    <strong lang="hi">ो</strong>, <strong lang="hi">ौ</strong> and
+    <strong lang="hi">ॉ</strong> have to be split back into the two glyphs Kruti Dev
+    draws them with.
+  </p>
+  <p>
+    This page does all of that as you type. The output is plain ASCII, which is
+    what Kruti Dev text <em>is</em>, and it turns into Hindi the moment the
+    Kruti Dev font is applied to it.
+  </p>
+
+  <h2>What to do with the output</h2>
+  <ol>
+    <li>Copy the right-hand panel, or use <strong>Download .docx</strong>.</li>
+    <li>
+      Paste into Word, LibreOffice or your DTP application.
+    </li>
+    <li>
+      Select the pasted text and set the font to <strong>Kruti Dev 010</strong>.
+      The .docx download does this step for you.
+    </li>
+  </ol>
+  <p>
+    If the text still looks like English letters after that, the font is not
+    installed on that machine. See
+    <a href="/kruti-dev-font-download">Kruti Dev font download</a>.
+  </p>
+
+  <h2>Who uses this direction</h2>
+  <p>
+    Printing presses and DTP shops that have twenty years of Kruti Dev
+    templates. Candidates practising for CPCT, RSCIT and state stenography
+    tests, which are still conducted in Kruti Dev. Offices that receive a
+    Unicode draft from one department and have to fit it into a legacy template
+    from another. And anyone maintaining an old publication where switching the
+    whole archive to Unicode is not realistic.
+  </p>
+
+  <h2>A note on exact spellings</h2>
+  <p>
+    Kruti Dev often offers more than one way to key the same letter. Where that
+    happens the converter picks a single canonical spelling, so its output may
+    not be byte-identical to text a person typed by hand. It renders
+    identically, and converting it back with the
+    <a href="/">Kruti Dev to Unicode converter</a> returns exactly what you
+    started with.
+  </p>
+</ConverterPage>

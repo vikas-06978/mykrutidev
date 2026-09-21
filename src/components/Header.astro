@@ -1,0 +1,447 @@
+---
+import { navGroups, getPage, isLive } from '../lib/routes.js';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+// Only groups with at least one live page appear. Pending pages are listed
+// inside their group but greyed and not linked — never send a visitor to a page
+// that cannot convert yet.
+const groups = navGroups();
+const allConverters = getPage('/all-converters');
+const showAll = allConverters && isLive(allConverters);
+
+const isCurrent = (p: string) => p === path;
+const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurrent(p.path));
+---
+
+{/*
+  The header must NOT establish a scroll container or a stacking context that
+  traps the dropdown panels. That was the bug: `overflow-x-auto` on the nav list
+  clipped every absolutely-positioned menu into a scroll box. Nothing from here
+  down to the menu's offset parent may set overflow to anything but visible.
+*/}
+<header class="relative z-50 border-b border-hairline bg-paper">
+  <div class="wrap flex items-center justify-between gap-4 py-3">
+    <a
+      href="/"
+      class="shrink-0 text-lg font-semibold tracking-tight text-ink no-underline"
+    >
+      My<span class="text-brick">Kruti</span>Dev
+    </a>
+
+    <!-- ===================== Desktop: dropdown menubar ===================== -->
+    <nav aria-label="Converters" class="hidden md:block" data-desktop-nav>
+      <ul class="flex items-center gap-1 text-sm">
+        {
+          groups.map((g, i) => (
+            <li class="relative" data-group>
+              <button
+                type="button"
+                id={`navtrigger-${i}`}
+                aria-expanded="false"
+                aria-controls={`navmenu-${i}`}
+                data-trigger
+                class:list={[
+                  'flex cursor-pointer items-center gap-1.5 rounded-(--radius-chrome) px-2.5 py-2 whitespace-nowrap',
+                  groupHasCurrent(g.pages)
+                    ? 'bg-inset font-medium text-ink'
+                    : 'text-body hover:bg-inset hover:text-ink',
+                ]}
+              >
+                {g.name}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  class="h-1.5 w-2.5 shrink-0 transition-transform duration-150"
+                  data-chevron
+                >
+                  <path
+                    d="M1 1l4 4 4-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+
+              <ul
+                id={`navmenu-${i}`}
+                aria-labelledby={`navtrigger-${i}`}
+                hidden
+                data-menu
+                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu"
+              >
+                {g.pages.map((p) =>
+                  p.live ? (
+                    <li>
+                      <a
+                        href={p.path}
+                        aria-current={isCurrent(p.path) ? 'page' : undefined}
+                        class:list={[
+                          'block rounded-(--radius-chrome) px-3 py-2.5 no-underline',
+                          isCurrent(p.path)
+                            ? 'bg-inset font-medium text-brick'
+                            : 'text-body hover:bg-inset hover:text-ink',
+                        ]}
+                      >
+                        {p.nav}
+                      </a>
+                    </li>
+                  ) : (
+                    <li>
+                      {/* Not a link on purpose — the page exists but cannot convert yet. */}
+                      <span
+                        aria-disabled="true"
+                        aria-current={isCurrent(p.path) ? 'page' : undefined}
+                        class:list={[
+                          'flex cursor-default items-center justify-between gap-3 rounded-(--radius-chrome) px-3 py-2.5 text-mute',
+                          isCurrent(p.path) && 'bg-inset font-medium',
+                        ]}
+                      >
+                        {p.nav}
+                        <span class="shrink-0 rounded-full bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-saffron">
+                          soon
+                        </span>
+                      </span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </li>
+          ))
+        }
+
+        {
+          showAll && (
+            <li>
+              <a
+                href={allConverters.path}
+                aria-current={isCurrent(allConverters.path) ? 'page' : undefined}
+                class:list={[
+                  'block rounded-(--radius-chrome) px-2.5 py-2 no-underline whitespace-nowrap',
+                  isCurrent(allConverters.path)
+                    ? 'bg-inset font-medium text-ink'
+                    : 'text-body hover:bg-inset hover:text-ink',
+                ]}
+              >
+                All converters
+              </a>
+            </li>
+          )
+        }
+      </ul>
+    </nav>
+
+    <!-- ===================== Mobile: hamburger ===================== -->
+    <button
+      type="button"
+      data-burger
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+      class="-me-1 grid size-11 shrink-0 place-items-center rounded-(--radius-chrome) text-ink md:hidden"
+    >
+      <span class="sr-only">Menu</span>
+      <svg aria-hidden="true" viewBox="0 0 20 20" class="size-6" data-burger-icon>
+        <path
+          d="M3 5h14M3 10h14M3 15h14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile panel: accordion sections, no hover menus. -->
+  <nav
+    id="mobile-nav"
+    aria-label="Converters"
+    hidden
+    data-mobile-nav
+    class="border-t border-hairline bg-surface md:hidden"
+  >
+    <ul class="wrap divide-y divide-hairline-soft py-1">
+      {
+        groups.map((g) => (
+          <li>
+            <details data-acc class="group">
+              <summary
+                class:list={[
+                  'flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base marker:hidden',
+                  groupHasCurrent(g.pages) ? 'font-medium text-ink' : 'text-body',
+                ]}
+              >
+                {g.name}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  class="h-2 w-3.5 shrink-0 text-mute transition-transform duration-150 group-open:rotate-180"
+                >
+                  <path
+                    d="M1 1l4 4 4-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </summary>
+
+              <ul class="pb-2">
+                {g.pages.map((p) =>
+                  p.live ? (
+                    <li>
+                      <a
+                        href={p.path}
+                        aria-current={isCurrent(p.path) ? 'page' : undefined}
+                        class:list={[
+                          'flex min-h-11 items-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
+                          isCurrent(p.path)
+                            ? 'bg-inset font-medium text-brick'
+                            : 'text-body',
+                        ]}
+                      >
+                        {p.nav}
+                      </a>
+                    </li>
+                  ) : (
+                    <li>
+                      <span
+                        aria-disabled="true"
+                        aria-current={isCurrent(p.path) ? 'page' : undefined}
+                        class:list={[
+                          'flex min-h-11 items-center justify-between gap-3 rounded-(--radius-chrome) px-3 py-2.5 text-mute',
+                          isCurrent(p.path) && 'bg-inset font-medium',
+                        ]}
+                      >
+                        {p.nav}
+                        <span class="shrink-0 rounded-full bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-saffron">
+                          soon
+                        </span>
+                      </span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </details>
+          </li>
+        ))
+      }
+
+      {
+        showAll && (
+          <li>
+            <a
+              href={allConverters.path}
+              aria-current={isCurrent(allConverters.path) ? 'page' : undefined}
+              class:list={[
+                'flex min-h-11 items-center py-3 text-base no-underline',
+                isCurrent(allConverters.path)
+                  ? 'font-medium text-brick'
+                  : 'text-body',
+              ]}
+            >
+              All converters
+            </a>
+          </li>
+        )
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  @reference '../styles/global.css';
+
+  /* The one shadow in the system. DESIGN.md is otherwise flat, but a menu that
+     floats over content needs to read as floating — a hairline alone leaves it
+     ambiguous against the card borders underneath. */
+  .shadow-menu {
+    box-shadow:
+      0 1px 2px rgb(26 39 68 / 0.06),
+      0 8px 24px -6px rgb(26 39 68 / 0.16);
+  }
+
+  [data-trigger][aria-expanded='true'] [data-chevron] {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script>
+  // Progressive enhancement. With JS off the desktop menus stay closed, so the
+  // mobile accordion (native <details>) and /all-converters remain the way in.
+  const nav = document.querySelector<HTMLElement>('[data-desktop-nav]');
+
+  type Group = {
+    root: HTMLElement;
+    trigger: HTMLButtonElement;
+    menu: HTMLElement;
+    items: HTMLAnchorElement[];
+  };
+
+  const groups: Group[] = nav
+    ? [...nav.querySelectorAll<HTMLElement>('[data-group]')].map((root) => ({
+        root,
+        trigger: root.querySelector<HTMLButtonElement>('[data-trigger]')!,
+        menu: root.querySelector<HTMLElement>('[data-menu]')!,
+        // Only real links are focusable; "soon" rows are inert by design.
+        items: [...root.querySelectorAll<HTMLAnchorElement>('[data-menu] a')],
+      }))
+    : [];
+
+  // Hover-to-open is a desktop affordance only: on a touch screen the first tap
+  // would open a menu and the second would be needed to follow the link.
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+  let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+  // ---- Mobile panel. Declared up here because the shared Escape and
+  // click-outside handlers below close the desktop menus and this panel.
+  const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
+  const mobile = document.querySelector<HTMLElement>('[data-mobile-nav]');
+
+  const BURGER_ICON = 'M3 5h14M3 10h14M3 15h14';
+  const CLOSE_ICON = 'M4 4l12 12M16 4L4 16';
+
+  function setBurger(open: boolean) {
+    if (!burger || !mobile) return;
+    mobile.hidden = !open;
+    burger.setAttribute('aria-expanded', String(open));
+    burger
+      .querySelector('[data-burger-icon] path')
+      ?.setAttribute('d', open ? CLOSE_ICON : BURGER_ICON);
+  }
+
+  const openMobile = () => setBurger(true);
+
+  function closeMobile({ focusBurger = false } = {}) {
+    setBurger(false);
+    if (focusBurger) burger?.focus();
+  }
+
+  function open(g: Group, focusItem?: 'first' | 'last') {
+    clearTimeout(closeTimer);
+    for (const other of groups) if (other !== g) close(other);
+    g.menu.hidden = false;
+    g.trigger.setAttribute('aria-expanded', 'true');
+    if (focusItem === 'first') g.items[0]?.focus();
+    if (focusItem === 'last') g.items.at(-1)?.focus();
+  }
+
+  function close(g: Group) {
+    g.menu.hidden = true;
+    g.trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  const closeAll = () => groups.forEach(close);
+  const isOpen = (g: Group) => !g.menu.hidden;
+
+  for (const g of groups) {
+    g.trigger.addEventListener('click', () => {
+      isOpen(g) ? close(g) : open(g);
+    });
+
+    g.trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        open(g, 'first');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        open(g, 'last');
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        // Move along the menubar, the way a native menu behaves.
+        e.preventDefault();
+        const i = groups.indexOf(g);
+        const next =
+          e.key === 'ArrowRight'
+            ? groups[(i + 1) % groups.length]
+            : groups[(i - 1 + groups.length) % groups.length];
+        closeAll();
+        next.trigger.focus();
+      }
+    });
+
+    // Roving focus inside an open menu.
+    g.menu.addEventListener('keydown', (e) => {
+      const i = g.items.indexOf(document.activeElement as HTMLAnchorElement);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        g.items[(i + 1) % g.items.length]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        g.items[(i - 1 + g.items.length) % g.items.length]?.focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        g.items[0]?.focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        g.items.at(-1)?.focus();
+      }
+    });
+
+    // Listeners are always attached and the check happens inside, so a hybrid
+    // laptop that gains or loses a mouse behaves correctly without a reload.
+    g.root.addEventListener('mouseenter', () => {
+      if (canHover.matches) open(g);
+    });
+    g.root.addEventListener('mouseleave', () => {
+      if (!canHover.matches) return;
+      // Small grace period so a diagonal cursor path does not snap it shut.
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => close(g), 180);
+    });
+  }
+
+  // Click outside closes. Pointerdown, so it fires before focus moves.
+  document.addEventListener('pointerdown', (e) => {
+    const t = e.target as Element | null;
+    if (!t?.closest('[data-group]')) closeAll();
+  });
+
+  // Escape closes whatever is open and hands focus back to its trigger.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const opened = groups.find(isOpen);
+    if (opened) {
+      close(opened);
+      opened.trigger.focus();
+      return;
+    }
+    if (mobile && !mobile.hidden) closeMobile({ focusBurger: true });
+  });
+
+  // Tabbing out of a menu closes it, without stealing the Tab itself.
+  document.addEventListener('focusin', (e) => {
+    const t = e.target as Element | null;
+    for (const g of groups) {
+      if (isOpen(g) && !g.root.contains(t)) close(g);
+    }
+  });
+
+  burger?.addEventListener('click', () => {
+    if (mobile?.hidden) openMobile();
+    else closeMobile();
+  });
+
+  // Tapping the page behind the open panel closes it.
+  document.addEventListener('pointerdown', (e) => {
+    if (!mobile || mobile.hidden) return;
+    const t = e.target as Element | null;
+    if (!t?.closest('[data-mobile-nav]') && !t?.closest('[data-burger]')) {
+      closeMobile();
+    }
+  });
+
+  // One accordion section at a time, so the panel stays short on a phone.
+  const accordions = document.querySelectorAll<HTMLDetailsElement>('[data-acc]');
+  for (const d of accordions) {
+    d.addEventListener('toggle', () => {
+      if (!d.open) return;
+      for (const other of accordions) if (other !== d) other.open = false;
+    });
+  }
+</script>

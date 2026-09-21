@@ -1,0 +1,21 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/devlys-to-mangal"
+  lede="Convert DevLys font Hindi to Mangal-ready Unicode for government forms and portals."
+  faq={[]}
+>
+  <h2>Working, but not yet verified</h2>
+  <p>
+    Mangal is a Unicode font rather than an encoding, so this page converts
+    DevLys to Unicode and displays the result in Mangal. The DevLys map is
+    currently seeded from Kruti Dev 010, which the two fonts largely share.
+  </p>
+  <p>
+    It has not been checked against real DevLys files yet, so the page stays out
+    of search results. <a href="/kruti-dev-to-mangal">Kruti Dev to Mangal</a> is
+    finished and tested.
+  </p>
+</ConverterPage>

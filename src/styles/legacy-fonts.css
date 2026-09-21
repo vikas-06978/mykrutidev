@@ -1,0 +1,73 @@
+/* ===========================================================================
+   Legacy font faces - output preview only
+   ===========================================================================
+
+   One face per legacy font. The Kruti Dev variant files (011, 012, 014, 016,
+   020, 055) are still in public/fonts/ but are deliberately not declared here:
+   the variant picker they served is gone, and an unused @font-face is dead code
+   that reads like a feature.
+
+   These faces exist so the output box can show `ueksS` as the Hindi it will
+   become in Word. That is a CSS effect and nothing more: the text in the
+   textarea is always the raw legacy keys, the copy buttons and the .docx
+   downloads read that text (or the Unicode conversion of the input), and none
+   of them consult this file.
+
+   FILENAMES ARE EXACT AND CASE-SENSITIVE. The owner's files are named
+   inconsistently, and static hosts serve case-sensitively even though Windows
+   does not, so a mismatch fails only in production.
+
+   format() DESCRIBES THE CONTENT, NOT THE EXTENSION. chanakya.woff and
+   preeti.woff are named .woff but start with 00 01 00 00, which is raw
+   TrueType. Get this wrong and the browser fetches the file, fails to parse it
+   and silently drops the face.
+
+   src/lib/legacyFonts.test.js enforces both rules: it reads public/fonts, checks
+   every name byte for byte, and sniffs each file's magic bytes against the
+   format declared below.
+
+   local() comes first so a visitor who already has the font installed previews
+   instantly and downloads nothing. font-display: swap so a slow file never
+   blanks the box.
+   =========================================================================== */
+
+@font-face {
+  font-family: 'MKD Kruti Dev 010';
+  src:
+    local('Kruti Dev 010'),
+    local('Kruti Dev'),
+    url('/fonts/KRDEV010.woff') format('woff');
+  font-display: swap;
+}
+
+/* Converted from the supplied "DevLys 010 Normal.ttf", which is kept out of the
+   served tree in vendor/fonts/. The DevLys CONVERTER pages stay "coming soon":
+   the DevLys character map is still a copy of the Kruti Dev one and has not been
+   diffed against real DevLys documents. A font file is not a mapping. */
+@font-face {
+  font-family: 'MKD DevLys 010';
+  src:
+    local('DevLys 010'),
+    local('DevLys'),
+    url('/fonts/devlys-010.woff') format('woff');
+  font-display: swap;
+}
+
+/* Chanakya and Preeti have files but no verified map, so nothing previews in
+   them yet. Declared now so the day a mapping lands there is nothing to wire. */
+@font-face {
+  font-family: 'MKD Chanakya';
+  src:
+    local('Chanakya'),
+    local('Chanakya 905'),
+    url('/fonts/chanakya.woff') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Preeti';
+  src:
+    local('Preeti'),
+    url('/fonts/preeti.woff') format('truetype');
+  font-display: swap;
+}

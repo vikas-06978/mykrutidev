@@ -1,0 +1,22 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/mangal-to-devlys"
+  lede="Paste Mangal (Unicode) Hindi on the left and get DevLys 010 on the right, once the DevLys layout has been verified."
+>
+  <h2>What is holding this up</h2>
+  <p>
+    DevLys 010 and Kruti Dev 010 share most of their keyboard layout, so it is
+    tempting to reuse one map for both. Mostly that works, and the places it does
+    not are the dangerous part: a handful of keys differ, and text converted with
+    the wrong one comes out looking like correct Hindi with a few letters
+    silently changed.
+  </p>
+  <p>
+    Until that diff is done against real DevLys files, this page stays off. The
+    <a href="/mangal-to-kruti-dev">Mangal to Kruti Dev converter</a> is finished
+    and tested if Kruti Dev will do.
+  </p>
+</ConverterPage>

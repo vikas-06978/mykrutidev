@@ -1,0 +1,22 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/gujarati-font-converter"
+  lede="Planned: a Gujarati font converter for legacy Gujarati DTP fonts to Unicode Gujarati."
+>
+  <h2>Planned, not started</h2>
+  <p>
+    Gujarati uses its own script, not Devanagari. That means none of the current
+    character maps apply and none of the Devanagari-specific reordering rules do
+    either. A Gujarati converter is a new map and a new set of rules, not an
+    extra table bolted onto this one.
+  </p>
+  <p>
+    The route exists so the work has somewhere to land. It will be switched on
+    only after a keyword check and a mapping tested against real Gujarati
+    documents. See <a href="/all-converters">all converters</a> for what is
+    working today.
+  </p>
+</ConverterPage>

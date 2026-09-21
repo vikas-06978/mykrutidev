@@ -1,0 +1,41 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/about"
+  lede="Why MyKrutiDev exists and how it works."
+  faq={[]}
+>
+  <h2>What this is</h2>
+  <p>
+    A Hindi legacy-font converter that tries to get the hard parts right: the
+    short-i matra that sits on the wrong side of its consonant, the reph that is
+    typed after the syllable it belongs to, the vowel signs that legacy fonts
+    draw as two separate glyphs, and the conjuncts
+    <strong lang="hi">क्ष</strong>, <strong lang="hi">त्र</strong>,
+    <strong lang="hi">ज्ञ</strong> and <strong lang="hi">श्र</strong>.
+  </p>
+
+  <h2>Your text stays on your machine</h2>
+  <p>
+    There is no server. The conversion engine is JavaScript that runs in your
+    browser, so nothing you paste is uploaded, logged or stored. You can load
+    the page, disconnect from the internet, and it will still work. For anyone
+    handling draft orders, file notings or personal records, that is the point.
+  </p>
+
+  <h2>Where it is incomplete</h2>
+  <p>
+    Kruti Dev and Unicode are done and covered by tests. DevLys is seeded from
+    the Kruti Dev layout and mostly works but has not been verified. Chanakya is
+    not mapped at all yet, and the converter refuses that pair rather than
+    guessing. Pages that are not finished are marked and kept out of search
+    results.
+  </p>
+  <p>
+    English-word detection is a heuristic, not a certainty. A legacy font
+    stores Hindi as plain ASCII, so there is no way to be perfect about it.
+    Numbers, dates, URLs and email addresses are always safe.
+  </p>
+</ConverterPage>

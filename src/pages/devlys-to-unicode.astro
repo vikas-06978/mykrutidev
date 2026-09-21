@@ -1,0 +1,27 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/devlys-to-unicode"
+  lede="Paste DevLys 010 text on the left and get Unicode Hindi on the right, once the DevLys layout has been verified."
+>
+  <h2>Close to Kruti Dev, and that is the problem</h2>
+  <p>
+    DevLys 010 shares almost all of its keyboard layout with Kruti Dev 010. The
+    engine already has a DevLys map seeded from the Kruti Dev one, and it would
+    convert the great majority of text correctly: matras, reph, the common
+    conjuncts, all of it.
+  </p>
+  <p>
+    The trouble is the minority. Where the two layouts diverge, the output is
+    not obviously broken: it is fluent-looking Hindi with a few letters quietly
+    replaced. That is worse than a visible failure, because there is nothing to
+    alert you. So the page stays off until the two layouts have been diffed
+    against real DevLys documents and the differences are covered by tests.
+  </p>
+  <p>
+    If your document is actually Kruti Dev, <a href="/">Kruti Dev to Unicode</a>
+    is finished and tested.
+  </p>
+</ConverterPage>

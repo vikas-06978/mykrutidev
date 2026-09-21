@@ -1,0 +1,114 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+
+const faq = [
+  {
+    q: 'Is this Kruti Dev to Unicode converter free?',
+    a: 'Yes, completely. There is no signup, no character limit and no paid tier. The converter is a static web page, so there is nothing to charge for.',
+  },
+  {
+    q: 'Does my text get uploaded anywhere?',
+    a: 'No. The entire conversion engine is JavaScript that runs inside your browser. Nothing is sent to a server, which means you can convert confidential file notings and draft orders without them leaving your machine. You can disconnect from the internet after the page loads and it will still work.',
+  },
+  {
+    q: 'Why does the i-matra (ि) come out in a different place than in my Kruti Dev file?',
+    a: 'Because that is correct. Kruti Dev stores glyphs in <em>visual</em> order, so the short-i sign is typed before its consonant. Unicode stores them in <em>logical</em> order, where the sign belongs after the consonant. So <strong>fd</strong> becomes <strong>कि</strong>, not <strong>ि</strong> followed by <strong>क</strong>. Converters that skip this step produce text that looks right but breaks search, sorting and spell-check.',
+  },
+  {
+    q: 'What about conjuncts like क्ष, त्र, ज्ञ and श्र?',
+    a: 'They are mapped explicitly, along with the reph (र्), the rakar (्र), half letters and nukta characters. The reph is the other common failure: in Kruti Dev it is typed after the syllable it sits on, so कर्म is keyed as <strong>deZ</strong> and has to be moved back into place.',
+  },
+  {
+    q: 'Will my English words and numbers be converted too?',
+    a: 'Dates, numbers, percentages, URLs and email addresses are always left untouched. Common English words are detected and preserved as well. Because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still be converted by mistake. You can turn the whole behaviour off with the checkbox under the panels.',
+  },
+  {
+    q: 'Is Kruti Dev the same as Mangal?',
+    a: 'No, and this trips a lot of people up. Kruti Dev is a legacy font that maps Hindi letters onto ASCII slots. Mangal is a Unicode font that ships with Windows. So "Kruti Dev to Mangal" really means "Kruti Dev to Unicode, displayed in Mangal". See the <a href="/kruti-dev-to-mangal">Kruti Dev to Mangal converter</a>.',
+  },
+  {
+    q: 'Can I convert back to Kruti Dev?',
+    a: 'Yes. Each page converts in one fixed direction, so for the reverse use the <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev converter</a>. There is a link to it under the boxes as well. That page also accepts Hindi typed straight from a phone or Windows keypad, since keypad Hindi is already Unicode.',
+  },
+];
+---
+
+<ConverterPage
+  path="/"
+  lede="Paste your Kruti Dev text on the left and get Unicode Hindi on the right, with the matra order and conjuncts actually correct. Nothing is uploaded."
+  faq={faq}
+>
+  <h2>What this converter does</h2>
+  <p>
+    Kruti Dev is not an encoding. It is a font whose glyphs happen to sit on
+    ASCII codepoints, which is why a Kruti Dev document opened on a machine
+    without the font shows up as gibberish like <code>Hkkjr</code> instead of
+    <strong lang="hi">भारत</strong>. Converting it to Unicode is not a matter of
+    swapping one letter for another. The characters have to be
+    <em>reordered</em>, because the two systems store Hindi differently.
+  </p>
+  <p>
+    This page does that reordering properly. Type or paste on the left and the
+    Unicode output appears on the right as you type. There is no Convert button
+    to hunt for, no advertisement between you and the text box, and no upload.
+  </p>
+
+  <h2>Why the output may look different from other converters</h2>
+  <p>
+    Two things go wrong in most Kruti Dev converters, and both are easy to
+    miss because the broken output still <em>looks</em> like Hindi:
+  </p>
+  <ul>
+    <li>
+      <strong>The short-i matra.</strong> In Kruti Dev you type the ि before the
+      consonant, because that is where it is drawn. Unicode wants it after. If a
+      converter copies the visual order straight across, you get text that
+      renders acceptably in some fonts but fails search, sorting, spell-check
+      and screen readers.
+    </li>
+    <li>
+      <strong>The reph.</strong> The र् that rides above a letter is typed
+      <em>after</em> its syllable in Kruti Dev, so कर्म is keyed as
+      <code>deZ</code>. It has to be moved to the front of the cluster, and it
+      has to be moved before the i-matra is repositioned, or words like
+      <strong lang="hi">कीर्ति</strong> come out scrambled.
+    </li>
+  </ul>
+  <p>
+    Split vowel signs are handled too: Kruti Dev builds
+    <strong lang="hi">ो</strong> out of an aa-matra plus an e-matra, so
+    <code>dks</code> has to be recomposed into <strong lang="hi">को</strong>
+    rather than left as two separate marks.
+  </p>
+
+  <h2>Who needs this</h2>
+  <p>
+    Government offices across India still run on Kruti Dev. Court orders, file
+    notings, tender documents, school records and exam papers were typed in it
+    for two decades. But portals, databases and e-governance systems all expect
+    Unicode, so every time an old document has to go into a new system,
+    somebody has to convert it. Typists preparing for CPCT, RSCIT and state
+    stenography exams need the reverse direction just as often.
+  </p>
+
+  <h2>How to use it</h2>
+  <ol>
+    <li>Open your Kruti Dev document and copy the Hindi text.</li>
+    <li>Paste it into the left panel. The output appears immediately.</li>
+    <li>
+      Press <strong>Copy text</strong>, or <strong>Download .docx</strong> to get
+      a Word file with the correct font already applied.
+    </li>
+    <li>
+      Read the output before you use it. Very old documents sometimes carry
+      unusual characters, and this is the one place where it is worth a glance.
+    </li>
+  </ol>
+  <p>
+    If you need the other direction, the <a href="/unicode-to-kruti-dev"
+      >Unicode to Kruti Dev converter</a
+    > does the same work in reverse, and <a href="/kruti-dev-to-mangal"
+      >Kruti Dev to Mangal</a
+    > shows the result in the Mangal font that most government forms ask for.
+  </p>
+</ConverterPage>

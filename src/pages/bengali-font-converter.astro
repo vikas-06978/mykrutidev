@@ -1,0 +1,21 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/bengali-font-converter"
+  lede="Planned: a Bengali font converter for Bijoy and other legacy Bengali fonts to Unicode Bengali."
+>
+  <h2>Planned, not started</h2>
+  <p>
+    Bijoy is the legacy Bengali font most older documents were typed in, and the
+    conversion problem is the same shape as the Hindi one: glyphs stored on ASCII
+    codepoints, in visual rather than logical order.
+  </p>
+  <p>
+    The script is not. Bengali has its own character set and a more elaborate
+    conjunct system than Devanagari, so it needs its own map and its own test
+    documents. The route is scaffolded so the work has somewhere to go; it will
+    be switched on only after a keyword check and a tested mapping.
+  </p>
+</ConverterPage>

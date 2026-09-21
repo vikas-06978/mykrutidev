@@ -1,0 +1,21 @@
+---
+import ConverterPage from '../components/ConverterPage.astro';
+---
+
+<ConverterPage
+  path="/unicode-to-devlys"
+  lede="Convert Unicode Hindi back to DevLys 010 font text, live in your browser."
+  faq={[]}
+>
+  <h2>Working, but not yet verified</h2>
+  <p>
+    DevLys 010 and Kruti Dev 010 use nearly the same key layout, so this
+    direction is seeded from the Kruti Dev map and handles most text correctly
+    today.
+  </p>
+  <p>
+    It still needs a check against genuine DevLys documents to catch the points
+    where the two diverge, so the page is kept out of search results for now.
+    Review the output before using it.
+  </p>
+</ConverterPage>
