@@ -1,23 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/shusha-to-unicode"]; the
+// Hindi twin at /hi/shusha-to-unicode is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/shusha-to-unicode"
-  lede="Paste Shusha font Hindi on the left and get Unicode on the right, once the Shusha layout has been mapped."
->
-  <h2>About Shusha</h2>
-  <p>
-    Shusha is an older Hindi DTP font from the same era as Kruti Dev and
-    Chanakya, and it turns up in scanned office documents and in files handed
-    down through several machines. Like the others it is a font, not an
-    encoding: the Hindi is stored as ASCII and only looks like Hindi when the
-    font is installed.
-  </p>
-  <p>
-    Its key arrangement is its own, so nothing from the Kruti Dev map carries
-    over. Until it has been read off real Shusha documents this page has no
-    converter on it. Try <a href="/">Kruti Dev to Unicode</a> if your document
-    turns out to be Kruti Dev after all.
-  </p>
-</ConverterPage>
+<PageView path="/shusha-to-unicode" />

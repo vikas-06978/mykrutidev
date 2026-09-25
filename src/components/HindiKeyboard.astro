@@ -1,5 +1,6 @@
 ---
 import { BASE_ROWS, EXTRA_ROWS, BOTTOM_KEYS, VOWEL_MATRA } from '../lib/keyboard.js';
+import { langOf, useT } from '../i18n/index.js';
 
 /**
  * The on-screen Devanagari keyboard.
@@ -17,12 +18,22 @@ import { BASE_ROWS, EXTRA_ROWS, BOTTOM_KEYS, VOWEL_MATRA } from '../lib/keyboard
  */
 
 const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
+
+const { t, render } = useT(langOf(Astro.url));
+// For the script: the copy button's confirmation. Text only.
+const strings = { copied: t('common.copied') };
 ---
 
-<div class="hk card" data-keyboard data-docked="false" data-own="false">
+<div
+  class="hk card"
+  data-keyboard
+  data-docked="false"
+  data-own="false"
+  data-i18n={JSON.stringify(strings)}
+>
   {/* ------------------- Text box + actions (sticky) ------------------- */}
   <div class="hk-top" data-role="top">
-    <label for="kb-out" class="sr-only">Hindi text</label>
+    <label for="kb-out" class="sr-only">{t('keyboard.textLabel')}</label>
     {/*
       An ordinary, fully editable textarea: arrow keys, selection, paste and
       undo all keep working. On touch screens it gets inputmode="none" while
@@ -35,27 +46,28 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
       lang="hi"
       spellcheck="false"
       autocomplete="off"
-      placeholder="यहाँ हिंदी टाइप करें - नीचे के अक्षर दबाएँ"
+      translate="no"
+      placeholder={t('keyboard.placeholder')}
       class="hk-text deva"></textarea>
 
     <div class="hk-actions">
       <button type="button" data-role="copy" class="btn btn-primary">
-        <span data-label>Copy text</span>
+        <span data-label>{t('common.copyText')}</span>
       </button>
-      <button type="button" data-role="clear" class="btn btn-ghost">Clear</button>
+      <button type="button" data-role="clear" class="btn btn-ghost">{t('common.clear')}</button>
       <button
         type="button"
         data-role="own"
         class="hk-own btn btn-ghost"
         aria-pressed="false"
-        title="Hide these keys and type with your phone's keyboard"
+        title={t('keyboard.useOwnTitle')}
       >
-        Use my keyboard
+        {t('keyboard.useOwn')}
       </button>
       <button type="button" data-role="reopen" class="hk-reopen btn btn-outline">
-        Show Hindi keys
+        {t('keyboard.showKeys')}
       </button>
-      <span data-role="count" class="hk-count" aria-label="characters">0</span>
+      <span data-role="count" class="hk-count" aria-label={t('keyboard.countAria')}>0</span>
     </div>
   </div>
 
@@ -63,12 +75,12 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
   <div class="hk-spacer" aria-hidden="true"></div>
 
   {/* ----------------------------- The keys ----------------------------- */}
-  <div class="hk-pad" data-role="pad" role="group" aria-label="Hindi keyboard">
+  <div class="hk-pad" data-role="pad" role="group" aria-label={t('keyboard.padAria')} translate="no">
     <div class="hk-bar">
       <div data-role="layer" role="group" aria-labelledby="kb-layer" class="cv-seg">
-        <span id="kb-layer" class="cv-seg-label">Show:</span>
-        <button type="button" data-layer="base" aria-pressed="true">Common</button>
-        <button type="button" data-layer="extra" aria-pressed="false">More letters</button>
+        <span id="kb-layer" class="cv-seg-label" translate="yes">{t('keyboard.show')}</span>
+        <button type="button" data-layer="base" aria-pressed="true" translate="yes">{t('keyboard.common')}</button>
+        <button type="button" data-layer="extra" aria-pressed="false" translate="yes">{t('keyboard.more')}</button>
       </div>
     </div>
 
@@ -110,14 +122,14 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
     </div>
 
     <div class="hk-bottom" data-role="bottom">
-      <button type="button" class="hk-key hk-key-util hk-key-space" data-ins=" " aria-label="Space">
-        Space
+      <button type="button" class="hk-key hk-key-util hk-key-space" data-ins=" " aria-label={t('keyboard.space')}>
+        {t('keyboard.space')}
       </button>
-      <button type="button" class="hk-key hk-key-util" data-role="backspace" aria-label="Backspace">
+      <button type="button" class="hk-key hk-key-util" data-role="backspace" aria-label={t('keyboard.backspace')}>
         &#8592;
       </button>
-      <button type="button" class="hk-key hk-key-util" data-ins="&#10;" aria-label="Enter">
-        Enter
+      <button type="button" class="hk-key hk-key-util" data-ins="&#10;" aria-label={t('keyboard.enter')}>
+        {t('keyboard.enter')}
       </button>
       {
         BOTTOM_KEYS.map((k) => (
@@ -129,10 +141,7 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
     </div>
   </div>
 
-  <p class="hk-foot">
-    Need Kruti Dev? Use the <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev converter</a>.
-    Your own keyboard still works, and nothing you type leaves your browser.
-  </p>
+  <p class="hk-foot" set:html={render(t('keyboard.foot'))} />
 </div>
 
 <script>
@@ -160,6 +169,7 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
     const ownBtn = q<HTMLButtonElement>('own');
     const reopenBtn = q<HTMLButtonElement>('reopen');
     const vowelKeys = [...root.querySelectorAll<HTMLButtonElement>('[data-vowel]')];
+    const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
 
     let ownKeyboard = false;
 
@@ -367,15 +377,16 @@ const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
 
     const copyBtn = q<HTMLButtonElement>('copy');
     const copyLabel = copyBtn.querySelector<HTMLElement>('[data-label]')!;
+    const copyOriginal = copyLabel.textContent ?? '';
     let reset: ReturnType<typeof setTimeout> | undefined;
     copyBtn.addEventListener('click', async () => {
       if (!text.value) return;
       await writeClipboard(text.value);
-      copyLabel.textContent = 'Copied!';
+      copyLabel.textContent = L.copied;
       copyBtn.dataset.copied = 'true';
       clearTimeout(reset);
       reset = setTimeout(() => {
-        copyLabel.textContent = 'Copy text';
+        copyLabel.textContent = copyOriginal;
         delete copyBtn.dataset.copied;
       }, 1600);
     });

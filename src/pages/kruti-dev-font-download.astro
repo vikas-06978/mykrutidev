@@ -1,21 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/kruti-dev-font-download"]; the
+// Hindi twin at /hi/kruti-dev-font-download is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/kruti-dev-font-download"
-  lede="How to install the Kruti Dev 010 Hindi font, and what to do when a document shows English letters instead of Hindi."
-  faq={[]}
->
-  <h2>Coming in phase 3</h2>
-  <p>
-    This page will cover installing Kruti Dev 010 on Windows, Mac and Android,
-    and the licensing position on redistributing the font file.
-  </p>
-  <p>
-    If a document is showing text like <code>Hkkjr</code> and you do not want to
-    install anything, you do not have to. Run it through the
-    <a href="/">Kruti Dev to Unicode converter</a> instead and read it in any
-    font.
-  </p>
-</ConverterPage>
+<PageView path="/kruti-dev-font-download" />

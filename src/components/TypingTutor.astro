@@ -5,6 +5,10 @@ import { buildVerifiedUnits } from '../lib/tutor.build.js';
 import { FINGERS } from '../lib/remington.js';
 import RemingtonKeyboard from './RemingtonKeyboard.astro';
 import HandGuide from './HandGuide.astro';
+import { langOf, useT, raw } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+const { t } = useT(lang);
 
 /**
  * The Hindi typing tutor.
@@ -42,16 +46,22 @@ const passages = PASSAGES.map((p) => ({
 const levels = LEVELS.map((l, i) => ({
   id: l.id,
   n: i + 1,
-  name: l.name,
-  title: l.title,
-  focus: l.focus,
+  // Words by level id; lessons.js keeps its English copy, and i18n.test.js
+  // checks the English column still matches it.
+  name: t(`tutor.levels.${l.id}.name`),
+  title: t(`tutor.levels.${l.id}.title`),
+  focus: t(`tutor.levels.${l.id}.focus`),
   threshold: l.threshold,
   units: buildVerifiedUnits(levelText(l), l.id),
 }));
 
 // Named here rather than in the client bundle: nine short strings that would
 // otherwise be a second copy of the finger table.
-const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
+const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, t(`tutor.fingers.${f.id}`)]));
+
+// Every message the script writes, in this page's language. Text only - no
+// rule below reads it.
+const strings = raw(lang, 'tutor');
 ---
 
 <div class="tt card" data-tutor data-state="idle" data-focused="false">
@@ -59,9 +69,9 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   <div class="cv-strip bg-inset">
     <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
       <div data-role="mode" role="group" aria-labelledby="tt-mode" class="cv-seg">
-        <span id="tt-mode" class="cv-seg-label">Mode:</span>
-        <button type="button" data-mode="lesson" aria-pressed="true">Lessons</button>
-        <button type="button" data-mode="practice" aria-pressed="false">Practice test</button>
+        <span id="tt-mode" class="cv-seg-label">{t('tutor.mode')}</span>
+        <button type="button" data-mode="lesson" aria-pressed="true">{t('tutor.lessons')}</button>
+        <button type="button" data-mode="practice" aria-pressed="false">{t('tutor.practice')}</button>
       </div>
 
       {/* Practice only: a lesson ends when the drill does, not on a clock. */}
@@ -72,21 +82,18 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         class="cv-seg"
         hidden
       >
-        <span id="tt-dur" class="cv-seg-label">Length:</span>
+        <span id="tt-dur" class="cv-seg-label">{t('tutor.length')}</span>
         {
           DURATIONS.map((d, i) => (
             <button type="button" data-seconds={String(d.value)} aria-pressed={String(i === 0)}>
-              {d.label}
+              {t(`tutor.durations.${d.value}`)}
             </button>
           ))
         }
       </div>
     </div>
     <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-      <p class="text-xs text-mute">
-        Remington layout, as used by CPCT, SSC and the court typing papers. The
-        clock starts when you press your first key.
-      </p>
+      <p class="text-xs text-mute">{t('tutor.layoutNote')}</p>
 
       {/*
         Off by default and stays off until asked for. A page that starts making
@@ -95,7 +102,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       */}
       <label class="tt-sound">
         <input type="checkbox" data-role="sound" class="size-4 accent-[var(--color-brick)]" />
-        <span>Key sounds</span>
+        <span>{t('tutor.sound')}</span>
       </label>
     </div>
   </div>
@@ -108,13 +115,13 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   */}
   <div data-role="levels-wrap" class="tt-levels-wrap">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
-      <span class="cv-eyebrow">Lessons</span>
+      <span class="cv-eyebrow">{t('tutor.lessons')}</span>
       <button type="button" data-role="reset-progress" class="tt-reset">
-        Reset progress
+        {t('tutor.resetProgress')}
       </button>
     </div>
 
-    <div data-role="levels" class="tt-levels" role="group" aria-label="Lessons">
+    <div data-role="levels" class="tt-levels" role="group" aria-label={t('tutor.lessons')}>
       {
         levels.map((l, i) => (
           <button
@@ -127,7 +134,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
             <span class="tt-level-n">{l.n}</span>
             <span class="tt-level-name">{l.name}</span>
             <span class="tt-level-meta" data-role="level-meta">
-              {i === 0 ? 'Start here' : 'Locked'}
+              {i === 0 ? t('tutor.startHere') : t('tutor.locked')}
             </span>
           </button>
         ))
@@ -143,19 +150,19 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       <span data-role="time" class="tt-stat-value">0:00</span>
       {/* "Time left" while a clock is running down, "Time" while a lesson
           counts up: a lesson ends when the drill does, not on a timer. */}
-      <span data-role="time-label" class="tt-stat-label">Time</span>
+      <span data-role="time-label" class="tt-stat-label">{t('tutor.time')}</span>
     </div>
     <div class="tt-stat">
       <span data-role="wpm" class="tt-stat-value">0</span>
-      <span class="tt-stat-label">WPM</span>
+      <span class="tt-stat-label">{t('tutor.wpm')}</span>
     </div>
     <div class="tt-stat">
       <span data-role="accuracy" class="tt-stat-value">100%</span>
-      <span class="tt-stat-label">Accuracy</span>
+      <span class="tt-stat-label">{t('tutor.accuracy')}</span>
     </div>
     <div class="tt-stat">
       <span data-role="errors" class="tt-stat-value">0</span>
-      <span class="tt-stat-label">Mistakes</span>
+      <span class="tt-stat-label">{t('tutor.mistakes')}</span>
     </div>
   </div>
 
@@ -168,7 +175,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   */}
   <div class="tt-progress">
     <div class="tt-progress-head">
-      <span data-role="passage-title" class="cv-eyebrow">Practice passage</span>
+      <span data-role="passage-title" class="cv-eyebrow">{t('tutor.practicePassage')}</span>
 
       {/*
         Pause lives HERE, not down in the controls strip.
@@ -186,10 +193,10 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         type="button"
         data-role="pause"
         class="tt-pause"
-        title="Pause the clock (Escape)"
+        title={t('tutor.pauseTitle')}
         hidden
       >
-        Pause
+        {t('tutor.pause')}
       </button>
     </div>
 
@@ -206,7 +213,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
     </div>
 
     <div class="tt-progress-foot">
-      <span id="tt-progress-label" data-role="progress-pct">0% complete</span>
+      <span id="tt-progress-label" data-role="progress-pct">{t('tutor.complete', { pct: 0 })}</span>
       <span class="tt-progress-rest">
         <span data-role="progress" class="cv-count">0 / 0</span>
         <span data-role="progress-left"></span>
@@ -215,7 +222,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   </div>
 
   <div class="tt-stage">
-    <div class="tt-passage" data-role="passage">
+    <div class="tt-passage" data-role="passage" translate="no">
       {/* Filled by the client: the passage is chosen at random per visit, so
           rendering one here would give every visitor the same paragraph. */}
       <p data-role="line" class="tt-line"></p>
@@ -227,7 +234,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       something to announce - only its ink is hidden, because the passage
       underneath already draws the state.
     */}
-    <label for="tt-capture" class="sr-only">Type the passage shown above</label>
+    <label for="tt-capture" class="sr-only">{t('tutor.captureLabel')}</label>
     <textarea
       id="tt-capture"
       data-role="capture"
@@ -236,6 +243,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       autocomplete="off"
       autocapitalize="off"
       autocorrect="off"
+      translate="no"
       aria-describedby="tt-prompt-text"></textarea>
 
     <div class="tt-veil">
@@ -243,16 +251,16 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         data-role="veil-text"
         class="rounded-(--radius-chrome) border border-hairline bg-surface px-4 py-2 text-sm font-medium text-ink"
       >
-        Click here, then start typing
+        {t('tutor.veil')}
       </span>
     </div>
   </div>
 
   {/* ---------------------------- Next key ------------------------------- */}
   <div class="tt-prompt">
-    <span class="tt-prompt-label">Press</span>
-    <span data-role="prompt-keys" class="tt-prompt-keys"></span>
-    <span data-role="prompt-deva" class="tt-prompt-deva" lang="hi"></span>
+    <span class="tt-prompt-label">{t('tutor.press')}</span>
+    <span data-role="prompt-keys" class="tt-prompt-keys" translate="no"></span>
+    <span data-role="prompt-deva" class="tt-prompt-deva" lang="hi" translate="no"></span>
     <span id="tt-prompt-text" data-role="prompt-finger" class="tt-prompt-finger"></span>
   </div>
 
@@ -274,50 +282,49 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         to score, so it can never hand back a result from nothing.
       */}
       <button type="button" data-role="submit" class="btn btn-primary" disabled>
-        Submit and see result
+        {t('tutor.submit')}
       </button>
-      <button type="button" data-role="restart" class="btn btn-ghost">Restart</button>
-      <button type="button" data-role="new" class="btn btn-ghost">New passage</button>
+      <button type="button" data-role="restart" class="btn btn-ghost">{t('tutor.restart')}</button>
+      <button type="button" data-role="new" class="btn btn-ghost">{t('tutor.newPassage')}</button>
       <button type="button" data-role="next-level" class="btn btn-outline" hidden>
-        Next lesson
+        {t('tutor.nextLesson')}
       </button>
     </div>
   </div>
 
   {/* ----------------------------- Result -------------------------------- */}
   <div data-role="result" hidden class="tt-result" role="status">
-    <h3 class="text-xl" data-role="result-title">Test complete</h3>
+    <h3 class="text-xl" data-role="result-title">{t('tutor.testComplete')}</h3>
     <p class="mt-1 text-sm text-body" data-role="result-note"></p>
 
     <div class="tt-result-grid">
       <div class="tt-result-cell">
         <span data-role="r-wpm" class="tt-stat-value">0</span>
-        <span class="tt-stat-label">Net WPM</span>
+        <span class="tt-stat-label">{t('tutor.netWpm')}</span>
       </div>
       <div class="tt-result-cell">
         <span data-role="r-gross" class="tt-stat-value">0</span>
-        <span class="tt-stat-label">Gross WPM</span>
+        <span class="tt-stat-label">{t('tutor.grossWpm')}</span>
       </div>
       <div class="tt-result-cell">
         <span data-role="r-acc" class="tt-stat-value">0%</span>
-        <span class="tt-stat-label">Accuracy</span>
+        <span class="tt-stat-label">{t('tutor.accuracy')}</span>
       </div>
       <div class="tt-result-cell">
         <span data-role="r-err" class="tt-stat-value">0</span>
-        <span class="tt-stat-label">Mistakes</span>
+        <span class="tt-stat-label">{t('tutor.mistakes')}</span>
       </div>
     </div>
 
     <div data-role="missed-wrap" hidden class="mt-4">
-      <p class="text-xs font-semibold tracking-wide text-mute uppercase">Keys you missed most</p>
-      <div data-role="missed" class="kb-hints mt-2"></div>
+      <p class="text-xs font-semibold tracking-wide text-mute uppercase">{t('tutor.missedMost')}</p>
+      <div data-role="missed" class="kb-hints mt-2" translate="no"></div>
     </div>
   </div>
 
   <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
-    <span class="font-medium text-body">Nothing is uploaded and nothing is scored by us.</span>
-    The passage, the clock and your result stay in this browser tab. Your best speed
-    is remembered on this device only.
+    <span class="font-medium text-body">{t('tutor.privacyStrong')}</span>
+    {t('tutor.privacyBody')}
   </p>
 </div>
 
@@ -328,6 +335,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
 />
 <script type="application/json" data-tutor-levels set:html={JSON.stringify(levels)} />
 <script type="application/json" data-tutor-fingers set:html={JSON.stringify(fingerNames)} />
+<script type="application/json" data-tutor-i18n set:html={JSON.stringify(strings)} />
 
 <script>
   import { clusterStates, formatClock } from '../lib/typing.js';
@@ -340,6 +348,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   } from '../lib/tutor.js';
   import { locate } from '../lib/remington.js';
   import { planPassages, JOINER, DURATIONS } from '../lib/passages.js';
+  import { fill } from '../i18n/fill.js';
 
   type Unit = { deva: string; keys: string };
   type Passage = { id: string; title: string; units: Unit[] };
@@ -402,6 +411,8 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
   const PASSAGES: Passage[] = read('[data-tutor-passages]') ?? [];
   const LEVELS: Level[] = read('[data-tutor-levels]') ?? [];
   const FINGER_NAMES: Record<string, string> = read('[data-tutor-fingers]') ?? {};
+  /** The page's words. Text only: nothing below decides anything from it. */
+  const L: Record<string, string> = read('[data-tutor-i18n]') ?? {};
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-tutor]')) {
     if (PASSAGES.length > 0 && LEVELS.length > 0) setup(root);
@@ -602,7 +613,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         titleEl.textContent =
           order.length === 1
             ? PASSAGES[order[0]].title
-            : `${PASSAGES[order[0]].title} +${order.length - 1} more`;
+            : fill(L.moreTitles, { title: PASSAGES[order[0]].title, n: order.length - 1 });
       }
 
       runs = unitKeyRuns(units);
@@ -629,10 +640,10 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
 
         const meta = chip.querySelector<HTMLElement>('[data-role="level-meta"]')!;
         const best = progress.best[level.id];
-        if (!open) meta.textContent = 'Locked';
-        else if (best) meta.textContent = `best ${Math.round(best)} wpm`;
-        else if (done) meta.textContent = 'Done';
-        else meta.textContent = level.n === 1 ? 'Start here' : 'Open';
+        if (!open) meta.textContent = L.locked;
+        else if (best) meta.textContent = fill(L.best, { n: Math.round(best) });
+        else if (done) meta.textContent = L.done;
+        else meta.textContent = level.n === 1 ? L.startHere : L.open;
       }
     }
 
@@ -755,7 +766,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       if (!ch) {
         promptKeys.textContent = '';
         promptDeva.textContent = '';
-        promptFinger.textContent = 'Finished.';
+        promptFinger.textContent = L.finished;
         return;
       }
 
@@ -778,10 +789,10 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         promptFinger.textContent = '';
         const strong = document.createElement('strong');
         strong.textContent = name;
-        promptFinger.append('with your ', strong);
+        promptFinger.append(L.withYour, strong);
         if (at.shift) {
           const other = FINGER_NAMES[at.shiftFinger] ?? '';
-          promptFinger.append(`, holding Shift with your ${other.toLowerCase()}`);
+          promptFinger.append(fill(L.holdingShift, { finger: other.toLowerCase() }));
         }
 
         // Light the board and the hand from the same lookup, so the cap and
@@ -984,7 +995,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       segmentStart = Date.now();
       root.dataset.state = 'running';
       pauseBtn.hidden = false;
-      pauseBtn.textContent = 'Pause';
+      pauseBtn.textContent = L.pause;
       ticker = setInterval(tick, TICK_MS);
     }
 
@@ -1005,15 +1016,15 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       clearInterval(ticker);
       root.dataset.state = 'paused';
       capture.disabled = true;
-      pauseBtn.textContent = 'Resume';
-      veilText.textContent = 'Paused - press Resume to carry on';
+      pauseBtn.textContent = L.resume;
+      veilText.textContent = L.veilPaused;
       updateStats();
     }
 
     function resume() {
       if (!paused || done) return;
       capture.disabled = false;
-      veilText.textContent = 'Click here, then start typing';
+      veilText.textContent = L.veil;
       start();
       capture.focus();
     }
@@ -1072,16 +1083,18 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
 
       progressEl.textContent = `${typedLength} / ${expected.length}`;
       progressFill.style.width = `${expected.length === 0 ? 0 : (typedLength / expected.length) * 100}%`;
-      progressPct.textContent = `${pct}% complete`;
+      progressPct.textContent = fill(L.complete, { pct });
       progressTrack.setAttribute('aria-valuenow', String(pct));
       progressTrack.setAttribute(
         'aria-valuetext',
-        `${pct} percent complete, ${left} keystrokes left`,
+        fill(L.progressAria, { pct, left }),
       );
       // Words as well as characters: five keystrokes to the word is the unit
       // the WPM figure beside it already uses, so the two agree.
       progressLeft.textContent =
-        left === 0 ? 'All typed' : `${left} left · about ${Math.max(1, Math.round(left / 5))} words`;
+        left === 0
+          ? L.allTyped
+          : fill(L.left, { left, words: Math.max(1, Math.round(left / 5)) });
 
       // Nothing typed means nothing to score, so there is nothing to submit.
       submitBtn.disabled = done || s.typed === 0;
@@ -1112,7 +1125,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         deva.textContent = devaForKey(m.key);
         const key = document.createElement('span');
         key.className = 'kb-hint-key';
-        key.textContent = `${m.key === ' ' ? 'space' : m.key} × ${m.count}`;
+        key.textContent = `${m.key === ' ' ? L.space : m.key} × ${m.count}`;
         cell.append(deva, key);
         list.append(cell);
       }
@@ -1126,10 +1139,10 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         const best = readBest();
         q('result-title').textContent =
           reason === 'passage'
-            ? 'Passage finished'
+            ? L.passageFinished
             : reason === 'submitted'
-              ? 'Your result'
-              : "Time's up";
+              ? L.yourResult
+              : L.timesUp;
 
         // A best speed is only meaningful over a run that went the distance.
         // Submitting after four words would otherwise post a flattering number
@@ -1139,16 +1152,13 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
         if (ranks && net > best) {
           writeBest(net);
           note.textContent =
-            best > 0
-              ? `A new best on this device. Your previous best was ${best} WPM.`
-              : 'Saved as your best on this device.';
+            best > 0 ? fill(L.newBest, { best }) : L.savedBest;
         } else if (!ranks) {
           note.textContent =
-            `Submitted after ${formatClock(elapsed())}. Short runs are not saved as a ` +
-            `best speed` +
-            (best > 0 ? `; yours on this device is ${best} WPM.` : '.');
+            fill(L.submittedShort, { time: formatClock(elapsed()) }) +
+            (best > 0 ? fill(L.submittedShortBest, { best }) : L.submittedShortEnd);
         } else if (best > 0) {
-          note.textContent = `Your best on this device is ${best} WPM.`;
+          note.textContent = fill(L.yourBest, { best });
         } else {
           note.textContent = '';
         }
@@ -1184,26 +1194,22 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       if (cleared) {
         if (!progress.done.includes(levelId)) progress.done.push(levelId);
         const next = LEVELS[LEVELS.findIndex((l) => l.id === levelId) + 1];
-        q('result-title').textContent = `${level.title} complete`;
+        q('result-title').textContent = fill(L.levelComplete, { title: level.title });
         note.textContent = next
-          ? `${acc}% accurate. ${next.title} is now unlocked.`
-          : `${acc}% accurate. That is the last lesson - try a practice test next.`;
+          ? fill(L.unlocked, { acc, next: next.title })
+          : fill(L.lastLesson, { acc });
         if (next) {
           nextLevelBtn.hidden = false;
-          nextLevelBtn.textContent = `Start ${next.title}`;
+          nextLevelBtn.textContent = fill(L.startLevel, { title: next.title });
         }
       } else if (!s.complete) {
         const through = Math.round((s.typed / expected.length) * 100);
         q('result-title').textContent =
-          reason === 'submitted' ? 'Submitted early' : 'Lesson stopped early';
-        note.textContent =
-          `${acc}% accurate over the ${through}% of the drill you typed. ` +
-          `Type all of it to clear this lesson.`;
+          reason === 'submitted' ? L.submittedEarly : L.stoppedEarly;
+        note.textContent = fill(L.partial, { acc, through });
       } else {
-        q('result-title').textContent = 'Not quite';
-        note.textContent =
-          `${acc}% accurate - this lesson needs ${level.threshold}%. ` +
-          `Slow down until the mistakes stop; the speed comes on its own.`;
+        q('result-title').textContent = L.notQuite;
+        note.textContent = fill(L.needs, { acc, threshold: level.threshold });
       }
 
       writeProgress(progress);
@@ -1236,8 +1242,8 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       result.hidden = true;
       nextLevelBtn.hidden = true;
       pauseBtn.hidden = true;
-      pauseBtn.textContent = 'Pause';
-      veilText.textContent = 'Click here, then start typing';
+      pauseBtn.textContent = L.pause;
+      veilText.textContent = L.veil;
       root.dataset.state = 'idle';
       passage.scrollTop = 0;
 
@@ -1259,7 +1265,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
       const lesson = next === 'lesson';
       levelsWrap.hidden = !lesson;
       durationGroup.hidden = lesson;
-      timeLabel.textContent = lesson ? 'Time' : 'Time left';
+      timeLabel.textContent = lesson ? L.time : L.timeLeft;
       // "New passage" makes no sense on a fixed drill - a lesson is the same
       // text every time, which is the point of practising it.
       newBtn.hidden = lesson;
@@ -1374,12 +1380,12 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
     resetBtn.addEventListener('click', () => {
       if (!armed) {
         armed = true;
-        resetBtn.textContent = 'Tap again to erase';
+        resetBtn.textContent = L.tapAgain;
         resetBtn.dataset.armed = 'true';
         clearTimeout(disarm);
         disarm = setTimeout(() => {
           armed = false;
-          resetBtn.textContent = 'Reset progress';
+          resetBtn.textContent = L.resetProgress;
           delete resetBtn.dataset.armed;
         }, 4000);
         return;
@@ -1387,7 +1393,7 @@ const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
 
       clearTimeout(disarm);
       armed = false;
-      resetBtn.textContent = 'Reset progress';
+      resetBtn.textContent = L.resetProgress;
       delete resetBtn.dataset.armed;
 
       progress = { done: [], best: {} };

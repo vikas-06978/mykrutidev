@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import { allGroups } from '../lib/routes.js';
+import { langOf, useT } from '../i18n/index.js';
+
+const { t, raw, render } = useT(langOf(Astro.url));
+const P = '/all-converters';
+const groups = allGroups();
+
+const total = groups.reduce((n, g) => n + g.pages.length, 0);
+const liveCount = groups.reduce(
+  (n, g) => n + g.pages.filter((p) => p.live).length,
+  0,
+);
+const body: string[] = raw('allConverters.body');
+---
+
+<Base title={t(`pages.${P}.title`)} description={t(`pages.${P}.description`)}>
+  <div class="wrap py-8 sm:py-12">
+    <h1 class="text-3xl sm:text-4xl" set:html={render(t(`pages.${P}.h1`))} />
+    <p class="mt-3 max-w-2xl text-base text-body">
+      {t('allConverters.intro', { live: liveCount, total })}
+    </p>
+
+    {
+      groups.map((g) => (
+        <section class="mt-10">
+          <h2 class="text-xl" set:html={render(t(`groups.${g.name}`))} />
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+            {g.pages.map((p) => (
+              <li>
+                <a
+                  href={p.path}
+                  class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron"
+                >
+                  <span class="flex items-start justify-between gap-3">
+                    <span class="font-medium text-ink" set:html={render(t(`pages.${p.path}.h1`))} />
+                    <span
+                      class:list={[
+                        'mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+                        p.live
+                          ? 'bg-inset text-ok'
+                          : 'bg-warn-bg text-saffron',
+                      ]}
+                    >
+                      {p.live ? t('allConverters.live') : t('allConverters.comingSoon')}
+                    </span>
+                  </span>
+                  <span
+                    class="mt-1.5 text-sm text-body"
+                    set:html={render(t(`pages.${p.path}.description`))}
+                  />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <div class="prose-page mt-14 text-body" set:html={body.map(render).join('\n')} />
+  </div>
+</Base>

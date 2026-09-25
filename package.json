@@ -10,7 +10,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test \"src/lib/*.test.js\"",
+    "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\"",
+    "test:dist": "node --test \"tests/*.test.js\"",
+    "i18n:review": "node scripts/translations-review.mjs",
     "astro": "astro"
   },
   "dependencies": {

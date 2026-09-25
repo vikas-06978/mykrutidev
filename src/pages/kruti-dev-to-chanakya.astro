@@ -1,20 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/kruti-dev-to-chanakya"]; the
+// Hindi twin at /hi/kruti-dev-to-chanakya is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/kruti-dev-to-chanakya"
-  lede="Convert Kruti Dev text to the Chanakya font encoding, entirely in your browser."
-  faq={[]}
->
-  <h2>Coming in phase 2</h2>
-  <p>
-    The Chanakya character map has not been verified against real documents yet,
-    so this pair is switched off rather than left to quietly mangle your text. A
-    half-remembered mapping is worse than none.
-  </p>
-  <p>
-    In the meantime, the
-    <a href="/">Kruti Dev to Unicode converter</a> is complete and tested.
-  </p>
-</ConverterPage>
+<PageView path="/kruti-dev-to-chanakya" />

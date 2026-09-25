@@ -1,21 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/punjabi-font-converter"]; the
+// Hindi twin at /hi/punjabi-font-converter is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/punjabi-font-converter"
-  lede="Planned: a Punjabi font converter for AnmolLipi, Asees and other legacy Gurmukhi fonts to Unicode."
->
-  <h2>Planned, not started</h2>
-  <p>
-    AnmolLipi and Asees are the legacy Gurmukhi fonts behind most older Punjabi
-    documents. As with Kruti Dev, the text inside the file is ASCII and only
-    becomes Punjabi when the right font is installed.
-  </p>
-  <p>
-    Gurmukhi is a separate script from Devanagari with its own letters, vowel
-    signs and subjoined forms, so nothing in the current engine transfers. The
-    route exists so the work has a home; it will be switched on only after a
-    keyword check and a mapping built from real AnmolLipi and Asees documents.
-  </p>
-</ConverterPage>
+<PageView path="/punjabi-font-converter" />

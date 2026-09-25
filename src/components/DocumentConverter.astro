@@ -7,11 +7,18 @@
  * text boxes above - and handed back as a download. There is no upload
  * endpoint anywhere on this site.
  */
+import { langOf, useT, raw } from '../i18n/index.js';
+
 interface Props {
   direction: 'to-unicode' | 'to-kruti';
 }
 
 const { direction } = Astro.props;
+const lang = langOf(Astro.url);
+const { t, render } = useT(lang);
+// Every doc.* string, for the script: errors and the result summary are
+// worded in the browser, after the file has been read.
+const strings = raw(lang, 'doc');
 const toUnicode = direction === 'to-unicode';
 const id = `doc-${direction}`;
 ---
@@ -20,19 +27,17 @@ const id = `doc-${direction}`;
   class="doc card mt-8"
   data-doc-converter
   data-direction={direction}
+  data-i18n={JSON.stringify(strings)}
   aria-labelledby={`${id}-title`}
 >
   <div class="px-4 pt-5 pb-4 sm:px-6">
-    <h2 id={`${id}-title`} class="text-xl">Convert a document</h2>
-    <p class="mt-1 text-sm text-body">
-      {
-        toUnicode
-          ? 'Upload a Word (.docx) or text (.txt) file typed in Kruti Dev. Only the Kruti Dev text is converted; English, tables, images and formatting stay as they are.'
-          : 'Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted to Kruti Dev 010; English, tables, images and formatting stay as they are.'
-      }
-    </p>
+    <h2 id={`${id}-title`} class="text-xl">{t('doc.title')}</h2>
+    <p
+      class="mt-1 text-sm text-body"
+      set:html={render(toUnicode ? t('doc.introToUnicode') : t('doc.introToKruti'))}
+    />
     <p class="mt-2 text-sm font-medium text-ink">
-      <span aria-hidden="true">🔒</span> Your file never leaves your computer.
+      <span aria-hidden="true">🔒</span> {t('doc.private')}
     </p>
 
     {/*
@@ -46,10 +51,10 @@ const id = `doc-${direction}`;
       class="doc-drop mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-(--radius-card) border-2 border-dashed border-hairline bg-inset px-4 py-8 text-center transition-colors"
     >
       <span class="text-sm text-body">
-        <span class="hidden sm:inline">Drag a file here, or </span>
+        <span class="hidden sm:inline">{t('doc.drag')}</span>
       </span>
-      <span class="btn btn-primary pointer-events-none">Choose file</span>
-      <span class="text-xs text-mute">.docx or .txt, up to 20 MB</span>
+      <span class="btn btn-primary pointer-events-none">{t('doc.choose')}</span>
+      <span class="text-xs text-mute" set:html={render(t('doc.limits'))} />
       <input
         id={`${id}-input`}
         data-role="input"
@@ -63,12 +68,13 @@ const id = `doc-${direction}`;
       toUnicode && (
         <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <label for={`${id}-font`} class="text-body">
-            Hindi font in the converted file:
+            {t('doc.fontLabel')}
           </label>
           <select
             id={`${id}-font`}
             data-role="font"
             class="rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5 text-ink"
+            translate="no"
           >
             <option value="Mangal" selected>Mangal</option>
             <option value="Nirmala UI">Nirmala UI</option>
@@ -79,14 +85,14 @@ const id = `doc-${direction}`;
 
     <div data-role="status" class="mt-4" hidden>
       <p class="text-sm text-ink">
-        <span data-role="file-name" class="font-medium break-all"></span>
+        <span data-role="file-name" class="font-medium break-all" translate="no"></span>
         <span data-role="file-size" class="text-mute"></span>
       </p>
       <div
         data-role="progress-wrap"
         class="mt-2 h-2 overflow-hidden rounded-full bg-inset"
         role="progressbar"
-        aria-label="Converting"
+        aria-label={t('doc.progress')}
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow="0"
@@ -102,9 +108,9 @@ const id = `doc-${direction}`;
       <p data-role="share" class="mt-1 text-sm text-body"></p>
       <p data-role="warning" role="status" hidden class="mt-2 rounded-(--radius-chrome) border border-saffron/40 bg-warn-bg px-3 py-2 text-sm text-ink"></p>
       <div class="mt-3 flex flex-wrap gap-2">
-        <a data-role="download" class="btn btn-primary" href="#" download>Download converted file</a>
+        <a data-role="download" class="btn btn-primary" href="#" download>{t('doc.download')}</a>
         <a data-role="download-docx" class="btn btn-outline" href="#" download hidden>
-          Download as Word (.docx) with Kruti Dev 010
+          <Fragment set:html={render(t('doc.downloadKrutiDocx'))} />
         </a>
       </div>
     </div>
@@ -112,6 +118,8 @@ const id = `doc-${direction}`;
 </section>
 
 <script>
+  import { localizeDocMessage, localizeSummary } from '../i18n/docMessages.js';
+
   type Mod = typeof import('../lib/docConvert.js');
   let mod: Promise<Mod> | null = null;
   // A failed load is not cached, so the next upload tries again.
@@ -129,6 +137,7 @@ const id = `doc-${direction}`;
     const q = <T extends HTMLElement>(role: string) =>
       root.querySelector<T>(`[data-role="${role}"]`)!;
     const direction = root.dataset.direction as 'to-unicode' | 'to-kruti';
+    const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
 
     const drop = q<HTMLLabelElement>('drop');
     const input = q<HTMLInputElement>('input');
@@ -196,7 +205,7 @@ const id = `doc-${direction}`;
         m = await load();
         const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
         const checked = m.checkFile({ name: file.name, size: file.size, head });
-        if ('error' in checked) return fail(checked.error);
+        if ('error' in checked) return fail(localizeDocMessage(checked.error, m, L));
 
         const bytes = new Uint8Array(await file.arrayBuffer());
         if (run !== busy) return;
@@ -234,7 +243,8 @@ const id = `doc-${direction}`;
         if (run !== busy) return;
         setProgress(1);
 
-        const s = m.summarize(stats, direction);
+        // Same stats, same arithmetic as m.summarize(), in this page's words.
+        const s = localizeSummary(stats, direction, L);
         summary.textContent = s.line;
         share.textContent = s.share ?? '';
         share.hidden = !s.share;
@@ -248,7 +258,7 @@ const id = `doc-${direction}`;
         console.error('[doc-converter]', err, (err as Error)?.cause ?? '');
         if (run !== busy) return;
         // If the converter itself failed to load there is no messageFor().
-        fail(m ? m.messageFor(err) : 'Something went wrong converting this file.');
+        fail(m ? localizeDocMessage(m.messageFor(err), m, L) : L.generic);
       }
     }
 

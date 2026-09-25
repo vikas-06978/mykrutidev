@@ -1,22 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/tamil-font-converter"]; the
+// Hindi twin at /hi/tamil-font-converter is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/tamil-font-converter"
-  lede="Planned: a Tamil font converter for Bamini and other legacy Tamil fonts to Unicode Tamil."
->
-  <h2>Planned, not started</h2>
-  <p>
-    Bamini is the Tamil equivalent of Kruti Dev: the legacy font that a great
-    deal of older Tamil typing was done in, still sitting inside documents that
-    now need to go into Unicode systems.
-  </p>
-  <p>
-    Tamil script works differently from Devanagari. It has its own vowel-sign
-    behaviour and its own rules about which signs move where, so this needs its
-    own engine work rather than a new lookup table. The route is scaffolded; it
-    will be built only after a keyword check and a mapping tested against real
-    Tamil documents.
-  </p>
-</ConverterPage>
+<PageView path="/tamil-font-converter" />

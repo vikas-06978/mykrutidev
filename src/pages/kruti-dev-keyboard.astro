@@ -1,24 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/kruti-dev-keyboard"]; the
+// Hindi twin at /hi/kruti-dev-keyboard is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/kruti-dev-keyboard"
-  lede="Which key types which Hindi letter in Kruti Dev 010: consonants, matras, half letters and conjuncts."
-  faq={[]}
->
-  <h2>Coming in phase 3</h2>
-  <p>
-    This page will carry the full Kruti Dev 010 layout as a printable chart:
-    every consonant, the matras, the half letters, the reph and rakar, and the
-    conjuncts that have their own key.
-  </p>
-  <p>
-    The short version, if you need it now: <code>d</code> is
-    <strong lang="hi">क</strong>, <code>k</code> is the vertical bar that both
-    completes a consonant and serves as <strong lang="hi">ा</strong>,
-    <code>f</code> is <strong lang="hi">ि</strong> and is typed
-    <em>before</em> its consonant, and <code>Z</code> is the reph, typed
-    <em>after</em> the syllable it sits on.
-  </p>
-</ConverterPage>
+<PageView path="/kruti-dev-keyboard" />

@@ -1,6 +1,7 @@
 ---
 import { FONTS, boxLabel, codeLabel } from '../lib/fontMaps.js';
 import { previewFontFor } from '../lib/legacyFonts.js';
+import { langOf, useT } from '../i18n/index.js';
 
 interface Props {
   from: string;
@@ -15,8 +16,40 @@ const fromFont = FONTS[from];
 const toFont = FONTS[to];
 if (!fromFont || !toFont) throw new Error(`Converter: unknown font ${from}/${to}`);
 
-const fromLabel = boxLabel(from);
-const toLabel = boxLabel(to);
+const { t, render } = useT(langOf(Astro.url));
+
+// Box labels: the font's own name wherever the reader has to recognise the
+// font ("Kruti Dev", "Mangal"), and the everyday word where it is a kind of
+// text rather than a font ("Unicode / Hindi" -> "यूनिकोड / हिंदी").
+// i18n.test.js checks the English column is exactly boxLabel().
+const fromLabel = t(`fontBox.${from}`);
+const toLabel = t(`fontBox.${to}`);
+void boxLabel;
+
+// A legacy placeholder is a real code sample plus "(example)". The code stays
+// as it is in every language - only the word "example" is translated.
+const placeholder = (fromFont.placeholder ?? '').replace('(example)', t('converter.example'));
+
+// Every string the script below shows, in this page's language.
+const strings = {
+  conversionFailed: t('common.conversionFailed'),
+  hintUnicodeLead: t('converter.hintUnicodeLead'),
+  hintUnicodeBody: t('converter.hintUnicodeBody'),
+  reverseLink: t('converter.reverseLink'),
+  hintEnglishLead: t('converter.hintEnglishLead'),
+  hintEnglishBody: t('converter.hintEnglishBody'),
+  hintLatinLead: t('converter.hintLatinLead'),
+  hintLatinBody: t('converter.hintLatinBody'),
+  fontMissing: t('converter.fontMissing'),
+  nothingToCopy: t('common.nothingToCopy'),
+  copied: t('common.copied'),
+  copiedToClipboard: t('common.copiedToClipboard'),
+  nothingToDownload: t('common.nothingToDownload'),
+  downloaded: t('common.downloaded'),
+  downloadFailed: t('common.downloadFailed'),
+  nothingToShare: t('common.nothingToShare'),
+  sharingFirst: t('converter.sharingFirst'),
+};
 
 // Derived from the props rather than a counter, so ids stay stable across
 // builds while still being unique if a page ever renders two converters.
@@ -61,6 +94,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
   data-from-label={fromLabel}
   data-to-label={toLabel}
   data-reverse={reverse?.path ?? ''}
+  data-i18n={JSON.stringify(strings)}
   data-view="preview"
   style={`--cv-preview:${previewStack}`}
 >
@@ -68,7 +102,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
     {/* Input */}
     <div class="cv-panel border-b border-hairline md:border-b-0">
       <div class="cv-head">
-        <label for={`cv-in-${uid}`} class="cv-eyebrow">{fromLabel}</label>
+        <label for={`cv-in-${uid}`} class="cv-eyebrow" translate="no">{fromLabel}</label>
         <span data-role="count-in" class="cv-count">0</span>
       </div>
 
@@ -76,17 +110,18 @@ const previewStack = previewFont?.stack ?? toFont.css;
         <textarea
           id={`cv-in-${uid}`}
           data-role="input"
+          translate="no"
           spellcheck="false"
           autocomplete="off"
           autocapitalize="off"
           lang={inputIsUnicode ? 'hi' : undefined}
-          placeholder={fromFont.placeholder}
+          placeholder={placeholder}
           class:list={['cv-area deva', inputIsUnicode ? 'text-lg' : 'text-base']}
           style={`font-family:${fromFont.css}`}></textarea>
       </div>
 
       <div class="cv-actions">
-        <button type="button" data-role="clear" class="btn btn-ghost">Clear</button>
+        <button type="button" data-role="clear" class="btn btn-ghost">{t('common.clear')}</button>
         {/*
           "Try example", not "Insert sample": users read "sample" as "upload a
           sample file". It only fills the box with real text in THIS page's
@@ -97,9 +132,9 @@ const previewStack = previewFont?.stack ?? toFont.css;
           data-role="sample"
           class="btn btn-ghost"
           data-sample={fromFont.sample}
-          title={`Fill the box with a real ${fromFont.label} example`}
+          title={t('converter.sampleTitle', { font: fromFont.label })}
         >
-          Try example
+          {t('common.tryExample')}
         </button>
       </div>
     </div>
@@ -116,18 +151,18 @@ const previewStack = previewFont?.stack ?? toFont.css;
     */}
     <div class="cv-panel bg-surface">
       <div class="cv-head">
-        <label for={`cv-out-${uid}`} class="cv-eyebrow">{toLabel}</label>
+        <label for={`cv-out-${uid}`} class="cv-eyebrow" translate="no">{toLabel}</label>
         {
           outputIsLegacy && (
             <div data-role="view" role="group" aria-labelledby={`cv-view-${uid}`} class="cv-seg">
               <span id={`cv-view-${uid}`} class="cv-seg-label">
-                View:
+                {t('converter.view')}
               </span>
               <button type="button" data-view="preview" aria-pressed="true">
-                Preview (Hindi)
+                {t('converter.preview')}
               </button>
               <button type="button" data-view="raw" aria-pressed="false">
-                Raw code
+                {t('converter.raw')}
               </button>
             </div>
           )
@@ -139,9 +174,10 @@ const previewStack = previewFont?.stack ?? toFont.css;
         <textarea
           id={`cv-out-${uid}`}
           data-role="output"
+          translate="no"
           readonly
           spellcheck="false"
-          placeholder="Your converted text appears here."
+          placeholder={t('converter.outPlaceholder')}
           class="cv-area cv-out deva text-base"></textarea>
       </div>
 
@@ -153,7 +189,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
       {
         toFont.warnUnmapped && (
           <p data-role="unmapped" hidden class="cv-hint">
-            Some characters have no {codeLabel(to)} equivalent and were left as-is.
+            <Fragment set:html={render(t('converter.unmapped', { font: codeLabel(to) }))} />
           </p>
         )
       }
@@ -170,15 +206,15 @@ const previewStack = previewFont?.stack ?? toFont.css;
               <div class="cv-copies">
                 <div class="cv-copy">
                   <button type="button" data-role="copy-raw" class="btn btn-primary">
-                    <span data-label>Copy {outputCodeName} code</span>
+                    <span data-label set:html={render(t('converter.copyCode', { font: outputCodeName }))} />
                   </button>
-                  <span class="cv-sub">For MS Word / forms</span>
+                  <span class="cv-sub" set:html={render(t('converter.forWord'))} />
                 </div>
                 <div class="cv-copy">
                   <button type="button" data-role="copy-unicode" class="btn btn-outline">
-                    <span data-label>Copy as Hindi (Unicode)</span>
+                    <span data-label>{t('converter.copyUnicode')}</span>
                   </button>
-                  <span class="cv-sub">For WhatsApp / web</span>
+                  <span class="cv-sub">{t('converter.forWeb')}</span>
                 </div>
               </div>
 
@@ -187,17 +223,17 @@ const previewStack = previewFont?.stack ?? toFont.css;
                   type="button"
                   data-role="docx"
                   class="btn btn-ghost"
-                  title={`Word file with the ${outputFaceName} font already applied`}
+                  title={t('converter.docxTitle', { font: outputFaceName })}
                 >
-                  Download .docx
+                  <span set:html={render(t('common.downloadDocx'))} />
                 </button>
                 <button
                   type="button"
                   data-role="docx-unicode"
                   class="btn btn-ghost"
-                  title="Word file in Unicode Hindi, readable without any legacy font"
+                  title={t('converter.unicodeDocxTitle')}
                 >
-                  Unicode .docx
+                  <span set:html={render(t('converter.unicodeDocx'))} />
                 </button>
                 <a
                   data-role="whatsapp"
@@ -206,20 +242,20 @@ const previewStack = previewFont?.stack ?? toFont.css;
                   rel="noopener"
                   class="btn btn-ghost"
                 >
-                  WhatsApp
+                  {t('converter.whatsapp')}
                 </a>
               </div>
             </>
           ) : (
             <div class="cv-secondary">
               <button type="button" data-role="copy-raw" class="btn btn-primary">
-                <span data-label>Copy text</span>
+                <span data-label>{t('common.copyText')}</span>
               </button>
               <button type="button" data-role="docx" class="btn btn-ghost">
-                Download .docx
+                <span set:html={render(t('common.downloadDocx'))} />
               </button>
               <a data-role="whatsapp" href="#" target="_blank" rel="noopener" class="btn btn-ghost">
-                WhatsApp
+                {t('converter.whatsapp')}
               </a>
             </div>
           )
@@ -245,23 +281,16 @@ const previewStack = previewFont?.stack ?? toFont.css;
         class="mt-0.5 size-4 shrink-0 accent-[var(--color-brick)]"
       />
       <span>
-        <strong class="font-medium text-ink">Keep English words and numbers unchanged</strong>
-        <span class="block text-xs text-mute">
-          Dates, numbers, URLs and email addresses are always left alone. English
-          words are detected heuristically, and because a legacy font stores Hindi
-          as plain ASCII, an unusual proper noun can still slip through.
-        </span>
+        <strong class="font-medium text-ink">{t('converter.keepEnglish')}</strong>
+        <span class="block text-xs text-mute">{t('converter.keepEnglishHelp')}</span>
       </span>
     </label>
   </div>
 
-  <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
-    <span class="font-medium text-body">Please review the output.</span> Matra order
-    and the common conjuncts (<span lang="hi">&#2325;&#2381;&#2359;, &#2340;&#2381;&#2352;,
-    &#2332;&#2381;&#2334;, &#2358;&#2381;&#2352;</span>) are handled, but rare
-    characters in very old documents may still differ. Nothing you type is
-    uploaded. This page converts entirely inside your browser.
-  </p>
+  <p
+    class="cv-strip bg-surface text-xs leading-relaxed text-mute"
+    set:html={render(t('converter.review'))}
+  />
 </div>
 
 {
@@ -269,7 +298,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
     <p class="mt-3 text-center text-sm text-body">
       <a href={reverse.path} class="inline-flex items-center gap-1.5 no-underline hover:underline">
         <span aria-hidden="true">&#8644;</span>
-        Need the other direction? {reverse.h1}
+        <span set:html={render(t('converter.otherDirection', { title: reverse.h1 }))} />
       </a>
     </p>
   )
@@ -281,6 +310,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
 <script>
   import { convert, FONTS, describeMismatch, unmappedChars } from '../lib/fontMaps.js';
   import { previewFontFor } from '../lib/legacyFonts.js';
+  import { fill } from '../i18n/fill.js';
 
   const WHATSAPP_LIMIT = 2000;
 
@@ -317,6 +347,9 @@ const previewStack = previewFont?.stack ?? toFont.css;
     const toLabel = root.dataset.toLabel!;
     const reversePath = root.dataset.reverse || '';
     const outputIsLegacy = FONTS[to]?.kind === 'legacy';
+    // This page's words, rendered by the server into data-i18n. Only text -
+    // nothing below decides anything from it.
+    const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
 
     let flash: ReturnType<typeof setTimeout> | undefined;
     const say = (msg: string) => {
@@ -341,29 +374,23 @@ const previewStack = previewFont?.stack ?? toFont.css;
       lead.className = 'font-medium text-ink';
 
       if (code === 'expected-legacy-got-unicode') {
-        lead.textContent = `This looks like Unicode Hindi, not ${fromLabel}. `;
-        hint.append(lead, 'You may want the converter that goes the other way');
+        lead.textContent = fill(L.hintUnicodeLead, { from: fromLabel });
+        hint.append(lead, L.hintUnicodeBody);
         if (reversePath) {
           hint.append(': ');
           const a = document.createElement('a');
           a.href = reversePath;
-          a.textContent = `${toLabel} to ${fromLabel}`;
+          a.textContent = fill(L.reverseLink, { to: toLabel, from: fromLabel });
           hint.append(a, '.');
         } else {
           hint.append('.');
         }
       } else if (code === 'expected-legacy-got-english') {
-        lead.textContent = `This doesn't look like ${fromLabel} text. `;
-        hint.append(
-          lead,
-          `${fromLabel} stores Hindi as ASCII, so a real ${fromLabel} document looks like gibberish here. Try the example button below the box.`,
-        );
+        lead.textContent = fill(L.hintEnglishLead, { from: fromLabel });
+        hint.append(lead, fill(L.hintEnglishBody, { from: fromLabel }));
       } else {
-        lead.textContent = "This doesn't look like Hindi text. ";
-        hint.append(
-          lead,
-          'Type or paste Hindi in the box, or use the example button to see what this page expects.',
-        );
+        lead.textContent = L.hintLatinLead;
+        hint.append(lead, L.hintLatinBody);
       }
     }
 
@@ -417,7 +444,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
         result = convert(text, from, to, { keepEnglish: keepEnglish.checked });
       } catch (err) {
         console.error(err);
-        say('Conversion failed');
+        say(L.conversionFailed);
       }
       // The one line worth guarding: assigning to a textarea's value re-shapes
       // the whole document even when the string is identical.
@@ -484,7 +511,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
           if (faces.some((f) => f.status === 'loaded')) return;
           const note = document.createElement('span');
           note.className = 'cv-count';
-          note.textContent = `${font.label} not available`;
+          note.textContent = fill(L.fontMissing, { font: font.label });
           viewGroup.after(note);
         } catch {
           // No FontFaceSet, or a browser that throws on an unknown family.
@@ -529,12 +556,12 @@ const previewStack = previewFont?.stack ?? toFont.css;
       btn.addEventListener('click', async () => {
         flush();
         const value = text();
-        if (!value) return say('Nothing to copy');
+        if (!value) return say(L.nothingToCopy);
         await writeClipboard(value);
 
-        label.textContent = 'Copied!';
+        label.textContent = L.copied;
         btn.dataset.copied = 'true';
-        say('Copied to clipboard');
+        say(L.copiedToClipboard);
         clearTimeout(reset);
         reset = setTimeout(() => {
           label.textContent = original;
@@ -554,17 +581,17 @@ const previewStack = previewFont?.stack ?? toFont.css;
       maybe<HTMLButtonElement>(role)?.addEventListener('click', async (e) => {
         flush();
         const body = text();
-        if (!body) return say('Nothing to download');
+        if (!body) return say(L.nothingToDownload);
         const btn = e.currentTarget as HTMLButtonElement;
         btn.disabled = true;
         try {
           // Dynamic import: the zip library never touches the initial bundle.
           const { downloadDocx } = await import('../lib/docx.js');
           downloadDocx(body, { fontName, fileName: `mykrutidev-${to}${suffix}.docx` });
-          say('Downloaded');
+          say(L.downloaded);
         } catch (err) {
           console.error(err);
-          say('Download failed');
+          say(L.downloadFailed);
         } finally {
           btn.disabled = false;
         }
@@ -587,13 +614,13 @@ const previewStack = previewFont?.stack ?? toFont.css;
       const shareable = outputIsLegacy ? unicodeText() : output.value;
       if (!shareable) {
         e.preventDefault();
-        say('Nothing to share');
+        say(L.nothingToShare);
         return;
       }
       // Built here rather than on every keystroke.
       whatsapp.href = `https://wa.me/?text=${encodeURIComponent(shareable.slice(0, WHATSAPP_LIMIT))}`;
       if (shareable.length > WHATSAPP_LIMIT) {
-        say(`Sharing the first ${WHATSAPP_LIMIT} characters`);
+        say(fill(L.sharingFirst, { n: WHATSAPP_LIMIT }));
       }
     });
 

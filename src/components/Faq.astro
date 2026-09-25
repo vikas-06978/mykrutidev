@@ -1,4 +1,6 @@
 ---
+import { langOf, useT } from '../i18n/index.js';
+
 interface Props {
   items: { q: string; a: string }[];
   /** Stub pages must not emit FAQPage schema for content Google cannot index. */
@@ -6,9 +8,10 @@ interface Props {
 }
 
 const { items, schema = true } = Astro.props;
+const { t, render } = useT(langOf(Astro.url));
 
-// Answers are authored here (never user input), so inline markup is safe to
-// render - but the schema wants plain text, so strip tags for that copy.
+// Answers are authored in src/i18n (never user input), so inline markup is
+// safe to render - but the schema wants plain text, so strip tags for that copy.
 const plain = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
 const faqSchema = {
@@ -23,14 +26,14 @@ const faqSchema = {
 ---
 
 <section aria-labelledby="faq-heading" class="mt-12">
-  <h2 id="faq-heading" class="text-2xl">Frequently asked questions</h2>
+  <h2 id="faq-heading" class="text-2xl">{t('page.faqHeading')}</h2>
 
   <div class="mt-5 divide-y divide-hairline overflow-hidden card">
     {
       items.map(({ q, a }) => (
         <details class="group">
           <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-base font-medium text-ink marker:hidden hover:bg-inset">
-            {q}
+            <span set:html={render(q)} />
             <span
               aria-hidden="true"
               class="shrink-0 text-xl leading-none text-saffron transition-transform group-open:rotate-45"
@@ -38,7 +41,7 @@ const faqSchema = {
               +
             </span>
           </summary>
-          <div class="px-5 pb-5 text-sm leading-relaxed text-body" set:html={a} />
+          <div class="px-5 pb-5 text-sm leading-relaxed text-body" set:html={render(a)} />
         </details>
       ))
     }

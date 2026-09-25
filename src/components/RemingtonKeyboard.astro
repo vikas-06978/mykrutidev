@@ -1,6 +1,7 @@
 ---
 import { layout } from '../lib/remington.js';
 import { FONTS } from '../lib/fontMaps.js';
+import { langOf, t } from '../i18n/index.js';
 
 /**
  * A drawing of the Remington keyboard.
@@ -26,6 +27,7 @@ const f = FONTS[font];
 if (!f?.map) throw new Error(`RemingtonKeyboard: ${font} has no character map`);
 
 const rows = layout(f.map);
+const lang = langOf(Astro.url);
 
 /**
  * The caps that carry no letter. They exist so the board reads as a keyboard -
@@ -49,7 +51,17 @@ const TRAILING = [
 ];
 ---
 
-<div class="kbd" data-keyboard role="img" aria-label="Remington Hindi keyboard layout">
+{/*
+  translate="no": the caps are the physical keys (Tab, Shift, the English
+  letter) and the Hindi each one types. None of it is prose.
+*/}
+<div
+  class="kbd"
+  data-keyboard
+  role="img"
+  aria-label={t(lang, 'tutor.keyboardAria')}
+  translate="no"
+>
   {
     rows.map((row, i) => (
       <div class="kbd-row">

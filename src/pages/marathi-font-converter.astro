@@ -1,28 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/marathi-font-converter"]; the
+// Hindi twin at /hi/marathi-font-converter is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/marathi-font-converter"
-  lede="Planned: a Marathi font converter for Shree Lipi and other legacy Marathi fonts to Unicode."
->
-  <h2>Planned, not started</h2>
-  <p>
-    Marathi is written in Devanagari, the same script as Hindi, so this is the
-    closest of the planned scripts to what the site already does. Some of the
-    engine, meaning the matra reordering, the reph and the conjunct handling, carries
-    over directly.
-  </p>
-  <p>
-    The character maps do not. Shree Lipi and the other Marathi DTP fonts have
-    their own key arrangements, and Marathi uses some conjuncts and the eyelash
-    <span lang="mr">ऱ</span> in ways Hindi does not. Reusing the Kruti Dev map
-    would produce Marathi that is wrong in precisely the places Marathi differs
-    from Hindi, which is the hardest kind of error to notice.
-  </p>
-  <p>
-    This will be built only after a keyword check says it is worth doing and a
-    mapping has been tested against real Marathi documents. Meanwhile, if your
-    document is Hindi in Kruti Dev, <a href="/">the main converter</a> handles it.
-  </p>
-</ConverterPage>
+<PageView path="/marathi-font-converter" />

@@ -1,22 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/unicode-to-shusha"]; the
+// Hindi twin at /hi/unicode-to-shusha is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/unicode-to-shusha"
-  lede="Type or paste Hindi on the left and get Shusha font text on the right, once the Shusha layout has been mapped."
->
-  <h2>Not ready yet</h2>
-  <p>
-    Going from Unicode back to a legacy font needs the same character map as the
-    forward direction, read in reverse, so this page and
-    <a href="/shusha-to-unicode">Shusha to Unicode</a> will become available
-    together, once the Shusha layout has been worked out from real documents.
-  </p>
-  <p>
-    If you need legacy Hindi today, <a href="/unicode-to-kruti-dev"
-      >Unicode to Kruti Dev</a
-    > is finished and tested, and accepts Hindi typed straight from a phone or Windows
-    keypad.
-  </p>
-</ConverterPage>
+<PageView path="/unicode-to-shusha" />

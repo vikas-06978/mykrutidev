@@ -1,0 +1,190 @@
+---
+import Base from '../layouts/Base.astro';
+import Converter from './Converter.astro';
+import DocumentConverter from './DocumentConverter.astro';
+import Transliterator from './Transliterator.astro';
+import HindiKeyboard from './HindiKeyboard.astro';
+import TypingTutor from './TypingTutor.astro';
+import Faq from './Faq.astro';
+import AllConverters from './AllConverters.astro';
+import { getPage, isLive, reversePage } from '../lib/routes.js';
+import { FONTS } from '../lib/fontMaps.js';
+import { langOf, useT } from '../i18n/index.js';
+
+/**
+ * One page of the site, in whichever language its URL is in.
+ *
+ * Everything that varies by page is data: the structure comes from routes.js
+ * and every word from src/i18n/{en,hi}.json under `pages.<path>`. So
+ * src/pages/<slug>.astro (English) and src/pages/hi/[...slug].astro (Hindi)
+ * both render this with nothing but a path, and the two languages cannot drift
+ * apart in layout - only in wording, which is what TRANSLATIONS-REVIEW.md is for.
+ */
+interface Props {
+  /** Route path - everything else is looked up in routes.js and src/i18n. */
+  path: string;
+}
+
+const { path } = Astro.props;
+
+const page = getPage(path);
+if (!page) throw new Error(`No routes.js entry for ${path}`);
+
+const lang = langOf(Astro.url);
+const { t, maybe, render } = useT(lang);
+const text = (field: string) => t(`pages.${path}.${field}`);
+
+const live = isLive(page);
+const related = page.related.map(getPage).filter(Boolean);
+
+// The interactive tool a content page is built around, if any.
+const TOOLS: Record<string, any> = {
+  '/english-to-hindi-typing': Transliterator,
+  '/hindi-keyboard': HindiKeyboard,
+  '/hindi-typing-test': TypingTutor,
+};
+const Tool = TOOLS[path];
+
+// Only offer the swap link when the reverse page is actually usable.
+const rev = reversePage(page);
+const reverse = rev && isLive(rev) ? { path: rev.path, h1: t(`pages.${rev.path}.h1`) } : null;
+
+// "Coming soon" copy differs by what is missing: a mapping, or just the prose.
+const pendingConverter = !live && page.kind === 'converter';
+const fontName = (k: string) => t(`fontBox.${k}`);
+const fromName = page.from ? fontName(page.from) : null;
+const toName = page.to ? fontName(page.to) : null;
+
+// Document conversion exists for the two Kruti Dev <-> Unicode directions only.
+const docDirection =
+  page.from === 'kruti-dev' && page.to === 'unicode'
+    ? 'to-unicode'
+    : page.from === 'unicode' && page.to === 'kruti-dev'
+      ? 'to-kruti'
+      : null;
+
+// Which half is holding it up - worth saying plainly rather than a blanket
+// "coming soon", because often one side is done and tested already.
+const blockers = [page.from, page.to]
+  .filter((k) => k && !FONTS[k]?.accurate)
+  .map((k) => FONTS[k!].label);
+
+const body: string[] = maybe(`pages.${path}.body`) ?? [];
+const faq: { q: string; a: string }[] = maybe(`pages.${path}.faq`) ?? [];
+const note = maybe(`pages.${path}.note`);
+const betaNote = maybe(`pages.${path}.betaNote`);
+---
+
+{/* The one page that is a table rather than an article. */}
+{path === '/all-converters' ? <AllConverters /> : (
+<Base title={text('title')} description={text('description')} noindex={!live}>
+  <div class="wrap py-8 sm:py-12">
+    <h1 class="text-3xl sm:text-4xl">
+      <Fragment set:html={render(text('h1'))} />
+      {
+        page.beta && (
+          <span class="ml-2 inline-block rounded-full border border-saffron/40 bg-warn-bg px-2.5 py-0.5 align-middle text-xs font-semibold tracking-wide text-saffron uppercase">
+            {t('page.beta')}
+          </span>
+        )
+      }
+    </h1>
+    {betaNote && <p class="mt-2 text-sm font-medium text-ink" set:html={render(betaNote)} />}
+    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(text('lede'))} />
+
+    {
+      Tool && (
+        <div class="mt-6">
+          <Tool />
+        </div>
+      )
+    }
+
+    {
+      live && page.from && page.to && (
+        <div class="mt-6">
+          <Converter from={page.from} to={page.to} reverse={reverse} />
+        </div>
+      )
+    }
+
+    {live && page.documents && docDirection && <DocumentConverter direction={docDirection} />}
+
+    {
+      pendingConverter && (
+        <section
+          aria-labelledby="soon"
+          class="mt-6 card border-saffron/40 bg-warn-bg p-6 sm:p-8"
+        >
+          <p class="text-xs font-semibold tracking-wide text-saffron uppercase">
+            {t('page.comingSoon')}
+          </p>
+          <h2
+            id="soon"
+            class="mt-2 text-xl"
+            set:html={render(
+              fromName && toName
+                ? t('page.pendingMapping', { from: fromName, to: toName })
+                : t('page.pendingBuilding'),
+            )}
+          />
+          {note && <p class="mt-3 max-w-2xl text-body" set:html={render(note)} />}
+          <p class="mt-3 max-w-2xl text-body">
+            {t('page.pendingLead')}{' '}
+            <strong class="font-medium text-ink">{t('page.pendingStrong')}</strong>
+            {t('page.pendingTail')}
+            {blockers.length > 0 && (
+              <>
+                {' '}
+                <Fragment
+                  set:html={render(
+                    t('page.stillToVerify', { list: blockers.join(t('page.listAnd')) }),
+                  )}
+                />
+              </>
+            )}
+          </p>
+          <p class="mt-5" set:html={render(t('page.pendingLinks'))} />
+        </section>
+      )
+    }
+
+    <div class="prose-page mt-12 text-body" set:html={body.map(render).join('\n')} />
+
+    {faq.length > 0 && <Faq items={faq} schema={live} />}
+
+    {
+      related.length > 0 && (
+        <nav aria-labelledby="related" class="mt-12">
+          <h2 id="related" class="text-xl">
+            {page.tool ? t('page.relatedTools') : t('page.relatedConverters')}
+          </h2>
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((r) => (
+              <li>
+                <a
+                  href={r.path}
+                  class="block h-full card p-4 no-underline transition-colors hover:border-saffron"
+                >
+                  <span class="block font-medium text-ink">
+                    <Fragment set:html={render(t(`pages.${r.path}.h1`))} />
+                    {!isLive(r) && (
+                      <span class="ml-2 align-middle text-xs font-normal text-mute">
+                        {t('page.comingSoonTag')}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    class="mt-1 block text-sm text-body"
+                    set:html={render(t(`pages.${r.path}.description`))}
+                  />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+  </div>
+</Base>
+)}

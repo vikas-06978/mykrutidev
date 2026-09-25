@@ -1,6 +1,9 @@
 ---
 import { FONTS } from '../lib/fontMaps.js';
 import { MODES, tipsFor } from '../lib/translit.js';
+import { langOf, useT } from '../i18n/index.js';
+
+const { t, render } = useT(langOf(Astro.url));
 
 /**
  * Roman -> Hindi typing.
@@ -30,14 +33,32 @@ const TIPS = {
   hinglish: tipsFor('hinglish'),
   itrans: tipsFor('itrans'),
 };
+
+// Status lines the script shows. Text only.
+const strings = {
+  conversionFailed: t('common.conversionFailed'),
+  changedTo: t('translit.changedTo'),
+  nothingToCopy: t('common.nothingToCopy'),
+  copied: t('common.copied'),
+  copiedToClipboard: t('common.copiedToClipboard'),
+  nothingToDownload: t('common.nothingToDownload'),
+  downloaded: t('common.downloaded'),
+  downloadFailed: t('common.downloadFailed'),
+};
 ---
 
-<div class="cv card" data-translit data-mode="hinglish" style={`--cv-preview:${OUTPUT_FONT}`}>
+<div
+  class="cv card"
+  data-translit
+  data-mode="hinglish"
+  data-i18n={JSON.stringify(strings)}
+  style={`--cv-preview:${OUTPUT_FONT}`}
+>
   <div class="grid md:grid-cols-2 md:divide-x md:divide-hairline">
     {/* ---------------------------- Input ---------------------------- */}
     <div class="cv-panel border-b border-hairline md:border-b-0">
       <div class="cv-head">
-        <label for="tl-in" class="cv-eyebrow">English (Roman)</label>
+        <label for="tl-in" class="cv-eyebrow">{t('translit.inputLabel')}</label>
         <span data-role="count-in" class="cv-count">0</span>
       </div>
 
@@ -49,21 +70,22 @@ const TIPS = {
           autocomplete="off"
           autocapitalize="off"
           autocorrect="off"
-          placeholder="Type here in English... e.g. namaste"
+          translate="no"
+          placeholder={t('translit.inputPlaceholder')}
           class="cv-area text-base"></textarea>
       </div>
 
       <div class="cv-actions">
         <div class="cv-secondary">
-          <button type="button" data-role="clear" class="btn btn-ghost">Clear</button>
+          <button type="button" data-role="clear" class="btn btn-ghost">{t('common.clear')}</button>
           <button
             type="button"
             data-role="sample"
             class="btn btn-ghost"
             data-sample={EXAMPLE}
-            title="Fill the box with an example"
+            title={t('translit.sampleTitle')}
           >
-            Try example
+            {t('common.tryExample')}
           </button>
         </div>
       </div>
@@ -72,15 +94,15 @@ const TIPS = {
     {/* ---------------------------- Output ---------------------------- */}
     <div class="cv-panel bg-surface">
       <div class="cv-head">
-        <label for="tl-out" class="cv-eyebrow">Hindi (Unicode)</label>
+        <label for="tl-out" class="cv-eyebrow">{t('translit.outputLabel')}</label>
         {/*
           How detected English words are written. Changes what the output IS,
           so it sits by the output. Only meaningful in Hinglish mode.
         */}
         <div data-role="english" role="group" aria-labelledby="tl-eng" class="cv-seg">
-          <span id="tl-eng" class="cv-seg-label">English words:</span>
-          <button type="button" data-english="hindi" aria-pressed="true">Hindi letters</button>
-          <button type="button" data-english="keep" aria-pressed="false">Keep English</button>
+          <span id="tl-eng" class="cv-seg-label">{t('translit.englishWords')}</span>
+          <button type="button" data-english="hindi" aria-pressed="true">{t('translit.hindiLetters')}</button>
+          <button type="button" data-english="keep" aria-pressed="false">{t('translit.keepEnglish')}</button>
         </div>
         <span data-role="count-out" class="cv-count">0</span>
       </div>
@@ -97,7 +119,8 @@ const TIPS = {
           data-role="output"
           spellcheck="false"
           lang="hi"
-          placeholder="Your Hindi appears here. Tap a word for other spellings."
+          translate="no"
+          placeholder={t('translit.outPlaceholder')}
           class="cv-area cv-out deva text-lg"></textarea>
       </div>
 
@@ -107,24 +130,26 @@ const TIPS = {
       */}
       <div data-role="suggest" hidden class="cv-strip flex flex-wrap items-center gap-2 text-sm">
         <span class="text-mute">
-          Other spellings for <code data-role="suggest-roman"></code>:
+          {t('translit.suggestBefore')}<code data-role="suggest-roman" translate="no"></code>{t('translit.suggestAfter')}
         </span>
-        <span data-role="suggest-list" class="flex flex-wrap gap-2" lang="hi"></span>
+        <span data-role="suggest-list" class="flex flex-wrap gap-2" lang="hi" translate="no"></span>
       </div>
 
       <div class="cv-actions">
         <div class="cv-secondary">
           <button type="button" data-role="copy" class="btn btn-primary">
-            <span data-label>Copy Hindi</span>
+            {/* romanTyping.test.js pins this button: in English it reads "Copy Hindi" (translit.copy). */}
+            <span data-label>{t('translit.copy')}</span>
           </button>
-          <button type="button" data-role="docx" class="btn btn-ghost">Download .docx</button>
+          <button type="button" data-role="docx" class="btn btn-ghost"><span set:html={render(t('common.downloadDocx'))} /></button>
         </div>
         <span data-role="status" role="status" aria-live="polite" class="sr-only"></span>
       </div>
 
       <p class="px-4 pb-4 text-sm text-body">
-        Need Kruti Dev? Use the
-        <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev converter</a>.
+        <Fragment set:html={render(t('translit.needKruti'))} />
+        {/* Base.astro points this at /hi/... on a Hindi page. */}
+        <a href="/unicode-to-kruti-dev" set:html={render(t('translit.needKrutiLink'))} />.
       </p>
     </div>
   </div>
@@ -135,9 +160,8 @@ const TIPS = {
     the built-in engine spelled it. Not an error: the page is still working.
   */}
   <p data-role="offline-note" hidden class="cv-strip bg-inset text-xs leading-relaxed text-mute">
-    <span class="font-medium text-body">Offline spelling.</span>
-    Google could not be reached, so some words come from the built-in dictionary and
-    rules. It still works - rare words are just likelier to need a correction.
+    <span class="font-medium text-body">{t('translit.offlineStrong')}</span>
+    {t('translit.offlineBody')}
   </p>
 
   {/* ------------------------- Spelling tips ------------------------- */}
@@ -150,25 +174,25 @@ const TIPS = {
           hidden={modeKey !== 'hinglish'}
           class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-body"
         >
-          <span class="font-medium text-ink">Spelling tips:</span>
-          {tips.map((t) => (
+          <span class="font-medium text-ink">{t('translit.tips')}</span>
+          {tips.map((tip) => (
             <span class="whitespace-nowrap">
-              <code class="text-xs">{t.roman}</code>
+              <code class="text-xs" translate="no">{tip.roman}</code>
               <span aria-hidden="true" class="mx-1 text-mute">
                 =
               </span>
               <span lang="hi" class="text-ink">
-                {t.deva}
+                {tip.deva}
               </span>
             </span>
           ))}
           <span class="whitespace-nowrap">
-            <code class="text-xs">|</code>
+            <code class="text-xs" translate="no">|</code>
             <span aria-hidden="true" class="mx-1 text-mute">=</span>
             <span lang="hi" class="text-ink">।</span>
           </span>
           <span class="whitespace-nowrap">
-            <code class="text-xs">`Google`</code>
+            <code class="text-xs" translate="no">`Google`</code>
             <span aria-hidden="true" class="mx-1 text-mute">=</span>
             <span class="text-ink">Google</span>
           </span>
@@ -181,51 +205,41 @@ const TIPS = {
   <div class="cv-strip bg-surface">
     <div class="flex flex-wrap items-start gap-x-4 gap-y-2">
       <div data-role="mode" role="group" aria-labelledby="tl-mode" class="cv-seg">
-        <span id="tl-mode" class="cv-seg-label">Typing:</span>
+        <span id="tl-mode" class="cv-seg-label">{t('translit.mode')}</span>
         {
           Object.values(MODES).map((m, idx) => (
             <button
               type="button"
               data-mode={m.key}
-              data-hint={m.hint}
+              data-hint={t(`translit.modes.${m.key}.hint`)}
               aria-pressed={String(idx === 0)}
             >
-              {m.label}
+              {t(`translit.modes.${m.key}.label`)}
             </button>
           ))
         }
       </div>
       <p data-role="mode-hint" class="flex-1 text-xs leading-relaxed text-mute">
-        {MODES.hinglish.hint}
+        {t('translit.modes.hinglish.hint')}
       </p>
     </div>
   </div>
 
   {/* --------------------------- Honesty strip --------------------------- */}
-  <p class="cv-strip bg-surface text-sm leading-relaxed text-body">
-    <span class="font-medium text-ink">Each word is spelled by Google's Hindi input service</span>
-    as you type, which is what gets <code>thela</code> to <span lang="hi">ठेला</span>
-    rather than <span lang="hi">थेला</span>. Only letters are transliterated: numbers,
-    punctuation and symbols stay exactly as typed. If Google cannot be reached, the
-    built-in dictionary takes over automatically.
-  </p>
+  <p
+    class="cv-strip bg-surface text-sm leading-relaxed text-body"
+    set:html={render(t('translit.honesty'))}
+  />
 
-  <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
-    <span class="font-medium text-body">Where your text goes.</span>
-    English spelling does not record whether an <code>a</code> is
-    <span lang="hi">अ</span> or <span lang="hi">आ</span>, nor whether a <code>d</code>
-    is <span lang="hi">द</span> or <span lang="hi">ड़</span>. Resolving that needs a
-    language model, so in <strong>Hinglish</strong> mode each word you type is sent to
-    Google's public input-tools service to be spelled. Numbers, punctuation, web
-    addresses and email addresses are never sent.
-    <strong>Exact (ITRANS)</strong> never touches the network - it is precise by
-    construction, so it runs entirely in your browser. If you would rather nothing
-    left the page, use that mode.
-  </p>
+  <p
+    class="cv-strip bg-surface text-xs leading-relaxed text-mute"
+    set:html={render(t('translit.privacy'))}
+  />
 </div>
 
 <script>
   import type { Typed } from '../lib/romanTyping.js';
+  import { fill } from '../i18n/fill.js';
 
   /** The local engine is cheap, so it runs between keystrokes. */
   const DEBOUNCE_MS = 80;
@@ -313,6 +327,7 @@ const TIPS = {
     const suggest = q('suggest');
     const suggestRoman = q('suggest-roman');
     const suggestList = q('suggest-list');
+    const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
 
     let mode: 'hinglish' | 'itrans' = 'hinglish';
     let keepEnglish = false;
@@ -367,7 +382,7 @@ const TIPS = {
         publish(typed, run);
       } catch (err) {
         console.error(err);
-        say('Conversion failed');
+        say(L.conversionFailed);
       }
     }
 
@@ -481,7 +496,7 @@ const TIPS = {
       output.focus();
       output.setSelectionRange(end, end);
       hideSuggestions();
-      say(`Changed to ${s}`);
+      say(fill(L.changedTo, { word: s }));
     }
 
     output.addEventListener('click', showSuggestionsAtCaret);
@@ -577,18 +592,19 @@ const TIPS = {
 
     const copyBtn = q<HTMLButtonElement>('copy');
     const copyLabel = copyBtn.querySelector<HTMLElement>('[data-label]')!;
+    const copyOriginal = copyLabel.textContent ?? '';
     let reset: ReturnType<typeof setTimeout> | undefined;
     copyBtn.addEventListener('click', async () => {
       await settle();
       const value = output.value;
-      if (!value) return say('Nothing to copy');
+      if (!value) return say(L.nothingToCopy);
       await writeClipboard(value);
-      copyLabel.textContent = 'Copied!';
+      copyLabel.textContent = L.copied;
       copyBtn.dataset.copied = 'true';
-      say('Copied to clipboard');
+      say(L.copiedToClipboard);
       clearTimeout(reset);
       reset = setTimeout(() => {
-        copyLabel.textContent = 'Copy Hindi';
+        copyLabel.textContent = copyOriginal;
         delete copyBtn.dataset.copied;
       }, 1600);
     });
@@ -596,16 +612,16 @@ const TIPS = {
     q<HTMLButtonElement>('docx').addEventListener('click', async (e) => {
       await settle();
       const body = output.value;
-      if (!body) return say('Nothing to download');
+      if (!body) return say(L.nothingToDownload);
       const btn = e.currentTarget as HTMLButtonElement;
       btn.disabled = true;
       try {
         const { downloadDocx } = await import('../lib/docx.js');
         downloadDocx(body, { fontName: 'Mangal', fileName: 'mykrutidev-typing.docx' });
-        say('Downloaded');
+        say(L.downloaded);
       } catch (err) {
         console.error(err);
-        say('Download failed');
+        say(L.downloadFailed);
       } finally {
         btn.disabled = false;
       }

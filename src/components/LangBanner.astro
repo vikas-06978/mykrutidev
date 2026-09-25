@@ -1,0 +1,90 @@
+---
+import { localizePath, useT, LANG_PREF_KEY } from '../i18n/index.js';
+
+/**
+ * "This site is also available in Hindi" - shown on an English page, once,
+ * to a visitor whose browser asks for Hindi and who has not yet picked a
+ * language with the switch.
+ *
+ * Never a redirect. Sending people (and crawlers) somewhere they did not ask
+ * to go is bad for them and worse for search; this is an offer, and closing it
+ * is remembered like any other choice.
+ *
+ * It is written in Hindi on the English page, because the reader it exists
+ * for is the one who would rather read Hindi.
+ */
+interface Props {
+  /** The locale-free route path of the current page. */
+  path: string;
+}
+
+const { path } = Astro.props;
+const { t } = useT('hi');
+---
+
+<div
+  data-lang-banner
+  data-pref-key={LANG_PREF_KEY}
+  hidden
+  lang="hi"
+  class="border-b border-saffron/40 bg-warn-bg"
+>
+  <div class="wrap flex items-center justify-between gap-3 py-2 text-sm text-ink">
+    <p>
+      {t('lang.bannerText')}
+      <span aria-hidden="true">→</span>
+      <a href={localizePath(path, 'hi')} hreflang="hi" data-lang-switch="hi" class="font-medium">
+        {t('lang.bannerCta')}
+      </a>
+    </p>
+    <button
+      type="button"
+      data-lang-banner-close
+      class="grid size-8 shrink-0 place-items-center rounded-(--radius-chrome) text-body hover:bg-inset"
+      aria-label={t('lang.bannerClose')}
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Storage can be blocked or throw (private mode, disabled site data). Every
+  // access is guarded, and when it fails the banner simply stays hidden: it is
+  // an offer, not something anyone needs to see.
+  const banner = document.querySelector<HTMLElement>('[data-lang-banner]');
+  if (banner) {
+    const key = banner.dataset.prefKey!;
+    const SEEN = `${key}-banner-seen`;
+    const store = {
+      get: (k: string) => {
+        try {
+          return localStorage.getItem(k);
+        } catch {
+          return 'unavailable';
+        }
+      },
+      set: (k: string, v: string) => {
+        try {
+          localStorage.setItem(k, v);
+        } catch {
+          // Not remembered. Harmless.
+        }
+      },
+    };
+
+    const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+    const wantsHindi = langs.some((l) => /^hi\b/i.test(l ?? ''));
+
+    // First visit only: no language picked yet, and the banner not shown before.
+    if (wantsHindi && !store.get(key) && !store.get(SEEN)) {
+      banner.hidden = false;
+      store.set(SEEN, '1');
+    }
+
+    banner.querySelector('[data-lang-banner-close]')?.addEventListener('click', () => {
+      banner.hidden = true;
+      store.set(key, 'en');
+    });
+  }
+</script>

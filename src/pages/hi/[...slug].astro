@@ -1,0 +1,25 @@
+---
+/**
+ * Every page, in Hindi, at /hi + the English slug.
+ *
+ * One route rather than a copy of each page file: the Hindi page is the same
+ * PageView with the same structure from routes.js, and only its words differ
+ * (src/i18n/hi.json). The language comes from the URL, so nothing here has to
+ * pass it on. A new entry in routes.js gets its Hindi page automatically - and
+ * fails the build until hi.json has its text.
+ */
+import PageView from '../../components/PageView.astro';
+import { PAGES } from '../../lib/routes.js';
+
+export function getStaticPaths() {
+  return PAGES.map((p) => ({
+    // "/" -> /hi, "/hindi-keyboard" -> /hi/hindi-keyboard
+    params: { slug: p.path === '/' ? undefined : p.path.slice(1) },
+    props: { path: p.path },
+  }));
+}
+
+const { path } = Astro.props;
+---
+
+<PageView path={path} />

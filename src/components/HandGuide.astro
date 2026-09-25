@@ -6,6 +6,11 @@ import {
   THUMB,
   HANDS,
 } from '../lib/hands.js';
+import { langOf, t } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+// "Left hand" / "Right hand" by id; hands.js keeps the English copy.
+const handLabel = (id: string) => t(lang, `tutor.hands.${id}`);
 
 /**
  * Two hands, with the finger that presses the next key coloured in.
@@ -31,7 +36,7 @@ const thumbTransform = `rotate(${THUMB.rotate} ${THUMB.originX} ${THUMB.originY}
             class="hand"
             viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
             role="img"
-            aria-label={hand.label}
+            aria-label={handLabel(hand.id)}
           >
             {/* Mirrored as a whole, so the left hand's pinky ends up on the
                 outside of the right hand too. */}
@@ -78,7 +83,7 @@ const thumbTransform = `rotate(${THUMB.rotate} ${THUMB.originX} ${THUMB.originY}
               />
             </g>
           </svg>
-          <figcaption class="hand-cap">{hand.label}</figcaption>
+          <figcaption class="hand-cap">{handLabel(hand.id)}</figcaption>
         </figure>
       );
     })

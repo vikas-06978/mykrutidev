@@ -1,20 +1,7 @@
 ---
-import ConverterPage from '../components/ConverterPage.astro';
+// English. The words live in src/i18n/en.json under pages["/unicode-to-preeti"]; the
+// Hindi twin at /hi/unicode-to-preeti is built by hi/[...slug].astro.
+import PageView from '../components/PageView.astro';
 ---
 
-<ConverterPage
-  path="/unicode-to-preeti"
-  lede="Type or paste Nepali Devanagari on the left and get Preeti font text on the right, once the Preeti layout has been mapped."
->
-  <h2>Not ready yet</h2>
-  <p>
-    This is the reverse of <a href="/preeti-to-unicode">Preeti to Unicode</a> and
-    uses the same character map read backwards, so the two pages will go live
-    together once that map has been built from real Nepali documents.
-  </p>
-  <p>
-    Preeti is the Nepali counterpart of Kruti Dev. If you are actually working in
-    Hindi, <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev</a> is finished and
-    tested today.
-  </p>
-</ConverterPage>
+<PageView path="/unicode-to-preeti" />
