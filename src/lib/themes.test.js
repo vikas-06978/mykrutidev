@@ -46,7 +46,9 @@ test('the new themes are what was asked for', () => {
 });
 
 test('accents.css is up to date with the theme colours', () => {
-  assert.equal(read('accents.css'), buildAccentsCss(), 'run: node scripts/build-accents.mjs');
+  // Line endings aside: git may check the file out with CRLF on Windows.
+  const lf = (s) => s.replace(/\r\n/g, '\n');
+  assert.equal(lf(read('accents.css')), lf(buildAccentsCss()), 'run: node scripts/build-accents.mjs');
 });
 
 test('High contrast outranks the accent mapping', () => {
