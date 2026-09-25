@@ -37,12 +37,20 @@ test('terracotta keeps its exact values where it existed', () => {
 });
 
 test('the new themes are what was asked for', () => {
+  assert.deepEqual(THEMES, ['light', 'white', 'dark', 'reading', 'contrast']);
   assert.equal(themes.white.paper, '#ffffff');
-  assert.equal(themes.black.paper, '#000000');
-  assert.notEqual(themes.black.surface, '#000000', 'cards stay visible on Black');
+  assert.equal(themes.white.surface, '#ffffff');
+  // No cream in White: every background is a neutral grey (R = G <= B, tiny spread).
+  for (const k of ['paper', 'surface', 'inset', 'hairline', 'hairline-soft', 'warn-bg']) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(themes.white[k].slice(i, i + 2), 16));
+    assert.ok(r <= b && g <= b && b - r <= 12, `white ${k} ${themes.white[k]} is not neutral`);
+  }
   assert.equal(themes.contrast.paper, '#000000');
   assert.equal(themes.contrast.ink, '#ffffff');
-  assert.equal(themes.contrast.brick, themes.contrast.focus, 'yellow for links and focus');
+  assert.equal(themes.contrast.brick, '#ffd400');
+  assert.equal(themes.contrast.focus, '#ffd400');
+  // Every theme is its own page colour.
+  assert.equal(new Set(THEMES.map((t) => themes[t].paper)).size, THEMES.length);
 });
 
 test('accents.css is up to date with the theme colours', () => {

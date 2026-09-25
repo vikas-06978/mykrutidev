@@ -15,13 +15,12 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const THEMES = ['light', 'white', 'dark', 'black', 'reading', 'contrast'];
+const THEMES = ['light', 'white', 'dark', 'reading', 'contrast'];
 const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'];
 const PAPER = {
   light: 'rgb(250, 247, 242)',
   white: 'rgb(255, 255, 255)',
   dark: 'rgb(21, 22, 24)',
-  black: 'rgb(0, 0, 0)',
   reading: 'rgb(244, 236, 216)',
   contrast: 'rgb(0, 0, 0)',
 };
@@ -29,7 +28,6 @@ const BAR = {
   light: '#faf7f2',
   white: '#ffffff',
   dark: '#151618',
-  black: '#000000',
   reading: '#f4ecd8',
   contrast: '#000000',
 };
@@ -89,7 +87,7 @@ test.describe('applying and remembering the choice', () => {
     await page.evaluate(() => window.mkdTheme.setAccent('blue'));
     expect(await brick()).not.toBe(terracotta);
     await page.evaluate(() => window.mkdTheme.set('contrast'));
-    expect(await brick()).toBe('#ffd60a');
+    expect(await brick()).toBe('#ffd400');
   });
 
   test('broken stored values fall back to System and terracotta', async ({ page }) => {
@@ -115,6 +113,165 @@ test.describe('applying and remembering the choice', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Real colours, chosen through the real picker. The first version of these
+// themes passed every attribute check and still painted Light on a dev server
+// whose CSS was stale; these read what the page actually draws.
+// ---------------------------------------------------------------------------
+
+/** Open the picker the way a visitor would and click an option. */
+async function pick(page, value, desktop) {
+  if (desktop) {
+    const panel = page.locator('[data-theme-panel]');
+    if (await panel.isHidden()) await page.locator('[data-theme-trigger]').click();
+    await panel.locator(`[data-value="${value}"]`).click();
+  } else {
+    const nav = page.locator('[data-mobile-nav]');
+    if (await nav.isHidden()) await page.locator('[data-burger]').click();
+    await nav.locator(`[data-theme-picker] [data-value="${value}"]`).click();
+  }
+}
+
+const colours = (page) =>
+  page.evaluate(() => {
+    const cs = (sel, prop) => {
+      const el = document.querySelector(sel);
+      return el ? getComputedStyle(el)[prop] : null;
+    };
+    return {
+      body: getComputedStyle(document.body).backgroundColor,
+      text: getComputedStyle(document.body).color,
+      card: cs('.card', 'backgroundColor'),
+      cardBorder: cs('.card', 'borderTopColor'),
+      cardBorderWidth: cs('.card', 'borderTopWidth'),
+      primary: cs('[data-role="copy-raw"]', 'backgroundColor'),
+      primaryBorderWidth: cs('[data-role="copy-raw"]', 'borderTopWidth'),
+      activeTab: cs('.cv-seg button[aria-pressed="true"]', 'backgroundColor'),
+      link: cs('main .prose-page a', 'color'),
+      field: cs('.cv-field', 'backgroundColor'),
+    };
+  });
+
+const EXPECTED_BODY = {
+  light: 'rgb(250, 247, 242)',
+  white: 'rgb(255, 255, 255)',
+  dark: 'rgb(21, 22, 24)',
+  reading: 'rgb(244, 236, 216)',
+  contrast: 'rgb(0, 0, 0)',
+};
+
+test.describe('real colours', () => {
+  test('each theme, picked in the panel, paints its own page - and all five differ', async ({ page }, testInfo) => {
+    await page.goto('/unicode-to-kruti-dev');
+    const seen = {};
+    for (const theme of THEMES) {
+      await pick(page, theme, isDesktop(testInfo));
+      await expect(html(page)).toHaveAttribute('data-theme', theme);
+      await expect(page.locator('body')).toHaveCSS('background-color', EXPECTED_BODY[theme]);
+      seen[theme] = await colours(page);
+    }
+    // Every theme is a different page, not Light under another name.
+    const bodies = THEMES.map((t) => seen[t].body);
+    expect(new Set(bodies).size).toBe(THEMES.length);
+    expect(new Set(THEMES.map((t) => JSON.stringify(seen[t]))).size).toBe(THEMES.length);
+
+    // White: white page AND white cards and boxes, neutral grey borders.
+    expect(seen.white.card).toBe('rgb(255, 255, 255)');
+    expect(seen.white.field).toBe('rgb(255, 255, 255)');
+    expect(seen.white.cardBorder).toBe('rgb(209, 213, 219)');
+    expect(seen.light.card).not.toBe(seen.light.body); // Light keeps its cream page
+
+    // High contrast: black, white text, yellow actions and links, 2px borders.
+    expect(seen.contrast.text).toBe('rgb(255, 255, 255)');
+    expect(seen.contrast.primary).toBe('rgb(255, 212, 0)');
+    expect(seen.contrast.activeTab).toBe('rgb(255, 212, 0)');
+    expect(seen.contrast.link).toBe('rgb(255, 212, 0)');
+    expect(seen.contrast.cardBorderWidth).toBe('2px');
+    expect(seen.contrast.primaryBorderWidth).toBe('2px');
+  });
+
+  test('High contrast: 2px borders on the Hindi Keyboard keys and box', async ({ page }) => {
+    await withStored(page, 'contrast');
+    await page.goto('/hindi-keyboard');
+    const widths = await page.evaluate(() =>
+      ['.hk-key', '.hk-text', '.card', 'button'].map((s) => getComputedStyle(document.querySelector(s)).borderTopWidth),
+    );
+    expect(widths).toEqual(['2px', '2px', '2px', '2px']);
+  });
+
+  test('each accent, picked in the panel, recolours the primary button, links and active tabs', async ({ page }, testInfo) => {
+    await page.goto('/unicode-to-kruti-dev');
+    for (const theme of ['light', 'dark']) {
+      await pick(page, theme, isDesktop(testInfo));
+      const seen = [];
+      for (const accent of ACCENTS) {
+        await pick(page, accent, isDesktop(testInfo));
+        await expect(html(page)).toHaveAttribute('data-accent', accent);
+        seen.push(await colours(page));
+      }
+      for (const key of ['primary', 'link', 'activeTab']) {
+        expect(new Set(seen.map((c) => c[key])).size, `${theme}: ${key}`).toBe(ACCENTS.length);
+      }
+    }
+    // High contrast ignores the accent: yellow whatever is chosen.
+    await pick(page, 'contrast', isDesktop(testInfo));
+    for (const accent of ACCENTS) {
+      await pick(page, accent, isDesktop(testInfo));
+      expect((await colours(page)).primary).toBe('rgb(255, 212, 0)');
+    }
+  });
+
+  test('the picker previews each theme in its own colours, and shows all five swatches', async ({ page }, testInfo) => {
+    await page.goto('/');
+    if (isDesktop(testInfo)) await page.locator('[data-theme-trigger]').click();
+    else await page.locator('[data-burger]').click();
+    const scope = isDesktop(testInfo) ? '[data-theme-panel]' : '[data-mobile-nav]';
+    const previews = await page.$$eval(`${scope} .tp-prev[data-theme-card]`, (els) =>
+      els.map((e) => [e.dataset.themeCard, getComputedStyle(e).backgroundColor, getComputedStyle(e.querySelector('.tp-pill')).backgroundColor]),
+    );
+    expect(previews.map((p) => p[0])).toEqual(THEMES);
+    for (const [theme, bg, pill] of previews) {
+      expect(bg, theme).toBe(EXPECTED_BODY[theme]);
+      expect(pill, theme).not.toBe('rgba(0, 0, 0, 0)');
+    }
+    const swatches = await page.$$eval(`${scope} .tp-swatch`, (els) => els.map((e) => getComputedStyle(e).backgroundColor));
+    expect(swatches).toHaveLength(5);
+    expect(new Set(swatches).size).toBe(5);
+    expect(swatches).not.toContain('rgba(0, 0, 0, 0)');
+  });
+
+  test('one menu at a time; Esc and an outside click close the theme panel', async ({ page }, testInfo) => {
+    test.skip(!isDesktop(testInfo), 'desktop menus');
+    await page.goto('/');
+    const panel = page.locator('[data-theme-panel]');
+    const dropdown = page.locator('#navmenu-0');
+    const openCount = () =>
+      page.evaluate(() => [...document.querySelectorAll('[data-menu], [data-theme-panel]')].filter((m) => !m.hidden).length);
+
+    await page.locator('#navtrigger-0').click();
+    await expect(dropdown).toBeVisible();
+    await page.locator('[data-theme-trigger]').click();
+    await expect(panel).toBeVisible();
+    await expect(dropdown).toBeHidden();
+    expect(await openCount()).toBe(1);
+
+    await page.locator('#navtrigger-1').click();
+    await expect(page.locator('#navmenu-1')).toBeVisible();
+    await expect(panel).toBeHidden();
+    expect(await openCount()).toBe(1);
+
+    await page.locator('[data-theme-trigger]').click();
+    await expect(panel).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+    await page.locator('[data-theme-trigger]').click();
+    await expect(panel).toBeVisible();
+    await page.mouse.click(10, 400);
+    await expect(panel).toBeHidden();
+    expect(await openCount()).toBe(0);
+  });
+});
+
 test.describe('System follows the device', () => {
   for (const scheme of ['light', 'dark']) {
     test(`prefers-color-scheme: ${scheme}`, async ({ page }) => {
@@ -136,10 +293,10 @@ test.describe('System follows the device', () => {
   });
 
   test('a fixed choice ignores the device', async ({ page }) => {
-    await withStored(page, 'black');
+    await withStored(page, 'contrast');
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/');
-    await expect(html(page)).toHaveAttribute('data-theme', 'black');
+    await expect(html(page)).toHaveAttribute('data-theme', 'contrast');
   });
 });
 
@@ -157,25 +314,25 @@ test.describe('the picker', () => {
 
     const cards = panel.locator('[data-picker-group="theme"] [role="radio"]');
     await expect(cards.locator('.tp-name')).toHaveText([
-      'लाइट', 'सफ़ेद', 'डार्क', 'काला', 'पढ़ने वाला', 'हाई कॉन्ट्रास्ट', 'सिस्टम',
+      'लाइट', 'सफ़ेद', 'डार्क', 'पढ़ने वाला', 'हाई कॉन्ट्रास्ट', 'सिस्टम',
     ]);
     await expect(panel.getByText('डिवाइस के हिसाब से')).toBeVisible();
     // Opens on the current choice.
-    await expect(cards.nth(6)).toBeFocused();
-    await expect(cards.nth(6)).toHaveAttribute('aria-checked', 'true');
+    await expect(cards.nth(5)).toBeFocused();
+    await expect(cards.nth(5)).toHaveAttribute('aria-checked', 'true');
 
-    // Rows of three: लाइट सफ़ेद डार्क / काला पढ़ने वाला हाई कॉन्ट्रास्ट / सिस्टम
+    // Rows of three: लाइट सफ़ेद डार्क / पढ़ने वाला हाई कॉन्ट्रास्ट सिस्टम
     await page.keyboard.press('Home');
     await page.keyboard.press('ArrowRight');
     await expect(cards.nth(1)).toBeFocused(); // सफ़ेद
     await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowDown'); // one row down from लाइट: काला
+    await page.keyboard.press('ArrowDown'); // one row down from लाइट: पढ़ने वाला
     await expect(cards.nth(3)).toBeFocused();
-    await expect(html(page)).not.toHaveAttribute('data-theme', 'black'); // moving does not pick
+    await expect(html(page)).not.toHaveAttribute('data-theme', 'reading'); // moving does not pick
     await page.keyboard.press('Enter');
-    await expect(html(page)).toHaveAttribute('data-theme', 'black');
+    await expect(html(page)).toHaveAttribute('data-theme', 'reading');
     await expect(cards.nth(3)).toHaveAttribute('aria-checked', 'true');
-    await expect(trigger).toHaveAttribute('aria-label', 'थीम: काला');
+    await expect(trigger).toHaveAttribute('aria-label', 'थीम: पढ़ने वाला');
 
     await page.keyboard.press('Tab'); // to the swatches, on the chosen one
     const swatches = panel.locator('[data-picker-group="accent"] [role="radio"]');
@@ -191,7 +348,7 @@ test.describe('the picker', () => {
     await expect(trigger).toBeFocused();
 
     await page.reload();
-    await expect(html(page)).toHaveAttribute('data-theme', 'black');
+    await expect(html(page)).toHaveAttribute('data-theme', 'reading');
     await expect(html(page)).toHaveAttribute('data-accent', 'green');
   });
 
@@ -201,7 +358,7 @@ test.describe('the picker', () => {
     await page.locator('[data-theme-trigger]').click();
     const panel = page.locator('[data-theme-panel]');
     await expect(panel.locator('[data-picker-group="theme"] .tp-name')).toHaveText([
-      'Light', 'White', 'Dark', 'Black', 'Reading', 'High contrast', 'System',
+      'Light', 'White', 'Dark', 'Reading', 'High contrast', 'System',
     ]);
     await expect(panel.getByText('Follows your device')).toBeVisible();
     await expect(panel.locator('[data-picker-group="accent"] [role="radio"]')).toHaveCount(5);
@@ -225,7 +382,7 @@ test.describe('the picker', () => {
     await expect(page.locator('[data-theme-trigger]')).toBeHidden();
     await page.locator('[data-burger]').click();
     const picker = page.locator('[data-mobile-nav] [data-theme-picker]');
-    await expect(picker.locator('[data-picker-group="theme"] [role="radio"]')).toHaveCount(7);
+    await expect(picker.locator('[data-picker-group="theme"] [role="radio"]')).toHaveCount(6);
     await picker.locator('[data-value="reading"]').click();
     await picker.locator('[data-value="purple"]').click();
     await expect(html(page)).toHaveAttribute('data-theme', 'reading');
@@ -255,12 +412,12 @@ test.describe('the picker', () => {
   });
 
   test('print always uses Light', async ({ page }) => {
-    await withStored(page, 'black', 'purple');
+    await withStored(page, 'contrast', 'purple');
     await page.goto('/');
     await page.emulateMedia({ media: 'print' });
     await expect(page.locator('body')).toHaveCSS('background-color', PAPER.light);
     await page.emulateMedia({ media: 'screen' });
-    await expect(page.locator('body')).toHaveCSS('background-color', PAPER.black);
+    await expect(page.locator('body')).toHaveCSS('background-color', PAPER.contrast);
   });
 });
 

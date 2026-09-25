@@ -9,7 +9,7 @@
  */
 
 /** The visual themes, in picker order. "system" is not one: it picks light or dark. */
-export const THEMES = ['light', 'white', 'dark', 'black', 'reading', 'contrast'];
+export const THEMES = ['light', 'white', 'dark', 'reading', 'contrast'];
 
 /**
  * Accent hues. Terracotta is the brand colour and keeps its hand-set values
@@ -30,7 +30,6 @@ const FIXED = {
   white: ['#a8442a', '#8a3722', '#ffffff'],
   reading: ['#963a21', '#7a2e19', '#ffffff'],
   dark: ['#ee9275', '#f5ab93', '#1a1411'],
-  black: ['#ee9275', '#f5ab93', '#1a1411'],
 };
 
 /** Minimum contrast for text, per theme. High contrast is AAA. */

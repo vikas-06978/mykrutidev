@@ -95,11 +95,10 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
           light: '#faf7f2',
           white: '#ffffff',
           dark: '#151618',
-          black: '#000000',
           reading: '#f4ecd8',
           contrast: '#000000',
         };
-        var PREFS = /^(light|white|dark|black|reading|contrast|system)$/;
+        var PREFS = /^(light|white|dark|reading|contrast|system)$/;
         var ACCENTS = /^(terracotta|blue|green|purple|teal)$/;
         var root = document.documentElement;
         var dark = window.matchMedia('(prefers-color-scheme: dark)');

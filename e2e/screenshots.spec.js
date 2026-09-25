@@ -2,17 +2,18 @@
  * Screenshots for a human to look at - not part of the normal run
  * (playwright.config.js ignores this file). `npm run screenshots` writes them
  * to screenshots/ (gitignored):
- *   - Kruti Dev to Unicode and the Typing Tutor in all six themes, desktop and
+ *   - the Hindi Keyboard, Kruti Dev to Unicode and the Typing Tutor in every theme, desktop and
  *     phone, full page;
  *   - desktop only: the picker open, once per accent colour.
  */
 import { test } from '@playwright/test';
 
 const PAGES = {
+  'hindi-keyboard': '/hindi-keyboard',
   'kruti-to-unicode': '/',
   'typing-tutor': '/hindi-typing-test',
 };
-const THEMES = ['light', 'white', 'dark', 'black', 'reading', 'contrast'];
+const THEMES = ['light', 'white', 'dark', 'reading', 'contrast'];
 const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'];
 
 const store = (page, theme, accent = 'terracotta') =>
@@ -25,6 +26,11 @@ const store = (page, theme, accent = 'terracotta') =>
   );
 
 async function busy(page, name) {
+  if (name === 'hindi-keyboard') {
+    for (const ch of ['न', 'म', 'स', '्', 'त']) {
+      await page.locator(`[data-keyboard] [data-layer-panel="base"] button[data-ins="${ch}"]`).first().click();
+    }
+  }
   if (name === 'kruti-to-unicode') {
     await page.locator('[data-converter] [data-role="sample"]').first().click();
   }

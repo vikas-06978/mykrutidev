@@ -3,6 +3,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4401;
+// Point the suite at another server (e.g. the dev server) with
+// E2E_BASE_URL=http://localhost:4321 - then no server is started here.
+const external = process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: 'e2e',
@@ -12,18 +15,20 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: external ?? `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
-    // Serves dist/ exactly as a static host would (see e2e/serve.mjs).
-    command: `node e2e/serve.mjs ${PORT}`,
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: false,
-    timeout: 60_000,
-  },
+  webServer: external
+    ? undefined
+    : {
+        // Serves dist/ exactly as a static host would (see e2e/serve.mjs).
+        command: `node e2e/serve.mjs ${PORT}`,
+        url: `http://localhost:${PORT}`,
+        reuseExistingServer: false,
+        timeout: 60_000,
+      },
 });

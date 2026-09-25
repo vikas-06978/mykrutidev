@@ -20,7 +20,7 @@ interface Props {
 const { uid } = Astro.props;
 const { t } = useT(langOf(Astro.url));
 
-const VISUAL = ['light', 'white', 'dark', 'black', 'reading', 'contrast'] as const;
+const VISUAL = ['light', 'white', 'dark', 'reading', 'contrast'] as const;
 const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'] as const;
 ---
 
@@ -35,7 +35,7 @@ const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'] as const;
           aria-checked="false"
           tabindex="-1"
           data-value={k}
-          class:list={['tp-card', k === 'system' && 'tp-card-system']}
+          class="tp-card"
         >
           <span class="tp-prev" data-theme-card={k === 'system' ? undefined : k} data-system={k === 'system' ? '' : undefined} aria-hidden="true">
             <span class="tp-line" />
@@ -98,8 +98,8 @@ const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'] as const;
     margin-bottom: 0.5rem;
   }
 
-  /* Six themes in rows of three (two on the narrowest phones), System under
-     them across the full width: it is the one that is not a look of its own. */
+  /* Five themes and System: two full rows of three (three rows of two on the
+     narrowest phones). */
   .tp-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -110,10 +110,8 @@ const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'] as const;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  .tp-card-system {
-    grid-column: 1 / -1;
-    grid-template-columns: 4.5rem 1fr;
-    align-items: center;
+  .tp-card {
+    align-content: start;
   }
 
   .tp-card {

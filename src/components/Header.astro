@@ -34,7 +34,7 @@ const showAll = allConverters && isLive(allConverters);
 
 // Colour themes. The inline script in Base.astro applies them; this is only
 // the control (see ThemePicker.astro).
-const THEMES = ['light', 'white', 'dark', 'black', 'reading', 'contrast', 'system'] as const;
+const THEMES = ['light', 'white', 'dark', 'reading', 'contrast', 'system'] as const;
 const themeStrings = {
   current: t('theme.current'),
   ...Object.fromEntries(THEMES.map((k) => [k, t(`theme.${k}`)])),
@@ -538,14 +538,14 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   }
 
   /* The trigger shows the icon of the theme in effect: sun for Light and
-     White, moon for Dark and Black, book for Reading, half-disc for High
+     White, moon for Dark, book for Reading, half-disc for High
      contrast. */
   [data-theme-icon] {
     display: none;
   }
   :global(html:not([data-theme])) [data-theme-icon='light'],
   :global(html:is([data-theme='light'], [data-theme='white'])) [data-theme-icon='light'],
-  :global(html:is([data-theme='dark'], [data-theme='black'])) [data-theme-icon='dark'],
+  :global(html[data-theme='dark']) [data-theme-icon='dark'],
   :global(html[data-theme='reading']) [data-theme-icon='reading'],
   :global(html[data-theme='contrast']) [data-theme-icon='contrast'] {
     display: block;
@@ -579,6 +579,8 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
 
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  /** When each menu was last opened by hover (see the trigger's click). */
+  const hoverOpenedAt = new Map<Group, number>();
 
   // ---- Mobile panel. Declared up here because the shared Escape and
   // click-outside handlers below close the desktop menus and this panel.
@@ -606,6 +608,8 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
 
   function open(g: Group, focusItem?: 'first' | 'last') {
     clearTimeout(closeTimer);
+    // One menu at a time: a dropdown opening closes the theme panel too.
+    closeTheme();
     for (const other of groups) if (other !== g) close(other);
     g.menu.hidden = false;
     g.trigger.setAttribute('aria-expanded', 'true');
@@ -623,6 +627,9 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
 
   for (const g of groups) {
     g.trigger.addEventListener('click', () => {
+      // A mouse opens the menu on hover a moment before the click lands; that
+      // click must not immediately shut what the visitor is reaching for.
+      if (isOpen(g) && Date.now() - (hoverOpenedAt.get(g) ?? 0) < 400) return;
       isOpen(g) ? close(g) : open(g);
     });
 
@@ -667,7 +674,9 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
     // Listeners are always attached and the check happens inside, so a hybrid
     // laptop that gains or loses a mouse behaves correctly without a reload.
     g.root.addEventListener('mouseenter', () => {
-      if (canHover.matches) open(g);
+      if (!canHover.matches || isOpen(g)) return;
+      open(g);
+      hoverOpenedAt.set(g, Date.now());
     });
     g.root.addEventListener('mouseleave', () => {
       if (!canHover.matches) return;
