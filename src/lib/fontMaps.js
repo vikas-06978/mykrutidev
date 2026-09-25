@@ -352,8 +352,9 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 //
 // STATUS: accurate: false, and NOT merely because nobody has got round to
 // checking it. The table below is complete and round-trips cleanly. It also
-// does not describe the Chanakya font this repo ships. Both of those are true
-// at once, and the second is why the pages stay on "coming soon".
+// did not describe the Chanakya font file this repo used to ship, which is why
+// the pages stay on "coming soon" and why that file has since been removed.
+// The pages load NO preview font until a matching one is supplied (TODO below).
 //
 // ---------------------------------------------------------------------------
 // WHAT THIS TABLE ACTUALLY IS
@@ -366,13 +367,18 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 // a Kruti Dev map is expected rather than suspicious.
 //
 // ---------------------------------------------------------------------------
-// WHY IT IS NOT SWITCHED ON: IT DISAGREES WITH public/fonts/Walkman-Chanakya.woff
+// WHY IT IS NOT SWITCHED ON: IT DISAGREED WITH THE FONT FILE WE HAD
+//
+// That file was public/fonts/chanakya.woff (git tracked it under that name; the
+// code had been changed to point at "Walkman-Chanakya.woff", which never
+// existed, so production 404'd on it). It has been removed. The measurements
+// below are kept as the record of why it was not usable.
 //
 // Measured the same way DEVLYS was verified above - glyph by glyph, comparing
 // contour count, bounding box and advance width across ASCII 33-126:
 //
 //   DevLys 010 vs Kruti Dev 010 ........... 94 of 94 glyphs agree  (100%)
-//   Walkman-Chanakya.woff vs Kruti Dev 010 .. 6 of 94 glyphs agree   (6%)
+//   chanakya.woff vs Kruti Dev 010 ........  6 of 94 glyphs agree   (6%)
 //
 // DevLys is the control: two fonts that really do share a layout agree on
 // everything. The shipped file agrees on almost nothing, so it does NOT use the
@@ -384,7 +390,7 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 // essentially never, because its lowercase range holds ready-made conjunct
 // ligatures where Remington has plain consonants:
 //
-//   key   table says   Kruti draws   Walkman-Chanakya.woff draws
+//   key   table says   Kruti draws   chanakya.woff drew
 //    d       क             क                स्त
 //    x       ग             ग                फ
 //    p       च             च                श्र
@@ -396,35 +402,27 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 //    v       अ             अ                क
 //    K      ज्ञ            ज्ञ                च
 //
-// The file has been renamed twice - chanakya.woff, then Walkman-Chanakya.woff -
-// and is byte-identical through both. A rename does not change a glyph, so the
-// numbers above are unchanged as well.
-//
-// So one of the two is mislabelled. Either the supplied mapping is not
-// Walkman-Chanakya, or the shipped file is not Walkman-Chanakya 905.
-// The font's own name table says only "Chanakya" (Fontographer 4.1.5, 2003) -
+// The file's own name table said only "Chanakya" (Fontographer 4.1.5, 2003) -
 // no "Walkman", no "905" - and Chanakya is a family with several incompatible
-// cuts, so the file cannot settle the question either.
+// cuts, so it was never the font this table describes. It stays in git history
+// (last present in commit af4e56d) if anyone needs to look at it again.
 //
-// This matters concretely rather than theoretically: legacyFonts.js uses
-// this file as the PREVIEW face for this font key. Switching the pages on
-// would show every user their text rendered in a font that draws different
-// letters than the converter produced - fluent-looking Devanagari that is the
-// wrong Devanagari, which is the exact failure the `accurate` gate exists to
-// prevent.
+// A preview face that draws different letters than the converter produced is
+// the exact failure the `accurate` gate exists to prevent: fluent-looking
+// Devanagari that is the wrong Devanagari. So no preview face at all is the
+// safe state until a matching font exists.
 //
 // ---------------------------------------------------------------------------
-// TO FINISH THIS, one of:
+// TODO(chanakya) - TO FINISH THIS:
 //
-//   a) obtain the real Walkman-Chanakya 905 font, confirm its glyphs against
-//      this table, and replace public/fonts/Walkman-Chanakya.woff with it; or
-//   b) obtain a real document in the Chanakya cut we already ship and build the
-//      map for THAT layout instead - in which case this table is the wrong
-//      starting point and should be replaced, not adjusted.
-//
-// Either way, then add a fixture next to __fixtures__/kruti-dev.json and flip
-// `accurate`. The check below (chanakya.test.js) fails loudly if anyone flips
-// it while the font and the table still disagree.
+//   1. Obtain the real Walkman-Chanakya 905 font and confirm its glyphs against
+//      this table (the same glyph-by-glyph check DEVLYS passed).
+//   2. Add it to public/fonts/, declare its @font-face in
+//      src/styles/legacy-fonts.css, and register it in PREVIEW_FONTS in
+//      src/lib/legacyFonts.js.
+//   3. Add a fixture next to __fixtures__/kruti-dev.json and only then flip
+//      `accurate`. chanakya.test.js pins the gate and the "no preview font"
+//      state, so both must be rewritten deliberately.
 //
 // The eight pairs worth checking by hand once a matching font is in place -
 // between them they cover both reorder rules, the conjuncts that break first,

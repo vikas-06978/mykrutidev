@@ -21,7 +21,7 @@ DESIGN.md.
 | `KRDEV016.woff`      | Kruti Dev 016   | WOFF              | nothing, kept for later |
 | `KRDEV020.woff`      | Kruti Dev 020   | WOFF              | nothing, kept for later |
 | `KRDEV055.woff`      | Kruti Dev 055   | WOFF              | nothing, kept for later |
-| `Walkman-Chanakya.woff` | Chanakya     | **TrueType**      | registered for preview; pages stay off, map does not match this font |
+| `abbasi-chanakya-new.woff` | Abbasi Chanakya New | WOFF    | **preview on the Abbasi Chanakya pages** |
 | `preeti.woff`        | Preeti          | **TrueType**      | nothing yet, no verified map |
 
 The numbered Kruti Dev variants used to fill a dropdown in the output box. That
@@ -29,6 +29,12 @@ picker is gone: the variants share one keyboard layout and differ only in
 letterforms, so choosing one changed nothing a user could act on. The files stay
 here in case a reason to surface them appears, but nothing references them and
 they are never downloaded by a visitor.
+
+**There is no Walkman-Chanakya font here, on purpose.** The old `chanakya.woff`
+did not match the Chanakya character map and was removed. The Chanakya pages are
+"coming soon" and load no preview font. When the real Walkman-Chanakya 905 font
+arrives, follow "Adding or replacing a font" below (see the TODO above CHANAKYA
+in `src/lib/fontMaps.js`).
 
 `devlys-010.woff` was converted from the supplied `DevLys 010 Normal.ttf`, which
 is kept out of the served tree in `vendor/fonts/` (the original download folder
@@ -45,14 +51,15 @@ Two things to know about that table:
    together. Static hosts are case-sensitive even though Windows is not, so
    `krdev010.woff` would 404 in production while working locally.
 
-2. **`Walkman-Chanakya.woff` and `preeti.woff` are not WOFF.** Their first four bytes are
-   `00 01 00 00`, which is raw TrueType. They are declared
+2. **`preeti.woff` is not WOFF.** Its first four bytes are
+   `00 01 00 00`, which is raw TrueType. It is declared
    `format('truetype')` for that reason. A `format()` hint that disagrees with
    the file's actual contents makes the browser download it and then silently
    discard the face.
 
-`npm test` enforces both points: it reads this directory, checks every filename
-referenced anywhere matches byte for byte, and sniffs each file's magic bytes
+`npm test` enforces both points: it reads this directory, checks every
+`/fonts/...` filename referenced anywhere in `src/` matches byte for byte
+(including case), and sniffs each file's magic bytes
 against its declared format.
 
 ## Adding or replacing a font

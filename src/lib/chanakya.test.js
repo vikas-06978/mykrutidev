@@ -6,6 +6,7 @@ import { inflateSync } from 'node:zlib';
 
 import { FONTS, convert, isAccurate } from './fontMaps.js';
 import { getPage, isLive } from './routes.js';
+import { previewFontFor } from './legacyFonts.js';
 
 const CHANAKYA = FONTS.chanakya.map;
 
@@ -138,12 +139,14 @@ function layoutAgreement(a, b) {
   return { same, total, pct: Math.round((same / total) * 100) };
 }
 
-describe('the table and the shipped font do NOT agree - which is why this is off', () => {
+describe('there is no Walkman-Chanakya font yet - which is why this is off', () => {
   // This suite asserts a PROBLEM, on purpose. It is the thing standing between
   // a plausible-looking table and a converter that quietly produces the wrong
-  // Hindi. When the problem is fixed these tests are what must be rewritten,
-  // and rewriting them forces whoever does it to look at the evidence.
-  const chanakya = glyphMetrics('Walkman-Chanakya.woff');
+  // Hindi. The old chanakya.woff drew different letters than this table (6 of
+  // 94 glyphs agreed with the layout; see the note above CHANAKYA) and was
+  // removed. When the real Walkman-Chanakya 905 font is added, these tests are
+  // what must be rewritten: compare it with glyphMetrics() the way DevLys is
+  // compared below, and only then flip `accurate`.
   const kruti = glyphMetrics('KRDEV010.woff');
   const devlys = glyphMetrics('devlys-010.woff');
 
@@ -162,19 +165,12 @@ describe('the table and the shipped font do NOT agree - which is why this is off
     assert.ok(pct > 95, `two fonts sharing a layout should agree; got ${pct}%`);
   });
 
-  test('the shipped font does not use that layout, so the table cannot describe it', () => {
-    const { pct, same, total } = layoutAgreement(chanakya, kruti);
-    assert.ok(
-      pct < 50,
-      `Walkman-Chanakya.woff now agrees with Kruti Dev on ${same}/${total} glyphs (${pct}%). ` +
-        'If a matching font has been supplied, this test and the note above CHANAKYA ' +
-        'both need rewriting - and the map can then be verified for real.',
-    );
+  test('no font file is shipped for it, so the table cannot be checked against one', () => {
+    assert.equal(previewFontFor('chanakya'), null);
   });
 
   test('so the font stays gated, and the gate is not a formality', () => {
-    // legacyFonts.js previews this key with Walkman-Chanakya.woff. Live + mismatched
-    // means every user sees their text drawn with the wrong letters.
+    // Without a verified font there is nothing to prove the table right.
     assert.equal(isAccurate('chanakya'), false);
   });
 });

@@ -43,22 +43,26 @@ const preview = (label, file, format = 'woff') => ({
 /**
  * Keyed by font key in FONTS. Legacy fonts only; Unicode fonts render natively.
  *
- * Chanakya and Preeti are here because the owner supplied their files, but
- * neither has a verified character map, so no page converts to them yet. These
- * entries do nothing until that changes.
+ * Preeti is here because the owner supplied its file, but it has no verified
+ * character map, so no page converts to it yet. The entry does nothing until
+ * that changes.
+ *
+ * Chanakya (Walkman-Chanakya) deliberately has NO entry: its pages are "coming
+ * soon" and must not load any preview font. The file that used to sit here
+ * (chanakya.woff) did not match the Chanakya map, so it was removed - see the
+ * note above CHANAKYA in fontMaps.js.
  *
  * @type {Record<string, PreviewFont>}
  */
 export const PREVIEW_FONTS = {
   'kruti-dev': preview('Kruti Dev 010', 'KRDEV010.woff'),
   devlys: preview('DevLys 010', 'devlys-010.woff'),
-  // The file was renamed to Walkman-Chanakya.woff, but its `name` table still
-  // says "Chanakya" and its glyphs are unchanged - see the note above CHANAKYA
-  // in fontMaps.js. The label stays "Chanakya" because that is what the face
-  // actually is; renaming a file does not make it a different font.
-  chanakya: preview('Chanakya', 'Walkman-Chanakya.woff', 'truetype'),
+  // TODO(chanakya): once the real Walkman-Chanakya 905 font is supplied and its
+  // glyphs are checked against FONTS.chanakya.map, add it to public/fonts/, add
+  // its @font-face in ../styles/legacy-fonts.css, and register it here, e.g.
+  //   chanakya: preview('Walkman-Chanakya 905', 'walkman-chanakya-905.woff'),
   // Converted from vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf,
-  // the exact file the mapping was built from. Unrelated to the file above.
+  // the exact file the mapping was built from. Unrelated to Walkman-Chanakya.
   'abbasi-chanakya': preview('Abbasi Chanakya New', 'abbasi-chanakya-new.woff'),
   preeti: preview('Preeti', 'preeti.woff', 'truetype'),
 };

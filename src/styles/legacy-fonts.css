@@ -17,9 +17,8 @@
    inconsistently, and static hosts serve case-sensitively even though Windows
    does not, so a mismatch fails only in production.
 
-   format() DESCRIBES THE CONTENT, NOT THE EXTENSION. Walkman-Chanakya.woff and
-   preeti.woff are named .woff but start with 00 01 00 00, which is raw
-   TrueType. Get this wrong and the browser fetches the file, fails to parse it
+   format() DESCRIBES THE CONTENT, NOT THE EXTENSION. preeti.woff is named
+   .woff but starts with 00 01 00 00, which is raw TrueType. Get this wrong and the browser fetches the file, fails to parse it
    and silently drops the face.
 
    src/lib/legacyFonts.test.js enforces both rules: it reads public/fonts, checks
@@ -53,16 +52,10 @@
   font-display: swap;
 }
 
-/* Chanakya and Preeti have files but no verified map, so nothing previews in
-   them yet. Declared now so the day a mapping lands there is nothing to wire. */
-@font-face {
-  font-family: 'MKD Chanakya';
-  src:
-    local('Chanakya'),
-    local('Chanakya 905'),
-    url('/fonts/Walkman-Chanakya.woff') format('truetype');
-  font-display: swap;
-}
+/* TODO(chanakya): no face for Walkman-Chanakya on purpose. Its pages are
+   "coming soon" and load no preview font. When the real Walkman-Chanakya 905
+   font is supplied and verified against the map, declare it here (with a
+   format() matching its bytes) and register it in src/lib/legacyFonts.js. */
 
 /* Abbasi Chanakya New: converted offline from the TTF in
    vendor/fonts/Abbasi Chanakya New/, the same file the mapping was built from.
@@ -76,6 +69,8 @@
   font-display: swap;
 }
 
+/* Preeti has a file but no verified map, so nothing previews in it yet.
+   Declared now so the day a mapping lands there is nothing to wire. */
 @font-face {
   font-family: 'MKD Preeti';
   src:
