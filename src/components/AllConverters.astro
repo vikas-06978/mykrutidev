@@ -4,7 +4,7 @@ import { allGroups } from '../lib/routes.js';
 import { langOf, useT } from '../i18n/index.js';
 import SoonBadge from './SoonBadge.astro';
 
-const { t, raw, render } = useT(langOf(Astro.url));
+const { t, raw, render, listTitle } = useT(langOf(Astro.url));
 const P = '/all-converters';
 const groups = allGroups();
 
@@ -35,7 +35,7 @@ const body: string[] = raw('allConverters.body');
                   class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron"
                 >
                   <span class="flex items-start justify-between gap-3">
-                    <span class="font-medium text-ink" set:html={render(t(`pages.${p.path}.h1`))} />
+                    <span class="font-medium text-ink" set:html={render(listTitle(t(`pages.${p.path}.h1`)))} />
                     {p.status === 'live' && (
                       <span class="mt-0.5 shrink-0 rounded-full bg-inset px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ok">
                         {t('allConverters.live')}

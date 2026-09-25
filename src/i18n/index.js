@@ -203,8 +203,26 @@ export function useT(lang) {
     maybe: (key) => maybe(lang, key),
     html: (key, vars) => renderHtml(t(lang, key, vars), lang),
     render: (s) => renderHtml(s, lang),
+    listTitle: (s) => listTitle(s, lang),
     path: (p) => localizePath(p, lang),
   };
+}
+
+/**
+ * A page title as it appears in a LIST of pages (the /all-converters cards and
+ * the footer), with font names in the reader's language: on Hindi pages
+ * "DevLys से यूनिकोड कन्वर्टर" -> "देवलिस से यूनिकोड कन्वर्टर".
+ *
+ * Lists only. A tool page keeps the exact Latin name (translate="no") wherever
+ * the reader must pick that font in Word. The names come from `fontNames` in
+ * the dictionaries - identity in en.json, so English is unchanged - and are
+ * the same Hindi names the nav labels use (i18n.test.js checks both).
+ */
+export function listTitle(s, lang) {
+  const names = raw(lang, 'fontNames');
+  const keys = Object.keys(names).sort((a, b) => b.length - a.length);
+  const re = new RegExp(`(?<![\\w-])(${keys.map(esc).join('|')})(?![\\w])`, 'g');
+  return s.replace(re, (m) => names[m]);
 }
 
 /** Authored HTML, ready for set:html. */

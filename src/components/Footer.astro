@@ -2,7 +2,7 @@
 import { liveConverters } from '../lib/routes.js';
 import { langOf, useT } from '../i18n/index.js';
 
-const { t, render, path: to } = useT(langOf(Astro.url));
+const { t, render, listTitle, path: to } = useT(langOf(Astro.url));
 const links = liveConverters();
 const year = new Date().getFullYear();
 ---
@@ -26,7 +26,7 @@ const year = new Date().getFullYear();
                 <a
                   href={to(p.path)}
                   class="text-body no-underline hover:underline"
-                  set:html={render(t(`pages.${p.path}.h1`))}
+                  set:html={render(listTitle(t(`pages.${p.path}.h1`)))}
                 />
               </li>
             ))

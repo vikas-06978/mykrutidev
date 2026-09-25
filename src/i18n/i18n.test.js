@@ -14,6 +14,7 @@ import {
   localizePath,
   localizeHtml,
   markNoTranslate,
+  listTitle,
 } from './index.js';
 import { localizeDocMessage, localizeSummary, TOO_LARGE_EN, ONLY_TYPES_EN } from './docMessages.js';
 import { PAGES, getPage, isIndexable, routeOf, SITE } from '../lib/routes.js';
@@ -27,6 +28,62 @@ import * as docConvert from '../lib/docConvert.js';
 
 const { en, hi } = DICTS;
 const RE_DEVA = /[ऀ-ॿ]/;
+
+// ---------------------------------------------------------------------------
+// Hindi font names in the nav and in lists of pages
+// ---------------------------------------------------------------------------
+
+describe('Hindi font names in the nav and in page lists', () => {
+  const LATIN = Object.keys(en.fontNames);
+  const navLabels = (d) => Object.values(d.pages).map((p) => p.nav).filter(Boolean);
+
+  test('the Hindi names are the agreed ones', () => {
+    assert.deepEqual(hi.fontNames, {
+      'Abbasi Chanakya New': 'अब्बासी चाणक्य',
+      'Abbasi Chanakya': 'अब्बासी चाणक्य',
+      Chanakya: 'चाणक्य',
+      DevLys: 'देवलिस',
+      Shusha: 'शुषा',
+      Mangal: 'मंगल',
+    });
+    for (const k of LATIN) assert.equal(en.fontNames[k], k, 'English keeps the Latin name');
+  });
+
+  test('no Hindi nav label or group name uses a Latin font name', () => {
+    for (const s of [...navLabels(hi), ...Object.values(hi.groups)]) {
+      for (const name of LATIN) assert.ok(!s.includes(name), `"${s}" still says ${name}`);
+    }
+  });
+
+  test('the nav labels use the same Hindi names as the lists', () => {
+    // listTitle() leaves a label alone only if it already uses fontNames' words.
+    for (const s of navLabels(hi)) assert.equal(listTitle(s, 'hi'), s);
+  });
+
+  test('list titles on Hindi pages', () => {
+    const h1 = (p) => hi.pages[p].h1;
+    assert.equal(listTitle(h1('/devlys-to-unicode'), 'hi'), 'देवलिस से यूनिकोड कन्वर्टर');
+    assert.equal(listTitle(h1('/abbasi-chanakya-to-unicode'), 'hi'), 'अब्बासी चाणक्य से यूनिकोड कन्वर्टर');
+    assert.equal(listTitle(h1('/chanakya-to-kruti-dev'), 'hi'), 'चाणक्य से कृतिदेव कन्वर्टर');
+    assert.equal(listTitle(h1('/kruti-dev-to-mangal'), 'hi'), 'कृतिदेव से मंगल कन्वर्टर');
+    assert.equal(listTitle(h1('/shusha-to-unicode'), 'hi'), 'शुषा से यूनिकोड कन्वर्टर');
+    for (const p of Object.keys(hi.pages)) {
+      for (const name of LATIN) {
+        assert.ok(!listTitle(h1(p), 'hi').includes(name), `${p}: list title still says ${name}`);
+      }
+    }
+  });
+
+  test('English is untouched, and the tool pages keep their exact Latin h1', () => {
+    for (const p of Object.values(en.pages)) {
+      if (p.nav) assert.equal(listTitle(p.nav, 'en'), p.nav);
+      assert.equal(listTitle(p.h1, 'en'), p.h1);
+    }
+    // The page's own h1 is not rewritten - only its entry in a list is.
+    assert.match(hi.pages['/devlys-to-unicode'].h1, /DevLys/);
+    assert.match(hi.pages['/unicode-to-abbasi-chanakya'].h1, /Abbasi Chanakya New/);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // The two dictionaries hold the same keys
@@ -130,10 +187,13 @@ describe('code examples and Unicode output survive translation untouched', () =>
     // in Word's font list.
     const PICK = ['Kruti Dev 010', 'DevLys 010', 'Abbasi Chanakya New', 'Mangal'];
     for (const key of flatKeys(en)) {
-      // Menu group headings name a font FAMILY, like a heading, and use the
-      // everyday Hindi word (कृतिदेव, मंगल, देवलिस, चाणक्य). The items inside
-      // each menu keep the exact Latin names.
-      if (key.startsWith('groups.')) continue;
+      // The nav (group headings and the items inside each menu) names fonts the
+      // way a Hindi reader says them (कृतिदेव, मंगल, देवलिस, चाणक्य), and
+      // fontNames is the map lists use to do the same. Page text - where the
+      // reader is told which font to pick in Word - keeps the exact Latin name.
+      if (key.startsWith('groups.') || key.startsWith('fontNames.') || /^pages\.[^.]+\.nav$/.test(key)) {
+        continue;
+      }
       for (const name of PICK) {
         const inEn = raw('en', key).split(name).length - 1;
         if (inEn === 0) continue;

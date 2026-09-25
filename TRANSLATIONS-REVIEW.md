@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **873 keys**, identical in both files (enforced by `npm test` and at build time).
+- **879 keys**, identical in both files (enforced by `npm test` and at build time).
 - **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -48,10 +48,16 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `groups.Mangal` | Mangal | मंगल |  |
 | `groups.DevLys` | DevLys | देवलिस |  |
 | `groups.Chanakya` | Chanakya | चाणक्य |  |
-| `groups.Shusha` | Shusha | Shusha | ⚠️ Menu groups use Hindi names (कृतिदेव, मंगल, देवलिस, चाणक्य); Shusha is kept Latin (hidden today - no live page). Items inside the menus keep exact Latin font names. |
+| `groups.Shusha` | Shusha | शुषा | ⚠️ Menu groups use Hindi names (कृतिदेव, मंगल, देवलिस, चाणक्य); Shusha is kept Latin (hidden today - no live page). Items inside the menus keep exact Latin font names. |
 | `groups.Nepali` | Nepali | नेपाली |  |
 | `groups.Other scripts` | Other scripts | दूसरी लिपियाँ |  |
 | `groups.More` | More | और |  |
+| `fontNames.Abbasi Chanakya New` | Abbasi Chanakya New | अब्बासी चाणक्य |  |
+| `fontNames.Abbasi Chanakya` | Abbasi Chanakya | अब्बासी चाणक्य |  |
+| `fontNames.Chanakya` | Chanakya | चाणक्य |  |
+| `fontNames.DevLys` | DevLys | देवलिस |  |
+| `fontNames.Shusha` | Shusha | शुषा |  |
+| `fontNames.Mangal` | Mangal | मंगल |  |
 | `fontBox.kruti-dev` | Kruti Dev | Kruti Dev | ⚠️ Box label kept Latin "Kruti Dev" (user must recognise the font). Headings use कृतिदेव. |
 | `fontBox.unicode` | Unicode / Hindi | यूनिकोड / हिंदी |  |
 | `fontBox.mangal` | Mangal (Unicode) | Mangal (यूनिकोड) |  |
@@ -372,7 +378,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./unicode-to-kruti-dev.faq.6.a` | They are left alone by default, which matters more in this direction than the other: converting the digits in a date or an account number would silently corrupt it. You can switch the behaviour off with the checkbox under the panels. | पहले से वे वैसे ही छोड़ दिए जाते हैं, और इस दिशा में यह ज़्यादा ज़रूरी है: किसी तारीख या खाता नंबर के अंक बदल जाएँ तो वह चुपचाप खराब हो जाएगा। बॉक्स के नीचे वाले चेकबॉक्स से यह सुविधा बंद कर सकते हैं। |  |
 | `pages./unicode-to-kruti-dev.faq.7.q` | Does it handle half letters and conjuncts? | क्या यह आधे अक्षर और संयुक्त अक्षर संभालता है? |  |
 | `pages./unicode-to-kruti-dev.faq.7.a` | Yes. Half consonants, the reph, the rakar, nukta letters and the ligatures क्ष, त्र, ज्ञ and श्र are all mapped, and the i-matra is moved back to the front of its cluster where Kruti Dev expects it. | हाँ। आधे अक्षर, रेफ़, नीचे वाला र, नुक्ता वाले अक्षर और क्ष, त्र, ज्ञ, श्र सबका मैप बना है, और ि की मात्रा अपने अक्षर-समूह के आगे वापस लाई जाती है, जहाँ कृतिदेव उसे चाहता है। |  |
-| `pages./kruti-dev-to-mangal.nav` | Kruti Dev → Mangal | कृतिदेव → Mangal |  |
+| `pages./kruti-dev-to-mangal.nav` | Kruti Dev → Mangal | कृतिदेव → मंगल |  |
 | `pages./kruti-dev-to-mangal.h1` | Kruti Dev to Mangal Converter | कृतिदेव से Mangal कन्वर्टर |  |
 | `pages./kruti-dev-to-mangal.title` | Kruti Dev to Mangal Converter \| KrutiDev to Mangal Font Hindi Online | कृतिदेव से Mangal कन्वर्टर \| Kruti Dev to Mangal फ़ॉन्ट हिंदी ऑनलाइन | ⚠️ SEO mix - see pages./.title |
 | `pages./kruti-dev-to-mangal.description` | Convert Kruti Dev text to Mangal font Hindi for government forms and CRA/NPS portals. Accurate matra placement, instant preview in real Mangal, free and fully browser-based. | कृतिदेव टेक्स्ट को सरकारी फ़ॉर्म और CRA/NPS पोर्टल के लिए Mangal फ़ॉन्ट हिंदी में बदलें। मात्राएँ सही जगह, असली Mangal में तुरंत प्रीव्यू, मुफ़्त और पूरी तरह ब्राउज़र में। |  |
@@ -400,7 +406,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./kruti-dev-to-mangal.faq.4.a` | Yes. The short-i sign is moved after its consonant, the reph is moved to the front of its cluster, split vowel signs are recomposed and the conjuncts क्ष, त्र, ज्ञ and श्र are mapped explicitly. This is the part most converters get wrong, and it is why text from elsewhere sometimes fails search or spell-check even though it looks fine. | हाँ। छोटी इ की मात्रा अपने अक्षर के बाद आती है, रेफ़ अक्षर-समूह की शुरुआत में जाता है, टूटी मात्राएँ जोड़ी जाती हैं और क्ष, त्र, ज्ञ, श्र का अलग से मैप है। ज़्यादातर कन्वर्टर यहीं गलती करते हैं, और इसी वजह से दूसरी जगह से लिया टेक्स्ट कभी-कभी सही दिखकर भी सर्च या स्पेल-चेक में फ़ेल होता है। |  |
 | `pages./kruti-dev-to-mangal.faq.5.q` | Can I go the other way? | क्या मैं उल्टा बदल सकता हूँ? |  |
 | `pages./kruti-dev-to-mangal.faq.5.a` | Yes. See the &lt;a href="/mangal-to-kruti-dev">Mangal to Kruti Dev converter&lt;/a>. There is a link to it under the boxes on this page too. | हाँ। &lt;a href="/mangal-to-kruti-dev">Mangal से कृतिदेव कन्वर्टर&lt;/a> देखें। इस पेज पर बॉक्स के नीचे भी उसका लिंक है। |  |
-| `pages./mangal-to-kruti-dev.nav` | Mangal → Kruti Dev | Mangal → कृतिदेव |  |
+| `pages./mangal-to-kruti-dev.nav` | Mangal → Kruti Dev | मंगल → कृतिदेव |  |
 | `pages./mangal-to-kruti-dev.h1` | Mangal to Kruti Dev Converter | Mangal से कृतिदेव कन्वर्टर |  |
 | `pages./mangal-to-kruti-dev.title` | Mangal to Kruti Dev Converter \| Mangal Font to KrutiDev 010 Free | Mangal से कृतिदेव कन्वर्टर \| Mangal Font to Kruti Dev 010 मुफ़्त | ⚠️ SEO mix - see pages./.title |
 | `pages./mangal-to-kruti-dev.description` | Paste Mangal (Unicode) Hindi and get Kruti Dev 010 text back, ready for legacy typing tests and old DTP files. Live conversion, accurate conjuncts, nothing leaves your browser. | Mangal (यूनिकोड) हिंदी पेस्ट करें और Kruti Dev 010 टेक्स्ट पाएँ, पुराने टाइपिंग टेस्ट और DTP फ़ाइलों के लिए तैयार। तुरंत कन्वर्जन, सही संयुक्त अक्षर, कुछ भी आपके ब्राउज़र से बाहर नहीं जाता। |  |
@@ -563,7 +569,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./all-converters.h1` | All Hindi and Indic Font Converters | सभी हिंदी और भारतीय भाषाओं के फ़ॉन्ट कन्वर्टर |  |
 | `pages./all-converters.title` | All Font Converters \| Kruti Dev, DevLys, Chanakya, Mangal, Unicode | सभी फ़ॉन्ट कन्वर्टर \| Kruti Dev, DevLys, Chanakya, Mangal, Unicode | ⚠️ SEO mix - see pages./.title |
 | `pages./all-converters.description` | Every converter on MyKrutiDev: Kruti Dev, DevLys, Chanakya, Shusha and Mangal for Hindi, Preeti for Nepali, plus the Indic scripts we are working on next. | MyKrutiDev के सभी कन्वर्टर: हिंदी के लिए कृतिदेव, DevLys, Chanakya, Shusha और Mangal, नेपाली के लिए Preeti, और वे भारतीय लिपियाँ जिन पर आगे काम होगा। |  |
-| `pages./devlys-to-unicode.nav` | DevLys → Unicode | DevLys → यूनिकोड |  |
+| `pages./devlys-to-unicode.nav` | DevLys → Unicode | देवलिस → यूनिकोड |  |
 | `pages./devlys-to-unicode.h1` | DevLys to Unicode Converter | DevLys से यूनिकोड कन्वर्टर |  |
 | `pages./devlys-to-unicode.title` | DevLys to Unicode Converter \| DevLys 010 to Hindi Unicode Online | DevLys से यूनिकोड कन्वर्टर \| DevLys 010 to Hindi Unicode ऑनलाइन | ⚠️ SEO mix - see pages./.title |
 | `pages./devlys-to-unicode.description` | Convert DevLys 010 Hindi text to Unicode with correct matras and conjuncts. Free and browser-based, with nothing uploaded. | DevLys 010 हिंदी टेक्स्ट को सही मात्राओं और संयुक्त अक्षरों के साथ यूनिकोड में बदलें। मुफ़्त, ब्राउज़र में चलता है, कुछ भी अपलोड नहीं होता। |  |
@@ -595,7 +601,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./devlys-to-unicode.faq.5.a` | Dates, numbers, percentages, URLs and email addresses are always left alone, and common English words are detected and preserved. Because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still be converted by mistake - the checkbox under the panels turns the whole behaviour off. | तारीख, अंक, प्रतिशत, URL और ईमेल पते कभी नहीं बदलते, और आम अंग्रेज़ी शब्द पहचानकर वैसे ही रखे जाते हैं। पर पुराना फ़ॉन्ट हिंदी को सादे ASCII में रखता है, इसलिए कोई अनोखा नाम गलती से बदल सकता है - बॉक्स के नीचे वाला चेकबॉक्स यह पूरी सुविधा बंद कर देता है। |  |
 | `pages./devlys-to-unicode.faq.6.q` | Can I convert Unicode back into DevLys? | क्या मैं यूनिकोड को वापस DevLys में बदल सकता हूँ? |  |
 | `pages./devlys-to-unicode.faq.6.a` | Yes. Each page converts in one fixed direction, so use the &lt;a href="/unicode-to-devlys">Unicode to DevLys converter&lt;/a> for the reverse. There is a link under the boxes too. That page also accepts Hindi typed on a phone or the Windows keypad, since keypad Hindi is already Unicode. | हाँ। हर पेज एक ही दिशा में बदलता है, इसलिए उल्टे के लिए &lt;a href="/unicode-to-devlys">यूनिकोड से DevLys कन्वर्टर&lt;/a> इस्तेमाल करें। बॉक्स के नीचे भी इसका लिंक है। वह पेज फ़ोन या Windows कीपैड पर टाइप की हुई हिंदी भी लेता है, क्योंकि कीपैड वाली हिंदी पहले से यूनिकोड होती है। |  |
-| `pages./unicode-to-devlys.nav` | Unicode / Hindi → DevLys | यूनिकोड / हिंदी → DevLys |  |
+| `pages./unicode-to-devlys.nav` | Unicode / Hindi → DevLys | यूनिकोड / हिंदी → देवलिस |  |
 | `pages./unicode-to-devlys.h1` | Unicode to DevLys Converter | यूनिकोड से DevLys कन्वर्टर |  |
 | `pages./unicode-to-devlys.title` | Unicode to DevLys Converter \| Hindi Unicode to DevLys 010 Font | यूनिकोड से DevLys कन्वर्टर \| Hindi Unicode to DevLys 010 फ़ॉन्ट | ⚠️ SEO mix - see pages./.title |
 | `pages./unicode-to-devlys.description` | Convert Unicode Hindi back to DevLys 010 font text online. Live conversion, correct half-letters, no upload, free. | यूनिकोड हिंदी को ऑनलाइन वापस DevLys 010 फ़ॉन्ट टेक्स्ट में बदलें। तुरंत कन्वर्जन, सही आधे अक्षर, कोई अपलोड नहीं, मुफ़्त। |  |
@@ -624,7 +630,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./unicode-to-devlys.faq.4.a` | Different fonts, same keyboard layout. Every key this converter produces draws the same Hindi letter in both, which was confirmed by comparing the two font files glyph by glyph. If you need Kruti Dev specifically, use &lt;a href="/unicode-to-kruti-dev">Unicode to Kruti Dev&lt;/a> - the output is the same keystrokes, and the page names the font your recipient expects. | फ़ॉन्ट अलग, कीबोर्ड लेआउट एक। यह कन्वर्टर जो भी बटन देता है, वह दोनों में एक ही हिंदी अक्षर बनाता है, यह दोनों फ़ॉन्ट फ़ाइलों को अक्षर-अक्षर मिलाकर पक्का किया गया। अगर आपको खास तौर पर कृतिदेव चाहिए, तो &lt;a href="/unicode-to-kruti-dev">यूनिकोड से कृतिदेव&lt;/a> इस्तेमाल करें - नतीजे के बटन वही हैं, और पेज पर वही फ़ॉन्ट का नाम है जिसकी सामने वाले को उम्मीद है। |  |
 | `pages./unicode-to-devlys.faq.5.q` | Does my text get uploaded anywhere? | क्या मेरा टेक्स्ट कहीं अपलोड होता है? |  |
 | `pages./unicode-to-devlys.faq.5.a` | No. Everything runs in your browser. Nothing is sent to a server, and the page keeps working after you disconnect from the internet. | नहीं। सब कुछ आपके ब्राउज़र में चलता है। कुछ भी सर्वर पर नहीं भेजा जाता, और इंटरनेट बंद करने के बाद भी पेज चलता रहता है। |  |
-| `pages./devlys-to-mangal.nav` | DevLys → Mangal | DevLys → Mangal |  |
+| `pages./devlys-to-mangal.nav` | DevLys → Mangal | देवलिस → मंगल |  |
 | `pages./devlys-to-mangal.h1` | DevLys to Mangal Converter | DevLys से Mangal कन्वर्टर |  |
 | `pages./devlys-to-mangal.title` | DevLys to Mangal Converter \| DevLys 010 to Mangal Font Hindi | DevLys से Mangal कन्वर्टर \| DevLys 010 to Mangal फ़ॉन्ट हिंदी | ⚠️ SEO mix - see pages./.title |
 | `pages./devlys-to-mangal.description` | Convert DevLys font Hindi to Mangal for government forms and Unicode documents. Free, instant, private. | DevLys फ़ॉन्ट हिंदी को सरकारी फ़ॉर्म और यूनिकोड डॉक्यूमेंट के लिए Mangal में बदलें। मुफ़्त, तुरंत, सुरक्षित। |  |
@@ -652,7 +658,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./devlys-to-mangal.faq.4.a` | Yes. Dates, numbers, percentages, URLs and email addresses are always left untouched, and common English words are detected and preserved. The checkbox under the panels turns that behaviour off if you want everything converted. | हाँ। तारीख, अंक, प्रतिशत, URL और ईमेल पते कभी नहीं बदलते, और आम अंग्रेज़ी शब्द पहचानकर वैसे ही रखे जाते हैं। अगर आप सब कुछ बदलना चाहते हैं, तो बॉक्स के नीचे वाला चेकबॉक्स यह सुविधा बंद कर देता है। |  |
 | `pages./devlys-to-mangal.faq.5.q` | Does my text get uploaded anywhere? | क्या मेरा टेक्स्ट कहीं अपलोड होता है? |  |
 | `pages./devlys-to-mangal.faq.5.a` | No. The conversion runs entirely in your browser and nothing is sent to a server, so office documents stay on your machine. | नहीं। कन्वर्जन पूरी तरह आपके ब्राउज़र में होता है और कुछ भी सर्वर पर नहीं जाता, इसलिए दफ़्तर के डॉक्यूमेंट आपके कंप्यूटर पर ही रहते हैं। |  |
-| `pages./mangal-to-devlys.nav` | Mangal → DevLys | Mangal → DevLys |  |
+| `pages./mangal-to-devlys.nav` | Mangal → DevLys | मंगल → देवलिस |  |
 | `pages./mangal-to-devlys.h1` | Mangal to DevLys Converter | Mangal से DevLys कन्वर्टर |  |
 | `pages./mangal-to-devlys.title` | Mangal to DevLys Converter \| Mangal Unicode to DevLys 010 Font | Mangal से DevLys कन्वर्टर \| Mangal Unicode to DevLys 010 फ़ॉन्ट | ⚠️ SEO mix - see pages./.title |
 | `pages./mangal-to-devlys.description` | Convert Mangal (Unicode) Hindi to DevLys 010 font text for legacy documents and typing practice. Free and fully client-side. | Mangal (यूनिकोड) हिंदी को पुराने डॉक्यूमेंट और टाइपिंग अभ्यास के लिए DevLys 010 फ़ॉन्ट टेक्स्ट में बदलें। मुफ़्त और पूरी तरह ब्राउज़र में। |  |
@@ -681,7 +687,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./mangal-to-devlys.faq.4.a` | Usually because something downstream has not moved on: a press or publishing workflow built around DevLys, a form whose layout was designed for it, an archive that has to stay consistent, or a typing test that is marked in the legacy layout. | आम तौर पर इसलिए कि आगे का कोई काम अभी पुराना ही है: DevLys पर चलने वाला प्रेस या प्रकाशन का काम, उसके लिए बना फ़ॉर्म, कोई पुराना रिकॉर्ड जिसे एक जैसा रखना है, या कोई टाइपिंग टेस्ट जो पुराने लेआउट में जाँचा जाता है। |  |
 | `pages./mangal-to-devlys.faq.5.q` | Does my text get uploaded anywhere? | क्या मेरा टेक्स्ट कहीं अपलोड होता है? |  |
 | `pages./mangal-to-devlys.faq.5.a` | No. Everything runs in your browser; nothing is sent to a server, and the page keeps working offline once loaded. | नहीं। सब कुछ आपके ब्राउज़र में चलता है; कुछ भी सर्वर पर नहीं जाता, और खुलने के बाद पेज ऑफ़लाइन भी चलता है। |  |
-| `pages./abbasi-chanakya-to-unicode.nav` | Abbasi Chanakya → Unicode | Abbasi Chanakya → यूनिकोड |  |
+| `pages./abbasi-chanakya-to-unicode.nav` | Abbasi Chanakya → Unicode | अब्बासी चाणक्य → यूनिकोड |  |
 | `pages./abbasi-chanakya-to-unicode.h1` | Abbasi Chanakya New to Unicode Converter | Abbasi Chanakya New से यूनिकोड कन्वर्टर |  |
 | `pages./abbasi-chanakya-to-unicode.title` | Abbasi Chanakya New to Unicode Converter \| Chanakya Font to Hindi Unicode | Abbasi Chanakya New से यूनिकोड कन्वर्टर \| Chanakya Font to Hindi Unicode | ⚠️ SEO mix - see pages./.title |
 | `pages./abbasi-chanakya-to-unicode.description` | Convert Hindi typed in the Abbasi Chanakya New font to Unicode, with the i-matra and reph put in the right order. Free, instant and entirely in your browser - nothing is uploaded. | Abbasi Chanakya New फ़ॉन्ट में टाइप की हिंदी को यूनिकोड में बदलें, इ की मात्रा और रेफ़ सही क्रम में। मुफ़्त, तुरंत और पूरी तरह आपके ब्राउज़र में - कुछ भी अपलोड नहीं होता। |  |
@@ -705,7 +711,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./abbasi-chanakya-to-unicode.faq.3.a` | Abbasi Chanakya New stores letters in the order they are drawn, so ि is typed before its consonant: &lt;strong>fgUnh&lt;/strong> is हिन्दी. Unicode wants it after the consonant. The reph (the र् above a letter) is the other way round: it is typed after its syllable, so &lt;strong>deZ&lt;/strong> is कर्म. | Abbasi Chanakya New अक्षरों को उसी क्रम में रखता है जिसमें वे दिखते हैं, इसलिए ि अपने अक्षर से पहले टाइप होती है: &lt;strong>fgUnh&lt;/strong> का मतलब हिन्दी है। यूनिकोड इसे अक्षर के बाद चाहता है। रेफ़ (अक्षर के ऊपर वाला र्) इसका उल्टा है: यह अपने अक्षर के बाद टाइप होता है, इसलिए &lt;strong>deZ&lt;/strong> का मतलब कर्म है। |  |
 | `pages./abbasi-chanakya-to-unicode.faq.4.q` | What happens to English words and numbers? | अंग्रेज़ी शब्दों और अंकों का क्या होता है? |  |
 | `pages./abbasi-chanakya-to-unicode.faq.4.a` | Numbers, dates, URLs and email addresses are always left alone, and common English words are detected and kept. This font has no Hindi digit keys, so 0-9 stay as they are. Untick the checkbox under the boxes to convert everything. | अंक, तारीख, URL और ईमेल पते कभी नहीं बदलते, और आम अंग्रेज़ी शब्द पहचानकर वैसे ही रखे जाते हैं। इस फ़ॉन्ट में हिंदी अंकों के बटन नहीं हैं, इसलिए 0-9 जैसे हैं वैसे रहते हैं। सब कुछ बदलना हो तो बॉक्स के नीचे वाला चेकबॉक्स हटा दें। |  |
-| `pages./unicode-to-abbasi-chanakya.nav` | Unicode → Abbasi Chanakya | यूनिकोड → Abbasi Chanakya |  |
+| `pages./unicode-to-abbasi-chanakya.nav` | Unicode → Abbasi Chanakya | यूनिकोड → अब्बासी चाणक्य |  |
 | `pages./unicode-to-abbasi-chanakya.h1` | Unicode to Abbasi Chanakya New Converter | यूनिकोड से Abbasi Chanakya New कन्वर्टर |  |
 | `pages./unicode-to-abbasi-chanakya.title` | Unicode to Abbasi Chanakya New Converter \| Hindi to Chanakya Font Code | यूनिकोड से Abbasi Chanakya New कन्वर्टर \| Hindi to Chanakya Font Code | ⚠️ SEO mix - see pages./.title |
 | `pages./unicode-to-abbasi-chanakya.description` | Convert Unicode Hindi to Abbasi Chanakya New font code for MS Word, with the i-matra and reph placed the way the font types them. Live Hindi preview, free, nothing uploaded. | यूनिकोड हिंदी को MS Word के लिए Abbasi Chanakya New फ़ॉन्ट कोड में बदलें, इ की मात्रा और रेफ़ उसी जगह जहाँ यह फ़ॉन्ट उन्हें टाइप करता है। हिंदी प्रीव्यू, मुफ़्त, कुछ भी अपलोड नहीं। |  |
@@ -729,7 +735,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./unicode-to-abbasi-chanakya.faq.4.a` | Straight quotes become curly ones. In this font the &lt;code>'&lt;/code> and &lt;code>"&lt;/code> keys are the letters श् and ष्, so a straight quote cannot be written as itself. | सीधे quotes घुमावदार बन जाते हैं। इस फ़ॉन्ट में &lt;code>'&lt;/code> और &lt;code>"&lt;/code> बटन श् और ष् अक्षर हैं, इसलिए सीधा quote अपने रूप में नहीं लिखा जा सकता। |  |
 | `pages./unicode-to-abbasi-chanakya.faq.5.q` | What happens to English words and numbers? | अंग्रेज़ी शब्दों और अंकों का क्या होता है? |  |
 | `pages./unicode-to-abbasi-chanakya.faq.5.a` | Numbers, dates, URLs and email addresses are left alone, the same as on the Unicode to Kruti Dev page. You can switch this off with the checkbox under the boxes. | अंक, तारीख, URL और ईमेल पते वैसे ही छोड़ दिए जाते हैं, जैसे यूनिकोड से कृतिदेव वाले पेज पर। बॉक्स के नीचे वाले चेकबॉक्स से इसे बंद कर सकते हैं। |  |
-| `pages./chanakya-to-unicode.nav` | Chanakya → Unicode | Chanakya → यूनिकोड |  |
+| `pages./chanakya-to-unicode.nav` | Chanakya → Unicode | चाणक्य → यूनिकोड |  |
 | `pages./chanakya-to-unicode.h1` | Chanakya to Unicode Converter | Chanakya से यूनिकोड कन्वर्टर |  |
 | `pages./chanakya-to-unicode.title` | Chanakya to Unicode Converter \| Chanakya 905 to Hindi Unicode | Chanakya से यूनिकोड कन्वर्टर \| Chanakya 905 to Hindi Unicode | ⚠️ SEO mix - see pages./.title |
 | `pages./chanakya-to-unicode.description` | Convert Chanakya font Hindi to Unicode instantly in your browser. Free, no signup, nothing uploaded. | Chanakya फ़ॉन्ट हिंदी को अपने ब्राउज़र में तुरंत यूनिकोड में बदलें। मुफ़्त, बिना साइन-अप, कुछ भी अपलोड नहीं। |  |
@@ -738,7 +744,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./chanakya-to-unicode.body.0` | &lt;h2>Coming in phase 2&lt;/h2> | &lt;h2>फ़ेज़ 2 में आ रहा है&lt;/h2> |  |
 | `pages./chanakya-to-unicode.body.1` | &lt;p>Chanakya uses a different glyph layout from Kruti Dev, and its map has not been built from real documents yet. Until it has been checked, this pair stays switched off.&lt;/p> | &lt;p>Chanakya का अक्षर-क्रम कृतिदेव से अलग है, और इसका मैप अभी असली डॉक्यूमेंट से नहीं बना है। जब तक इसकी जाँच न हो, यह जोड़ी बंद रहेगी।&lt;/p> |  |
 | `pages./chanakya-to-unicode.body.2` | &lt;p>The &lt;a href="/">Kruti Dev to Unicode converter&lt;/a> is finished and tested if that is the font you actually have.&lt;/p> | &lt;p>अगर आपके पास असल में कृतिदेव है, तो &lt;a href="/">कृतिदेव से यूनिकोड कन्वर्टर&lt;/a> तैयार और जाँचा हुआ है।&lt;/p> |  |
-| `pages./unicode-to-chanakya.nav` | Unicode / Hindi → Chanakya | यूनिकोड / हिंदी → Chanakya |  |
+| `pages./unicode-to-chanakya.nav` | Unicode / Hindi → Chanakya | यूनिकोड / हिंदी → चाणक्य |  |
 | `pages./unicode-to-chanakya.h1` | Unicode to Chanakya Converter | यूनिकोड से Chanakya कन्वर्टर |  |
 | `pages./unicode-to-chanakya.title` | Unicode to Chanakya Converter \| Hindi Unicode to Chanakya 905 Font | यूनिकोड से Chanakya कन्वर्टर \| Hindi Unicode to Chanakya 905 फ़ॉन्ट | ⚠️ SEO mix - see pages./.title |
 | `pages./unicode-to-chanakya.description` | Convert Unicode Hindi back to Chanakya font encoding. Live, free and fully client-side. | यूनिकोड हिंदी को वापस Chanakya फ़ॉन्ट एन्कोडिंग में बदलें। तुरंत, मुफ़्त और पूरी तरह ब्राउज़र में। |  |
@@ -747,7 +753,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./unicode-to-chanakya.body.0` | &lt;h2>Coming in phase 2&lt;/h2> | &lt;h2>फ़ेज़ 2 में आ रहा है&lt;/h2> |  |
 | `pages./unicode-to-chanakya.body.1` | &lt;p>The Chanakya mapping is not filled in yet, so this pair is disabled rather than approximate.&lt;/p> | &lt;p>Chanakya मैपिंग अभी भरी नहीं गई है, इसलिए यह जोड़ी अंदाज़े से चलाने की जगह बंद रखी गई है।&lt;/p> |  |
 | `pages./unicode-to-chanakya.body.2` | &lt;p>&lt;a href="/unicode-to-kruti-dev">Unicode to Kruti Dev&lt;/a> is complete if that direction helps.&lt;/p> | &lt;p>अगर वह दिशा काम की हो, तो &lt;a href="/unicode-to-kruti-dev">यूनिकोड से कृतिदेव&lt;/a> तैयार है।&lt;/p> |  |
-| `pages./kruti-dev-to-chanakya.nav` | Kruti Dev → Chanakya | कृतिदेव → Chanakya |  |
+| `pages./kruti-dev-to-chanakya.nav` | Kruti Dev → Chanakya | कृतिदेव → चाणक्य |  |
 | `pages./kruti-dev-to-chanakya.h1` | Kruti Dev to Chanakya Converter | कृतिदेव से Chanakya कन्वर्टर |  |
 | `pages./kruti-dev-to-chanakya.title` | Kruti Dev to Chanakya Converter \| KrutiDev to Chanakya 905 Hindi | कृतिदेव से Chanakya कन्वर्टर \| Kruti Dev to Chanakya 905 हिंदी | ⚠️ SEO mix - see pages./.title |
 | `pages./kruti-dev-to-chanakya.description` | Convert Kruti Dev text to Chanakya font encoding online. Free, browser-based, no upload. | कृतिदेव टेक्स्ट को ऑनलाइन Chanakya फ़ॉन्ट एन्कोडिंग में बदलें। मुफ़्त, ब्राउज़र में, कोई अपलोड नहीं। |  |
@@ -756,7 +762,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./kruti-dev-to-chanakya.body.0` | &lt;h2>Coming in phase 2&lt;/h2> | &lt;h2>फ़ेज़ 2 में आ रहा है&lt;/h2> |  |
 | `pages./kruti-dev-to-chanakya.body.1` | &lt;p>The Chanakya character map has not been verified against real documents yet, so this pair is switched off rather than left to quietly mangle your text. A half-remembered mapping is worse than none.&lt;/p> | &lt;p>Chanakya अक्षर-मैप की अभी असली डॉक्यूमेंट से जाँच नहीं हुई है, इसलिए यह जोड़ी आपके टेक्स्ट को चुपचाप बिगाड़ने के लिए छोड़ने की जगह बंद रखी गई है। आधा-अधूरा याद किया मैप, मैप न होने से भी बुरा है।&lt;/p> |  |
 | `pages./kruti-dev-to-chanakya.body.2` | &lt;p>In the meantime, the &lt;a href="/">Kruti Dev to Unicode converter&lt;/a> is complete and tested.&lt;/p> | &lt;p>तब तक &lt;a href="/">कृतिदेव से यूनिकोड कन्वर्टर&lt;/a> पूरा और जाँचा हुआ है।&lt;/p> |  |
-| `pages./chanakya-to-kruti-dev.nav` | Chanakya → Kruti Dev | Chanakya → कृतिदेव |  |
+| `pages./chanakya-to-kruti-dev.nav` | Chanakya → Kruti Dev | चाणक्य → कृतिदेव |  |
 | `pages./chanakya-to-kruti-dev.h1` | Chanakya to Kruti Dev Converter | Chanakya से कृतिदेव कन्वर्टर |  |
 | `pages./chanakya-to-kruti-dev.title` | Chanakya to Kruti Dev Converter \| Chanakya 905 to KrutiDev 010 | Chanakya से कृतिदेव कन्वर्टर \| Chanakya 905 to Kruti Dev 010 | ⚠️ SEO mix - see pages./.title |
 | `pages./chanakya-to-kruti-dev.description` | Convert Chanakya font Hindi to Kruti Dev 010 text online, free and entirely in your browser. | Chanakya फ़ॉन्ट हिंदी को ऑनलाइन Kruti Dev 010 टेक्स्ट में बदलें, मुफ़्त और पूरी तरह आपके ब्राउज़र में। |  |
@@ -765,7 +771,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./chanakya-to-kruti-dev.body.0` | &lt;h2>Chanakya and Kruti Dev are different layouts&lt;/h2> | &lt;h2>Chanakya और कृतिदेव के लेआउट अलग हैं&lt;/h2> |  |
 | `pages./chanakya-to-kruti-dev.body.1` | &lt;p>Both are legacy Hindi fonts that store Devanagari on ASCII codepoints, but they were made by different vendors and they do not agree on which key carries which letter. A Chanakya document opened with Kruti Dev installed shows the wrong Hindi, not gibberish, which is exactly why this needs a real map rather than an approximation.&lt;/p> | &lt;p>दोनों पुराने हिंदी फ़ॉन्ट हैं जो देवनागरी को ASCII कोड पर रखते हैं, पर इन्हें अलग-अलग कंपनियों ने बनाया और ये इस पर सहमत नहीं हैं कि किस बटन पर कौन-सा अक्षर हो। कृतिदेव इंस्टॉल वाले कंप्यूटर पर Chanakya डॉक्यूमेंट खोलें तो बेमतलब अक्षर नहीं, गलत हिंदी दिखती है, और इसीलिए इसके लिए अंदाज़े की जगह असली मैप चाहिए।&lt;/p> |  |
 | `pages./chanakya-to-kruti-dev.body.2` | &lt;p>The Kruti Dev half of this conversion is already finished and tested. What is missing is the Chanakya side. In the meantime, the &lt;a href="/">Kruti Dev to Unicode converter&lt;/a> works today.&lt;/p> | &lt;p>इस कन्वर्जन का कृतिदेव वाला हिस्सा पहले से तैयार और जाँचा हुआ है। कमी Chanakya वाले हिस्से की है। तब तक &lt;a href="/">कृतिदेव से यूनिकोड कन्वर्टर&lt;/a> आज ही काम करता है।&lt;/p> |  |
-| `pages./shusha-to-unicode.nav` | Shusha → Unicode | Shusha → यूनिकोड |  |
+| `pages./shusha-to-unicode.nav` | Shusha → Unicode | शुषा → यूनिकोड |  |
 | `pages./shusha-to-unicode.h1` | Shusha to Unicode Converter | Shusha से यूनिकोड कन्वर्टर |  |
 | `pages./shusha-to-unicode.title` | Shusha to Unicode Converter \| Shusha Hindi Font to Unicode Online | Shusha से यूनिकोड कन्वर्टर \| Shusha Hindi Font to Unicode ऑनलाइन | ⚠️ SEO mix - see pages./.title |
 | `pages./shusha-to-unicode.description` | Convert Shusha font Hindi to Unicode in your browser. Free, private, no upload required. | Shusha फ़ॉन्ट हिंदी को अपने ब्राउज़र में यूनिकोड में बदलें। मुफ़्त, सुरक्षित, कोई अपलोड नहीं। |  |
@@ -774,7 +780,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./shusha-to-unicode.body.0` | &lt;h2>About Shusha&lt;/h2> | &lt;h2>Shusha के बारे में&lt;/h2> |  |
 | `pages./shusha-to-unicode.body.1` | &lt;p>Shusha is an older Hindi DTP font from the same era as Kruti Dev and Chanakya, and it turns up in scanned office documents and in files handed down through several machines. Like the others it is a font, not an encoding: the Hindi is stored as ASCII and only looks like Hindi when the font is installed.&lt;/p> | &lt;p>Shusha उसी दौर का पुराना हिंदी DTP फ़ॉन्ट है जिस दौर के कृतिदेव और Chanakya हैं, और यह स्कैन किए दफ़्तरी डॉक्यूमेंट और कई कंप्यूटरों से होकर आई फ़ाइलों में मिलता है। दूसरों की तरह यह भी फ़ॉन्ट है, एन्कोडिंग नहीं: हिंदी ASCII में रखी जाती है और फ़ॉन्ट इंस्टॉल होने पर ही हिंदी जैसी दिखती है।&lt;/p> |  |
 | `pages./shusha-to-unicode.body.2` | &lt;p>Its key arrangement is its own, so nothing from the Kruti Dev map carries over. Until it has been read off real Shusha documents this page has no converter on it. Try &lt;a href="/">Kruti Dev to Unicode&lt;/a> if your document turns out to be Kruti Dev after all.&lt;/p> | &lt;p>इसका बटन-क्रम अपना है, इसलिए कृतिदेव मैप से कुछ नहीं आता। जब तक असली Shusha डॉक्यूमेंट से इसे पढ़ा न जाए, इस पेज पर कोई कन्वर्टर नहीं है। अगर आपका डॉक्यूमेंट असल में कृतिदेव निकले, तो &lt;a href="/">कृतिदेव से यूनिकोड&lt;/a> आज़माएँ।&lt;/p> |  |
-| `pages./unicode-to-shusha.nav` | Unicode / Hindi → Shusha | यूनिकोड / हिंदी → Shusha |  |
+| `pages./unicode-to-shusha.nav` | Unicode / Hindi → Shusha | यूनिकोड / हिंदी → शुषा |  |
 | `pages./unicode-to-shusha.h1` | Unicode to Shusha Converter | यूनिकोड से Shusha कन्वर्टर |  |
 | `pages./unicode-to-shusha.title` | Unicode to Shusha Converter \| Hindi Unicode to Shusha Font Online | यूनिकोड से Shusha कन्वर्टर \| Hindi Unicode to Shusha फ़ॉन्ट ऑनलाइन | ⚠️ SEO mix - see pages./.title |
 | `pages./unicode-to-shusha.description` | Convert Unicode Hindi back to Shusha font text. Free, instant and fully client-side. | यूनिकोड हिंदी को वापस Shusha फ़ॉन्ट टेक्स्ट में बदलें। मुफ़्त, तुरंत और पूरी तरह ब्राउज़र में। |  |

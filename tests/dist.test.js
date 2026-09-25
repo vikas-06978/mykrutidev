@@ -261,6 +261,40 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
   });
 });
 
+describe('font names in the nav, the footer and /all-converters', () => {
+  const LATIN = ['Abbasi Chanakya', 'Chanakya', 'DevLys', 'Shusha', 'Mangal'];
+  const strip = (s) => s.replace(/<[^>]+>/g, '');
+  /** Visible text of the nav, footer and (on /all-converters) the card titles. */
+  const listText = (html) => {
+    const navs = [...html.matchAll(/<nav\b[^>]*data-(?:desktop|mobile)-nav[^>]*>([\s\S]*?)<\/nav>/g)].map((m) => m[1]);
+    // The footer's links only: its legal line names the trademarks as they are
+    // registered, which is exactly where the Latin spelling belongs.
+    const footer = html.match(/<nav aria-labelledby="footer-conv"[\s\S]*?<\/nav>/)?.[0] ?? '';
+    const cards = [...html.matchAll(/<li\b[^>]*data-route="[^"]*"[^>]*>[\s\S]*?<span class="font-medium text-ink"[^>]*>([\s\S]*?)<\/span>/g)].map((m) => m[1]);
+    return strip([...navs, footer, ...cards].join('\n'));
+  };
+
+  test('Hindi pages use Hindi font names there', () => {
+    for (const [p, html] of pages) {
+      if (!(p === '/hi' || p.startsWith('/hi/'))) continue;
+      const text = listText(html);
+      for (const name of LATIN) assert.ok(!text.includes(name), `${p}: "${name}" in the nav, footer or card titles`);
+    }
+    const all = listText(pages.get('/hi/all-converters'));
+    for (const hiName of ['देवलिस', 'चाणक्य', 'शुषा', 'अब्बासी चाणक्य', 'मंगल']) assert.ok(all.includes(hiName), hiName);
+  });
+
+  test('English pages still use the Latin names', () => {
+    const text = listText(pages.get('/all-converters'));
+    for (const name of LATIN) assert.ok(text.includes(name), name);
+  });
+
+  test('a Hindi tool page keeps the exact Latin font name in its own text', () => {
+    const h1 = pages.get('/hi/devlys-to-unicode').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)[1];
+    assert.match(h1, /<span translate="no">DevLys<\/span>/);
+  });
+});
+
 describe('converters behave identically in both languages', () => {
   /** What a page's converter is configured to do, read from its markup. */
   const converterOf = (html) => {

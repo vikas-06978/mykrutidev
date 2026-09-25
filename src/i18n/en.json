@@ -26,6 +26,14 @@
     "Other scripts": "Other scripts",
     "More": "More"
   },
+  "fontNames": {
+    "Abbasi Chanakya New": "Abbasi Chanakya New",
+    "Abbasi Chanakya": "Abbasi Chanakya",
+    "Chanakya": "Chanakya",
+    "DevLys": "DevLys",
+    "Shusha": "Shusha",
+    "Mangal": "Mangal"
+  },
   "fontBox": {
     "kruti-dev": "Kruti Dev",
     "unicode": "Unicode / Hindi",

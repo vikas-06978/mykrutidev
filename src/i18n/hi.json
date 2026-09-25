@@ -21,10 +21,18 @@
     "Mangal": "मंगल",
     "DevLys": "देवलिस",
     "Chanakya": "चाणक्य",
-    "Shusha": "Shusha",
+    "Shusha": "शुषा",
     "Nepali": "नेपाली",
     "Other scripts": "दूसरी लिपियाँ",
     "More": "और"
+  },
+  "fontNames": {
+    "Abbasi Chanakya New": "अब्बासी चाणक्य",
+    "Abbasi Chanakya": "अब्बासी चाणक्य",
+    "Chanakya": "चाणक्य",
+    "DevLys": "देवलिस",
+    "Shusha": "शुषा",
+    "Mangal": "मंगल"
   },
   "fontBox": {
     "kruti-dev": "Kruti Dev",
@@ -448,7 +456,7 @@
       ]
     },
     "/kruti-dev-to-mangal": {
-      "nav": "कृतिदेव → Mangal",
+      "nav": "कृतिदेव → मंगल",
       "h1": "कृतिदेव से Mangal कन्वर्टर",
       "title": "कृतिदेव से Mangal कन्वर्टर | Kruti Dev to Mangal फ़ॉन्ट हिंदी ऑनलाइन",
       "description": "कृतिदेव टेक्स्ट को सरकारी फ़ॉर्म और CRA/NPS पोर्टल के लिए Mangal फ़ॉन्ट हिंदी में बदलें। मात्राएँ सही जगह, असली Mangal में तुरंत प्रीव्यू, मुफ़्त और पूरी तरह ब्राउज़र में।",
@@ -494,7 +502,7 @@
       ]
     },
     "/mangal-to-kruti-dev": {
-      "nav": "Mangal → कृतिदेव",
+      "nav": "मंगल → कृतिदेव",
       "h1": "Mangal से कृतिदेव कन्वर्टर",
       "title": "Mangal से कृतिदेव कन्वर्टर | Mangal Font to Kruti Dev 010 मुफ़्त",
       "description": "Mangal (यूनिकोड) हिंदी पेस्ट करें और Kruti Dev 010 टेक्स्ट पाएँ, पुराने टाइपिंग टेस्ट और DTP फ़ाइलों के लिए तैयार। तुरंत कन्वर्जन, सही संयुक्त अक्षर, कुछ भी आपके ब्राउज़र से बाहर नहीं जाता।",
@@ -761,7 +769,7 @@
       "description": "MyKrutiDev के सभी कन्वर्टर: हिंदी के लिए कृतिदेव, DevLys, Chanakya, Shusha और Mangal, नेपाली के लिए Preeti, और वे भारतीय लिपियाँ जिन पर आगे काम होगा।"
     },
     "/devlys-to-unicode": {
-      "nav": "DevLys → यूनिकोड",
+      "nav": "देवलिस → यूनिकोड",
       "h1": "DevLys से यूनिकोड कन्वर्टर",
       "title": "DevLys से यूनिकोड कन्वर्टर | DevLys 010 to Hindi Unicode ऑनलाइन",
       "description": "DevLys 010 हिंदी टेक्स्ट को सही मात्राओं और संयुक्त अक्षरों के साथ यूनिकोड में बदलें। मुफ़्त, ब्राउज़र में चलता है, कुछ भी अपलोड नहीं होता।",
@@ -813,7 +821,7 @@
       ]
     },
     "/unicode-to-devlys": {
-      "nav": "यूनिकोड / हिंदी → DevLys",
+      "nav": "यूनिकोड / हिंदी → देवलिस",
       "h1": "यूनिकोड से DevLys कन्वर्टर",
       "title": "यूनिकोड से DevLys कन्वर्टर | Hindi Unicode to DevLys 010 फ़ॉन्ट",
       "description": "यूनिकोड हिंदी को ऑनलाइन वापस DevLys 010 फ़ॉन्ट टेक्स्ट में बदलें। तुरंत कन्वर्जन, सही आधे अक्षर, कोई अपलोड नहीं, मुफ़्त।",
@@ -860,7 +868,7 @@
       ]
     },
     "/devlys-to-mangal": {
-      "nav": "DevLys → Mangal",
+      "nav": "देवलिस → मंगल",
       "h1": "DevLys से Mangal कन्वर्टर",
       "title": "DevLys से Mangal कन्वर्टर | DevLys 010 to Mangal फ़ॉन्ट हिंदी",
       "description": "DevLys फ़ॉन्ट हिंदी को सरकारी फ़ॉर्म और यूनिकोड डॉक्यूमेंट के लिए Mangal में बदलें। मुफ़्त, तुरंत, सुरक्षित।",
@@ -906,7 +914,7 @@
       ]
     },
     "/mangal-to-devlys": {
-      "nav": "Mangal → DevLys",
+      "nav": "मंगल → देवलिस",
       "h1": "Mangal से DevLys कन्वर्टर",
       "title": "Mangal से DevLys कन्वर्टर | Mangal Unicode to DevLys 010 फ़ॉन्ट",
       "description": "Mangal (यूनिकोड) हिंदी को पुराने डॉक्यूमेंट और टाइपिंग अभ्यास के लिए DevLys 010 फ़ॉन्ट टेक्स्ट में बदलें। मुफ़्त और पूरी तरह ब्राउज़र में।",
@@ -953,7 +961,7 @@
       ]
     },
     "/abbasi-chanakya-to-unicode": {
-      "nav": "Abbasi Chanakya → यूनिकोड",
+      "nav": "अब्बासी चाणक्य → यूनिकोड",
       "h1": "Abbasi Chanakya New से यूनिकोड कन्वर्टर",
       "title": "Abbasi Chanakya New से यूनिकोड कन्वर्टर | Chanakya Font to Hindi Unicode",
       "description": "Abbasi Chanakya New फ़ॉन्ट में टाइप की हिंदी को यूनिकोड में बदलें, इ की मात्रा और रेफ़ सही क्रम में। मुफ़्त, तुरंत और पूरी तरह आपके ब्राउज़र में - कुछ भी अपलोड नहीं होता।",
@@ -993,7 +1001,7 @@
       ]
     },
     "/unicode-to-abbasi-chanakya": {
-      "nav": "यूनिकोड → Abbasi Chanakya",
+      "nav": "यूनिकोड → अब्बासी चाणक्य",
       "h1": "यूनिकोड से Abbasi Chanakya New कन्वर्टर",
       "title": "यूनिकोड से Abbasi Chanakya New कन्वर्टर | Hindi to Chanakya Font Code",
       "description": "यूनिकोड हिंदी को MS Word के लिए Abbasi Chanakya New फ़ॉन्ट कोड में बदलें, इ की मात्रा और रेफ़ उसी जगह जहाँ यह फ़ॉन्ट उन्हें टाइप करता है। हिंदी प्रीव्यू, मुफ़्त, कुछ भी अपलोड नहीं।",
@@ -1035,7 +1043,7 @@
       ]
     },
     "/chanakya-to-unicode": {
-      "nav": "Chanakya → यूनिकोड",
+      "nav": "चाणक्य → यूनिकोड",
       "h1": "Chanakya से यूनिकोड कन्वर्टर",
       "title": "Chanakya से यूनिकोड कन्वर्टर | Chanakya 905 to Hindi Unicode",
       "description": "Chanakya फ़ॉन्ट हिंदी को अपने ब्राउज़र में तुरंत यूनिकोड में बदलें। मुफ़्त, बिना साइन-अप, कुछ भी अपलोड नहीं।",
@@ -1048,7 +1056,7 @@
       ]
     },
     "/unicode-to-chanakya": {
-      "nav": "यूनिकोड / हिंदी → Chanakya",
+      "nav": "यूनिकोड / हिंदी → चाणक्य",
       "h1": "यूनिकोड से Chanakya कन्वर्टर",
       "title": "यूनिकोड से Chanakya कन्वर्टर | Hindi Unicode to Chanakya 905 फ़ॉन्ट",
       "description": "यूनिकोड हिंदी को वापस Chanakya फ़ॉन्ट एन्कोडिंग में बदलें। तुरंत, मुफ़्त और पूरी तरह ब्राउज़र में।",
@@ -1061,7 +1069,7 @@
       ]
     },
     "/kruti-dev-to-chanakya": {
-      "nav": "कृतिदेव → Chanakya",
+      "nav": "कृतिदेव → चाणक्य",
       "h1": "कृतिदेव से Chanakya कन्वर्टर",
       "title": "कृतिदेव से Chanakya कन्वर्टर | Kruti Dev to Chanakya 905 हिंदी",
       "description": "कृतिदेव टेक्स्ट को ऑनलाइन Chanakya फ़ॉन्ट एन्कोडिंग में बदलें। मुफ़्त, ब्राउज़र में, कोई अपलोड नहीं।",
@@ -1074,7 +1082,7 @@
       ]
     },
     "/chanakya-to-kruti-dev": {
-      "nav": "Chanakya → कृतिदेव",
+      "nav": "चाणक्य → कृतिदेव",
       "h1": "Chanakya से कृतिदेव कन्वर्टर",
       "title": "Chanakya से कृतिदेव कन्वर्टर | Chanakya 905 to Kruti Dev 010",
       "description": "Chanakya फ़ॉन्ट हिंदी को ऑनलाइन Kruti Dev 010 टेक्स्ट में बदलें, मुफ़्त और पूरी तरह आपके ब्राउज़र में।",
@@ -1087,7 +1095,7 @@
       ]
     },
     "/shusha-to-unicode": {
-      "nav": "Shusha → यूनिकोड",
+      "nav": "शुषा → यूनिकोड",
       "h1": "Shusha से यूनिकोड कन्वर्टर",
       "title": "Shusha से यूनिकोड कन्वर्टर | Shusha Hindi Font to Unicode ऑनलाइन",
       "description": "Shusha फ़ॉन्ट हिंदी को अपने ब्राउज़र में यूनिकोड में बदलें। मुफ़्त, सुरक्षित, कोई अपलोड नहीं।",
@@ -1100,7 +1108,7 @@
       ]
     },
     "/unicode-to-shusha": {
-      "nav": "यूनिकोड / हिंदी → Shusha",
+      "nav": "यूनिकोड / हिंदी → शुषा",
       "h1": "यूनिकोड से Shusha कन्वर्टर",
       "title": "यूनिकोड से Shusha कन्वर्टर | Hindi Unicode to Shusha फ़ॉन्ट ऑनलाइन",
       "description": "यूनिकोड हिंदी को वापस Shusha फ़ॉन्ट टेक्स्ट में बदलें। मुफ़्त, तुरंत और पूरी तरह ब्राउज़र में।",
