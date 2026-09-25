@@ -130,12 +130,23 @@ describe('code examples and Unicode output survive translation untouched', () =>
     // in Word's font list.
     const PICK = ['Kruti Dev 010', 'DevLys 010', 'Abbasi Chanakya New', 'Mangal'];
     for (const key of flatKeys(en)) {
+      // Menu group headings name a font FAMILY, like a heading, and use the
+      // everyday Hindi word (कृतिदेव, मंगल, देवलिस, चाणक्य). The items inside
+      // each menu keep the exact Latin names.
+      if (key.startsWith('groups.')) continue;
       for (const name of PICK) {
         const inEn = raw('en', key).split(name).length - 1;
         if (inEn === 0) continue;
         assert.ok(raw('hi', key).includes(name), `${key}: Hindi lost "${name}"`);
       }
     }
+  });
+
+  test('Hindi menu groups use the everyday Hindi names', () => {
+    assert.equal(hi.groups['Kruti Dev'], 'कृतिदेव');
+    assert.equal(hi.groups.Mangal, 'मंगल');
+    assert.equal(hi.groups.DevLys, 'देवलिस');
+    assert.equal(hi.groups.Chanakya, 'चाणक्य');
   });
 
   test('the brand and file types are never translated', () => {

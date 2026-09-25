@@ -145,6 +145,7 @@
     "copy": "Copy Hindi",
     "needKruti": "Need Kruti Dev? Use the",
     "needKrutiLink": "Unicode to Kruti Dev converter",
+    "needKrutiAfter": ".",
     "offlineStrong": "Offline spelling.",
     "offlineBody": "Google could not be reached, so some words come from the built-in dictionary and rules. It still works - rare words are just likelier to need a correction.",
     "tips": "Spelling tips:",

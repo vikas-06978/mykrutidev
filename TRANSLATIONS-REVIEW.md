@@ -4,8 +4,8 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **874 keys**, identical in both files (enforced by `npm test` and at build time).
-- **77 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
+- **875 keys**, identical in both files (enforced by `npm test` and at build time).
+- **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
   Mangal, DevLys 010, Abbasi Chanakya New). Brand (MyKrutiDev), file types
@@ -43,12 +43,12 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `nav.allConverters` | All converters | सभी कन्वर्टर |  |
 | `nav.soon` | soon | जल्द |  |
 | `nav.menu` | Menu | मेनू |  |
-| `groups.Kruti Dev` | Kruti Dev | कृतिदेव | ⚠️ Nav group uses कृतिदेव (running-text rule). Other font groups stay in Latin (Mangal, DevLys, Chanakya, Shusha) - no common Hindi spelling. Confirm. |
+| `groups.Kruti Dev` | Kruti Dev | कृतिदेव |  |
 | `groups.Unicode / Hindi` | Unicode / Hindi | यूनिकोड / हिंदी |  |
-| `groups.Mangal` | Mangal | Mangal | ⚠️ Kept Latin. "मंगल" is also common in Hindi text - your call. |
-| `groups.DevLys` | DevLys | DevLys |  |
-| `groups.Chanakya` | Chanakya | Chanakya |  |
-| `groups.Shusha` | Shusha | Shusha |  |
+| `groups.Mangal` | Mangal | मंगल |  |
+| `groups.DevLys` | DevLys | देवलिस |  |
+| `groups.Chanakya` | Chanakya | चाणक्य |  |
+| `groups.Shusha` | Shusha | Shusha | ⚠️ Menu groups use Hindi names (कृतिदेव, मंगल, देवलिस, चाणक्य); Shusha is kept Latin (hidden today - no live page). Items inside the menus keep exact Latin font names. |
 | `groups.Nepali` | Nepali | नेपाली |  |
 | `groups.Other scripts` | Other scripts | दूसरी लिपियाँ |  |
 | `groups.More` | More | और |  |
@@ -156,8 +156,9 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `translit.suggestBefore` | Other spellings for  |  | ⚠️ Intentionally empty: Hindi word order puts the Roman word first ("&lt;code> की दूसरी स्पेलिंग:"). |
 | `translit.suggestAfter` | : |  की दूसरी स्पेलिंग: |  |
 | `translit.copy` | Copy Hindi | हिंदी कॉपी करें |  |
-| `translit.needKruti` | Need Kruti Dev? Use the | कृतिदेव चाहिए? इस्तेमाल करें |  |
+| `translit.needKruti` | Need Kruti Dev? Use the | कृतिदेव चाहिए? |  |
 | `translit.needKrutiLink` | Unicode to Kruti Dev converter | यूनिकोड से कृतिदेव कन्वर्टर |  |
+| `translit.needKrutiAfter` | . |  इस्तेमाल करें। |  |
 | `translit.offlineStrong` | Offline spelling. | ऑफ़लाइन स्पेलिंग। |  |
 | `translit.offlineBody` | Google could not be reached, so some words come from the built-in dictionary and rules. It still works - rare words are just likelier to need a correction. | Google से कनेक्शन नहीं हो पाया, इसलिए कुछ शब्द साइट की अपनी डिक्शनरी और नियमों से बने हैं। टूल फिर भी चलता है - बस कम इस्तेमाल होने वाले शब्दों को सुधारना पड़ सकता है। |  |
 | `translit.tips` | Spelling tips: | स्पेलिंग के टिप्स: |  |

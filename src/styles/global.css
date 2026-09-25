@@ -157,6 +157,23 @@
   }
 }
 
+/* --- Hindi pages ----------------------------------------------------------- */
+/* A whole page of Devanagari needs more room than the Latin defaults give it:
+   matras rise above and below the line, and headings set tight clip into
+   each other. Unlayered on purpose, so it outranks the line-height that
+   Tailwind's text-* utilities attach to the h1 and h2s. English pages are
+   untouched. */
+html[lang='hi'] body {
+  line-height: 1.7;
+}
+html[lang='hi'] :is(h1, h2, h3, h4) {
+  line-height: 1.35;
+}
+/* The h1 and the intro paragraph (or the Beta note) under it. */
+html[lang='hi'] h1 + p {
+  margin-top: 1rem;
+}
+
 /* --- Custom utilities (v4 uses @utility, not @layer components) ----------- */
 
 @utility wrap {

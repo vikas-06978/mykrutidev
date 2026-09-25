@@ -24,8 +24,7 @@ const get = (obj, key) => key.split('.').reduce((n, k) => n?.[k], obj);
 const FLAGS = {
   'lang.bannerText': 'Only the Hindi is ever shown (the banner is for Hindi readers, on English pages). English column is for reference.',
   'lang.bannerCta': 'As above.',
-  'groups.Kruti Dev': 'Nav group uses कृतिदेव (running-text rule). Other font groups stay in Latin (Mangal, DevLys, Chanakya, Shusha) - no common Hindi spelling. Confirm.',
-  'groups.Mangal': 'Kept Latin. "मंगल" is also common in Hindi text - your call.',
+  'groups.Shusha': 'Menu groups use Hindi names (कृतिदेव, मंगल, देवलिस, चाणक्य); Shusha is kept Latin (hidden today - no live page). Items inside the menus keep exact Latin font names.',
   'fontBox.kruti-dev': 'Box label kept Latin "Kruti Dev" (user must recognise the font). Headings use कृतिदेव.',
   'converter.raw': '"रॉ कोड" - is "कच्चा कोड" or "असली कोड" clearer for your users?',
   'converter.keepEnglishHelp': '"अंदाज़े से" for "heuristically". Check it reads naturally.',

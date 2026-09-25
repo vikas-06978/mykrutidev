@@ -147,9 +147,16 @@ const strings = {
       </div>
 
       <p class="px-4 pb-4 text-sm text-body">
-        <Fragment set:html={render(t('translit.needKruti'))} />
-        {/* Base.astro points this at /hi/... on a Hindi page. */}
-        <a href="/unicode-to-kruti-dev" set:html={render(t('translit.needKrutiLink'))} />.
+        {/*
+          Three parts so each language can put the link where its word order
+          wants it. The spaces are explicit: Astro drops the whitespace between
+          a set:html fragment and the tag after it. Base.astro points the href
+          at /hi/... on a Hindi page.
+        */}
+        <Fragment set:html={render(t('translit.needKruti'))} />{' '}<a
+          href="/unicode-to-kruti-dev"
+          set:html={render(t('translit.needKrutiLink'))}
+        /><Fragment set:html={render(t('translit.needKrutiAfter'))} />
       </p>
     </div>
   </div>

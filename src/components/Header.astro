@@ -236,9 +236,13 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       menu: someone who cannot read the page must not have to find a hamburger
       first. Each side links to THIS page in that language; the current one is
       plain text. `data-lang-switch` keeps Base.astro's link rewriting off it.
+
+      Both labels get the same line box (leading-6) and share a baseline.
+      Without it the global [lang='hi'] { line-height: 1.85 } rule gave
+      "हिंदी" a taller box than "English", so it sat higher.
     */}
     <p
-      class="flex shrink-0 items-center gap-1.5 text-sm whitespace-nowrap"
+      class="flex shrink-0 items-baseline gap-1.5 text-sm whitespace-nowrap"
       role="group"
       aria-label={t('lang.switchAria')}
       translate="no"
@@ -247,12 +251,12 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
         switcher.map((s, i) => (
           <>
             {i > 0 && (
-              <span aria-hidden="true" class="text-mute">
+              <span aria-hidden="true" class="leading-6 text-mute">
                 |
               </span>
             )}
             {s.current ? (
-              <span lang={s.lang} aria-current="true" class="font-semibold text-ink">
+              <span lang={s.lang} aria-current="true" class="leading-6 font-semibold text-ink">
                 {s.label}
               </span>
             ) : (
@@ -261,7 +265,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                 lang={s.lang}
                 hreflang={s.lang}
                 data-lang-switch={s.lang}
-                class="text-body no-underline hover:text-ink hover:underline"
+                class="leading-6 text-body no-underline hover:text-ink hover:underline"
               >
                 {s.label}
               </a>
