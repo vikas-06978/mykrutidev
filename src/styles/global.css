@@ -32,6 +32,11 @@
    hk-* classes, so the typing tutor's kb-* caps are untouched. */
 @import './hindi-keyboard.css';
 
+/* Colour themes (Light is the @theme block below) and accent colours. Order
+   matters: accents.css maps --color-brick after themes.css sets it. */
+@import './themes.css';
+@import './accents.css';
+
 /* ===========================================================================
    Design tokens - see DESIGN.md
    Deep navy ink on warm paper, muted brick accent. Trustworthy, not flashy.
@@ -101,88 +106,6 @@
   --radius-chrome: 6px;
   --radius-card: 12px;
   --radius-panel: 16px;
-}
-
-/* ===========================================================================
-   Themes - Light (the tokens above), Dark, Reading
-   ===========================================================================
-   Chosen in the header and applied by the inline script at the top of
-   Base.astro, which sets <html data-theme> before anything is painted.
-   "System" is not a theme of its own: that script resolves it to light or dark
-   from prefers-color-scheme and follows the device live.
-
-   A theme overrides ONLY the tokens; every component reads them. Every
-   text/background pair used on the site is at least 4.5:1 in every theme
-   (lowest: Light 4.7, Dark 5.5, Reading 5.1) - e2e/theme.spec.js checks the
-   rendered pages with axe.
-
-   Screen only: print always uses the Light tokens above. */
-:root {
-  color-scheme: light;
-}
-
-@media screen {
-  :root[data-theme='dark'] {
-    color-scheme: dark;
-    --color-paper: #151618;
-    --color-surface: #1d1f22;
-    --color-inset: #26292d;
-    --color-ink: #eceae6;
-    --color-body: #c9c6c0;
-    --color-mute: #a29f99;
-    --color-hairline: #34373c;
-    --color-hairline-soft: #2a2d31;
-    /* The brand brick, lifted so it reads on a dark page. */
-    --color-brick: #ee9275;
-    --color-brick-deep: #f5ab93;
-    --color-saffron: #e0a043;
-    --color-ok: #6fd394;
-    --color-warn-bg: #2d2718;
-    --color-badge: #efc56f;
-    --color-err: #ff8f85;
-    --color-err-bg: #3a1e1e;
-    --color-on-brick: #1a1411;
-    --color-on-ok: #0e1a12;
-    --color-on-err: #1f0e0e;
-    --color-focus: #ee9275;
-    --color-shadow: #000000;
-  }
-
-  :root[data-theme='reading'] {
-    --color-paper: #f4ecd8;
-    --color-surface: #faf4e6;
-    --color-inset: #ece1c7;
-    --color-ink: #2e251c;
-    --color-body: #4a3d31;
-    --color-mute: #665747;
-    --color-hairline: #dccdab;
-    --color-hairline-soft: #e6dbc0;
-    --color-brick: #963a21;
-    --color-brick-deep: #7a2e19;
-    --color-saffron: #b5761c;
-    --color-ok: #2a6a2c;
-    --color-warn-bg: #f2e3bf;
-    --color-badge: #744810;
-    --color-err: #a1221a;
-    --color-err-bg: #f5dbcf;
-    --color-focus: #963a21;
-    --color-shadow: #3b2a14;
-  }
-
-  /* Reading is also a typographic setting: long prose and page intros get
-     about 10% more size, looser leading and a ~70ch measure. The tools'
-     boxes and keyboards keep their sizes so nothing reflows out of place. */
-  :root[data-theme='reading'] body {
-    line-height: 1.8;
-  }
-  :root[data-theme='reading'] :is(.prose-page, main h1 + p) {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    max-width: 70ch;
-  }
-  :root[data-theme='reading'] .prose-page :is(p, li) {
-    line-height: 1.8;
-  }
 }
 
 /* --- Base ---------------------------------------------------------------- */

@@ -10,12 +10,23 @@
   },
   "theme": {
     "label": "Theme",
-    "menuAria": "Colour theme",
+    "panelAria": "Theme and accent colour",
     "current": "Theme: {name}",
     "light": "Light",
+    "white": "White",
     "dark": "Dark",
+    "black": "Black",
     "reading": "Reading",
-    "system": "System"
+    "contrast": "High contrast",
+    "system": "System",
+    "systemHint": "Follows your device",
+    "accentLabel": "Accent colour",
+    "accentHint": "High contrast always uses yellow.",
+    "terracotta": "Terracotta",
+    "blue": "Blue",
+    "green": "Green",
+    "purple": "Purple",
+    "teal": "Teal"
   },
   "nav": {
     "aria": "Converters",

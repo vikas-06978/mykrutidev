@@ -1,0 +1,248 @@
+---
+/**
+ * The theme and accent picker: a grid of theme cards (each a small preview of
+ * its own theme, in the chosen accent) and a row of accent swatches.
+ *
+ * Rendered twice by Header.astro - in the desktop popover and in the phone
+ * menu - so every id is prefixed with `uid`. The state lives in the inline
+ * script in Base.astro (window.mkdTheme); Header.astro's script draws it here
+ * and handles the keys: arrows move within a group, Enter/Space picks, Tab
+ * moves between the theme cards and the swatches.
+ *
+ * The preview colours (--pp, --pt, --pa ...) are generated per theme into
+ * accents.css, so a card shows its theme whatever theme is on.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  uid: string;
+}
+const { uid } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+
+const VISUAL = ['light', 'white', 'dark', 'black', 'reading', 'contrast'] as const;
+const ACCENTS = ['terracotta', 'blue', 'green', 'purple', 'teal'] as const;
+---
+
+<div class="tp" data-theme-picker>
+  <p id={`${uid}-themes`} class="tp-label">{t('theme.label')}</p>
+  <div class="tp-grid" role="radiogroup" aria-labelledby={`${uid}-themes`} data-picker-group="theme">
+    {
+      [...VISUAL, 'system' as const].map((k) => (
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          tabindex="-1"
+          data-value={k}
+          class:list={['tp-card', k === 'system' && 'tp-card-system']}
+        >
+          <span class="tp-prev" data-theme-card={k === 'system' ? undefined : k} data-system={k === 'system' ? '' : undefined} aria-hidden="true">
+            <span class="tp-line" />
+            <span class="tp-line tp-line-short" />
+            <span class="tp-pill" />
+          </span>
+          <span class="tp-text">
+            <span class="tp-name">
+              {t(`theme.${k}`)}
+              <svg viewBox="0 0 16 16" class="tp-tick" aria-hidden="true">
+                <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            {k === 'system' && <span class="tp-hint">{t('theme.systemHint')}</span>}
+          </span>
+        </button>
+      ))
+    }
+  </div>
+
+  <p id={`${uid}-accents`} class="tp-label">{t('theme.accentLabel')}</p>
+  <div class="tp-swatches" role="radiogroup" aria-labelledby={`${uid}-accents`} data-picker-group="accent">
+    {
+      ACCENTS.map((a) => (
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          tabindex="-1"
+          data-value={a}
+          aria-label={t(`theme.${a}`)}
+          title={t(`theme.${a}`)}
+          class="tp-swatch"
+          style={`--sw: var(--accent-${a}); --sw-on: var(--accent-${a}-on)`}
+        >
+          <svg viewBox="0 0 16 16" class="tp-tick" aria-hidden="true">
+            <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      ))
+    }
+  </div>
+  <p class="tp-hc-hint">{t('theme.accentHint')}</p>
+</div>
+
+<style>
+  .tp {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .tp-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+  }
+  .tp-label + .tp-grid,
+  .tp-label + .tp-swatches {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Six themes in rows of three (two on the narrowest phones), System under
+     them across the full width: it is the one that is not a look of its own. */
+  .tp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  @media (width < 22rem) {
+    .tp-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .tp-card-system {
+    grid-column: 1 / -1;
+    grid-template-columns: 4.5rem 1fr;
+    align-items: center;
+  }
+
+  .tp-card {
+    display: grid;
+    gap: 0.375rem;
+    padding: 0.375rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+    color: var(--color-body);
+    text-align: start;
+    cursor: pointer;
+  }
+  .tp-card:hover {
+    border-color: var(--color-mute);
+  }
+  .tp-card[aria-checked='true'] {
+    border-color: var(--color-brick);
+    box-shadow: inset 0 0 0 1px var(--color-brick);
+    color: var(--color-ink);
+  }
+
+  /* The preview: that theme's page, a heading line, a text line, an accent pill. */
+  .tp-prev {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    height: 2.75rem;
+    padding: 0 8px;
+    border: 1px solid var(--pl);
+    border-radius: 4px;
+    background: var(--pp);
+  }
+  .tp-line {
+    display: block;
+    width: 70%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--pt);
+  }
+  .tp-line-short {
+    width: 45%;
+    background: var(--pm);
+  }
+  .tp-pill {
+    display: block;
+    width: 1.75rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--pa, var(--pa-terracotta));
+  }
+  /* System previews both of the looks it chooses between. */
+  .tp-prev[data-system] {
+    --pl: var(--color-hairline);
+    background: linear-gradient(135deg, #faf7f2 0 50%, #151618 50% 100%);
+  }
+  .tp-prev[data-system] .tp-line {
+    background: #8a8f99;
+  }
+  .tp-prev[data-system] .tp-pill {
+    background: var(--color-brick);
+  }
+
+  .tp-text {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .tp-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .tp-hint {
+    font-size: 0.75rem;
+    color: var(--color-mute);
+  }
+  .tp-tick {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+    color: var(--color-brick);
+  }
+  [aria-checked='false'] > .tp-text .tp-tick,
+  .tp-swatch[aria-checked='false'] .tp-tick {
+    visibility: hidden;
+  }
+
+  .tp-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+  .tp-swatch {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--sw);
+    cursor: pointer;
+  }
+  .tp-swatch .tp-tick {
+    color: var(--sw-on);
+    width: 1rem;
+    height: 1rem;
+  }
+  .tp-swatch[aria-checked='true'] {
+    box-shadow:
+      0 0 0 2px var(--color-surface),
+      0 0 0 4px var(--color-ink);
+  }
+
+  .tp-hc-hint {
+    display: none;
+    font-size: 0.75rem;
+    color: var(--color-mute);
+  }
+  :global(:root[data-theme='contrast']) .tp-hc-hint {
+    display: block;
+  }
+
+  .tp-card:focus-visible,
+  .tp-swatch:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+</style>

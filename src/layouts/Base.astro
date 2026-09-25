@@ -91,25 +91,58 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     */}
     <script is:inline>
       (function () {
-        var KEY = 'mkd-theme';
-        var BAR = { light: '#faf7f2', dark: '#151618', reading: '#f4ecd8' };
+        var BAR = {
+          light: '#faf7f2',
+          white: '#ffffff',
+          dark: '#151618',
+          black: '#000000',
+          reading: '#f4ecd8',
+          contrast: '#000000',
+        };
+        var PREFS = /^(light|white|dark|black|reading|contrast|system)$/;
+        var ACCENTS = /^(terracotta|blue|green|purple|teal)$/;
         var root = document.documentElement;
         var dark = window.matchMedia('(prefers-color-scheme: dark)');
-        var pref = 'system';
-        try {
-          pref = localStorage.getItem(KEY) || 'system';
-        } catch (e) {}
-        if (!/^(light|dark|reading|system)$/.test(pref)) pref = 'system';
+        function load(key, ok, fallback) {
+          try {
+            var v = localStorage.getItem(key);
+            return v && ok.test(v) ? v : fallback;
+          } catch (e) {
+            return fallback;
+          }
+        }
+        function save(key, v) {
+          try {
+            localStorage.setItem(key, v);
+          } catch (e) {}
+        }
+        var pref = load('mkd-theme', PREFS, 'system');
+        var accent = load('mkd-accent', ACCENTS, 'terracotta');
         function apply() {
           var theme = pref === 'system' ? (dark.matches ? 'dark' : 'light') : pref;
           root.setAttribute('data-theme', theme);
           root.setAttribute('data-theme-pref', pref);
+          root.setAttribute('data-accent', accent);
           var bar = document.querySelector('meta[name="theme-color"]');
           if (bar) bar.setAttribute('content', BAR[theme]);
-          document.dispatchEvent(new CustomEvent('mkd:theme', { detail: { pref: pref, theme: theme } }));
+          document.dispatchEvent(
+            new CustomEvent('mkd:theme', { detail: { pref: pref, theme: theme, accent: accent } }),
+          );
+        }
+        // A short cross-fade for a switch the visitor made (themes.css).
+        var fading;
+        function fade() {
+          root.classList.add('theme-fade');
+          clearTimeout(fading);
+          fading = setTimeout(function () {
+            root.classList.remove('theme-fade');
+          }, 260);
         }
         function onDevice() {
-          if (pref === 'system') apply();
+          if (pref === 'system') {
+            fade();
+            apply();
+          }
         }
         if (dark.addEventListener) dark.addEventListener('change', onDevice);
         else if (dark.addListener) dark.addListener(onDevice);
@@ -117,12 +150,21 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
           get: function () {
             return pref;
           },
+          accent: function () {
+            return accent;
+          },
           set: function (p) {
-            if (!/^(light|dark|reading|system)$/.test(p)) return;
+            if (!PREFS.test(p) || p === pref) return;
             pref = p;
-            try {
-              localStorage.setItem(KEY, p);
-            } catch (e) {}
+            save('mkd-theme', p);
+            fade();
+            apply();
+          },
+          setAccent: function (a) {
+            if (!ACCENTS.test(a) || a === accent) return;
+            accent = a;
+            save('mkd-accent', a);
+            fade();
             apply();
           },
         };

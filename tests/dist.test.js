@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
+import { THEMES, readThemes } from '../src/lib/themeColors.js';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const FIXTURES = JSON.parse(
@@ -296,21 +297,16 @@ describe('font names in the nav, the footer and /all-converters', () => {
 });
 
 describe('themes', () => {
-  const css = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
-  /** --color-paper in the @theme block (light) and in each [data-theme] block. */
-  const paperOf = (theme) => {
-    const block =
-      theme === 'light'
-        ? css.match(/@theme\s*\{([\s\S]*?)\n\}/)[1]
-        : css.match(new RegExp(`\\[data-theme='${theme}'\\]\\s*\\{([\\s\\S]*?)\\}`))[1];
-    return block.match(/--color-paper:\s*(#[0-9a-f]{6})/i)[1].toLowerCase();
-  };
+  const styles = (f) => readFileSync(new URL(`../src/styles/${f}`, import.meta.url), 'utf8');
+  const themes = readThemes(styles('global.css'), styles('themes.css'));
+  const paperOf = (theme) => themes[theme].paper;
 
-  test('every page sets the theme in <head>, before <body>', () => {
+  test('every page sets the theme and accent in <head>, before <body>', () => {
     for (const [p, html] of pages) {
       const [head] = html.split('<body');
       assert.match(head, /<meta name="theme-color"/, p);
-      assert.match(head, /localStorage\.getItem\(KEY\)/, `${p}: no theme script in <head>`);
+      assert.match(head, /'mkd-theme'/, `${p}: no theme script in <head>`);
+      assert.match(head, /'mkd-accent'/, `${p}: the theme script does not restore the accent`);
       // Inline, not a module: it must run while the head is parsed.
       const script = [...head.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].find((m) => m[2].includes('mkd-theme'));
       assert.ok(script && !/type="module"|\bsrc=/.test(script[1]), `${p}: theme script must be inline`);
@@ -319,10 +315,10 @@ describe('themes', () => {
 
   test('the browser-bar colours in the script match --color-paper for each theme', () => {
     const html = pages.get('/');
-    const bar = JSON.parse(
-      html.match(/var BAR = (\{[^}]+\})/)[1].replace(/'/g, '"').replace(/(\w+):/g, '"$1":'),
+    const bar = Object.fromEntries(
+      [...html.match(/var BAR = \{([^}]+)\}/)[1].matchAll(/(\w+):\s*'(#[0-9a-f]{6})'/gi)].map((m) => [m[1], m[2]]),
     );
-    for (const theme of ['light', 'dark', 'reading']) assert.equal(bar[theme], paperOf(theme), theme);
+    for (const theme of THEMES) assert.equal(bar[theme], paperOf(theme), theme);
     assert.match(html, new RegExp(`<meta name="theme-color" content="${paperOf('light')}"`));
   });
 });

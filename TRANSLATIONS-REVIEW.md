@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **887 keys**, identical in both files (enforced by `npm test` and at build time).
+- **898 keys**, identical in both files (enforced by `npm test` and at build time).
 - **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -39,12 +39,23 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `lang.bannerCta` | View in Hindi | हिंदी में देखें | ⚠️ As above. |
 | `lang.bannerClose` | Close | बंद करें |  |
 | `theme.label` | Theme | थीम |  |
-| `theme.menuAria` | Colour theme | रंग थीम |  |
+| `theme.panelAria` | Theme and accent colour | थीम और एक्सेंट रंग |  |
 | `theme.current` | Theme: {name} | थीम: {name} |  |
 | `theme.light` | Light | लाइट |  |
+| `theme.white` | White | सफ़ेद |  |
 | `theme.dark` | Dark | डार्क |  |
+| `theme.black` | Black | काला |  |
 | `theme.reading` | Reading | पढ़ने वाला |  |
+| `theme.contrast` | High contrast | हाई कॉन्ट्रास्ट |  |
 | `theme.system` | System | सिस्टम |  |
+| `theme.systemHint` | Follows your device | डिवाइस के हिसाब से |  |
+| `theme.accentLabel` | Accent colour | एक्सेंट रंग |  |
+| `theme.accentHint` | High contrast always uses yellow. | हाई कॉन्ट्रास्ट में हमेशा पीला रंग रहता है। |  |
+| `theme.terracotta` | Terracotta | टेराकोटा |  |
+| `theme.blue` | Blue | नीला |  |
+| `theme.green` | Green | हरा |  |
+| `theme.purple` | Purple | बैंगनी |  |
+| `theme.teal` | Teal | टील |  |
 | `nav.aria` | Converters | कन्वर्टर |  |
 | `nav.typingTools` | Typing tools | टाइपिंग टूल |  |
 | `nav.allConverters` | All converters | सभी कन्वर्टर |  |

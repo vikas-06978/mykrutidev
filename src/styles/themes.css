@@ -1,0 +1,188 @@
+/* ===========================================================================
+   Colour themes
+   ===========================================================================
+   Light is the @theme block in global.css. The others override ONLY tokens;
+   every component reads them. The inline script at the top of Base.astro sets
+   <html data-theme> (and data-accent) before anything is painted; "System"
+   is not a theme of its own - it resolves to light or dark from
+   prefers-color-scheme and follows the device live.
+
+   Every text/background pair used on the site passes AA (4.5:1) in every
+   theme with every accent, and High contrast passes AAA (7:1):
+   src/lib/themes.test.js computes them, e2e/theme.spec.js checks the rendered
+   pages with axe.
+
+   Screen only: print always uses the Light tokens.
+
+   The accent (--color-brick and friends) is set here per theme as the
+   terracotta default; accents.css swaps it for the chosen accent.
+   =========================================================================== */
+:root {
+  color-scheme: light;
+}
+
+@media screen {
+  /* White: the Light palette on pure white, with crisper grey borders. */
+  :root[data-theme='white'] {
+    --color-paper: #ffffff;
+    --color-surface: #ffffff;
+    --color-inset: #f3f4f6;
+    --color-hairline: #d5d9df;
+    --color-hairline-soft: #e7eaee;
+    --color-shadow: #111827;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-paper: #151618;
+    --color-surface: #1d1f22;
+    --color-inset: #26292d;
+    --color-ink: #eceae6;
+    --color-body: #c9c6c0;
+    --color-mute: #a29f99;
+    --color-hairline: #34373c;
+    --color-hairline-soft: #2a2d31;
+    --color-brick: #ee9275;
+    --color-brick-deep: #f5ab93;
+    --color-saffron: #e0a043;
+    --color-ok: #6fd394;
+    --color-warn-bg: #2d2718;
+    --color-badge: #efc56f;
+    --color-err: #ff8f85;
+    --color-err-bg: #3a1e1e;
+    --color-on-brick: #1a1411;
+    --color-on-ok: #0e1a12;
+    --color-on-err: #1f0e0e;
+    --color-focus: #ee9275;
+    --color-shadow: #000000;
+  }
+
+  /* Black: true #000 for OLED screens. Cards and boxes stay dark grey, so the
+     layout is still visible. */
+  :root[data-theme='black'] {
+    color-scheme: dark;
+    --color-paper: #000000;
+    --color-surface: #121212;
+    --color-inset: #1e1e1e;
+    --color-ink: #eceae6;
+    --color-body: #cfccc6;
+    --color-mute: #a8a59f;
+    --color-hairline: #333333;
+    --color-hairline-soft: #262626;
+    --color-brick: #ee9275;
+    --color-brick-deep: #f5ab93;
+    --color-saffron: #e0a043;
+    --color-ok: #6fd394;
+    --color-warn-bg: #221d10;
+    --color-badge: #efc56f;
+    --color-err: #ff8f85;
+    --color-err-bg: #2e1414;
+    --color-on-brick: #1a1411;
+    --color-on-ok: #0e1a12;
+    --color-on-err: #1f0e0e;
+    --color-focus: #ee9275;
+    --color-shadow: #000000;
+  }
+
+  :root[data-theme='reading'] {
+    --color-paper: #f4ecd8;
+    --color-surface: #faf4e6;
+    --color-inset: #ece1c7;
+    --color-ink: #2e251c;
+    --color-body: #4a3d31;
+    --color-mute: #665747;
+    --color-hairline: #dccdab;
+    --color-hairline-soft: #e6dbc0;
+    --color-brick: #963a21;
+    --color-brick-deep: #7a2e19;
+    --color-saffron: #b5761c;
+    --color-ok: #2a6a2c;
+    --color-warn-bg: #f2e3bf;
+    --color-badge: #744810;
+    --color-err: #a1221a;
+    --color-err-bg: #f5dbcf;
+    --color-focus: #963a21;
+    --color-shadow: #3b2a14;
+  }
+
+  /* Reading is also a typographic setting: long prose and page intros get
+     about 10% more size, looser leading and a ~70ch measure. The tools'
+     boxes and keyboards keep their sizes so nothing reflows out of place. */
+  :root[data-theme='reading'] body {
+    line-height: 1.8;
+  }
+  :root[data-theme='reading'] :is(.prose-page, main h1 + p) {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 70ch;
+  }
+  :root[data-theme='reading'] .prose-page :is(p, li) {
+    line-height: 1.8;
+  }
+
+  /* High contrast: black and white, yellow for links, actions and focus,
+     thick borders. AAA (7:1) throughout. The extra [data-accent] outranks
+     accents.css: this theme always keeps its own yellow. */
+  :root[data-theme='contrast'],
+  :root[data-theme='contrast'][data-accent] {
+    color-scheme: dark;
+    --color-paper: #000000;
+    --color-surface: #000000;
+    --color-inset: #1c1c1c;
+    --color-ink: #ffffff;
+    --color-body: #ffffff;
+    --color-mute: #d6d6d6;
+    --color-hairline: #bdbdbd;
+    --color-hairline-soft: #8a8a8a;
+    --color-brick: #ffd60a;
+    --color-brick-deep: #ffe766;
+    --color-saffron: #ffd60a;
+    --color-ok: #5cf08f;
+    --color-warn-bg: #262000;
+    --color-badge: #ffe766;
+    --color-err: #ff9e9e;
+    --color-err-bg: #2e0000;
+    --color-on-brick: #000000;
+    --color-on-ok: #000000;
+    --color-on-err: #000000;
+    --color-focus: #ffd60a;
+    --color-shadow: #000000;
+  }
+  :root[data-theme='contrast'] :is(
+      .card,
+      .cv-field,
+      .btn,
+      .cv-seg button,
+      .kbd-cap,
+      .hk-key,
+      .tt-level,
+      [data-menu],
+      [data-theme-panel]
+    ) {
+    border-width: 2px;
+  }
+  :root[data-theme='contrast'] :focus-visible {
+    outline-width: 3px;
+  }
+  /* Links read as links without relying on colour. */
+  :root[data-theme='contrast'] main a:not(.btn, .card) {
+    text-decoration: underline;
+  }
+}
+
+/* A 200ms cross-fade while the theme or accent is being switched - only then,
+   so hover states and typing feedback keep their own timing. The script adds
+   the class for a moment; prefers-reduced-motion turns it off entirely. */
+@media (prefers-reduced-motion: no-preference) {
+  :root.theme-fade,
+  :root.theme-fade *,
+  :root.theme-fade *::before,
+  :root.theme-fade *::after {
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease,
+      fill 200ms ease,
+      stroke 200ms ease !important;
+  }
+}

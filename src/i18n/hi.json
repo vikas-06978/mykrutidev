@@ -10,12 +10,23 @@
   },
   "theme": {
     "label": "थीम",
-    "menuAria": "रंग थीम",
+    "panelAria": "थीम और एक्सेंट रंग",
     "current": "थीम: {name}",
     "light": "लाइट",
+    "white": "सफ़ेद",
     "dark": "डार्क",
+    "black": "काला",
     "reading": "पढ़ने वाला",
-    "system": "सिस्टम"
+    "contrast": "हाई कॉन्ट्रास्ट",
+    "system": "सिस्टम",
+    "systemHint": "डिवाइस के हिसाब से",
+    "accentLabel": "एक्सेंट रंग",
+    "accentHint": "हाई कॉन्ट्रास्ट में हमेशा पीला रंग रहता है।",
+    "terracotta": "टेराकोटा",
+    "blue": "नीला",
+    "green": "हरा",
+    "purple": "बैंगनी",
+    "teal": "टील"
   },
   "nav": {
     "aria": "कन्वर्टर",
