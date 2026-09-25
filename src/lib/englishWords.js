@@ -1,11 +1,15 @@
 /**
  * Is a Roman word English or Hinglish? And if English, how is it said?
  *
- * `nice to have` is English and should read नाइस तो हैव... except `to`, which
- * in a Hinglish sentence is almost always तो. So the rule is:
+ * `nice to have` is English and should read नाइस टू हैव, but `to` in a
+ * Hinglish sentence (`chal to sahi`) is तो. So the rule is:
  *
- *   a word is ENGLISH  if it is in public/data/english-words.json
- *                      AND it is none of the HINGLISH words below.
+ *   a word is ENGLISH    if it is in public/data/english-words.json
+ *                        AND it is none of the HINGLISH words below;
+ *   a word is AMBIGUOUS  if it is in both (is, to, he, main, mere...). Its
+ *                        neighbours decide - see readsEnglish() in
+ *                        romanTyping.js - and with no clear neighbour it is
+ *                        Hinglish, as it always used to be.
  *
  * HINGLISH is three lists together:
  *   - HINGLISH_ALWAYS: short words that look English and are Hindi in practice
@@ -46,6 +50,7 @@ export const HINGLISH = new Set(
 /**
  * @typedef {{
  *   isEnglish: (word: string) => boolean,
+ *   isAmbiguous: (word: string) => boolean,
  *   pronounce: (word: string) => string | null,
  * }} English
  */
@@ -71,5 +76,10 @@ export function makeEnglish(words) {
     const w = word.toLowerCase();
     return Object.hasOwn(words, w) && !HINGLISH.has(w);
   };
-  return { isEnglish, pronounce };
+  /** Both English and Hinglish (is, to, he, main...): the sentence decides - see romanTyping.js. */
+  const isAmbiguous = (word) => {
+    const w = word.toLowerCase();
+    return Object.hasOwn(words, w) && HINGLISH.has(w);
+  };
+  return { isEnglish, isAmbiguous, pronounce };
 }

@@ -321,7 +321,8 @@ describe('English words', () => {
       keepEnglish,
     });
   const CASES = [
-    ['nice to have', 'नाइस तो हैव'],
+    // `to` is ambiguous and its next word is English, so it reads English.
+    ['nice to have', 'नाइस टू हैव'],
     ['mera phone kaha hai?', 'मेरा फ़ोन कहा है?'],
     ['school jana hai', 'स्कूल जाना है'],
     ['thank you bhai!', 'थैंक यू भाई!'],
@@ -335,7 +336,71 @@ describe('English words', () => {
 
   test('Keep English: English words stay as typed, Hindi words are still Hindi', async () => {
     assert.equal((await typeEn('mera phone kaha hai', true)).text, 'मेरा phone कहा है');
-    assert.equal((await typeEn('Nice to have', true)).text, 'Nice तो have');
+    assert.equal((await typeEn('Nice to have', true)).text, 'Nice to have');
+  });
+
+  describe('ambiguous words follow their neighbours (is, to, he, mere...)', () => {
+    // The dictionary pass - what the page shows instantly, and all it has
+    // offline - so these do not depend on Google's answers.
+    const local = (text, keepEnglish) => typeHindiLocal(text, { fallback, english, keepEnglish }).text;
+
+    const KEEP = [
+      ['bhai is everything good', 'भाई is everything good'],
+      ['is ghar mein', 'इस घर में'],
+      ['nice to meet you', 'nice to meet you'],
+      ['chal to sahi', 'चल तो सही'],
+      ['he is good', 'he is good'],
+      ['wo mere ghar he', 'वो मेरे घर है'],
+    ];
+    for (const [roman, want] of KEEP) {
+      test(`Keep English: ${roman} -> ${want}`, () => assert.equal(nfd(local(roman, true)), nfd(want)));
+    }
+
+    const LETTERS = [
+      ['nice to meet you', 'नाइस टू मीट यू'],
+      ['is ghar mein', 'इस घर में'],
+    ];
+    for (const [roman, want] of LETTERS) {
+      test(`Hindi letters: ${roman} -> ${want}`, () => assert.equal(nfd(local(roman, false)), nfd(want)));
+    }
+
+    test('the same with Google answering', async () => {
+      assert.equal((await typeEn('bhai is everything good', true)).text, 'भाई is everything good');
+      assert.equal(nfd((await typeEn('nice to meet you')).text), nfd('नाइस टू मीट यू'));
+    });
+
+    test('punctuation is skipped when looking for a neighbour', () => {
+      assert.equal(local('bhai is, everything good', true), 'भाई is, everything good');
+      assert.equal(nfd(local('ghar... is', true)), nfd('घर... इस'));
+    });
+
+    test('no clear neighbour: Hindi, as before', () => {
+      assert.equal(local('is', true), 'इस');
+      assert.equal(nfd(local('to', false)), nfd('तो'));
+      assert.equal(local('is to', true), 'इस तो', 'both neighbours ambiguous');
+    });
+
+    test('a single letter passes the context through and is not itself changed', () => {
+      // `is` looks past `a` to `book`; `a` keeps whatever it always gave.
+      const a = typeHindiLocal('a', { fallback }).text;
+      assert.equal(local('this is a book', true), `this is ${a} book`);
+    });
+
+    test('tapping still offers both readings, whichever is shown', async () => {
+      const hindiTo = (await typeEn('chal to sahi', true, offlineFetch)).words[1];
+      assert.equal(hindiTo.suggestions[0], 'तो');
+      assert.ok(hindiTo.suggestions.includes('टू'));
+      const englishTo = (await typeEn('nice to meet you', false, offlineFetch)).words[1];
+      assert.equal(englishTo.suggestions[0], 'टू');
+      assert.ok(englishTo.suggestions.includes('तो'));
+      const keptTo = (await typeEn('nice to meet you', true, offlineFetch)).words[1];
+      assert.deepEqual(keptTo.suggestions.slice(0, 2), ['to', 'टू']);
+      assert.ok(keptTo.suggestions.includes('तो'));
+    });
+
+    test('before the English list has loaded nothing changes', () => {
+      assert.equal(typeHindiLocal('he is good', { fallback, keepEnglish: true }).text, typeHindiLocal('he is good', { fallback }).text);
+    });
   });
 
   test('English words are spelled offline too', async () => {

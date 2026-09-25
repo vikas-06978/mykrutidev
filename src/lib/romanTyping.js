@@ -29,9 +29,10 @@
  *      (हूँ, है, नहीं, वहाँ ...). Google's other candidates stay on offer.
  *   4. An ENGLISH word (englishWords.js: in the English list, not Hinglish)
  *      is spelled by its English pronunciation instead - nice -> नाइस - or
- *      kept exactly as typed in "Keep English" mode. Google's candidates are
- *      still offered when it is tapped, and a Hinglish word that is also
- *      English (`to`) offers its English reading (टू) there too.
+ *      kept exactly as typed in "Keep English" mode. A word that is both
+ *      (is, to, he) follows its neighbours - see readsEnglish(). Tapping any
+ *      of them offers both readings: Google's candidates / the Hindi, and the
+ *      English (टू for `to`).
  *   5. A word the user picked from the list wins over all of it.
  *
  * This module does no I/O itself. The Google lookup and the fallback are passed
@@ -102,6 +103,7 @@ export const pickKey = (index, roman) => `${index}|${roman.toLowerCase()}`;
 /**
  * @typedef {{
  *   isEnglish: (word: string) => boolean,
+ *   isAmbiguous?: (word: string) => boolean,
  *   pronounce: (word: string) => string | null,
  * }} English  see englishWords.js
  * @typedef {{ english?: English | null, keepEnglish?: boolean }} EnglishOpts
@@ -110,22 +112,68 @@ export const pickKey = (index, roman) => `${index}|${roman.toLowerCase()}`;
 const dedupe = (list) => [...new Set(list.filter(Boolean))];
 
 /**
+ * Which words read as English, by `index`.
+ *
+ * A plain English word always does. An AMBIGUOUS word - English and Hinglish
+ * at once: is, to, he, main, mere - is decided by its neighbours, skipping
+ * punctuation:
+ *
+ *   1. the NEXT word: English -> English, Hindi/Hinglish -> Hindi;
+ *   2. if there is none, or it is ambiguous and still undecided, the PREVIOUS
+ *      word, the same way;
+ *   3. otherwise Hindi, which is what every ambiguous word used to be.
+ *
+ * An ambiguous neighbour counts once it has been decided, so "he is good"
+ * reads English all the way back from `good`. A single letter (a, I - the
+ * English list has no one-letter words) says nothing either way and is
+ * skipped like punctuation; it is never changed itself.
+ *
+ *   bhai is everything good   is -> next is English          -> is
+ *   is ghar mein              is -> next is Hindi            -> इस
+ *   wo mere ghar he           he -> no next, previous Hindi  -> है
+ *
+ * @param {Segment[]} segments
+ * @param {English | null | undefined} english
+ * @returns {Set<number>}
+ */
+export function readsEnglish(segments, english) {
+  const out = new Set();
+  if (!english) return out;
+  const words = segments.filter((s) => s.kind === 'word' && s.v.length > 1);
+  /** 'en' | 'hi' | null (ambiguous, undecided) */
+  const read = words.map((s) =>
+    english.isEnglish(s.v) ? 'en' : english.isAmbiguous?.(s.v) ? null : 'hi',
+  );
+  const open = read.map((r) => r === null);
+  for (let i = words.length - 1; i >= 0; i--) {
+    if (open[i] && i + 1 < words.length && read[i + 1]) read[i] = read[i + 1];
+  }
+  for (let i = 0; i < words.length; i++) {
+    if (open[i] && read[i] === null && i > 0 && read[i - 1]) read[i] = read[i - 1];
+  }
+  words.forEach((s, i) => read[i] === 'en' && out.add(s.index));
+  return out;
+}
+
+/**
  * The candidates for one word, best first: what is shown is index 0.
  *
  * @param {string} roman as typed
  * @param {string[]} found Google's candidates, or the fallback's one
  * @param {EnglishOpts} opts
+ * @param {boolean} asEnglish from readsEnglish()
  */
-function suggestionsFor(roman, found, { english, keepEnglish }) {
+function suggestionsFor(roman, found, { english, keepEnglish }, asEnglish) {
   const lower = roman.toLowerCase();
   const spoken = english?.pronounce(lower) ?? null;
+  const pinned = COMMON_WORDS[lower];
 
-  if (english?.isEnglish(lower)) {
+  if (asEnglish) {
     const first = keepEnglish ? [roman, spoken] : [spoken];
-    return dedupe([...first, ...found]).slice(0, MAX_SUGGESTIONS);
+    // An ambiguous word read as English still offers its Hindi (to -> तो).
+    return dedupe([...first, pinned, ...found]).slice(0, MAX_SUGGESTIONS);
   }
 
-  const pinned = COMMON_WORDS[lower];
   const hindi = dedupe(pinned ? [pinned, ...found] : found);
   // Keep a slot for the English reading, so `to` always offers टू.
   if (spoken && !hindi.includes(spoken)) {
@@ -147,6 +195,7 @@ function assemble(segments, candidates, picks, englishOpts) {
   let text = '';
   /** @type {WordSpan[]} */
   const words = [];
+  const english = readsEnglish(segments, englishOpts.english);
   for (const seg of segments) {
     if (seg.kind === 'keep') {
       text += seg.v;
@@ -154,7 +203,7 @@ function assemble(segments, candidates, picks, englishOpts) {
     }
     const lower = seg.v.toLowerCase();
     const found = candidates.get(lower) ?? [seg.v];
-    const suggestions = suggestionsFor(seg.v, found, englishOpts);
+    const suggestions = suggestionsFor(seg.v, found, englishOpts, english.has(seg.index));
     const chosen = picks?.get(pickKey(seg.index, seg.v)) ?? suggestions[0];
     words.push({
       start: text.length,
