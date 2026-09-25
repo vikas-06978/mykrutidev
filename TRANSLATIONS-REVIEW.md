@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **879 keys**, identical in both files (enforced by `npm test` and at build time).
+- **880 keys**, identical in both files (enforced by `npm test` and at build time).
 - **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -166,6 +166,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `translit.needKrutiAfter` | . |  इस्तेमाल करें। |  |
 | `translit.offlineStrong` | Offline spelling. | ऑफ़लाइन स्पेलिंग। |  |
 | `translit.offlineBody` | Google could not be reached, so some words come from the built-in dictionary and rules. It still works - rare words are just likelier to need a correction. | Google से कनेक्शन नहीं हो पाया, इसलिए कुछ शब्द साइट की अपनी डिक्शनरी और नियमों से बने हैं। टूल फिर भी चलता है - बस कम इस्तेमाल होने वाले शब्दों को सुधारना पड़ सकता है। |  |
+| `translit.engineFailed` | The Hindi converter could not load. Check your connection and reload the page. | हिंदी कन्वर्टर लोड नहीं हो पाया। इंटरनेट कनेक्शन देखें और पेज को रीलोड करें। |  |
 | `translit.tips` | Spelling tips: | स्पेलिंग के टिप्स: |  |
 | `translit.mode` | Typing: | टाइपिंग: |  |
 | `translit.modes.hinglish.label` | Hinglish | Hinglish |  |

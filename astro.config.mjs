@@ -29,10 +29,14 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
-    // docConvert.js is import()ed only when a file is dropped, so Vite would
-    // discover fflate late, re-optimise, and answer the page's request with
-    // "504 Outdated Optimize Dep" - the upload then failed in dev. Bundling it
-    // up front means that request can never be stale.
-    optimizeDeps: { include: ['fflate'] },
+    // Every dependency that is only reached through a lazy import() must be
+    // listed here. Otherwise Vite discovers it late, re-optimises, and answers
+    // the page's request with "503/504 Outdated Optimize Dep":
+    //  - fflate: docConvert.js / docx.js, loaded when a file is dropped;
+    //  - sanscript: translit.js, loaded when someone types on English to Hindi
+    //    Typing. Missing, it left that page's output blank in dev.
+    // Bundling them up front means those requests can never be stale.
+    // src/lib/optimizeDeps.test.js checks the list against the source.
+    optimizeDeps: { include: ['fflate', '@indic-transliteration/sanscript'] },
   },
 });

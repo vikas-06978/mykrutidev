@@ -171,6 +171,11 @@ const strings = {
     {t('translit.offlineBody')}
   </p>
 
+  {/* Only if the converter itself could not load. */}
+  <p data-role="engine-error" role="alert" hidden class="cv-strip bg-warn-bg text-xs leading-relaxed text-body">
+    {t('translit.engineFailed')}
+  </p>
+
   {/* ------------------------- Spelling tips ------------------------- */}
   <div class="cv-strip bg-inset">
     {
@@ -296,12 +301,30 @@ const strings = {
   let engine: Engine | null = null;
   let loading: Promise<Engine> | null = null;
 
+  /** Google is an upgrade, not a requirement: without it every word keeps its dictionary spelling. */
+  const GOOGLE_OFF = {
+    googleSuggestions: async (): Promise<string[]> => {
+      throw new Error('Input Tools: module did not load');
+    },
+    isAvailable: () => false,
+  };
+
+  /**
+   * The two essential modules, plus Google as an optional extra.
+   *
+   * No retry: a browser remembers a failed module import for the life of the
+   * page and never re-requests it (checked in Chromium), so the only recovery
+   * is a reload - which the engine-error note asks for.
+   */
   function loadEngine(): Promise<Engine> {
     loading ??= Promise.all([
       import('../lib/translit.js'),
-      import('../lib/googleTranslit.js'),
       import('../lib/romanTyping.js'),
-    ]).then(([t, g, typing]) => {
+      import('../lib/googleTranslit.js').catch((err) => {
+        console.error(err);
+        return GOOGLE_OFF;
+      }),
+    ]).then(([t, typing, g]) => {
       engine = {
         romanToUnicode: t.romanToUnicode,
         googleSuggestions: g.googleSuggestions,
@@ -317,7 +340,8 @@ const strings = {
   if (root) {
     setup(root);
     const idle = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 200));
-    idle(() => void loadEngine());
+    // A failed preload is reported when someone types, not here.
+    idle(() => void loadEngine().catch(() => {}));
   }
 
   function setup(root: HTMLElement) {
@@ -331,6 +355,7 @@ const strings = {
     const status = q('status');
     const modeHint = q('mode-hint');
     const offlineNote = q('offline-note');
+    const engineError = q('engine-error');
     const suggest = q('suggest');
     const suggestRoman = q('suggest-roman');
     const suggestList = q('suggest-list');
@@ -373,9 +398,23 @@ const strings = {
       hideSuggestions();
     }
 
+    /** The engine, or null after telling the user it could not load. */
+    async function getEngine(): Promise<Engine | null> {
+      try {
+        const e = engine ?? (await loadEngine());
+        engineError.hidden = true;
+        return e;
+      } catch (err) {
+        console.error(err);
+        // A blank box with no reason is the one outcome not allowed here.
+        engineError.hidden = false;
+        return null;
+      }
+    }
+
     async function renderLocal(run: number) {
-      const e = engine ?? (await loadEngine());
-      if (run !== seq) return;
+      const e = await getEngine();
+      if (!e || run !== seq) return;
       try {
         const typed =
           mode === 'itrans'
@@ -398,8 +437,8 @@ const strings = {
         offlineNote.hidden = true;
         return;
       }
-      const e = engine ?? (await loadEngine());
-      if (run !== seq) return;
+      const e = await getEngine();
+      if (!e || run !== seq) return;
       // Breaker open after repeated failures: the local pass IS the answer.
       if (!e.isAvailable()) {
         offlineNote.hidden = false;

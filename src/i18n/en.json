@@ -155,6 +155,7 @@
     "needKrutiAfter": ".",
     "offlineStrong": "Offline spelling.",
     "offlineBody": "Google could not be reached, so some words come from the built-in dictionary and rules. It still works - rare words are just likelier to need a correction.",
+    "engineFailed": "The Hindi converter could not load. Check your connection and reload the page.",
     "tips": "Spelling tips:",
     "mode": "Typing:",
     "modes": {
