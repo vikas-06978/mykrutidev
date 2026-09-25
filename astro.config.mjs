@@ -16,6 +16,10 @@ export default defineConfig({
     defaultLocale: 'en',
     routing: { prefixDefaultLocale: false },
   },
+  // The stylesheet (~12 KB gzipped) goes inside each page instead of in a file
+  // the page has to wait for: one round trip less before the first paint on a
+  // slow phone connection (Lighthouse FCP 2.3-2.5 s with the file).
+  build: { inlineStylesheets: 'always' },
   // Static output. No adapter, no SSR — the whole product runs in the browser.
   integrations: [
     sitemap({

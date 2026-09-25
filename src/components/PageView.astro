@@ -6,6 +6,9 @@ import Transliterator from './Transliterator.astro';
 import HindiKeyboard from './HindiKeyboard.astro';
 import TypingTutor from './TypingTutor.astro';
 import Faq from './Faq.astro';
+import HowTo from './HowTo.astro';
+import HomeTasks from './HomeTasks.astro';
+import GuidedTour from './GuidedTour.astro';
 import AllConverters from './AllConverters.astro';
 import { getPage, isLive, reversePage, statusOf } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
@@ -72,6 +75,8 @@ const blockers = [page.from, page.to]
 
 const body: string[] = maybe(`pages.${path}.body`) ?? [];
 const faq: { q: string; a: string }[] = maybe(`pages.${path}.faq`) ?? [];
+const howTo: { steps: string[]; tip: string } | undefined = maybe(`pages.${path}.howTo`);
+const tour: string[] | undefined = maybe(`pages.${path}.tour`);
 const note = maybe(`pages.${path}.note`);
 const betaNote = maybe(`pages.${path}.betaNote`);
 ---
@@ -80,22 +85,37 @@ const betaNote = maybe(`pages.${path}.betaNote`);
 {path === '/all-converters' ? <AllConverters /> : (
 <Base title={text('title')} description={text('description')} noindex={!live}>
   <div class="wrap py-8 sm:py-12">
-    <h1 class="text-3xl sm:text-4xl">
-      <Fragment set:html={render(text('h1'))} />
+    <div class="title-row flex items-start justify-between gap-3">
+      <h1 class="text-3xl sm:text-4xl">
+        <Fragment set:html={render(text('h1'))} />
+        {
+          page.beta && (
+            <span class="ml-2 inline-block rounded-full border border-saffron/40 bg-warn-bg px-2.5 py-0.5 align-middle text-xs font-semibold tracking-wide text-badge uppercase">
+              {t('page.beta')}
+            </span>
+          )
+        }
+      </h1>
       {
-        page.beta && (
-          <span class="ml-2 inline-block rounded-full border border-saffron/40 bg-warn-bg px-2.5 py-0.5 align-middle text-xs font-semibold tracking-wide text-badge uppercase">
-            {t('page.beta')}
-          </span>
+        tour && (
+          <button
+            type="button"
+            class="tour-replay mt-1"
+            data-tour-replay
+            aria-label={t('guide.tourReplay')}
+            title={t('guide.tourReplay')}
+          >
+            ?
+          </button>
         )
       }
-    </h1>
+    </div>
     {betaNote && <p class="mt-2 text-sm font-medium text-ink" set:html={render(betaNote)} />}
     <p class="mt-3 max-w-2xl text-base text-body" set:html={render(text('lede'))} />
 
     {
       Tool && (
-        <div class="mt-6">
+        <div class="mt-6 scroll-mt-4" id="tool">
           <Tool />
         </div>
       )
@@ -103,13 +123,20 @@ const betaNote = maybe(`pages.${path}.betaNote`);
 
     {
       live && page.from && page.to && (
-        <div class="mt-6">
+        <div class="mt-6 scroll-mt-4" id="tool">
           <Converter from={page.from} to={page.to} reverse={reverse} />
         </div>
       )
     }
 
+    {/* Help sits UNDER the tool, never over it: the tool is the first thing on the page. */}
+    {live && howTo && <HowTo steps={howTo.steps} tip={howTo.tip} />}
+
     {live && page.documents && docDirection && <DocumentConverter direction={docDirection} />}
+
+    {path === '/' && <HomeTasks />}
+
+    {live && tour && <GuidedTour path={path} steps={tour} />}
 
     {
       pendingConverter && (
@@ -150,9 +177,9 @@ const betaNote = maybe(`pages.${path}.betaNote`);
       )
     }
 
-    <div class="prose-page mt-12 text-body" set:html={body.map(render).join('\n')} />
-
     {faq.length > 0 && <Faq items={faq} schema={live} />}
+
+    <div class="prose-page mt-12 text-body" set:html={body.map(render).join('\n')} />
 
     {
       related.length > 0 && (

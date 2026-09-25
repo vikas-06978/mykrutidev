@@ -1,0 +1,104 @@
+/* The first-visit tour on the typing tools (src/scripts/tour.js).
+
+   A small bubble next to the control it explains - never a modal, never a
+   backdrop: the page stays fully usable and nothing is covered but the few
+   square centimetres the bubble itself takes. Fixed-position, so showing it
+   shifts nothing (CLS stays 0). */
+.tour {
+  position: fixed;
+  z-index: 60;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.875rem 1rem 0.75rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-body);
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--color-shadow) 22%, transparent);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.tour-text {
+  color: var(--color-ink);
+}
+.tour-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.tour-count {
+  margin-inline-end: auto;
+  color: var(--color-mute);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.tour-foot button {
+  min-height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-chrome);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.tour-foot .tour-next {
+  border-color: var(--color-brick);
+  background: var(--color-brick);
+  color: var(--color-on-brick);
+}
+.tour-foot button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* The arrow: a rotated square on the edge that faces the target. */
+.tour::before {
+  content: '';
+  position: absolute;
+  left: var(--tour-arrow-x, 50%);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border: inherit;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.tour[data-side='below']::before {
+  top: -7px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.tour[data-side='above']::before {
+  bottom: -7px;
+  border-top: 0;
+  border-left: 0;
+}
+
+/* The control being explained: a ring, drawn outside it, that moves nothing. */
+.tour-target {
+  outline: 3px solid var(--color-focus) !important;
+  outline-offset: 3px;
+  border-radius: var(--radius-chrome);
+}
+
+/* The "?" beside the title that replays the tour. */
+.tour-replay {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tour-replay:hover {
+  border-color: var(--color-brick);
+  color: var(--color-ink);
+}

@@ -9,6 +9,7 @@ test-results/
 playwright-report/
 screenshots/
 perf-traces/
+lighthouse-reports/
 
 # dependencies
 node_modules/

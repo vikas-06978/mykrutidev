@@ -263,4 +263,29 @@ export function assertParity(a = en, b = hi) {
   }
 }
 
+/**
+ * Every page's <title> and meta description is its own, in each language.
+ * Two pages sharing one compete with each other in search, so a duplicate
+ * THROWS - and because this runs at import, it fails the build.
+ */
+export function assertUniqueMeta(dicts = DICTS) {
+  const problems = [];
+  for (const [lang, dict] of Object.entries(dicts)) {
+    for (const field of ['title', 'description']) {
+      const seen = new Map();
+      for (const [path, page] of Object.entries(dict.pages ?? {})) {
+        const v = page[field]?.trim();
+        if (!v) {
+          problems.push(`${lang} ${path}: no ${field}`);
+          continue;
+        }
+        if (seen.has(v)) problems.push(`${lang}: ${path} has the same ${field} as ${seen.get(v)}`);
+        else seen.set(v, path);
+      }
+    }
+  }
+  if (problems.length) throw new Error(`i18n: titles/descriptions must be unique:\n  ${problems.join('\n  ')}`);
+}
+
 assertParity();
+assertUniqueMeta();

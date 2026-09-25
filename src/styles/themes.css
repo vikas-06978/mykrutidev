@@ -87,7 +87,7 @@
   :root[data-theme='reading'] body {
     line-height: 1.8;
   }
-  :root[data-theme='reading'] :is(.prose-page, main h1 + p) {
+  :root[data-theme='reading'] :is(.prose-page, main :is(h1, .title-row) + p) {
     font-size: 1.1rem;
     line-height: 1.8;
     max-width: 70ch;

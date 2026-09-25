@@ -1,0 +1,112 @@
+---
+/**
+ * First-visit tour for the typing tools: three small bubbles pointing at real
+ * controls. Rendered only on pages whose text has `tour` steps (the three
+ * typing tools) - never on converter pages.
+ *
+ * Nothing here is on the critical path. The markup is one empty, hidden div
+ * carrying the step text; the script below is a few lines that wait for the
+ * page to go idle, and only then - on a first visit, if the visitor has not
+ * started typing - load src/scripts/tour.js. The "?" beside the title
+ * (PageView.astro) replays it any time.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  path: string;
+  steps: string[];
+}
+const { path, steps } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+
+// What each step points at, per tool, in step order.
+const TARGETS: Record<string, string[]> = {
+  '/english-to-hindi-typing': [
+    '[data-translit] textarea[data-role="input"]',
+    '[data-translit] textarea[data-role="output"]',
+    '[data-translit] [data-role="copy"]',
+  ],
+  '/hindi-keyboard': [
+    '[data-keyboard] [data-role="keys"]',
+    '[data-keyboard] [data-role="layer"]',
+    '[data-keyboard] [data-role="copy"]',
+  ],
+  '/hindi-typing-test': ['.tt-levels-wrap', '.tt-stage', '.tt-stats'],
+};
+const targets = TARGETS[path] ?? [];
+if (targets.length !== steps.length) throw new Error(`GuidedTour: ${path} has ${steps.length} steps for ${targets.length} targets`);
+
+const data = steps.map((text, i) => ({ target: targets[i], text }));
+const strings = {
+  next: t('guide.tourNext'),
+  done: t('guide.tourDone'),
+  skip: t('guide.tourSkip'),
+  step: t('guide.tourStep'),
+  aria: t('guide.tourAria'),
+};
+---
+
+<div hidden data-tour={path} data-steps={JSON.stringify(data)} data-i18n={JSON.stringify(strings)}></div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-tour]');
+  if (root) {
+    const KEY = `mkd-tour:${root.dataset.tour}`;
+    const seen = () => {
+      try {
+        return localStorage.getItem(KEY) === '1';
+      } catch {
+        // Storage blocked: we could not remember a "seen", so never auto-show.
+        return true;
+      }
+    };
+    const remember = () => {
+      try {
+        localStorage.setItem(KEY, '1');
+      } catch {
+        // Not remembered; harmless.
+      }
+    };
+
+    let end: (() => void) | null = null;
+    /** `auto`: started by itself on a first visit; otherwise by the "?" button. */
+    async function start(auto: boolean) {
+      end?.();
+      const { runTour } = await import('../scripts/tour.js');
+      end = runTour(JSON.parse(root!.dataset.steps!), JSON.parse(root!.dataset.i18n!), {
+        focus: !auto,
+        auto,
+        onEnd: () => (end = null),
+      });
+      // Once it has actually shown, never automatically again. (An automatic
+      // start is dropped if its first control is not on screen.)
+      if (end) remember();
+    }
+
+    // The visitor started using the tool: they do not need the tour, now or
+    // on a later visit (it is a first-visit tour).
+    let busy = false;
+    const tool = document.getElementById('tool');
+    const quit = () => {
+      if (busy) return;
+      busy = true;
+      if (!end) remember();
+    };
+    for (const type of ['keydown', 'input', 'pointerdown']) {
+      (tool ?? document).addEventListener(type, quit, { capture: true, once: true });
+    }
+
+    if (!seen()) {
+      const idle = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 1500));
+      idle(
+        () =>
+          setTimeout(() => {
+            if (!busy && !seen() && document.visibilityState === 'visible') void start(true);
+          }, 1200),
+        { timeout: 4000 },
+      );
+    }
+
+    document.querySelector('[data-tour-replay]')?.addEventListener('click', () => void start(false));
+  }
+</script>

@@ -296,6 +296,106 @@ describe('font names in the nav, the footer and /all-converters', () => {
   });
 });
 
+describe('SEO basics', () => {
+  const isHi = (p) => p === '/hi' || p.startsWith('/hi/');
+  const routeOf = (p) => (p === '/hi' ? '/' : isHi(p) ? p.slice(3) : p);
+  const pageOf = (p) => PAGES.find((x) => x.path === routeOf(p));
+  const jsonLd = (html) =>
+    [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+  const isTool = (page) =>
+    !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!(page.from && page.to));
+
+  test('every page has exactly one <h1>', () => {
+    for (const [p, html] of pages) {
+      assert.equal((html.match(/<h1\b/g) ?? []).length, 1, p);
+    }
+  });
+
+  test('titles and descriptions are unique per language across all built pages', () => {
+    for (const lang of ['en', 'hi']) {
+      for (const [field, re] of [
+        ['title', /<title>([^<]*)<\/title>/],
+        ['description', /name="description" content="([^"]*)"/],
+      ]) {
+        const seen = new Map();
+        for (const [p, html] of pages) {
+          if (isHi(p) !== (lang === 'hi')) continue;
+          const v = html.match(re)?.[1];
+          assert.ok(v, `${p}: no ${field}`);
+          assert.ok(!seen.has(v), `${p} and ${seen.get(v)} share a ${field}`);
+          seen.set(v, p);
+        }
+      }
+    }
+  });
+
+  test('live tool pages: "How to use" (3 steps + a tip) and FAQ under h2 headings, tool first', () => {
+    let n = 0;
+    for (const [p, html] of pages) {
+      const page = pageOf(p);
+      if (!isTool(page)) continue;
+      n++;
+      assert.match(html, /<h2 id="howto-heading"[^>]*>/, `${p}: no How to use`);
+      assert.match(html, /<h2 id="faq-heading"[^>]*>/, `${p}: no FAQ`);
+      const steps = html.match(/<ol class="howto[^"]*"[^>]*>([\s\S]*?)<\/ol>/)?.[1] ?? '';
+      assert.equal((steps.match(/<li\b/g) ?? []).length, 3, `${p}: steps`);
+      // Order: tool, then How to use, then FAQ.
+      const at = (s) => html.indexOf(s);
+      assert.ok(at('id="tool"') > 0 && at('id="tool"') < at('id="howto-heading"'), `${p}: help above the tool`);
+      assert.ok(at('id="howto-heading"') < at('id="faq-heading"'), `${p}: FAQ before How to use`);
+      // FAQ answers sit in <details>.
+      assert.match(html.slice(at('id="faq-heading"')), /<details\b/, `${p}: FAQ without details`);
+    }
+    assert.ok(n >= 28, `only ${n} tool pages`);
+  });
+
+  test('no two pages share a "How to use" step or tip (duplicate text hurts ranking)', () => {
+    for (const lang of ['en', 'hi']) {
+      const seen = new Map();
+      for (const [p, html] of pages) {
+        if (isHi(p) !== (lang === 'hi')) continue;
+        const block = html.match(/<section aria-labelledby="howto-heading"[\s\S]*?<\/section>/)?.[0];
+        if (!block) continue;
+        const items = [...block.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g), ...block.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/g)]
+          .map((m) => m[1].replace(/<[^>]+>/g, '').replace(/^\d+/, '').trim());
+        for (const s of items) {
+          assert.ok(!seen.has(s), `${p} repeats "${s.slice(0, 60)}" from ${seen.get(s)}`);
+          seen.set(s, p);
+        }
+      }
+    }
+  });
+
+  test('every live converter links to its reverse and to at least 2 related tools', () => {
+    for (const [p, html] of pages) {
+      const page = pageOf(p);
+      if (!page || page.kind !== 'converter' || !isLive(page)) continue;
+      const hrefs = new Set([...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map((m) => routeOf(m[1].replace(/\/$/, '') || '/')));
+      const rev = PAGES.find((x) => x.kind === 'converter' && x.from === page.to && x.to === page.from);
+      if (rev && isLive(rev)) assert.ok(hrefs.has(rev.path), `${p}: no link to its reverse ${rev.path}`);
+      const related = page.related.filter((r) => isLive(PAGES.find((x) => x.path === r)));
+      assert.ok(related.length >= 2, `${p}: fewer than 2 live related pages`);
+      for (const r of related) assert.ok(hrefs.has(r), `${p}: no link to related ${r}`);
+    }
+  });
+
+  test('WebApplication data on tool pages only; BreadcrumbList on every page', () => {
+    for (const [p, html] of pages) {
+      const types = jsonLd(html).map((j) => j['@type']);
+      assert.ok(types.includes('BreadcrumbList'), `${p}: no BreadcrumbList`);
+      assert.equal(types.includes('WebApplication'), isTool(pageOf(p)), `${p}: WebApplication`);
+    }
+  });
+
+  test('every image has alt text', () => {
+    for (const [p, html] of pages) {
+      for (const [tag] of html.matchAll(/<img\b[^>]*>/g)) {
+        assert.match(tag, /\salt="[^"]+"/, `${p}: ${tag}`);
+      }
+    }
+  });
+});
+
 describe('themes', () => {
   const styles = (f) => readFileSync(new URL(`../src/styles/${f}`, import.meta.url), 'utf8');
   const themes = readThemes(styles('global.css'), styles('themes.css'));

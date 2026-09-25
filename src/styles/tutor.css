@@ -607,6 +607,9 @@
   font-size: 0.75rem;
   line-height: 1.5;
   color: var(--color-body);
+  /* Filled in by the script just after load; its line is reserved so the
+     stats and passage below do not jump down 18px (a layout shift). */
+  min-height: 1.5em;
 }
 
 .tt-reset {

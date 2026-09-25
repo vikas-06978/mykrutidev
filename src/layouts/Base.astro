@@ -1,9 +1,12 @@
 ---
 import '../styles/global.css';
+// The same hashed file global.css points at, so the preload is reused, not
+// fetched twice. See the @font-face note in global.css.
+import devanagari400 from '@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-400-normal.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import LangBanner from '../components/LangBanner.astro';
-import { SITE, getPage } from '../lib/routes.js';
+import { SITE, getPage, isLive } from '../lib/routes.js';
 import {
   LOCALES,
   DEFAULT_LOCALE,
@@ -57,6 +60,10 @@ const breadcrumb = {
   ],
 };
 
+// WebApplication only where there is an application: a live page with a tool
+// (a converter, a typing tool, or the hub that converts). Lists, articles and
+// coming-soon pages carry the breadcrumb alone.
+const isTool = !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!(page.from && page.to));
 const app = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
@@ -82,6 +89,8 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf7f2" />
+    <link rel="preload" href={devanagari400} as="font" type="font/woff2" crossorigin />
+
     {/*
       Theme: runs before the first paint, so a dark or reading page never
       flashes light. Resolves "system" from prefers-color-scheme and follows
@@ -224,7 +233,7 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <script type="application/ld+json" set:html={JSON.stringify(app)} />
+    {isTool && <script type="application/ld+json" set:html={JSON.stringify(app)} />}
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumb)} />
   </head>
 

@@ -210,10 +210,17 @@ const strings = { copied: t('common.copied') };
     function dock() {
       const r = root.getBoundingClientRect();
       const on = NARROW.matches && !ownKeyboard && r.top <= 1 && r.bottom > top.offsetHeight + 24;
+      // The spacer takes the keys' height as they were IN THE PAGE, measured
+      // before they dock. Measured after, it got the docked (shorter, max
+      // 55vh) height and everything below jumped up by the difference - a
+      // layout shift of 0.4 on a phone.
+      if (on && root.dataset.docked !== 'true') {
+        // The exact (fractional) height: offsetHeight rounds, which left a 1px step.
+        root.style.setProperty('--hk-pad-h', `${pad.getBoundingClientRect().height}px`);
+      }
       if ((root.dataset.docked === 'true') !== on) {
         root.dataset.docked = String(on);
       }
-      if (on) root.style.setProperty('--hk-pad-h', `${pad.offsetHeight}px`);
     }
     window.addEventListener('scroll', dock, { passive: true });
     window.addEventListener('resize', () => {

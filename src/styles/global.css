@@ -6,8 +6,32 @@
 
 /* Self-hosted. No Google Fonts CDN: it is render-blocking and a third-party
    beacon, and "fast + private" is the entire pitch. */
-@import '@fontsource/noto-sans-devanagari/devanagari-400.css';
-@import '@fontsource/noto-sans-devanagari/devanagari-600.css';
+/* The @fontsource files, declared here rather than through its CSS so the
+   display strategy is ours: `optional` + a preload of 400 in Base.astro.
+   Devanagari is on the first screen of every page (at least "हिंदी" in the
+   header). With `swap`, the font arriving late re-measured every Hindi word
+   and slid the text after it sideways - a layout shift. With `optional` the
+   font is used if it is there within the first ~100ms (the preload sees to
+   that on most connections) and otherwise the device's own Devanagari font
+   is used for that page view, without a later swap. */
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-400-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-400-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-600-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-600-normal.woff') format('woff');
+}
 
 /* Kruti Dev / DevLys faces for the output preview. Self-hosted from
    /public/fonts (owner-supplied) with local() first, so the preview degrades
@@ -31,6 +55,9 @@
 /* The Hindi Keyboard page: sticky text box, docked keyboard on phones. Its own
    hk-* classes, so the typing tutor's kb-* caps are untouched. */
 @import './hindi-keyboard.css';
+
+/* The first-visit tour on the typing tools and its "?" button. */
+@import './tour.css';
 
 /* Colour themes (Light is the @theme block below) and accent colours. Order
    matters: accents.css maps --color-brick after themes.css sets it. */
@@ -166,6 +193,13 @@
   a:hover {
     color: var(--color-brick-deep);
   }
+  /* A link inside running text must not rely on colour alone (WCAG 1.4.1):
+     Tailwind's base removes the underline, so put it back for prose,
+     paragraphs and FAQ answers. Cards and buttons are links by shape. */
+  :is(.prose-page, main p, main details) a:not(.no-underline, .btn) {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+  }
 
   /* One visible, high-contrast focus ring everywhere. Brick, never saffron. */
   :focus-visible {
@@ -194,8 +228,9 @@ html[lang='hi'] body {
 html[lang='hi'] :is(h1, h2, h3, h4) {
   line-height: 1.35;
 }
-/* The h1 and the intro paragraph (or the Beta note) under it. */
-html[lang='hi'] h1 + p {
+/* The h1 (or the row holding it and the tour's "?") and the intro paragraph
+   (or the Beta note) under it. */
+html[lang='hi'] :is(h1, .title-row) + p {
   margin-top: 1rem;
 }
 
