@@ -1,0 +1,48 @@
+---
+/**
+ * The page a static host serves for any URL that does not exist - one file
+ * for both languages, so it speaks both: English, then Hindi, each with the
+ * tools people most often came for. Never indexed, no canonical.
+ */
+import Base from '../layouts/Base.astro';
+import { getPage, isLive } from '../lib/routes.js';
+import { GUIDES_PATH } from '../lib/guides.js';
+import { useT } from '../i18n/index.js';
+
+const TOP = ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/hindi-typing-test', '/english-to-hindi-typing', '/hindi-keyboard'];
+const tools = TOP.map(getPage).filter((p) => p && isLive(p));
+const langs = (['en', 'hi'] as const).map((lang) => ({ lang, ...useT(lang) }));
+const en = langs[0];
+---
+
+<Base title={en.t('notFound.title')} description={en.t('notFound.description')} notFound>
+  <div class="wrap py-10 sm:py-14" data-not-found>
+    {
+      langs.map(({ lang, t, render, path: to }, i) => (
+        <section lang={lang} class:list={[i > 0 && 'mt-12 border-t border-hairline pt-10']} aria-labelledby={`nf-${lang}`}>
+          {i === 0 ? (
+            <h1 id={`nf-${lang}`} class="text-3xl sm:text-4xl">{t('notFound.h1')}</h1>
+          ) : (
+            <h2 id={`nf-${lang}`} class="text-2xl">{t('notFound.h1')}</h2>
+          )}
+          <p class="mt-3 max-w-2xl text-body" set:html={render(t('notFound.lede'))} />
+          <h3 class="mt-6 text-lg">{t('notFound.toolsHeading')}</h3>
+          <ul class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tools.map((p) => (
+              <li>
+                <a href={to(p!.path)} class="block h-full card p-4 no-underline transition-colors hover:border-saffron">
+                  <span class="block font-medium text-ink" set:html={render(t(`pages.${p!.path}.h1`))} />
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="mt-5 text-sm">
+            <a href={to(GUIDES_PATH)}>{t('notFound.guides')}</a>
+            <span aria-hidden="true"> · </span>
+            <a href={to('/all-converters')}>{t('nav.allConverters')}</a>
+          </p>
+        </section>
+      ))
+    }
+  </div>
+</Base>

@@ -97,35 +97,42 @@ export function splitLocale(pathname) {
 /** The locale of an Astro.url. */
 export const langOf = (url) => splitLocale(url.pathname).lang;
 
-/** A route path in the given locale: "/x" -> "/hi/x", "/" -> "/hi". */
+/**
+ * A route path in the given locale, in the one URL form the site publishes:
+ * with a trailing slash, as the pages are built ("dist/x/index.html") and as
+ * the sitemap lists them. "/x" -> "/x/" or "/hi/x/", "/" -> "/" or "/hi/".
+ * Links, canonicals, hreflang and og:url all come from here, so a page is
+ * never reached at two addresses.
+ */
 export function localizePath(path, lang) {
   const base = splitLocale(path).path;
-  if (lang === DEFAULT_LOCALE) return base;
-  return base === '/' ? `/${lang}` : `/${lang}${base}`;
+  const slashed = base === '/' ? '/' : `${base}/`;
+  if (lang === DEFAULT_LOCALE) return slashed;
+  return `/${lang}${slashed}`;
 }
 
-/** Paths that are files, not pages - never given a locale prefix. */
-const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
+/** Paths that are files, not pages - never given a locale prefix or a slash. */
+const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt|og\/|guides\/img\/)/;
 
 /**
- * Point every internal page link inside a block of HTML at the given locale.
+ * Point every internal page link inside a block of HTML at the given locale,
+ * in the published trailing-slash form.
  *
  * This is what keeps a Hindi page's links on Hindi pages, whether the link was
  * written in a component, in routes.js or inside a translated paragraph. An
- * anchor carrying `data-lang-switch` is left alone: it is the one link whose
- * job is to leave the current language.
+ * anchor carrying `data-lang-switch` keeps its language - it is the one link
+ * whose job is to leave the current one - but still gets the slash.
  */
 export function localizeHtml(html, lang) {
-  if (lang === DEFAULT_LOCALE) return html;
-  return html.replace(/<a\b[^>]*>/g, (tag) => {
-    if (/\sdata-lang-switch\b/.test(tag)) return tag;
-    return tag.replace(/(\shref=")(\/[^"]*)"/, (m, pre, href) => {
+  return html.replace(/<a\b[^>]*>/g, (tag) =>
+    tag.replace(/(\shref=")(\/[^"]*)"/, (m, pre, href) => {
       if (href.startsWith('//') || NOT_A_PAGE.test(href)) return m;
       const [p, hash = ''] = href.split('#');
-      if (splitLocale(p).lang !== DEFAULT_LOCALE) return m;
-      return `${pre}${localizePath(p, lang)}${hash ? `#${hash}` : ''}"`;
-    });
-  });
+      const target = splitLocale(p);
+      const to = /\sdata-lang-switch\b/.test(tag) || target.lang !== DEFAULT_LOCALE ? target.lang : lang;
+      return `${pre}${localizePath(target.path, to)}${hash ? `#${hash}` : ''}"`;
+    }),
+  );
 }
 
 // ---------------------------------------------------------------------------

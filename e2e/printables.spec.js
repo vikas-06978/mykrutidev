@@ -91,7 +91,7 @@ test('the Typing Tutor and Hindi Keyboard list all five PDFs, and the menu reach
   }
   await page.goto('/');
   await page.locator('#navtrigger-tools').click();
-  await page.locator('#navmenu-tools a[href="/kruti-dev-keyboard"]').click();
+  await page.locator('#navmenu-tools a[href="/kruti-dev-keyboard/"]').click();
   await expect(page).toHaveURL(/\/kruti-dev-keyboard\/?$/);
 });
 

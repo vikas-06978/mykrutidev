@@ -15,10 +15,13 @@ const sub = (p: { path: string }) => t(`pages.${p.path}.navSub`);
 const groupName = (name: string) => render(t(`groups.${name}`));
 
 // English | हिंदी - each links to THIS page in that language, never the home page.
+// The 404 page has no twin - it is one file for both languages - so from
+// there the switcher goes to the home page.
+const switchPath = path === '/404' ? '/' : path;
 const switcher = LOCALES.map((l) => ({
   lang: l,
   label: LOCALE_META[l].label,
-  href: localizePath(path, l),
+  href: localizePath(switchPath, l),
   current: l === lang,
 }));
 

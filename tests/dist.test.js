@@ -48,16 +48,22 @@ const attr = (tag, name) => {
   return m ? decode(m[1]) : undefined;
 };
 
-let pages; // Map<urlPath, html>
+let pages; // Map<urlPath, html> - every page except the 404, which is not a route
+let notFound; // dist/404.html
 
 before(() => {
   assert.ok(existsSync(DIST), 'dist/ not found - run `astro build` first');
-  pages = new Map(walk(DIST).map((f) => [urlPathOf(f), readFileSync(f, 'utf8')]));
+  const files = walk(DIST);
+  pages = new Map(files.filter((f) => !f.endsWith(`${sep}404.html`)).map((f) => [urlPathOf(f), readFileSync(f, 'utf8')]));
+  notFound = readFileSync(join(DIST, '404.html'), 'utf8');
 });
 
 const english = () => [...pages.keys()].filter((p) => p !== '/hi' && !p.startsWith('/hi/'));
 const hindiOf = (p) => (p === '/' ? '/hi' : `/hi${p}`);
-const abs = (p) => new URL(p, SITE).href;
+/** A page path in its published form: "/x" -> "/x/", "/hi" -> "/hi/". */
+const slash = (p) => (p === '/' ? '/' : `${p.replace(/\/$/, '')}/`);
+/** The published URL of a page: absolute, with the trailing slash. */
+const abs = (p) => new URL(p === '/' ? '/' : `${p.replace(/\/$/, '')}/`, SITE).href;
 
 describe('every page exists in both languages', () => {
   test('each English page has a /hi twin, and nothing else lives under /hi', () => {
@@ -170,8 +176,8 @@ describe('links', () => {
       const q = hindiOf(p);
       const toHi = [...pages.get(p).matchAll(/<a\b[^>]*data-lang-switch="hi"[^>]*>/g)].map((m) => attr(m[0], 'href'));
       const toEn = [...pages.get(q).matchAll(/<a\b[^>]*data-lang-switch="en"[^>]*>/g)].map((m) => attr(m[0], 'href'));
-      assert.ok(toHi.length > 0 && toHi.every((h) => h === q), `${p} -> ${toHi}`);
-      assert.ok(toEn.length > 0 && toEn.every((h) => h === p), `${q} -> ${toEn}`);
+      assert.ok(toHi.length > 0 && toHi.every((h) => h === slash(q)), `${p} -> ${toHi}`);
+      assert.ok(toEn.length > 0 && toEn.every((h) => h === slash(p)), `${q} -> ${toEn}`);
     }
   });
 
@@ -407,7 +413,7 @@ describe('printable charts and PDFs', () => {
         const html = pages.get(p);
         assert.match(html, new RegExp(`<a href="${pdfHref(pr, lang)}" download="${pdfFile(pr, lang)}" type="application/pdf"`), `${p}: PDF link`);
         assert.match(html, /data-print\b/, `${p}: Print`);
-        assert.match(html, new RegExp(`href="${lang === 'hi' ? '/hi' : ''}/hindi-typing-test"`), `${p}: Practise online`);
+        assert.match(html, new RegExp(`href="${lang === 'hi' ? '/hi' : ''}/hindi-typing-test/"`), `${p}: Practise online`);
         for (const other of PRINTABLES.filter((o) => o !== pr)) {
           assert.ok(html.includes(pdfHref(other, lang)), `${p}: no link to ${other.pdf}`);
         }
@@ -423,7 +429,7 @@ describe('printable charts and PDFs', () => {
     }
     for (const [p, html] of pages) {
       const prefix = isHiPath(p) ? '/hi' : '';
-      assert.ok(html.includes(`href="${prefix}/kruti-dev-keyboard"`), `${p}: no menu link to the printables`);
+      assert.ok(html.includes(`href="${prefix}/kruti-dev-keyboard/"`), `${p}: no menu link to the printables`);
     }
   });
 });

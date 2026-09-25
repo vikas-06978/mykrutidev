@@ -1,0 +1,140 @@
+---
+/**
+ * One guide, in whichever language its URL is in: /guides/<slug>/ or
+ * /hi/guides/<slug>/. Structure from src/lib/guides.js, words from
+ * src/i18n/{en,hi}.json under `articles.<slug>`.
+ *
+ * Tool first, as on every page: a "use the tool" link sits right under the
+ * title, and the same three tools close the article.
+ */
+import Base from '../layouts/Base.astro';
+import Faq from './Faq.astro';
+import GuideDiagram from './GuideDiagram.astro';
+import { getGuide, guidePath, GUIDES, GUIDES_PATH } from '../lib/guides.js';
+import { getPage, SITE } from '../lib/routes.js';
+import { ogImagePath } from '../lib/og.js';
+import { langOf, useT, localizePath, LOCALE_META } from '../i18n/index.js';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const guide = getGuide(slug);
+if (!guide) throw new Error(`No guide "${slug}" in src/lib/guides.js`);
+
+const lang = langOf(Astro.url);
+const { t, maybe, render, path: to } = useT(lang);
+const a = (field: string) => t(`articles.${slug}.${field}`);
+const body: string[] = maybe(`articles.${slug}.body`) ?? [];
+const faq: { q: string; a: string }[] = maybe(`articles.${slug}.faq`) ?? [];
+const tools = guide.tools.map(getPage).filter(Boolean);
+const primary = tools[0];
+const others = GUIDES.filter((g) => g.slug !== slug);
+
+const updated = new Date(`${guide.updated}T00:00:00Z`);
+const updatedText = updated.toLocaleDateString(LOCALE_META[lang].htmlLang === 'hi' ? 'hi-IN' : 'en-IN', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const abs = (p: string) => new URL(p, SITE).href;
+const url = abs(localizePath(guidePath(guide), lang));
+const plain = (s: string) => s.replace(/<[^>]+>/g, '').trim();
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: plain(a('h1')),
+  description: a('description'),
+  inLanguage: lang,
+  url,
+  mainEntityOfPage: url,
+  image: abs(ogImagePath(guidePath(guide), lang)),
+  datePublished: guide.updated,
+  dateModified: guide.updated,
+  author: { '@type': 'Organization', name: t('article.author'), url: abs(localizePath('/about', lang)) },
+  publisher: { '@id': `${SITE}/#organization`, '@type': 'Organization', name: 'MyKrutiDev', logo: { '@type': 'ImageObject', url: abs('/og/logo.png') } },
+};
+
+const DIAGRAM = /^\{\{diagram:([a-z-]+)\}\}$/;
+---
+
+<Base
+  title={a('title')}
+  description={a('description')}
+  trail={[{ name: t('guidesIndex.nav'), path: GUIDES_PATH }]}
+  crumb={a('crumb')}
+  jsonLd={[article]}
+  ogType="article"
+>
+  <article class="wrap py-8 sm:py-12" data-guide={slug}>
+    <h1 class="max-w-3xl text-3xl sm:text-4xl" set:html={render(a('h1'))} />
+    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(a('lede'))} />
+    <p class="mt-3 text-sm text-mute" data-byline>
+      {t('article.by')} <a href={to('/about')} class="text-body" set:html={render(t('article.author'))} />
+      <span aria-hidden="true"> · </span>
+      {t('article.updated')} <time datetime={guide.updated}>{updatedText}</time>
+    </p>
+    {
+      primary && (
+        <p class="mt-5">
+          <a href={to(primary.path)} class="btn btn-primary" data-guide-tool>
+            <span set:html={render(t('article.useTool', { tool: t(`pages.${primary.path}.h1`) }))} />
+          </a>
+        </p>
+      )
+    }
+
+    <div class="prose-page mt-10 max-w-3xl text-body">
+      {
+        body.map((item) => {
+          const m = item.match(DIAGRAM);
+          return m ? <GuideDiagram name={m[1]} /> : <Fragment set:html={render(item)} />;
+        })
+      }
+    </div>
+
+    {faq.length > 0 && <Faq items={faq} />}
+
+    <aside aria-labelledby="author-heading" class="mt-12 max-w-3xl card p-5" data-author-box>
+      <h2 id="author-heading" class="text-base">{t('article.aboutAuthor')}</h2>
+      <p class="mt-2 text-sm leading-relaxed text-body">
+        <strong class="text-ink" set:html={render(t('article.author'))} /> - <Fragment set:html={render(t('article.authorBio'))} />
+      </p>
+      <p class="mt-2 text-sm text-mute">
+        {t('article.updated')} <time datetime={guide.updated}>{updatedText}</time>.
+        <Fragment set:html={render(t('article.corrections'))} />
+      </p>
+    </aside>
+
+    <nav aria-labelledby="guide-tools" class="mt-12">
+      <h2 id="guide-tools" class="text-xl">{t('article.toolsHeading')}</h2>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          tools.map((p) => (
+            <li>
+              <a href={to(p.path)} class="block h-full card p-4 no-underline transition-colors hover:border-saffron">
+                <span class="block font-medium text-ink" set:html={render(t(`pages.${p.path}.h1`))} />
+                <span class="mt-1 block text-sm text-body" set:html={render(t(`pages.${p.path}.description`))} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="more-guides" class="mt-12">
+      <h2 id="more-guides" class="text-xl">{t('article.moreGuides')}</h2>
+      <ul class="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+        {
+          others.map((g) => (
+            <li>
+              <a href={to(guidePath(g))} set:html={render(t(`articles.${g.slug}.h1`))} />
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </article>
+</Base>

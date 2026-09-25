@@ -9,8 +9,11 @@
   "scripts": {
     "dev": "astro dev",
     "pdfs": "node scripts/pdfs.mjs",
-    "prebuild": "npm run pdfs",
+    "og": "node scripts/og-images.mjs",
+    "prebuild": "npm run pdfs && npm run og",
     "build": "astro build",
+    "postbuild": "npm run test:seo",
+    "test:seo": "node --test tests/seo.test.js",
     "preview": "astro preview",
     "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\"",
     "test:dist": "node --test \"tests/*.test.js\"",

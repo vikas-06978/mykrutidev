@@ -353,10 +353,12 @@ describe('paths', () => {
     assert.deepEqual(splitLocale('/hindi-typing-test'), { lang: 'en', path: '/hindi-typing-test' });
   });
 
-  test('localizePath gives the same page in the other language', () => {
-    assert.equal(localizePath('/', 'hi'), '/hi');
-    assert.equal(localizePath('/unicode-to-kruti-dev', 'hi'), '/hi/unicode-to-kruti-dev');
-    assert.equal(localizePath('/hi/unicode-to-kruti-dev', 'en'), '/unicode-to-kruti-dev');
+  test('localizePath gives the same page in the other language, with the trailing slash', () => {
+    assert.equal(localizePath('/', 'hi'), '/hi/');
+    assert.equal(localizePath('/', 'en'), '/');
+    assert.equal(localizePath('/unicode-to-kruti-dev', 'hi'), '/hi/unicode-to-kruti-dev/');
+    assert.equal(localizePath('/hi/unicode-to-kruti-dev', 'en'), '/unicode-to-kruti-dev/');
+    assert.equal(localizePath('/hi/unicode-to-kruti-dev/', 'en'), '/unicode-to-kruti-dev/');
     assert.equal(localizePath('/hi', 'en'), '/');
   });
 
@@ -377,16 +379,23 @@ describe('paths', () => {
     }
   });
 
-  test('localizeHtml moves page links to /hi and leaves everything else alone', () => {
+  test('localizeHtml moves page links to /hi, adds the trailing slash, and leaves files alone', () => {
     const html =
       '<a href="/">a</a> <a href="/x#faq">b</a> <a href="/hi/y">c</a> <a href="https://e.com/">d</a>' +
-      ' <a href="/data/english-words.json">e</a> <a href="/" data-lang-switch="en">f</a> <link href="/favicon.svg">';
+      ' <a href="/data/english-words.json">e</a> <a href="/" data-lang-switch="en">f</a> <link href="/favicon.svg">' +
+      ' <a href="/downloads/x.pdf">g</a> <a href="/og/en/home.png">h</a>';
     assert.equal(
       localizeHtml(html, 'hi'),
-      '<a href="/hi">a</a> <a href="/hi/x#faq">b</a> <a href="/hi/y">c</a> <a href="https://e.com/">d</a>' +
-        ' <a href="/data/english-words.json">e</a> <a href="/" data-lang-switch="en">f</a> <link href="/favicon.svg">',
+      '<a href="/hi/">a</a> <a href="/hi/x/#faq">b</a> <a href="/hi/y/">c</a> <a href="https://e.com/">d</a>' +
+        ' <a href="/data/english-words.json">e</a> <a href="/" data-lang-switch="en">f</a> <link href="/favicon.svg">' +
+        ' <a href="/downloads/x.pdf">g</a> <a href="/og/en/home.png">h</a>',
     );
-    assert.equal(localizeHtml(html, 'en'), html);
+    assert.equal(
+      localizeHtml(html, 'en'),
+      '<a href="/">a</a> <a href="/x/#faq">b</a> <a href="/hi/y/">c</a> <a href="https://e.com/">d</a>' +
+        ' <a href="/data/english-words.json">e</a> <a href="/" data-lang-switch="en">f</a> <link href="/favicon.svg">' +
+        ' <a href="/downloads/x.pdf">g</a> <a href="/og/en/home.png">h</a>',
+    );
   });
 
   test('markNoTranslate protects codes and font names, and never touches attributes', () => {

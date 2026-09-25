@@ -35,6 +35,7 @@
  */
 
 import { FONTS, isPairAccurate } from './fontMaps.js';
+import { guideRoutes } from './guides.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
 export const SITE = 'https://mykrutidev.com';
@@ -370,14 +371,52 @@ export const PAGES = [
     group: 'More',
     related: ['/', '/all-converters', '/unicode-to-kruti-dev'],
   },
+  // ---- Search landing pages: each answers one query with the tool that
+  // solves it on top, then how-to, problems, FAQ and three related tools.
   {
-    path: '/kruti-dev-font-download',
-    ready: false,
+    path: '/kruti-dev-010-font',
+    ready: true,
+    // Hosts the Kruti Dev -> Unicode converter because that is what someone
+    // without the font needs, but the page is ABOUT the font (install, check,
+    // what it is), so it is its own canonical and not a duplicate of "/".
+    kind: 'content',
+    from: 'kruti-dev',
+    to: 'unicode',
+    group: 'More',
+    related: ['/', '/kruti-dev-keyboard', '/unicode-to-kruti-dev'],
+  },
+  {
+    path: '/hindi-typing-test-for-exams',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    tool: true,
+    group: 'More',
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard'],
+  },
+  {
+    path: '/remington-hindi-keyboard',
+    ready: true,
+    // Type on your own keyboard in the Remington layout; the converter turns
+    // the keystrokes into Unicode Hindi as you go. Same converter as "/",
+    // different question (the layout, not a file), so its own canonical.
+    kind: 'content',
+    from: 'kruti-dev',
+    to: 'unicode',
+    // Not a menu `tool`: tools have no source font, and this page has one.
+    // It is linked from the footer, the tutor and the keyboard chart instead.
+    group: 'More',
+    related: ['/kruti-dev-keyboard', '/hindi-typing-test', '/hindi-keyboard'],
+  },
+  {
+    path: '/how-to-type-hindi-in-ms-word',
+    ready: true,
     kind: 'content',
     from: null,
     to: null,
     group: 'More',
-    related: ['/kruti-dev-keyboard', '/'],
+    related: ['/english-to-hindi-typing', '/unicode-to-kruti-dev', '/hindi-keyboard'],
   },
   // ---- Printables: an HTML page + a PDF each, built from the tutor's data
   // (src/lib/printables.js). The keyboard chart carries the one menu entry;
@@ -433,16 +472,51 @@ export const PAGES = [
     group: 'More',
     related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
   },
+  // ---- Who runs the site and on what terms (linked from every footer).
   {
     path: '/about',
-    ready: false,
+    ready: true,
     kind: 'content',
     from: null,
     to: null,
+    trust: true,
     group: 'More',
-    related: ['/'],
+    related: ['/', '/hindi-typing-test', '/all-converters'],
+  },
+  {
+    path: '/contact',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/about', '/privacy-policy', '/terms'],
+  },
+  {
+    path: '/privacy-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/', '/english-to-hindi-typing', '/terms'],
+  },
+  {
+    path: '/terms',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/about', '/privacy-policy', '/contact'],
   },
 ];
+
+/** The contact address printed on /contact and in Organization data. */
+export const CONTACT_EMAIL = 'contact@mykrutidev.com';
 
 /** The fields that are words rather than structure - see the note at the top. */
 const TEXT_FIELDS = ['nav', 'navSub', 'h1', 'title', 'description', 'note', 'betaNote'];
@@ -560,9 +634,11 @@ export function reversePage(page) {
  */
 const isSelfCanonical = (page) => isLive(page) && !page.canonical;
 
-/** Absolute URLs of every page Google is allowed to index. */
+/** Absolute URLs of every page Google is allowed to index (English). */
 export const indexableUrls = () =>
-  PAGES.filter(isSelfCanonical).map((p) => new URL(p.path, SITE).href);
+  [...PAGES.filter(isSelfCanonical).map((p) => p.path), ...guideRoutes()].map(
+    (p) => new URL(p === '/' ? '/' : `${p}/`, SITE).href,
+  );
 
 /**
  * The route path behind a URL path, with any language prefix removed:
@@ -578,9 +654,13 @@ export function routeOf(urlPath) {
 /** Used by the sitemap integration's `filter()`. English and /hi alike. */
 export function isIndexable(absoluteUrl) {
   const path = routeOf(new URL(absoluteUrl).pathname);
+  if (GUIDE_ROUTES.has(path)) return true;
   const page = BY_PATH.get(path);
   return page ? isSelfCanonical(page) : false;
 }
+
+/** The guides are not in PAGES (they are articles, not tools) but are indexed. */
+const GUIDE_ROUTES = new Set(guideRoutes());
 
 /**
  * Guard: catch a typo'd font key at build time rather than at runtime.

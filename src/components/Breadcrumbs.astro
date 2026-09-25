@@ -1,0 +1,40 @@
+---
+/**
+ * "Home › Guides › This article" above every page but the home page. The same
+ * trail is published as BreadcrumbList data by Base.astro, so what a reader
+ * sees and what a search engine reads are one list.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  /** Home first, this page last; hrefs already in this page's language. */
+  items: { name: string; href: string }[];
+}
+const { items } = Astro.props;
+const { t, render } = useT(langOf(Astro.url));
+---
+
+<nav aria-label={t('nav.breadcrumb')} class="wrap pt-4 text-sm" data-breadcrumbs>
+  <ol class="crumbs flex flex-wrap items-center gap-x-1.5 gap-y-1 text-mute">
+    {
+      items.map((c, i) =>
+        i < items.length - 1 ? (
+          <li class="flex items-center gap-1.5">
+            <a href={c.href} class="text-body no-underline hover:underline" set:html={render(c.name)} />
+            <span aria-hidden="true">›</span>
+          </li>
+        ) : (
+          <li aria-current="page" class="text-mute" set:html={render(c.name)} />
+        ),
+      )
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumbs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+</style>

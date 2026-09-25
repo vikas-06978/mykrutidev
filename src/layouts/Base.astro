@@ -6,7 +6,9 @@ import devanagari400 from '@fontsource/noto-sans-devanagari/files/noto-sans-deva
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import LangBanner from '../components/LangBanner.astro';
-import { SITE, getPage, isLive } from '../lib/routes.js';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE, CONTACT_EMAIL, getPage, isLive } from '../lib/routes.js';
+import { ogImagePath, OG_SIZE } from '../lib/og.js';
 import {
   LOCALES,
   DEFAULT_LOCALE,
@@ -22,9 +24,30 @@ interface Props {
   description: string;
   /** Stub pages pass true: noindex + kept out of the sitemap. */
   noindex?: boolean;
+  /**
+   * The trail between Home and this page, route paths without a language
+   * prefix: [{ name: 'Guides', path: '/guides' }]. This page itself is added
+   * last, named by `crumb` (default: its h1). Home gets no visible trail.
+   */
+  trail?: { name: string; path: string }[];
+  crumb?: string;
+  /** Extra JSON-LD for this page (an Article, say). */
+  jsonLd?: object[];
+  ogType?: 'website' | 'article';
+  /** The 404 page: no canonical, no language alternates, never indexed. */
+  notFound?: boolean;
 }
 
-const { title, description, noindex = false } = Astro.props;
+const {
+  title,
+  description,
+  noindex = false,
+  trail = [],
+  crumb,
+  jsonLd = [],
+  ogType = 'website',
+  notFound = false,
+} = Astro.props;
 
 // The locale comes from the URL, so a page never has to be told which one it
 // is in: /hi/... is Hindi, everything else is English.
@@ -50,15 +73,50 @@ const alternates = [
 ];
 
 const h1 = page ? t(`pages.${page.path}.h1`) : title;
+const plain = (s: string) => s.replace(/<[^>]+>/g, '').trim();
 
+// Home › (trail) › this page. Visible above the page and published as
+// BreadcrumbList, from the same list.
+const crumbs = [
+  { name: t('nav.home'), path: '/' },
+  ...trail,
+  ...(path === '/' ? [] : [{ name: crumb ?? h1, path }]),
+];
 const breadcrumb = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'MyKrutiDev', item: abs(localizePath('/', lang)) },
-    ...(path === '/' ? [] : [{ '@type': 'ListItem', position: 2, name: h1, item: selfUrl }]),
-  ],
+  itemListElement: crumbs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: plain(c.name),
+    item: abs(localizePath(c.path, lang)),
+  })),
 };
+
+// Who publishes the site, and the site itself - on the home page only.
+const homeUrl = abs(localizePath('/', lang));
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${SITE}/#organization`,
+  name: 'MyKrutiDev',
+  url: `${SITE}/`,
+  logo: abs('/og/logo.png'),
+  email: CONTACT_EMAIL,
+  contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: CONTACT_EMAIL, availableLanguage: ['en', 'hi'] },
+};
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${homeUrl}#website`,
+  name: 'MyKrutiDev',
+  url: homeUrl,
+  inLanguage: meta.htmlLang,
+  publisher: { '@id': `${SITE}/#organization` },
+};
+
+const ogImage = abs(ogImagePath(path, lang));
+const ogAlt = plain(h1);
 
 // WebApplication only where there is an application: a live page with a tool
 // (a converter, a typing tool, or the hub that converts). Lists, articles and
@@ -213,28 +271,38 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
 
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
-    {noindex && <meta name="robots" content="noindex,follow" />}
+    {!notFound && <link rel="canonical" href={canonical} />}
+    {!notFound && alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    {(noindex || notFound) && <meta name="robots" content="noindex,follow" />}
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="MyKrutiDev" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={selfUrl} />
+    {!notFound && <meta property="og:url" content={selfUrl} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(OG_SIZE.width)} />
+    <meta property="og:image:height" content={String(OG_SIZE.height)} />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta property="og:locale" content={meta.ogLocale} />
     {
       LOCALES.filter((l) => l !== lang).map((l) => (
         <meta property="og:locale:alternate" content={LOCALE_META[l].ogLocale} />
       ))
     }
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt} />
 
     {isTool && <script type="application/ld+json" set:html={JSON.stringify(app)} />}
-    <script type="application/ld+json" set:html={JSON.stringify(breadcrumb)} />
+    {path === '/' && !notFound && <script type="application/ld+json" set:html={JSON.stringify(organization)} />}
+    {path === '/' && !notFound && <script type="application/ld+json" set:html={JSON.stringify(website)} />}
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {!notFound && <script type="application/ld+json" set:html={JSON.stringify(breadcrumb)} />}
   </head>
 
   <body class="min-h-screen flex flex-col">
@@ -244,8 +312,13 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
       >{t('meta.skipLink')}</a
     >
     <Header />
-    {lang === DEFAULT_LOCALE && <LangBanner path={path} />}
-    <main id="main" class="flex-1" set:html={body} />
+    {lang === DEFAULT_LOCALE && !notFound && <LangBanner path={path} />}
+    <main id="main" class="flex-1">
+      {!notFound && crumbs.length > 1 && (
+        <Breadcrumbs items={crumbs.map((c) => ({ name: c.name, href: localizePath(c.path, lang) }))} />
+      )}
+      <Fragment set:html={body} />
+    </main>
     <Footer />
   </body>
 </html>

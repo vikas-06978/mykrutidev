@@ -20,6 +20,7 @@ const TYPES = {
   '.xml': 'application/xml',
   '.txt': 'text/plain; charset=utf-8',
   '.pdf': 'application/pdf',
+  '.png': 'image/png',
 };
 const COMPRESS = /^(text\/|application\/(json|xml)|image\/svg)/;
 
@@ -48,7 +49,10 @@ export function serveDist(root, port) {
   const server = createServer(async (req, res) => {
     const file = await resolve(new URL(req.url, 'http://x').pathname);
     if (!file) {
-      res.writeHead(404, { 'content-type': 'text/plain' }).end('404');
+      // As static hosts do: the site's own 404.html, with a 404 status.
+      const page = await readFile(join(root, '404.html')).catch(() => null);
+      if (page) res.writeHead(404, { 'content-type': TYPES['.html'] }).end(page);
+      else res.writeHead(404, { 'content-type': 'text/plain' }).end('404');
       return;
     }
     const type = TYPES[extname(file)] ?? 'application/octet-stream';

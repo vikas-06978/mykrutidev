@@ -1,10 +1,27 @@
 ---
-import { liveConverters } from '../lib/routes.js';
+import { liveConverters, getPage, isLive } from '../lib/routes.js';
+import { GUIDES, GUIDES_PATH, guidePath } from '../lib/guides.js';
 import { langOf, useT } from '../i18n/index.js';
 
 const { t, render, listTitle, path: to } = useT(langOf(Astro.url));
 const links = liveConverters();
 const year = new Date().getFullYear();
+
+// On every page, so every page of the site is at most two clicks from home:
+// home -> any link here, and the guides index -> each guide.
+const live = (paths: string[]) => paths.map(getPage).filter((p) => p && isLive(p));
+const typing = live([
+  '/hindi-typing-test',
+  '/hindi-typing-test-for-exams',
+  '/remington-hindi-keyboard',
+  '/english-to-hindi-typing',
+  '/hindi-keyboard',
+  '/how-to-type-hindi-in-ms-word',
+  '/kruti-dev-010-font',
+  '/kruti-dev-keyboard',
+]);
+const site = live(['/about', '/contact', '/privacy-policy', '/terms']);
+const linkClass = 'text-body no-underline hover:underline';
 ---
 
 <footer class="mt-16 border-t border-hairline bg-paper">
@@ -23,19 +40,56 @@ const year = new Date().getFullYear();
           {
             links.map((p) => (
               <li>
-                <a
-                  href={to(p.path)}
-                  class="text-body no-underline hover:underline"
-                  set:html={render(listTitle(t(`pages.${p.path}.h1`)))}
-                />
+                <a href={to(p.path)} class={linkClass} set:html={render(listTitle(t(`pages.${p.path}.h1`)))} />
               </li>
             ))
           }
           <li>
-            <a href={to('/all-converters')} class="text-body no-underline hover:underline">
+            <a href={to('/all-converters')} class={linkClass}>
               {t('nav.allConverters')}
             </a>
           </li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="footer-typing">
+        <p id="footer-typing" class="text-sm font-semibold text-ink">{t('footer.typing')}</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          {
+            typing.map((p) => (
+              <li>
+                <a href={to(p!.path)} class={linkClass} set:html={render(t(`pages.${p!.path}.nav`))} />
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="footer-guides">
+        <p id="footer-guides" class="text-sm font-semibold text-ink">
+          <a href={to(GUIDES_PATH)} class="text-ink no-underline hover:underline">{t('footer.guides')}</a>
+        </p>
+        <ul class="mt-3 max-w-64 space-y-2 text-sm">
+          {
+            GUIDES.map((g) => (
+              <li>
+                <a href={to(guidePath(g))} class={linkClass} set:html={render(t(`articles.${g.slug}.crumb`))} />
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="footer-site">
+        <p id="footer-site" class="text-sm font-semibold text-ink">{t('footer.site')}</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          {
+            site.map((p) => (
+              <li>
+                <a href={to(p!.path)} class={linkClass}>{t(`pages.${p!.path}.nav`)}</a>
+              </li>
+            ))
+          }
         </ul>
       </nav>
     </div>
