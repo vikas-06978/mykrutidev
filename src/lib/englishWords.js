@@ -40,6 +40,13 @@ export const LOANWORDS = [
   'internet', 'motor', 'police', 'train', 'march', 'april',
 ];
 
+/**
+ * The two one-letter English words. The word list starts at two letters, so
+ * these carry their own reading. They are ambiguous like `is` or `to`: English
+ * next to English (this is a book, I am fine), otherwise what they always were.
+ */
+export const SINGLE_LETTER_WORDS = { a: 'अ', i: 'आई' };
+
 const loan = new Set(LOANWORDS);
 export const HINGLISH = new Set(
   [...HINGLISH_ALWAYS, ...DICTIONARY_WORDS, ...Object.keys(COMMON_WORDS)].filter(
@@ -68,6 +75,7 @@ export function makeEnglish(words) {
   const cache = new Map();
   const pronounce = (word) => {
     const w = word.toLowerCase();
+    if (Object.hasOwn(SINGLE_LETTER_WORDS, w)) return SINGLE_LETTER_WORDS[w];
     if (!Object.hasOwn(words, w)) return null;
     if (!cache.has(w)) cache.set(w, englishToDevanagari(w, words[w]));
     return cache.get(w);
@@ -79,7 +87,7 @@ export function makeEnglish(words) {
   /** Both English and Hinglish (is, to, he, main...): the sentence decides - see romanTyping.js. */
   const isAmbiguous = (word) => {
     const w = word.toLowerCase();
-    return Object.hasOwn(words, w) && HINGLISH.has(w);
+    return Object.hasOwn(SINGLE_LETTER_WORDS, w) || (Object.hasOwn(words, w) && HINGLISH.has(w));
   };
   return { isEnglish, isAmbiguous, pronounce };
 }

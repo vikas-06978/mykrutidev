@@ -380,10 +380,32 @@ describe('English words', () => {
       assert.equal(local('is to', true), 'इस तो', 'both neighbours ambiguous');
     });
 
-    test('a single letter passes the context through and is not itself changed', () => {
-      // `is` looks past `a` to `book`; `a` keeps whatever it always gave.
-      const a = typeHindiLocal('a', { fallback }).text;
-      assert.equal(local('this is a book', true), `this is ${a} book`);
+    describe('a and I follow their neighbours too', () => {
+      test('Keep English: this is a book -> this is a book', () => {
+        assert.equal(local('this is a book', true), 'this is a book');
+      });
+      test('Hindi letters: this is a book -> दिस इज़ अ बुक', () => {
+        assert.equal(nfd(local('this is a book', false)), nfd('दिस इज़ अ बुक'));
+      });
+      test('Keep English: I am fine -> I am fine', () => {
+        assert.equal(local('I am fine', true), 'I am fine');
+      });
+      test('Hindi letters: I am fine -> आई ...', () => {
+        assert.match(local('I am fine', false), /^आई /);
+      });
+      test('the previous word decides at the end of the text', () => {
+        assert.equal(local('good book a', true), 'good book a');
+      });
+      test('next to Hindi, or alone, they give what they always did', () => {
+        const before = (s) => typeHindiLocal(s, { fallback }).text;
+        for (const s of ['wo a gaya', 'ghar a', 'a', 'I', 'bhai I']) {
+          assert.equal(local(s, true), before(s), s);
+          assert.equal(local(s, false), before(s), s);
+        }
+      });
+      test('other single letters are still skipped, not changed', () => {
+        assert.equal(local('is x good', true), `is ${typeHindiLocal('x', { fallback }).text} good`);
+      });
     });
 
     test('tapping still offers both readings, whichever is shown', async () => {

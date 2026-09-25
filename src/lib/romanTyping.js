@@ -124,9 +124,10 @@ const dedupe = (list) => [...new Set(list.filter(Boolean))];
  *   3. otherwise Hindi, which is what every ambiguous word used to be.
  *
  * An ambiguous neighbour counts once it has been decided, so "he is good"
- * reads English all the way back from `good`. A single letter (a, I - the
- * English list has no one-letter words) says nothing either way and is
- * skipped like punctuation; it is never changed itself.
+ * reads English all the way back from `good`. `a` and `I` are ambiguous words
+ * too (englishWords.js SINGLE_LETTER_WORDS): "this is a book" stays English.
+ * Any other single letter says nothing either way and is skipped like
+ * punctuation; it is never changed itself.
  *
  *   bhai is everything good   is -> next is English          -> is
  *   is ghar mein              is -> next is Hindi            -> इस
@@ -139,7 +140,9 @@ const dedupe = (list) => [...new Set(list.filter(Boolean))];
 export function readsEnglish(segments, english) {
   const out = new Set();
   if (!english) return out;
-  const words = segments.filter((s) => s.kind === 'word' && s.v.length > 1);
+  const words = segments.filter(
+    (s) => s.kind === 'word' && (s.v.length > 1 || english.isAmbiguous?.(s.v)),
+  );
   /** 'en' | 'hi' | null (ambiguous, undecided) */
   const read = words.map((s) =>
     english.isEnglish(s.v) ? 'en' : english.isAmbiguous?.(s.v) ? null : 'hi',
