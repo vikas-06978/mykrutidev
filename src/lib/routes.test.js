@@ -190,7 +190,8 @@ describe('routes match the files on disk', () => {
   });
 
   test('every .astro page file has a table entry', () => {
-    for (const f of files) {
+    // 404.astro is the host's error page for every missing URL, not a route.
+    for (const f of files.filter((x) => x !== '404.astro')) {
       const path = f === 'index.astro' ? '/' : `/${f.replace(/\.astro$/, '')}`;
       assert.ok(getPage(path), `${f} has no routes.js entry`);
     }

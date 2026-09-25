@@ -7,8 +7,10 @@ import { LOCALES, localizePath } from '../i18n/index.js';
 // disallowed in every language, since /hi/x is the same page as /x.
 export const GET: APIRoute = ({ site }) => {
   const sitemapURL = new URL('sitemap-index.xml', site);
+  // Without the trailing slash: a robots rule is a prefix, so "/x" covers both
+  // "/x" and "/x/".
   const disallow = pendingPages()
-    .flatMap((p) => LOCALES.map((l) => `Disallow: ${localizePath(p.path, l)}`))
+    .flatMap((p) => LOCALES.map((l) => `Disallow: ${localizePath(p.path, l).replace(/\/$/, '')}`))
     .join('\n');
 
   return new Response(

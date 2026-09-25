@@ -1,0 +1,13 @@
+---
+// One guide per entry in src/lib/guides.js; the words are in src/i18n/en.json under articles.<slug>.
+import GuideArticle from '../../components/GuideArticle.astro';
+import { GUIDES } from '../../lib/guides.js';
+
+export function getStaticPaths() {
+  return GUIDES.map((g) => ({ params: { slug: g.slug } }));
+}
+
+const { slug } = Astro.params;
+---
+
+<GuideArticle slug={slug} />

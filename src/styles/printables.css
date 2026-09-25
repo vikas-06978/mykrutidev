@@ -349,6 +349,7 @@
   /* A printable page prints its chart and nothing else: no header, nav,
      footer, FAQ or article. Other pages print as they are. */
   body:has(.pr-area) > :not(main),
+  body:has(.pr-area) main > [data-breadcrumbs],
   body:has(.pr-area) main > .wrap > :not(.pr-area) {
     display: none !important;
   }

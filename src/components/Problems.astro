@@ -1,0 +1,28 @@
+---
+/**
+ * "Common problems & fixes": what actually goes wrong for people using this
+ * page's tool, each with the fix. Plain HTML from src/i18n
+ * (pages.<path>.problems), under "How to use" and above the FAQ.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  items: { problem: string; fix: string }[];
+}
+const { items } = Astro.props;
+const { t, render } = useT(langOf(Astro.url));
+---
+
+<section aria-labelledby="problems-heading" class="mt-10">
+  <h2 id="problems-heading" class="text-xl">{t('page.problemsHeading')}</h2>
+  <dl class="mt-4 grid gap-3 md:grid-cols-2">
+    {
+      items.map(({ problem, fix }) => (
+        <div class="card p-4">
+          <dt class="font-medium text-ink" set:html={render(problem)} />
+          <dd class="mt-1.5 text-sm leading-relaxed text-body" set:html={render(fix)} />
+        </div>
+      ))
+    }
+  </dl>
+</section>

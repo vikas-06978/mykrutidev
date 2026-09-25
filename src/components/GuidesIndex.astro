@@ -1,0 +1,42 @@
+---
+/**
+ * /guides/ and /hi/guides/: every guide, with what it answers and when it was
+ * last updated. Linked from every page's footer, so each guide is two clicks
+ * from anywhere.
+ */
+import Base from '../layouts/Base.astro';
+import { GUIDES, guidePath, GUIDES_PATH } from '../lib/guides.js';
+import { langOf, useT, LOCALE_META } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+const { t, render, path: to } = useT(lang);
+const date = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString(LOCALE_META[lang].htmlLang === 'hi' ? 'hi-IN' : 'en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<Base title={t('guidesIndex.title')} description={t('guidesIndex.description')} crumb={t('guidesIndex.nav')}>
+  <div class="wrap py-8 sm:py-12" data-guides-index>
+    <h1 class="text-3xl sm:text-4xl">{t('guidesIndex.h1')}</h1>
+    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(t('guidesIndex.lede'))} />
+    <ul class="mt-8 grid gap-4 md:grid-cols-2">
+      {
+        GUIDES.map((g) => (
+          <li>
+            <a href={to(guidePath(g))} class="block h-full card p-5 no-underline transition-colors hover:border-saffron">
+              <span class="block text-lg font-medium text-ink" set:html={render(t(`articles.${g.slug}.h1`))} />
+              <span class="mt-1.5 block text-sm leading-relaxed text-body" set:html={render(t(`articles.${g.slug}.description`))} />
+              <span class="mt-3 block text-xs text-mute">
+                {t('article.updated')} <time datetime={g.updated}>{date(g.updated)}</time>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

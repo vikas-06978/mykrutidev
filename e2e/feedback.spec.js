@@ -206,7 +206,7 @@ test.describe('the flow', () => {
     await expect(panel(page).locator('#fb-title')).toHaveText('हमें बेहतर बनाने में मदद करें');
     await expect(panel(page).locator('.fb-step[data-step="1"] legend')).toHaveText('आपका अनुभव कैसा रहा?');
     await expect(panel(page)).toContainText('कोई निजी जानकारी नहीं चाहिए। ईमेल देना ज़रूरी नहीं है।');
-    await expect(panel(page).locator('.fb-privacy a')).toHaveAttribute('href', '/hi/privacy-policy');
+    await expect(panel(page).locator('.fb-privacy a')).toHaveAttribute('href', /^\/hi\/privacy-policy\/?$/);
     await panel(page).locator('[data-rating="4"]').click();
     await expect(panel(page).locator('.fb-step[data-step="2"] legend')).toHaveText('आज आपने क्या इस्तेमाल किया?');
     await expect(panel(page).locator('input[value="hindi-keyboard"]')).toBeChecked();

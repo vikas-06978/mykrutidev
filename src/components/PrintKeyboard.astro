@@ -21,7 +21,7 @@ const TRAILING = [{ label: 'Bksp', w: 2, finger: 'r-pinky' }, null, { label: 'En
 const fingers = mode === 'fingers';
 ---
 
-<div class="pr-scroll">
+<div class="pr-scroll" tabindex="0" role="region" aria-label="Remington (Kruti Dev) keyboard chart">
   <div class="pr-kbd" data-mode={mode} role="img" aria-label="Remington (Kruti Dev) keyboard" translate="no">
     {
       rows.map((row, i) => (

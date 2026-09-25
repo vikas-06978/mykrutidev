@@ -63,9 +63,9 @@ describe('in the built pages', () => {
 
   test('the footer links the Privacy Policy on every page', () => {
     const page = readFileSync(join(DIST, 'hindi-keyboard/index.html'), 'utf8');
-    assert.match(page, /href="\/privacy-policy"/);
+    assert.match(page, /href="\/privacy-policy\/?"/);
     const hi = readFileSync(join(DIST, 'hi/hindi-keyboard/index.html'), 'utf8');
-    assert.match(hi, /href="\/hi\/privacy-policy"/);
+    assert.match(hi, /href="\/hi\/privacy-policy\/?"/);
   });
 });
 
