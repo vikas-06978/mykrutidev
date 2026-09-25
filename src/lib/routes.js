@@ -434,6 +434,17 @@ export const PAGES = [
     related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
   },
   {
+    // What the site collects (the feedback widget) and what it never does.
+    // Linked from the footer and from the feedback panel.
+    path: '/privacy-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    related: ['/', '/english-to-hindi-typing', '/hindi-typing-test'],
+  },
+  {
     path: '/about',
     ready: false,
     kind: 'content',

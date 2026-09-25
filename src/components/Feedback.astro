@@ -1,0 +1,305 @@
+---
+/**
+ * The feedback button (bottom-right, every page) and its panel.
+ *
+ * Nothing here is on the critical path and nothing ever opens by itself:
+ *  - the button is plain HTML, position: fixed, so it takes no room in the
+ *    page and shifts nothing (CLS 0);
+ *  - the panel's markup and words are rendered here, at build time, inside a
+ *    <template> - inert, never laid out, until the button is pressed;
+ *  - the script below is a few lines: it keeps the button off the tool's own
+ *    controls, and on idle (or on the first press, if that comes sooner) it
+ *    loads src/scripts/feedback.js, which runs the panel.
+ *
+ * What is sent, and what never is: src/lib/feedback.js.
+ */
+import { splitLocale, useT } from '../i18n/index.js';
+import { LIMITS, USED, USED_BY_PAGE, WANTS, RATINGS, RATING_EMOJI } from '../lib/feedback.js';
+
+const { lang, path } = splitLocale(Astro.url.pathname);
+const { t, render, path: to } = useT(lang);
+const preUsed = USED_BY_PAGE[path] ?? '';
+
+// Words the script shows itself (the rest are in the template).
+const strings = {
+  step: t('feedback.step'),
+  sending: t('feedback.sending'),
+  send: t('feedback.send'),
+  charsLeft: t('feedback.charsLeft'),
+  errorEmail: t('feedback.errorEmail'),
+  errorRate: t('feedback.errorRate'),
+  errorGeneric: t('feedback.errorGeneric'),
+};
+---
+
+<button
+  type="button"
+  class="fb-btn"
+  data-feedback-open
+  data-hidden="true"
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-controls="fb-panel"
+  aria-label={t('feedback.buttonAria')}
+>
+  <svg class="fb-btn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+    <path
+      d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5v-8Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linejoin="round"></path>
+    <path d="M8.5 8.5h7M8.5 11.5h4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+  </svg>
+  <span class="fb-btn-label">{t('feedback.button')}</span>
+</button>
+
+<template id="fb-template" data-i18n={JSON.stringify(strings)} data-pre-used={preUsed}>
+  <div class="fb-panel" id="fb-panel" role="dialog" aria-modal="false" aria-labelledby="fb-title" lang={lang}>
+    <div class="fb-head">
+      <h2 id="fb-title" class="fb-title">{t('feedback.title')}</h2>
+      <button type="button" class="fb-x" data-fb-close aria-label={t('feedback.close')}>
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <form class="fb-form" novalidate data-fb-form>
+      <p class="fb-count" data-fb-count aria-live="polite"></p>
+      <p class="fb-note" data-fb-sent-before hidden>{t('feedback.sentBefore')}</p>
+
+      {/* Step 1 - one tap moves on. */}
+      <fieldset class="fb-step" data-step="1">
+        <legend class="fb-q">{t('feedback.ratingQ')}</legend>
+        <div class="fb-rating">
+          {
+            RATINGS.map((r) => (
+              <button type="button" class="fb-face" data-rating={r} aria-pressed="false">
+                <span class="fb-emoji" aria-hidden="true">{RATING_EMOJI[r]}</span>
+                <span class="fb-face-label">{t(`feedback.ratings.${r}`)}</span>
+              </button>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      {/* Step 2 */}
+      <fieldset class="fb-step" data-step="2" hidden>
+        <legend class="fb-q">{t('feedback.usedQ')}</legend>
+        <p class="fb-hint">{t('feedback.pickAny')}</p>
+        <div class="fb-chips">
+          {
+            USED.map((id) => (
+              <label class="fb-chip">
+                <input type="checkbox" name="used" value={id} />
+                <span set:html={render(t(`feedback.used.${id}`))} />
+              </label>
+            ))
+          }
+        </div>
+        <div class="fb-nav">
+          <button type="button" class="fb-ghost" data-fb-back>{t('feedback.back')}</button>
+          <button type="button" class="fb-primary" data-fb-next>{t('feedback.next')}</button>
+        </div>
+      </fieldset>
+
+      {/* Step 3 */}
+      <fieldset class="fb-step" data-step="3" hidden>
+        <legend class="fb-q">{t('feedback.wantsQ')}</legend>
+        <p class="fb-hint">{t('feedback.pickAny')}</p>
+        <div class="fb-chips">
+          {
+            WANTS.map((id) => (
+              <label class="fb-chip">
+                <input type="checkbox" name="wants" value={id} />
+                <span set:html={render(t(`feedback.wants.${id}`))} />
+              </label>
+            ))
+          }
+        </div>
+        <div class="fb-field" data-fb-bug hidden>
+          <label for="fb-bug" class="fb-label">
+            {t('feedback.bugQ')} <span class="fb-opt">{t('feedback.optional')}</span>
+          </label>
+          <textarea
+            id="fb-bug"
+            translate="no"
+            name="bugText"
+            rows="3"
+            maxlength={LIMITS.bugText}
+            aria-describedby="fb-bug-hint"
+            class="fb-input"></textarea>
+          <p id="fb-bug-hint" class="fb-hint">{t('feedback.bugHint')}</p>
+        </div>
+        <div class="fb-nav">
+          <button type="button" class="fb-ghost" data-fb-back>{t('feedback.back')}</button>
+          <button type="button" class="fb-primary" data-fb-next>{t('feedback.next')}</button>
+        </div>
+      </fieldset>
+
+      {/* Step 4 */}
+      <fieldset class="fb-step" data-step="4" hidden>
+        <legend class="sr-only">{t('feedback.messageQ')}</legend>
+        <div class="fb-field">
+          <label for="fb-msg" class="fb-label">
+            {t('feedback.messageQ')} <span class="fb-opt">{t('feedback.optional')}</span>
+          </label>
+          <textarea
+            id="fb-msg"
+            translate="no"
+            name="message"
+            rows="3"
+            maxlength={LIMITS.message}
+            aria-describedby="fb-msg-left"
+            class="fb-input"></textarea>
+          <p id="fb-msg-left" class="fb-hint fb-left" data-fb-left></p>
+        </div>
+        <div class="fb-field">
+          <label for="fb-email" class="fb-label">
+            {t('feedback.emailLabel')} <span class="fb-opt">({t('feedback.emailHint')})</span>
+          </label>
+          <input
+            id="fb-email"
+            name="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            maxlength={LIMITS.email}
+            aria-describedby="fb-err"
+            class="fb-input"
+          />
+        </div>
+        {/* The honeypot: out of sight and out of the tab order. A person never fills it. */}
+        <div class="fb-hp" aria-hidden="true">
+          <label for="fb-website">Website</label>
+          <input id="fb-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <div data-fb-turnstile></div>
+        <p id="fb-err" class="fb-err" data-fb-error role="alert" hidden></p>
+        <div class="fb-nav">
+          <button type="button" class="fb-ghost" data-fb-back>{t('feedback.back')}</button>
+          <button type="submit" class="fb-primary" data-fb-send>{t('feedback.send')}</button>
+        </div>
+      </fieldset>
+
+      <div class="fb-thanks" data-fb-thanks hidden tabindex="-1">
+        <p>{t('feedback.thanks')}</p>
+        <button type="button" class="fb-primary" data-fb-close>{t('feedback.done')}</button>
+      </div>
+
+      <p class="fb-privacy">
+        {t('feedback.privacy')} <a href={to('/privacy-policy')}>{t('footer.privacy')}</a>
+      </p>
+    </form>
+  </div>
+</template>
+
+<script>
+  // The only code on the page before the panel is wanted. It (1) keeps the
+  // button off the tool's own controls, and (2) loads the panel on idle.
+  const btn = document.querySelector<HTMLButtonElement>('[data-feedback-open]');
+  if (btn) {
+    // ------------------------------------------------------------------
+    // Keep out of the way. The button hides (never moves the page) while:
+    //  - one of these controls is under it - Copy, Download, the keys...;
+    //  - someone is typing on the Hindi Keyboard or the Typing Tutor. It
+    //    comes back 2.5 s after the last key, or at once on a scroll up.
+    // ------------------------------------------------------------------
+    const PROTECT =
+      'main button, main a.btn, main input:not([type="hidden"]), main select, main [role="button"], [data-keyboard] .hk-pad';
+    const under = new Set<Element>();
+    let typing = false;
+    let open = false;
+
+    const apply = () => {
+      const hide = !open && document.activeElement !== btn && (typing || under.size > 0);
+      if ((btn.dataset.hidden === 'true') !== hide) btn.dataset.hidden = String(hide);
+    };
+
+    // One IntersectionObserver whose "viewport" is just the corner the button
+    // sits in (plus a little margin), so nothing is measured on scroll.
+    let io: IntersectionObserver | null = null;
+    function watch() {
+      io?.disconnect();
+      under.clear();
+      const r = btn!.getBoundingClientRect();
+      const m = 8;
+      const top = Math.max(0, r.top - m);
+      const left = Math.max(0, r.left - m);
+      const right = Math.max(0, innerWidth - r.right - m);
+      const bottom = Math.max(0, innerHeight - r.bottom - m);
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting && e.target !== btn && !btn!.contains(e.target)) under.add(e.target);
+            else under.delete(e.target);
+          }
+          apply();
+        },
+        { rootMargin: `-${top}px -${right}px -${bottom}px -${left}px` },
+      );
+      const els = document.querySelectorAll(PROTECT);
+      for (const el of els) io.observe(el);
+      // Otherwise the observer's first report (one per element) decides.
+      if (!els.length) apply();
+    }
+    let resizing = 0;
+    addEventListener('resize', () => {
+      clearTimeout(resizing);
+      resizing = window.setTimeout(watch, 150);
+    });
+
+    const tools = document.querySelectorAll('[data-keyboard], [data-tutor]');
+    let quiet = 0;
+    const onType = () => {
+      typing = true;
+      apply();
+      clearTimeout(quiet);
+      quiet = window.setTimeout(() => {
+        typing = false;
+        apply();
+      }, 2500);
+    };
+    for (const tool of tools) {
+      for (const type of ['keydown', 'input', 'pointerdown']) {
+        tool.addEventListener(type, onType, { passive: true, capture: true });
+      }
+    }
+    let lastY = scrollY;
+    addEventListener(
+      'scroll',
+      () => {
+        if (typing && scrollY < lastY - 4) {
+          typing = false;
+          clearTimeout(quiet);
+          apply();
+        }
+        lastY = scrollY;
+      },
+      { passive: true },
+    );
+    btn.addEventListener('focus', apply);
+    btn.addEventListener('blur', apply);
+
+    // ------------------------------------------------------------------
+    // The panel: loaded on idle, or on the first press if that is sooner.
+    // ------------------------------------------------------------------
+    let loading: Promise<typeof import('../scripts/feedback.js')> | null = null;
+    const load = () => (loading ??= import('../scripts/feedback.js'));
+
+    btn.addEventListener('click', async () => {
+      const { toggle } = await load();
+      toggle(btn, (isOpen: boolean) => {
+        open = isOpen;
+        apply();
+      });
+    });
+
+    const idle = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 2000));
+    // Starts hidden (data-hidden in the markup, so it never flashes over a
+    // control); shown once the corner is known to be clear.
+    watch();
+    const start = () => idle(() => void load(), { timeout: 5000 });
+    if (document.readyState === 'complete') start();
+    else addEventListener('load', start, { once: true });
+  }
+</script>

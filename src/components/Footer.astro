@@ -42,6 +42,7 @@ const year = new Date().getFullYear();
 
     <p class="mt-10 border-t border-hairline-soft pt-6 text-xs text-mute">
       &copy; {year} <span translate="no">MyKrutiDev</span>. <Fragment set:html={render(t('footer.legal'))} />
+      <a href={to('/privacy-policy')} class="ms-1 text-mute underline hover:text-ink">{t('footer.privacy')}</a>
     </p>
   </div>
 </footer>

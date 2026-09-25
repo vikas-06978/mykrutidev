@@ -4,8 +4,8 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **1099 keys**, identical in both files (enforced by `npm test` and at build time).
-- **80 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
+- **1170 keys**, identical in both files (enforced by `npm test` and at build time).
+- **81 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
   Mangal, DevLys 010, Abbasi Chanakya New). Brand (MyKrutiDev), file types
@@ -86,6 +86,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `footer.tagline` | Hindi legacy font conversion that gets matras and conjuncts right. Everything runs in your browser. Your text is never uploaded. | पुराने हिंदी फ़ॉन्ट का सही कन्वर्जन, मात्रा और संयुक्त अक्षर सही क्रम में। सब कुछ आपके ब्राउज़र में होता है। आपका टेक्स्ट कहीं अपलोड नहीं होता। |  |
 | `footer.converters` | Converters | कन्वर्टर |  |
 | `footer.legal` | Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners; this site is not affiliated with them. | Kruti Dev, DevLys, Chanakya और Mangal अपने-अपने मालिकों की संपत्ति हैं; इस साइट का उनसे कोई संबंध नहीं है। |  |
+| `footer.privacy` | Privacy Policy | गोपनीयता नीति |  |
 | `page.beta` | Beta | बीटा |  |
 | `page.comingSoon` | Coming soon | जल्द आ रहा है |  |
 | `page.pendingMapping` | The {from} to {to} mapping is being finalised | {from} से {to} की मैपिंग पर काम चल रहा है |  |
@@ -1048,6 +1049,27 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./hindi-typing-progress-log.faq.0.a` | It depends on the exam: many Hindi typing tests ask for 25 to 30 words per minute, with a limit on mistakes. Check your notification, and log your accuracy as well as your speed. | यह परीक्षा पर निर्भर है: कई हिंदी टाइपिंग टेस्ट 25 से 30 शब्द प्रति मिनट माँगते हैं, गलतियों की सीमा के साथ। अपना नोटिफ़िकेशन देखें, और स्पीड के साथ शुद्धता भी लिखें। |  |
 | `pages./hindi-typing-progress-log.faq.1.q` | How often should I test myself? | कितनी बार खुद को टेस्ट करें? |  |
 | `pages./hindi-typing-progress-log.faq.1.a` | Once a day is plenty. Practise lessons for most of your session and finish with one timed test, then write the result here. | दिन में एक बार काफ़ी है। अभ्यास का ज़्यादातर समय पाठों में लगाएँ और आख़िर में एक टाइम्ड टेस्ट दें, फिर उसका नतीजा यहाँ लिखें। |  |
+| `pages./privacy-policy.nav` | Privacy | गोपनीयता |  |
+| `pages./privacy-policy.h1` | Privacy Policy | गोपनीयता नीति |  |
+| `pages./privacy-policy.title` | Privacy Policy \| MyKrutiDev | गोपनीयता नीति \| MyKrutiDev | ⚠️ SEO mix - see pages./.title |
+| `pages./privacy-policy.description` | What MyKrutiDev collects: nothing from the converters or typing tools, and only what you choose to send in the optional feedback form. | MyKrutiDev क्या जमा करता है: कन्वर्टर और टाइपिंग टूल से कुछ नहीं, और वैकल्पिक सुझाव फ़ॉर्म में सिर्फ़ वही जो आप खुद भेजना चुनें। |  |
+| `pages./privacy-policy.lede` | Short version: the converters and typing tools run in your browser and your text is never uploaded. The only thing that reaches our server is feedback you choose to send. | संक्षेप में: कन्वर्टर और टाइपिंग टूल आपके ब्राउज़र में ही चलते हैं और आपका टेक्स्ट कभी अपलोड नहीं होता। हमारे सर्वर तक सिर्फ़ वही सुझाव पहुँचता है जो आप खुद भेजना चुनें। |  |
+| `pages./privacy-policy.body.0` | &lt;h2>Your text and files&lt;/h2> | &lt;h2>आपका टेक्स्ट और फ़ाइलें&lt;/h2> |  |
+| `pages./privacy-policy.body.1` | &lt;p>Every converter, the document converter, the Hindi keyboard and the typing tutor run entirely in your browser. The text you paste or type and the files you convert are never uploaded, logged or stored by us.&lt;/p> | &lt;p>हर कन्वर्टर, डॉक्यूमेंट कन्वर्टर, हिंदी कीबोर्ड और टाइपिंग ट्यूटर पूरी तरह आपके ब्राउज़र में चलते हैं। आप जो टेक्स्ट पेस्ट या टाइप करते हैं और जो फ़ाइलें बदलते हैं, उन्हें हम न अपलोड करते हैं, न लॉग करते हैं, न सहेजते हैं।&lt;/p> |  |
+| `pages./privacy-policy.body.2` | &lt;p>One exception, which you can switch off: in &lt;strong>Hinglish&lt;/strong> mode on &lt;a href="/english-to-hindi-typing">English to Hindi typing&lt;/a>, each word you type is sent to Google's public input-tools service to be spelled in Hindi. &lt;strong>Exact (ITRANS)&lt;/strong> mode never uses the network.&lt;/p> | &lt;p>एक अपवाद, जिसे आप बंद कर सकते हैं: &lt;a href="/english-to-hindi-typing">अंग्रेज़ी से हिंदी टाइपिंग&lt;/a> के &lt;strong>Hinglish&lt;/strong> मोड में आपका टाइप किया हर शब्द हिंदी स्पेलिंग के लिए Google की पब्लिक इनपुट-टूल सेवा को भेजा जाता है। &lt;strong>सटीक (ITRANS)&lt;/strong> मोड इंटरनेट का इस्तेमाल बिल्कुल नहीं करता।&lt;/p> |  |
+| `pages./privacy-policy.body.3` | &lt;h2>Feedback&lt;/h2> | &lt;h2>सुझाव&lt;/h2> |  |
+| `pages./privacy-policy.body.4` | &lt;p>The &lt;strong>Feedback&lt;/strong> button at the bottom of each page opens a short form, and only when you click it. If you press Send, we store:&lt;/p> | &lt;p>हर पेज के नीचे का &lt;strong>सुझाव&lt;/strong> बटन एक छोटा फ़ॉर्म खोलता है, और सिर्फ़ तभी जब आप उसे दबाएँ। अगर आप "भेजें" दबाते हैं, तो हम यह सहेजते हैं:&lt;/p> |  |
+| `pages./privacy-policy.body.5` | &lt;ul>&lt;li>your rating (😞 😐 🙂 😍) and the options you ticked;&lt;/li>&lt;li>what you wrote in the form's own text boxes, and an email address only if you chose to give one;&lt;/li>&lt;li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example "Chrome") and the date.&lt;/li>&lt;/ul> | &lt;ul>&lt;li>आपकी रेटिंग (😞 😐 🙂 😍) और आपके चुने हुए विकल्प;&lt;/li>&lt;li>फ़ॉर्म के अपने टेक्स्ट बॉक्स में आपने जो लिखा, और ईमेल पता सिर्फ़ तब, जब आपने खुद दिया हो;&lt;/li>&lt;li>आप किस पेज पर थे, साइट की भाषा, रंग थीम, फ़ोन था या कंप्यूटर, स्क्रीन की चौड़ाई (पिक्सेल में), ब्राउज़र का नाम (जैसे "Chrome") और तारीख।&lt;/li>&lt;/ul> |  |
+| `pages./privacy-policy.body.6` | &lt;p>We do &lt;strong>not&lt;/strong> store your IP address, your browser's full identification string, or anything you typed, pasted or converted in the tools. No account or sign-up is needed.&lt;/p> | &lt;p>हम आपका IP पता, ब्राउज़र की पूरी पहचान-स्ट्रिंग, या टूल में टाइप, पेस्ट या बदला गया कुछ भी &lt;strong>नहीं&lt;/strong> सहेजते। कोई अकाउंट या साइन-अप नहीं चाहिए।&lt;/p> |  |
+| `pages./privacy-policy.body.7` | &lt;p>Feedback is used only to decide what to fix and build next. An email address is used only to reply to you. It is never shared or used for marketing.&lt;/p> | &lt;p>सुझावों का इस्तेमाल सिर्फ़ यह तय करने के लिए होता है कि आगे क्या ठीक करें और क्या बनाएँ। ईमेल पता सिर्फ़ आपको जवाब देने के लिए इस्तेमाल होता है। उसे न किसी से साझा किया जाता है, न विज्ञापन के लिए इस्तेमाल किया जाता है।&lt;/p> |  |
+| `pages./privacy-policy.body.8` | &lt;h2>Spam protection&lt;/h2> | &lt;h2>स्पैम से बचाव&lt;/h2> |  |
+| `pages./privacy-policy.body.9` | &lt;p>To keep robots out, the form uses Cloudflare Turnstile, an invisible check that runs only after you open the form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.&lt;/p> | &lt;p>रोबोट को रोकने के लिए फ़ॉर्म Cloudflare Turnstile का इस्तेमाल करता है। यह एक अदृश्य जाँच है जो फ़ॉर्म खोलने के बाद ही चलती है (इस पर Cloudflare की अपनी गोपनीयता नीति लागू होती है)। हर व्यक्ति को एक घंटे में 5 संदेश तक सीमित रखने के लिए सर्वर आपके IP पते और मौजूदा घंटे से बना एक एकतरफ़ा कोड रखता है। IP पता खुद कभी नहीं सहेजा जाता, और घंटा पूरा होते ही वह कोड मिटा दिया जाता है।&lt;/p> |  |
+| `pages./privacy-policy.body.10` | &lt;h2>Where feedback is kept&lt;/h2> | &lt;h2>सुझाव कहाँ रखे जाते हैं&lt;/h2> |  |
+| `pages./privacy-policy.body.11` | &lt;p>In a Cloudflare D1 database that only the site's owner can read. If you gave an email address and want your feedback deleted, send a message through the form with the same address asking for it, and we will delete it.&lt;/p> | &lt;p>एक Cloudflare D1 डेटाबेस में, जिसे सिर्फ़ साइट का मालिक पढ़ सकता है। अगर आपने ईमेल पता दिया था और अपना सुझाव हटवाना चाहते हैं, तो उसी पते के साथ फ़ॉर्म से एक संदेश भेजकर कहें; हम उसे मिटा देंगे।&lt;/p> |  |
+| `pages./privacy-policy.body.12` | &lt;h2>Settings saved on your device&lt;/h2> | &lt;h2>आपके डिवाइस पर सहेजी गई सेटिंग&lt;/h2> |  |
+| `pages./privacy-policy.body.13` | &lt;p>Your browser's own storage (localStorage) remembers a few settings on this device only: the colour theme and accent, your language choice, whether you have seen the quick tour, your typing-tutor progress, best speed and sound setting, and the date you last sent feedback (so you are not asked again for 30 days). They are never sent to us, and clearing your browser data removes them.&lt;/p> | &lt;p>आपके ब्राउज़र का अपना स्टोरेज (localStorage) कुछ सेटिंग सिर्फ़ इसी डिवाइस पर याद रखता है: रंग थीम और एक्सेंट, आपकी चुनी भाषा, आपने छोटा परिचय देखा है या नहीं, टाइपिंग ट्यूटर की प्रगति, सबसे अच्छी स्पीड और आवाज़ की सेटिंग, और आपने आखिरी बार सुझाव कब भेजा था (ताकि 30 दिन तक आपसे दोबारा न पूछा जाए)। ये हमें कभी नहीं भेजी जातीं, और ब्राउज़र डेटा साफ़ करने पर मिट जाती हैं।&lt;/p> |  |
+| `pages./privacy-policy.body.14` | &lt;h2>No tracking&lt;/h2> | &lt;h2>कोई ट्रैकिंग नहीं&lt;/h2> |  |
+| `pages./privacy-policy.body.15` | &lt;p>The pages of this site load no ads, analytics or tracking scripts. Fonts are served from this site.&lt;/p> | &lt;p>इस साइट के पेज कोई विज्ञापन, एनालिटिक्स या ट्रैकिंग स्क्रिप्ट लोड नहीं करते। फ़ॉन्ट इसी साइट से आते हैं।&lt;/p> |  |
 | `guide.howToHeading` | How to use | कैसे इस्तेमाल करें |  |
 | `guide.tipLabel` | Tip | सुझाव |  |
 | `guide.tasksHeading` | What do you want to do? | आप क्या करना चाहते हैं? |  |
@@ -1132,3 +1154,52 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `print.names.log` | Progress log | प्रोग्रेस लॉग |  |
 | `print.pdfAria` | Download PDF: {name} | PDF डाउनलोड करें: {name} |  |
 | `print.thumb` | Thumb: Space | अँगूठा: Space |  |
+| `feedback.button` | Feedback | सुझाव |  |
+| `feedback.buttonAria` | Send feedback | सुझाव भेजें |  |
+| `feedback.title` | Help us improve | हमें बेहतर बनाने में मदद करें |  |
+| `feedback.close` | Close | बंद करें |  |
+| `feedback.privacy` | No personal data needed. Email is optional. | कोई निजी जानकारी नहीं चाहिए। ईमेल देना ज़रूरी नहीं है। |  |
+| `feedback.step` | Step {n} of {total} | {total} में से चरण {n} |  |
+| `feedback.ratingQ` | How was your experience? | आपका अनुभव कैसा रहा? |  |
+| `feedback.ratings.1` | Bad | खराब |  |
+| `feedback.ratings.2` | Okay | ठीक-ठाक |  |
+| `feedback.ratings.3` | Good | अच्छा |  |
+| `feedback.ratings.4` | Loved it | बहुत बढ़िया |  |
+| `feedback.usedQ` | What did you use today? | आज आपने क्या इस्तेमाल किया? |  |
+| `feedback.used.kruti-dev` | Kruti Dev converter | Kruti Dev कन्वर्टर |  |
+| `feedback.used.unicode-to-kruti` | Unicode to Kruti | यूनिकोड से Kruti |  |
+| `feedback.used.mangal-devlys` | Mangal/DevLys | Mangal/DevLys |  |
+| `feedback.used.abbasi-chanakya` | Abbasi Chanakya | Abbasi Chanakya |  |
+| `feedback.used.word-file` | Word file conversion | Word फ़ाइल कन्वर्जन |  |
+| `feedback.used.english-to-hindi` | English to Hindi typing | अंग्रेज़ी से हिंदी टाइपिंग |  |
+| `feedback.used.hindi-keyboard` | Hindi keyboard | हिंदी कीबोर्ड |  |
+| `feedback.used.typing-tutor` | Typing tutor | टाइपिंग ट्यूटर |  |
+| `feedback.used.keyboard-chart` | Keyboard chart PDF | कीबोर्ड चार्ट PDF |  |
+| `feedback.wantsQ` | What should we add or improve next? | आगे हम क्या जोड़ें या बेहतर करें? |  |
+| `feedback.wants.more-fonts` | More fonts (Chanakya, Shusha…) | और फ़ॉन्ट (Chanakya, Shusha…) |  |
+| `feedback.wants.pdf-conversion` | PDF file conversion | PDF फ़ाइल कन्वर्जन |  |
+| `feedback.wants.typing-lessons` | Better typing lessons | बेहतर टाइपिंग पाठ |  |
+| `feedback.wants.exam-mode` | Exam mode (SSC/CPCT/Court) | परीक्षा मोड (SSC/CPCT/कोर्ट) |  |
+| `feedback.wants.mobile-app` | Mobile app | मोबाइल ऐप |  |
+| `feedback.wants.design` | Faster/cleaner design | तेज़/साफ़ डिज़ाइन |  |
+| `feedback.wants.voice-typing` | Voice typing in Hindi | हिंदी में बोलकर टाइपिंग |  |
+| `feedback.wants.bug` | Something is wrong/bug | कुछ गड़बड़ है/बग |  |
+| `feedback.pickAny` | Pick any that apply. | जितने लागू हों, सब चुनें। |  |
+| `feedback.bugQ` | What went wrong? | क्या गड़बड़ हुई? |  |
+| `feedback.bugHint` | Which page, what you pressed, what happened. | कौन-सा पेज, आपने क्या दबाया, क्या हुआ। |  |
+| `feedback.messageQ` | Anything else? | और कुछ कहना है? |  |
+| `feedback.optional` | (optional) | (वैकल्पिक) |  |
+| `feedback.emailLabel` | Email | ईमेल |  |
+| `feedback.emailHint` | only if you want a reply | सिर्फ़ अगर आप जवाब चाहते हैं |  |
+| `feedback.next` | Next | आगे |  |
+| `feedback.back` | Back | पीछे |  |
+| `feedback.skip` | Skip | छोड़ें |  |
+| `feedback.send` | Send | भेजें |  |
+| `feedback.sending` | Sending… | भेजा जा रहा है… |  |
+| `feedback.thanks` | Thank you! 🙏 Your feedback helps us improve. | धन्यवाद! 🙏 आपके सुझाव से हमें बेहतर बनने में मदद मिलती है। |  |
+| `feedback.done` | Close | बंद करें |  |
+| `feedback.sentBefore` | You sent feedback recently - thank you! You can always send more. | आपने हाल ही में सुझाव भेजा था - धन्यवाद! आप जब चाहें और भी भेज सकते हैं। |  |
+| `feedback.charsLeft` | {n} characters left | {n} अक्षर बाकी |  |
+| `feedback.errorEmail` | That email address does not look right. Leave it empty if you do not want a reply. | यह ईमेल पता सही नहीं लगता। जवाब नहीं चाहिए तो इसे खाली छोड़ दें। |  |
+| `feedback.errorRate` | Too many messages from here just now. Please try again in an hour. | अभी यहाँ से बहुत सारे संदेश आ चुके हैं। कृपया एक घंटे बाद फिर कोशिश करें। |  |
+| `feedback.errorGeneric` | That did not go through. Please try again in a moment. | संदेश नहीं जा सका। कृपया थोड़ी देर में फिर कोशिश करें। |  |

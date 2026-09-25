@@ -59,6 +59,10 @@
 /* The first-visit tour on the typing tools and its "?" button. */
 @import './tour.css';
 
+/* The feedback button, bottom-right on every page. The panel's styles
+   (feedback.css) load with its script, only when it is wanted. */
+@import './feedback-button.css';
+
 /* Printable charts and practice sheets: screen, print and the PDFs. */
 @import './printables.css';
 

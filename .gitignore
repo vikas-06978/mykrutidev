@@ -44,3 +44,7 @@ vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf
 
 # Raw sources for public/data/english-words.json - scripts/build-english-words.mjs downloads them
 vendor/english/
+
+# Cloudflare: local D1 state (`npm run preview:cf`) and local secrets
+.wrangler/
+.dev.vars

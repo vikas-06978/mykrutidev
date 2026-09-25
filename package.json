@@ -12,7 +12,8 @@
     "prebuild": "npm run pdfs",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\"",
+    "preview:cf": "astro build && wrangler pages dev dist --d1 DB --persist-to .wrangler/state",
+    "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\" \"server/*.test.js\"",
     "test:dist": "node --test \"tests/*.test.js\"",
     "test:e2e": "astro build && playwright test",
     "screenshots": "astro build && playwright test --config=playwright.screenshots.config.js",
@@ -39,6 +40,7 @@
     "@xmldom/xmldom": "^0.9.12",
     "lighthouse": "^13.5.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^6.3.289"
+    "pdfjs-dist": "^6.3.289",
+    "wrangler": "^4.140.0"
   }
 }

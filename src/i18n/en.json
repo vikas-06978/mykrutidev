@@ -66,7 +66,8 @@
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. Everything runs in your browser. Your text is never uploaded.",
     "converters": "Converters",
-    "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners; this site is not affiliated with them."
+    "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners; this site is not affiliated with them.",
+    "privacy": "Privacy Policy"
   },
   "page": {
     "beta": "Beta",
@@ -1556,6 +1557,31 @@
           "a": "Once a day is plenty. Practise lessons for most of your session and finish with one timed test, then write the result here."
         }
       ]
+    },
+    "/privacy-policy": {
+      "nav": "Privacy",
+      "h1": "Privacy Policy",
+      "title": "Privacy Policy | MyKrutiDev",
+      "description": "What MyKrutiDev collects: nothing from the converters or typing tools, and only what you choose to send in the optional feedback form.",
+      "lede": "Short version: the converters and typing tools run in your browser and your text is never uploaded. The only thing that reaches our server is feedback you choose to send.",
+      "body": [
+        "<h2>Your text and files</h2>",
+        "<p>Every converter, the document converter, the Hindi keyboard and the typing tutor run entirely in your browser. The text you paste or type and the files you convert are never uploaded, logged or stored by us.</p>",
+        "<p>One exception, which you can switch off: in <strong>Hinglish</strong> mode on <a href=\"/english-to-hindi-typing\">English to Hindi typing</a>, each word you type is sent to Google's public input-tools service to be spelled in Hindi. <strong>Exact (ITRANS)</strong> mode never uses the network.</p>",
+        "<h2>Feedback</h2>",
+        "<p>The <strong>Feedback</strong> button at the bottom of each page opens a short form, and only when you click it. If you press Send, we store:</p>",
+        "<ul><li>your rating (😞 😐 🙂 😍) and the options you ticked;</li><li>what you wrote in the form's own text boxes, and an email address only if you chose to give one;</li><li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example \"Chrome\") and the date.</li></ul>",
+        "<p>We do <strong>not</strong> store your IP address, your browser's full identification string, or anything you typed, pasted or converted in the tools. No account or sign-up is needed.</p>",
+        "<p>Feedback is used only to decide what to fix and build next. An email address is used only to reply to you. It is never shared or used for marketing.</p>",
+        "<h2>Spam protection</h2>",
+        "<p>To keep robots out, the form uses Cloudflare Turnstile, an invisible check that runs only after you open the form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
+        "<h2>Where feedback is kept</h2>",
+        "<p>In a Cloudflare D1 database that only the site's owner can read. If you gave an email address and want your feedback deleted, send a message through the form with the same address asking for it, and we will delete it.</p>",
+        "<h2>Settings saved on your device</h2>",
+        "<p>Your browser's own storage (localStorage) remembers a few settings on this device only: the colour theme and accent, your language choice, whether you have seen the quick tour, your typing-tutor progress, best speed and sound setting, and the date you last sent feedback (so you are not asked again for 30 days). They are never sent to us, and clearing your browser data removes them.</p>",
+        "<h2>No tracking</h2>",
+        "<p>The pages of this site load no ads, analytics or tracking scripts. Fonts are served from this site.</p>"
+      ]
     }
   },
   "guide": {
@@ -1679,5 +1705,62 @@
     },
     "pdfAria": "Download PDF: {name}",
     "thumb": "Thumb: Space"
+  },
+  "feedback": {
+    "button": "Feedback",
+    "buttonAria": "Send feedback",
+    "title": "Help us improve",
+    "close": "Close",
+    "privacy": "No personal data needed. Email is optional.",
+    "step": "Step {n} of {total}",
+    "ratingQ": "How was your experience?",
+    "ratings": {
+      "1": "Bad",
+      "2": "Okay",
+      "3": "Good",
+      "4": "Loved it"
+    },
+    "usedQ": "What did you use today?",
+    "used": {
+      "kruti-dev": "Kruti Dev converter",
+      "unicode-to-kruti": "Unicode to Kruti",
+      "mangal-devlys": "Mangal/DevLys",
+      "abbasi-chanakya": "Abbasi Chanakya",
+      "word-file": "Word file conversion",
+      "english-to-hindi": "English to Hindi typing",
+      "hindi-keyboard": "Hindi keyboard",
+      "typing-tutor": "Typing tutor",
+      "keyboard-chart": "Keyboard chart PDF"
+    },
+    "wantsQ": "What should we add or improve next?",
+    "wants": {
+      "more-fonts": "More fonts (Chanakya, Shusha…)",
+      "pdf-conversion": "PDF file conversion",
+      "typing-lessons": "Better typing lessons",
+      "exam-mode": "Exam mode (SSC/CPCT/Court)",
+      "mobile-app": "Mobile app",
+      "design": "Faster/cleaner design",
+      "voice-typing": "Voice typing in Hindi",
+      "bug": "Something is wrong/bug"
+    },
+    "pickAny": "Pick any that apply.",
+    "bugQ": "What went wrong?",
+    "bugHint": "Which page, what you pressed, what happened.",
+    "messageQ": "Anything else?",
+    "optional": "(optional)",
+    "emailLabel": "Email",
+    "emailHint": "only if you want a reply",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "send": "Send",
+    "sending": "Sending…",
+    "thanks": "Thank you! 🙏 Your feedback helps us improve.",
+    "done": "Close",
+    "sentBefore": "You sent feedback recently - thank you! You can always send more.",
+    "charsLeft": "{n} characters left",
+    "errorEmail": "That email address does not look right. Leave it empty if you do not want a reply.",
+    "errorRate": "Too many messages from here just now. Please try again in an hour.",
+    "errorGeneric": "That did not go through. Please try again in a moment."
   }
 }

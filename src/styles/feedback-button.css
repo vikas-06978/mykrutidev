@@ -1,0 +1,73 @@
+/* The feedback button (Feedback.astro). Fixed, so it takes no room in the page
+   and appearing or hiding shifts nothing (CLS 0). The panel's own styles are
+   in feedback.css and arrive with the panel's script, not on first paint.
+
+   It hides - opacity only, never a move - while a tool control is under it
+   or someone is typing on the keyboard / tutor (data-hidden, set by the
+   script). It starts hidden, so it never flashes over a control on load. */
+.fb-btn {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1rem 0 0.875rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--color-shadow) 28%, transparent);
+  cursor: pointer;
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 0s;
+}
+.fb-btn:hover {
+  border-color: var(--color-brick);
+}
+.fb-btn[aria-expanded='true'] {
+  border-color: var(--color-brick);
+  color: var(--color-brick);
+}
+.fb-btn[data-hidden='true'] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 150ms;
+}
+.fb-btn-icon {
+  flex-shrink: 0;
+}
+
+/* Phones: just the icon, 44px round - the smallest a thumb can hit. */
+@media (max-width: 767px) {
+  .fb-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    justify-content: center;
+  }
+  .fb-btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media print {
+  .fb-btn,
+  .fb-panel {
+    display: none !important;
+  }
+}

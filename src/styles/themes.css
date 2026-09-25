@@ -207,6 +207,7 @@
     .tt-level,
     .hand-palm,
     .hand-finger,
+    .fb-btn,
     .transition-colors
   ) {
   transition: none !important;

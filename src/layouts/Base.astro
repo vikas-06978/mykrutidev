@@ -6,6 +6,7 @@ import devanagari400 from '@fontsource/noto-sans-devanagari/files/noto-sans-deva
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import LangBanner from '../components/LangBanner.astro';
+import Feedback from '../components/Feedback.astro';
 import { SITE, getPage, isLive } from '../lib/routes.js';
 import {
   LOCALES,
@@ -247,5 +248,6 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     {lang === DEFAULT_LOCALE && <LangBanner path={path} />}
     <main id="main" class="flex-1" set:html={body} />
     <Footer />
+    <Feedback />
   </body>
 </html>
