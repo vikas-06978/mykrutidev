@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
-import { PRINTABLES, keyboardRows, practiceSheets, matraRows } from '../src/lib/printables.js';
+import { PRINTABLES, chartRows, practiceSheets, matraRows, pdfFile, pdfHref } from '../src/lib/printables.js';
 import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
@@ -309,7 +309,7 @@ describe('printable charts and PDFs', () => {
   test('the build wrote every PDF: it opens, is A4, has the right page count, is under 500 KB', async () => {
     for (const p of PRINTABLES) {
       for (const lang of ['en', 'hi']) {
-        const file = join(DOWNLOADS, `${p.pdf}-${lang}.pdf`);
+        const file = join(DOWNLOADS, pdfFile(p, lang));
         assert.ok(existsSync(file), `missing ${file}`);
         const bytes = readFileSync(file);
         assert.ok(bytes.length < MAX_BYTES, `${p.pdf}-${lang}: ${bytes.length} bytes`);
@@ -327,18 +327,43 @@ describe('printable charts and PDFs', () => {
     }
   });
 
-  test('every key on the keyboard and finger charts IS the tutor keyboard (normal + Shift)', () => {
-    const want = keyboardRows()
+  test('every PDF link on every page is a real PDF in the build, downloaded under its own name', () => {
+    let links = 0;
+    for (const [p, html] of pages) {
+      for (const [tag] of html.matchAll(/<a\b(?:[^>"]|"[^"]*")*\bhref="[^"]*\.pdf"(?:[^>"]|"[^"]*")*>/g)) {
+        const href = attr(tag, 'href');
+        assert.match(href, /^\/downloads\/mykrutidev-[a-z-]+\.pdf$/, `${p}: ${href}`);
+        assert.equal(attr(tag, 'download'), href.slice('/downloads/'.length), `${p}: download name for ${href}`);
+        assert.equal(attr(tag, 'type'), 'application/pdf', `${p}: type for ${href}`);
+        const file = join(DIST, href);
+        assert.ok(existsSync(file) && statSync(file).size > 10 * 1024, `${p}: ${href} is missing or tiny`);
+        links++;
+      }
+    }
+    assert.ok(links >= PRINTABLES.length * 2, `only ${links} PDF links`);
+  });
+
+  test('the PDFs are committed in public/downloads, so they exist in dev too', () => {
+    for (const p of PRINTABLES) {
+      for (const lang of ['en', 'hi']) {
+        const src = fileURLToPath(new URL(`../public/downloads/${pdfFile(p, lang)}`, import.meta.url));
+        assert.ok(existsSync(src), `missing ${src} - run npm run pdfs`);
+      }
+    }
+  });
+
+  test('every key on the keyboard and finger charts IS the tutor keyboard, labelled from the font (normal + Shift)', () => {
+    const want = chartRows()
       .flat()
-      .map((c) => ({ base: c.base, shift: c.shift, baseDeva: c.baseDeva, shiftDeva: c.shiftDeva, finger: c.finger, home: String(c.home) }));
+      .map((c) => ({ base: c.base, shift: c.shift, baseLabel: c.baseText, shiftLabel: c.shiftText, finger: c.finger, home: String(c.home) }));
     for (const route of ['/kruti-dev-keyboard', '/hindi-typing-finger-chart']) {
       for (const p of both(route)) {
         // Quoted values may contain ">" (the "." key's Shift character is ">").
         const got = [...pages.get(p).matchAll(/<span\b(?:[^>"]|"[^"]*")*\bdata-cap-key\b(?:[^>"]|"[^"]*")*>/g)].map(([tag]) => ({
           base: attr(tag, 'data-base'),
           shift: attr(tag, 'data-shift'),
-          baseDeva: attr(tag, 'data-base-deva') ?? '',
-          shiftDeva: attr(tag, 'data-shift-deva') ?? '',
+          baseLabel: attr(tag, 'data-base-label') ?? '',
+          shiftLabel: attr(tag, 'data-shift-label') ?? '',
           finger: attr(tag, 'data-finger'),
           home: attr(tag, 'data-home'),
         }));
@@ -380,11 +405,11 @@ describe('printable charts and PDFs', () => {
     for (const pr of PRINTABLES) {
       for (const [p, lang] of [[pr.path, 'en'], [hindiOf(pr.path), 'hi']]) {
         const html = pages.get(p);
-        assert.match(html, new RegExp(`<a href="/downloads/${pr.pdf}-${lang}\\.pdf" download`), `${p}: PDF link`);
+        assert.match(html, new RegExp(`<a href="${pdfHref(pr, lang)}" download="${pdfFile(pr, lang)}" type="application/pdf"`), `${p}: PDF link`);
         assert.match(html, /data-print\b/, `${p}: Print`);
         assert.match(html, new RegExp(`href="${lang === 'hi' ? '/hi' : ''}/hindi-typing-test"`), `${p}: Practise online`);
         for (const other of PRINTABLES.filter((o) => o !== pr)) {
-          assert.ok(html.includes(`/downloads/${other.pdf}-${lang}.pdf`), `${p}: no link to ${other.pdf}`);
+          assert.ok(html.includes(pdfHref(other, lang)), `${p}: no link to ${other.pdf}`);
         }
         assert.match(html, /<h2 id="faq-heading"/, `${p}: FAQ`);
       }
@@ -394,7 +419,7 @@ describe('printable charts and PDFs', () => {
   test('the Typing Tutor, the Hindi Keyboard, the menu and the home page link to the printables', () => {
     for (const p of [...both('/hindi-typing-test'), ...both('/hindi-keyboard')]) {
       const lang = isHiPath(p) ? 'hi' : 'en';
-      for (const pr of PRINTABLES) assert.ok(pages.get(p).includes(`/downloads/${pr.pdf}-${lang}.pdf`), `${p}: ${pr.pdf}`);
+      for (const pr of PRINTABLES) assert.ok(pages.get(p).includes(pdfHref(pr, lang)), `${p}: ${pr.pdf}`);
     }
     for (const [p, html] of pages) {
       const prefix = isHiPath(p) ? '/hi' : '';

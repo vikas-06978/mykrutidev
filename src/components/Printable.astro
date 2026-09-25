@@ -10,6 +10,8 @@ import { LEVELS } from '../lib/lessons.js';
 import PrintKeyboard from './PrintKeyboard.astro';
 import {
   pdfHref,
+  pdfFile,
+  chartRows,
   practiceSheets,
   matraRows,
   LEGEND_FINGERS,
@@ -29,6 +31,9 @@ const pagesNote = p.pages === 1 ? t('print.pdfOne') : fill(t('print.pdfMany'), {
 
 const sheets = p.kind === 'sheets' ? practiceSheets() : [];
 const matras = p.kind === 'matras' ? matraRows() : [];
+// "A dash means the key types nothing" only when a key really does: Kruti Dev
+// 010 draws something for every key, and & DOES type a hyphen.
+const hasDeadKey = p.kind === 'keyboard' && chartRows().flat().some((c) => c.base !== ' ' && (!c.baseText || !c.shiftText));
 // A sheet whose drills run long keeps one ruled line per drill, not two, so it
 // still fits one A4 page.
 const isLong = (s: { drills: { keys: string }[] }) => s.drills.some((d) => d.keys.length > 70);
@@ -44,7 +49,7 @@ const circleBareMarks = (text: string) =>
 ---
 
 <div class="pr-actions mt-6">
-  <a href={pdf} download class="btn btn-primary" data-pdf-link>{t('print.downloadPdf')}</a>
+  <a href={pdf} download={pdfFile(p, lang)} type="application/pdf" class="btn btn-primary" data-pdf-link>{t('print.downloadPdf')}</a>
   <button type="button" class="btn btn-outline" data-print>{t('print.printPage')}</button>
   <a href={to('/hindi-typing-test')} class="btn btn-ghost">{t('print.practiseOnline')}</a>
   <span class="pr-note">{pagesNote}</span>
@@ -62,7 +67,7 @@ const circleBareMarks = (text: string) =>
         <div class="pr-lines">
           <span set:html={render(t('print.kbd.how'))} />
           <span set:html={render(t('print.kbd.home'))} />
-          <span set:html={render(t('print.kbd.dead'))} />
+          {hasDeadKey && <span set:html={render(t('print.kbd.dead'))} />}
         </div>
         <PrintKeyboard mode="layout" />
       </>

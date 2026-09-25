@@ -1,11 +1,11 @@
-// Renders page 1 of every built PDF to a PNG with pdf.js, the real PDF - not
-// the HTML it was printed from. `node e2e/pdf-shots.mjs [outDir]` after a build.
+﻿// Renders page 1 of every committed PDF (public/downloads) to a PNG with pdf.js, the real PDF - not
+// the HTML it was printed from. `node e2e/pdf-shots.mjs [outDir]` after `npm run pdfs`.
 // Output: screenshots/pdf/<name>.png (gitignored).
 import { chromium } from '@playwright/test';
 import { readdirSync, readFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const DIST = fileURLToPath(new URL('../dist/downloads/', import.meta.url));
+const DIST = fileURLToPath(new URL('../public/downloads/', import.meta.url));
 const PDFJS = fileURLToPath(new URL('../node_modules/pdfjs-dist/build/', import.meta.url));
 const OUT = process.argv[2] ?? 'screenshots/pdf';
 mkdirSync(OUT, { recursive: true });

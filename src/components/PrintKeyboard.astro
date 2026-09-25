@@ -3,17 +3,17 @@
  * The Remington (Kruti Dev) keyboard for paper: the keyboard chart
  * (mode="layout") and the finger chart (mode="fingers").
  *
- * Every letter comes from keyboardRows() - layout() over the Kruti Dev map,
- * the same call the typing tutor's keyboard makes. The data-* attributes on
- * each key are what tests/dist.test.js compares with that data.
+ * Positions and fingers come from the tutor's keyboard; every label comes
+ * from the Kruti Dev 010 font through the converter (chartRows). The data-*
+ * attributes on each key are what tests/dist.test.js checks.
  */
-import { keyboardRows, FINGER_TAG } from '../lib/printables.js';
+import { chartRows, FINGER_TAG } from '../lib/printables.js';
 
 interface Props {
   mode: 'layout' | 'fingers';
 }
 const { mode } = Astro.props;
-const rows = keyboardRows();
+const rows = chartRows();
 
 // Modifier keys, as on the tutor's keyboard: they make it read as a keyboard.
 const LEADING = [null, { label: 'Tab', w: 1.5, finger: 'l-pinky' }, { label: 'Caps', w: 1.75, finger: 'l-pinky' }, { label: 'Shift', w: 2.25, finger: 'l-pinky' }];
@@ -37,8 +37,8 @@ const fingers = mode === 'fingers';
               data-cap-key
               data-base={cap.base}
               data-shift={cap.shift}
-              data-base-deva={cap.baseDeva}
-              data-shift-deva={cap.shiftDeva}
+              data-base-label={cap.baseText}
+              data-shift-label={cap.shiftText}
               data-finger={cap.finger}
               data-home={String(cap.home)}
             >

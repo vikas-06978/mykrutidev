@@ -14,7 +14,11 @@ import {
   FINGER_TAG,
   LEGEND_FINGERS,
   pdfHref,
+  pdfFile,
+  chartRows,
+  KRUTI_FONT,
 } from './printables.js';
+import { glyphChecker } from './fontGlyphs.js';
 
 describe('the printables come from the tutor’s own data', () => {
   test('keyboard rows ARE the tutor keyboard: every key, normal and Shift', () => {
@@ -82,6 +86,46 @@ describe('the printables come from the tutor’s own data', () => {
     assert.equal(PRINTABLES.length, 5);
     assert.equal(new Set(PRINTABLES.map((p) => p.pdf)).size, 5);
     assert.equal(PRINTABLES.find((p) => p.kind === 'sheets').pages, LEVELS.length);
-    assert.equal(pdfHref(PRINTABLES[0], 'hi'), '/downloads/kruti-dev-keyboard-chart-hi.pdf');
+    assert.equal(pdfFile(PRINTABLES[0], 'en'), 'mykrutidev-kruti-dev-keyboard-chart.pdf');
+    assert.equal(pdfHref(PRINTABLES[0], 'hi'), '/downloads/mykrutidev-kruti-dev-keyboard-chart-hindi.pdf');
+    for (const p of PRINTABLES) {
+      for (const lang of ['en', 'hi']) assert.match(pdfFile(p, lang), /^mykrutidev-[a-z-]+\.pdf$/);
+    }
+  });
+});
+
+describe('the keyboard chart is read from the Kruti Dev 010 font', () => {
+  const kruti2unicode = (keys) => convert(keys, 'kruti-dev', 'unicode', { keepEnglish: false });
+  const hasGlyph = glyphChecker(KRUTI_FONT);
+  const caps = chartRows().flat();
+  // Space is on the chart but is not a printable key.
+  const printable = caps.filter((c) => c.base !== ' ');
+
+  test('47 printable keys, 94 key + Shift combinations, every one drawn by the font', () => {
+    assert.equal(printable.length, 47);
+    const all = printable.flatMap((c) => [c.base, c.shift]);
+    assert.equal(new Set(all).size, 94);
+    for (const ch of all) assert.ok(hasGlyph(ch), `KRDEV010.woff has no glyph for ${JSON.stringify(ch)}`);
+  });
+
+  for (const c of printable) {
+    for (const [ch, text] of [[c.base, c.baseText], [c.shift, c.shiftText]]) {
+      test(`${JSON.stringify(ch)} is labelled kruti2unicode(${JSON.stringify(ch)})`, () => {
+        // The reph is typed after its syllable, so alone it converts to nothing:
+        // read after a consonant and take the consonant away (dZ = र्क -> र्).
+        const expected = ch === 'Z' ? 'र्' : kruti2unicode(ch);
+        assert.equal(text, expected);
+        assert.notEqual(text, '', 'a key the font draws is never shown as typing nothing');
+      });
+    }
+  }
+
+  test('the keys the old chart showed as "-" (font glyph checked by rendering)', () => {
+    const label = Object.fromEntries(printable.flatMap((c) => [[c.base, c.baseText], [c.shift, c.shiftText]]));
+    assert.deepEqual(
+      { '#': label['#'], '@': label['@'], $: label.$, ')': label[')'], G: label.G, ':': label[':'], Z: label.Z, '/': label['/'], '}': label['}'] },
+      { '#': 'रु', '@': '/', $: '+', ')': 'द्ध', G: 'ळ', ':': 'रू', Z: 'र्', '/': 'ध्', '}': 'द्व' },
+    );
+    assert.equal(kruti2unicode('/k'), 'ध');
   });
 });

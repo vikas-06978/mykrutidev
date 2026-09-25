@@ -5,7 +5,7 @@
  * printable page, the other four.
  */
 import { langOf, useT, fill } from '../i18n/index.js';
-import { PRINTABLES, pdfHref } from '../lib/printables.js';
+import { PRINTABLES, pdfHref, pdfFile } from '../lib/printables.js';
 
 interface Props {
   /** The printable page this is on, left out of the list. */
@@ -27,7 +27,8 @@ const items = PRINTABLES.filter((p) => p.path !== except);
           <a href={to(p.path)} class="font-medium text-ink no-underline hover:underline" set:html={render(t(`print.names.${p.kind}`))} />
           <a
             href={pdfHref(p, lang)}
-            download
+            download={pdfFile(p, lang)}
+            type="application/pdf"
             class="btn btn-outline shrink-0"
             aria-label={fill(t('print.pdfAria'), { name: t(`print.names.${p.kind}`) })}
           >

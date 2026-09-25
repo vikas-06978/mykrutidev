@@ -3,8 +3,11 @@
  *
  * Build time only (imports the converter). Nothing here is typed by hand:
  *
- *   keyboard / finger chart   layout(FONTS['kruti-dev'].map) - the very call
- *                             RemingtonKeyboard.astro makes for the tutor
+ *   keyboard / finger chart   positions and fingers from layout() - the call
+ *                             the tutor's keyboard makes - and every label
+ *                             from the Kruti Dev 010 FONT: the converter's
+ *                             reading of each key, "-" only where the font
+ *                             file has no glyph (chartRows)
  *   practice sheets           LEVELS - the tutor's own lessons, with each
  *                             drill's keystrokes from wholeKeys(), the
  *                             function the tutor's targets are built with
@@ -15,14 +18,16 @@
  * cannot disagree with the tutor or the converter.
  */
 
-import { FONTS } from './fontMaps.js';
+import { join } from 'node:path';
+import { FONTS, convert } from './fontMaps.js';
+import { glyphChecker } from './fontGlyphs.js';
 import { layout, locate, FINGERS } from './remington.js';
 import { LEVELS } from './lessons.js';
 import { wholeKeys, buildVerifiedUnits } from './tutor.build.js';
 
 /**
- * The five printables. `pdf` is the file under /downloads/ (one per language:
- * <pdf>-en.pdf and <pdf>-hi.pdf); `pages` is how many A4 pages it must print
+ * The five printables. `pdf` names the file under /downloads/ (one per
+ * language, see pdfFile); `pages` is how many A4 pages it must print
  * to - the build and the tests both check it.
  */
 export const PRINTABLES = [
@@ -35,11 +40,70 @@ export const PRINTABLES = [
 
 export const printableFor = (path) => PRINTABLES.find((p) => p.path === path) ?? null;
 
-/** The file a visitor downloads, e.g. /downloads/kruti-dev-keyboard-chart-hi.pdf */
-export const pdfHref = (p, lang) => `/downloads/${p.pdf}-${lang}.pdf`;
+/**
+ * The file a visitor downloads: mykrutidev-kruti-dev-keyboard-chart.pdf, and
+ * ...-hindi.pdf for the Hindi edition. It lives in public/downloads/ (written
+ * by `npm run pdfs`), so the same path works in dev and in production.
+ */
+export const pdfFile = (p, lang) => `mykrutidev-${p.pdf}${lang === 'hi' ? '-hindi' : ''}.pdf`;
+export const pdfHref = (p, lang) => `/downloads/${pdfFile(p, lang)}`;
 
-/** Rows of caps, exactly as the tutor draws them. */
+/** Rows of caps, exactly as the tutor draws them (positions, fingers, home row). */
 export const keyboardRows = () => layout(FONTS['kruti-dev'].map);
+
+/**
+ * The Kruti Dev 010 font file the site ships, and whether it draws a key.
+ * From the project root, not import.meta.url: the build bundles this module
+ * into another folder, where a relative path would point nowhere.
+ */
+export const KRUTI_FONT = join(process.cwd(), 'public', 'fonts', 'KRDEV010.woff');
+const hasGlyph = glyphChecker(KRUTI_FONT);
+
+const kruti2unicode = (keys) => convert(keys, 'kruti-dev', 'unicode', { keepEnglish: false });
+
+/**
+ * What a key types, as Unicode: the converter's reading of that one keystroke.
+ *
+ * A mark that attaches to its neighbour converts to nothing on its own - the
+ * reph (Z) is typed AFTER the syllable it sits on - so for those the key is
+ * read after a consonant (dZ = र्क) and the consonant is taken away (र्).
+ */
+export function keyLabel(ch) {
+  const alone = kruti2unicode(ch);
+  if (alone) return alone;
+  const withBase = kruti2unicode(`d${ch}`);
+  return withBase.replace(kruti2unicode('d'), '');
+}
+
+/** A sign with no shape of its own (ि, ्र, ़) goes on a dotted circle. */
+const RE_MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ]/;
+const onCircle = (s) => (RE_MARK.test(s) ? `◌${s}` : s);
+
+/**
+ * The keyboard chart: every key, normal and Shift, from the FONT. A key is
+ * shown as typing nothing ("-") only when KRDEV010.woff has no glyph for it;
+ * otherwise its label is keyLabel() - Hindi, or the punctuation the font
+ * draws there (@ is /, $ is +).
+ */
+export function chartRows() {
+  const label = (ch) => (hasGlyph(ch) ? keyLabel(ch) : '');
+  return keyboardRows().map((row) =>
+    row.map((cap) => {
+      const base = label(cap.base);
+      const shift = label(cap.shift);
+      return {
+        base: cap.base,
+        shift: cap.shift,
+        baseText: base,
+        shiftText: shift,
+        baseLabel: onCircle(base),
+        shiftLabel: onCircle(shift),
+        finger: cap.finger,
+        home: cap.home,
+      };
+    }),
+  );
+}
 
 /** The eight fingers that own letter keys, in legend order (thumb has only Space). */
 export const LEGEND_FINGERS = FINGERS.filter((f) => f.id !== 'thumb');

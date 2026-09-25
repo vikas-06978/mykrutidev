@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "pdfs": "node scripts/pdfs.mjs",
+    "prebuild": "npm run pdfs",
     "build": "astro build",
     "preview": "astro preview",
     "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\"",

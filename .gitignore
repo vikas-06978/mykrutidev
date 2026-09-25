@@ -10,6 +10,7 @@ playwright-report/
 screenshots/
 perf-traces/
 lighthouse-reports/
+.pdf-build/
 
 # dependencies
 node_modules/

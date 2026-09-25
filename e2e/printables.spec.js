@@ -58,13 +58,20 @@ for (const pr of PRINTABLES) {
     test(`${url}: the PDF downloads, and Print prints`, async ({ page, request }) => {
       await page.goto(url);
       const href = await page.locator('[data-pdf-link]').getAttribute('href');
-      expect(href).toBe(`/downloads/${pr.pdf}-${lang}.pdf`);
+      const name = `mykrutidev-${pr.pdf}${lang === 'hi' ? '-hindi' : ''}.pdf`;
+      expect(href).toBe(`/downloads/${name}`);
+      await expect(page.locator('[data-pdf-link]')).toHaveAttribute('download', name);
       const res = await request.get(href);
       expect(res.status()).toBe(200);
       expect(res.headers()['content-type']).toContain('application/pdf');
       const body = await res.body();
       expect(body.subarray(0, 5).toString()).toBe('%PDF-');
       expect(body.length).toBeLessThan(500 * 1024);
+
+      // A real click saves a PDF under its own name (not a 404 page as .htm).
+      const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-pdf-link]').click()]);
+      expect(download.suggestedFilename()).toBe(name);
+      expect(await download.failure()).toBeNull();
 
       await page.evaluate(() => {
         window.__printed = 0;
@@ -87,3 +94,65 @@ test('the Typing Tutor and Hindi Keyboard list all five PDFs, and the menu reach
   await page.locator('#navmenu-tools a[href="/kruti-dev-keyboard"]').click();
   await expect(page).toHaveURL(/\/kruti-dev-keyboard\/?$/);
 });
+
+// Every "Download PDF" link on every page that has one, English and Hindi:
+// the file is really there, is served as a PDF, and is not a stub.
+const WITH_PDFS = [...PRINTABLES.map((p) => p.path), '/hindi-typing-test', '/hindi-keyboard'];
+for (const path of WITH_PDFS) {
+  for (const url of [path, `/hi${path}`]) {
+    test(`${url}: every PDF link returns a PDF (200, application/pdf, > 10 KB)`, async ({ page, request }) => {
+      await page.goto(url);
+      const links = await page.locator('a[href$=".pdf"]').evaluateAll((as) =>
+        as.map((a) => ({ href: a.getAttribute('href'), download: a.getAttribute('download') })),
+      );
+      expect(links.length).toBeGreaterThan(0);
+      for (const { href, download } of links) {
+        expect(download, href).toBe(href.split('/').pop());
+        const res = await request.get(href);
+        expect(res.status(), href).toBe(200);
+        expect(res.headers()['content-type'], href).toContain('application/pdf');
+        const body = await res.body();
+        expect(body.length, href).toBeGreaterThan(10 * 1024);
+        expect(body.subarray(0, 5).toString(), href).toBe('%PDF-');
+      }
+    });
+  }
+}
+
+// Devanagari labels (ि ी ु ू ृ, conjuncts) sit fully inside the key border:
+// the ink of every label, measured from the font, not just its line box.
+for (const url of ['/kruti-dev-keyboard', '/hi/kruti-dev-keyboard', '/hindi-typing-finger-chart']) {
+  for (const media of ['screen', 'print']) {
+    test(`${url} (${media}): no key label is clipped by its key`, async ({ page }) => {
+      await page.emulateMedia({ media });
+      await page.goto(url);
+      await page.evaluate(() => document.fonts.ready);
+      const { labels, clipped } = await page.evaluate(() => {
+        const ctx = document.createElement('canvas').getContext('2d');
+        const clipped = [];
+        let labels = 0;
+        for (const key of document.querySelectorAll('.pr-key')) {
+          const k = key.getBoundingClientRect();
+          const walk = document.createTreeWalker(key, NodeFilter.SHOW_TEXT);
+          for (let n; (n = walk.nextNode()); ) {
+            if (!n.textContent.trim()) continue;
+            labels++;
+            const range = document.createRange();
+            range.selectNodeContents(n);
+            const box = range.getBoundingClientRect();
+            const cs = getComputedStyle(n.parentElement);
+            ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+            const m = ctx.measureText(n.textContent);
+            const baseline = box.top + (box.height + m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;
+            if (baseline - m.actualBoundingBoxAscent < k.top + 1 || baseline + m.actualBoundingBoxDescent > k.bottom - 1) {
+              clipped.push(`${key.dataset.base}: ${n.textContent}`);
+            }
+          }
+        }
+        return { labels, clipped };
+      });
+      expect(labels).toBeGreaterThan(94);
+      expect(clipped).toEqual([]);
+    });
+  }
+}

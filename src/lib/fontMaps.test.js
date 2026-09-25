@@ -52,6 +52,48 @@ describe('unicode -> kruti-dev -> unicode round trip', () => {
   }
 });
 
+/**
+ * Real Kruti Dev words for the keys the font draws as letters: `)` द्ध,
+ * `}` द्व, `#` रु, `:` रू, `G` ळ. Each glyph was checked by rendering the word
+ * in public/fonts/KRDEV010.woff. (`jQi;k` is NOT here: the font draws it as
+ * रफपया - Q is फ - so it is a typo for jqi;k, not another spelling.)
+ */
+describe('kruti-dev letters on punctuation keys: real words', () => {
+  const WORDS = [
+    ["'kq)", 'शुद्ध'],
+    ['i)fr', 'पद्धति'],
+    ['fo}ku', 'विद्वान'],
+    ['#i;k', 'रुपया'],
+    ['jqi;k', 'रुपया'],
+    [':i', 'रूप'],
+    ['jwi', 'रूप'],
+    ['vkS"k/k', 'औषध'],
+    ['G', 'ळ'],
+    ['deG', 'कमळ'],
+  ];
+  for (const [k, u] of WORDS) {
+    test(`${k} -> ${u}`, () => assert.equal(legacyToUnicode(k, KD), u));
+  }
+
+  // Unicode -> Kruti Dev writes the key the font draws, and reads back the same.
+  const REVERSE = [
+    ['शुद्ध', "'kq)"],
+    ['पद्धति', 'i)fr'],
+    ['विद्वान', 'fo}ku'],
+    ['द्वारा', '}kjk'],
+    ['कमळ', 'deG'],
+    ['रुपया', 'jqi;k'], // रु/रू keep the spelled-out keys the typing tutor teaches
+    ['रूप', 'jwi'],
+    ['औषध', 'vkS"k/k'],
+  ];
+  for (const [u, k] of REVERSE) {
+    test(`${u} -> ${k} and back`, () => {
+      assert.equal(unicodeToLegacy(u, KD), k);
+      assert.equal(legacyToUnicode(unicodeToLegacy(u, KD), KD), u);
+    });
+  }
+});
+
 describe('no sentinels leak into output', () => {
   for (const [, cases] of groups) {
     for (const { k, u } of cases) {
@@ -84,6 +126,8 @@ describe('punctuation survives a round trip', () => {
     ['<', 'the < slot draws ढ'],
     ['>', 'the > slot draws झ्'],
     ['`', 'the ` slot draws ृ'],
+    ['#', 'the # slot draws रु'],
+    [':', 'the : slot draws रू'],
     // Slots spent on the punctuation above, so the ASCII character itself is
     // now the one with no key. All rare in Hindi prose, and `@` and `/` are
     // protected inside emails and dates by splitProtected anyway - a worthwhile

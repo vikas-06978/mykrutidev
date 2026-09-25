@@ -1,0 +1,5 @@
+# The committed printable PDFs (public/downloads/) must reach every checkout
+# byte for byte: never convert their line endings.
+*.pdf binary
+*.woff binary
+*.woff2 binary

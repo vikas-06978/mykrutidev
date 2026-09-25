@@ -99,8 +99,22 @@ const KRUTI_DEV = {
   J: 'श्र',
   'Ø': 'क्र',
   '|': 'द्य',
-  '}': 'द्ध',
+  // `)` draws द्ध and `}` draws द्व - checked against the glyph outlines in
+  // public/fonts/KRDEV010.woff. `}` used to be read as द्ध, which turned
+  // विद्वान (`fo}ku`) into विद्धान and wrote द्ध back as a key Word shows as द्व.
+  ')': 'द्ध',
+  '}': 'द्व',
   'Ñ': 'कृ', // dedicated कृ ligature: कृपया = `Ñi;k`, संस्कृत = `laLÑr`
+
+  // -- रु and रू have their own glyphs: `#` and `:` ------------------------------
+  // The spelled-out forms come FIRST so they stay the canonical reverse
+  // spelling (buildReverse keeps the first key): Unicode -> Kruti still writes
+  // रु as `jq`, which is what the typing tutor teaches. `#i;k` (रुपया) and
+  // `:i` (रूप) are how many typists key them, and now read correctly.
+  jq: 'रु',
+  '#': 'रु',
+  jw: 'रू',
+  ':': 'रू',
 
   // -- Full consonants written as "half + vertical bar" ---------------------
   // These MUST be here: there is no single key for भ, थ, घ, ध, श, ष, ण, ख, झ.
@@ -137,6 +151,7 @@ const KRUTI_DEV = {
   o: 'व',
   l: 'स',
   g: 'ह',
+  G: 'ळ', // Marathi/Vedic ळ: `deG` = कमळ. Without it ळ could not be typed at all.
 
   // -- Half consonants (no vertical bar) ------------------------------------
   D: 'क्',
@@ -276,9 +291,10 @@ const KRUTI_DEV = {
   //
   // Verified glyph by glyph against the outlines in public/fonts/KRDEV010.woff,
   // not from a keyboard chart. `!` is the one key that means itself, so it needs
-  // no entry. The slots that draw a letter rather than punctuation (`:` is रु,
-  // `)` is छ, `#` is रु, `G` and `%`) are deliberately left out - see the
-  // "unverified layouts" note above on why guessing is worse than not mapping.
+  // no entry. The slots that draw a letter rather than punctuation are mapped
+  // above with the letters (`#` रु, `:` रू, `)` द्ध, `G` ळ, `%` ः) - an earlier
+  // reading had `:` as रु and `)` as छ and left them out; rendering the font
+  // settled it, and printables.test.js now checks every key against the font.
   AA: '॥',
   A: '।',
   '¼': '(',

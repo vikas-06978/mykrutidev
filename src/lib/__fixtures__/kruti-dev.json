@@ -64,8 +64,9 @@
     { "k": "fofHkUu", "u": "विभिन्न", "why": "reported broken: i-matra then the doubled न्न" },
     { "k": "laLÑfr;ksa", "u": "संस्कृतियों", "why": "reported broken: anusvara, half-sa, kri ligature, i-matra, split o-matra" },
     { "k": "lRrk", "u": "सत्ता", "why": "doubled त्त is half-ta + ta + bar, no dedicated glyph" },
-    { "k": "'kq}", "u": "शुद्ध", "why": "doubled द्ध, which DOES have a dedicated glyph" },
-    { "k": "i}fr", "u": "पद्धति", "why": "द्ध glyph then an i-matra that has to hop it" },
+    { "k": "'kq)", "u": "शुद्ध", "why": "doubled द्ध, which DOES have a dedicated glyph - on `)`, not `}` (that one is द्व)" },
+    { "k": "i)fr", "u": "पद्धति", "why": "द्ध glyph then an i-matra that has to hop it" },
+    { "k": "fo}ku", "u": "विद्वान", "why": "`}` is the द्व glyph" },
     { "k": "vUu", "u": "अन्न", "why": "doubled न्न after an independent vowel" }
   ],
 
