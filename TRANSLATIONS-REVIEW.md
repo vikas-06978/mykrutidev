@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **880 keys**, identical in both files (enforced by `npm test` and at build time).
+- **887 keys**, identical in both files (enforced by `npm test` and at build time).
 - **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -38,6 +38,13 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `lang.bannerText` | This site is also available in Hindi | यह साइट हिंदी में भी उपलब्ध है | ⚠️ Only the Hindi is ever shown (the banner is for Hindi readers, on English pages). English column is for reference. |
 | `lang.bannerCta` | View in Hindi | हिंदी में देखें | ⚠️ As above. |
 | `lang.bannerClose` | Close | बंद करें |  |
+| `theme.label` | Theme | थीम |  |
+| `theme.menuAria` | Colour theme | रंग थीम |  |
+| `theme.current` | Theme: {name} | थीम: {name} |  |
+| `theme.light` | Light | लाइट |  |
+| `theme.dark` | Dark | डार्क |  |
+| `theme.reading` | Reading | पढ़ने वाला |  |
+| `theme.system` | System | सिस्टम |  |
 | `nav.aria` | Converters | कन्वर्टर |  |
 | `nav.typingTools` | Typing tools | टाइपिंग टूल |  |
 | `nav.allConverters` | All converters | सभी कन्वर्टर |  |

@@ -7,6 +7,7 @@ dist/
 # Playwright output
 test-results/
 playwright-report/
+screenshots/
 
 # dependencies
 node_modules/

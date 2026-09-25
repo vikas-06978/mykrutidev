@@ -60,7 +60,7 @@
   /* A soft ring rather than a hard outline. Still a 2px brick indicator, so
      it stays as visible as the global :focus-visible rule DESIGN.md requires,
      but it follows the radius and sits inside the panel. */
-  box-shadow: 0 0 0 3px rgb(168 68 42 / 0.14);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brick) 14%, transparent);
 }
 
 .cv-area {
@@ -103,7 +103,7 @@
 }
 
 .btn-primary {
-  @apply border border-brick bg-brick text-white;
+  @apply border border-brick bg-brick text-on-brick;
 }
 .btn-primary:hover {
   @apply border-brick-deep bg-brick-deep;
@@ -127,7 +127,7 @@
 }
 
 .btn[data-copied='true'] {
-  @apply border-ok bg-ok text-white;
+  @apply border-ok bg-ok text-on-ok;
 }
 
 /* --- Segmented toggle --------------------------------------------------- */
@@ -160,10 +160,10 @@
   @apply border-mute bg-inset text-ink;
 }
 .cv-seg button[aria-pressed='true'] {
-  @apply border-brick bg-brick text-white;
+  @apply border-brick bg-brick text-on-brick;
 }
 .cv-seg button[aria-pressed='true']:hover {
-  @apply border-brick-deep bg-brick-deep text-white;
+  @apply border-brick-deep bg-brick-deep text-on-brick;
 }
 .cv-seg button:active {
   transform: translateY(1px);

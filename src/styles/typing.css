@@ -97,7 +97,7 @@
 }
 .tt-c[data-s='current'] {
   color: var(--color-ink);
-  background-color: rgb(168 68 42 / 0.13);
+  background-color: color-mix(in srgb, var(--color-brick) 13%, transparent);
   /* Inset, so marking the caret position never reflows the passage. */
   box-shadow: inset 2px 0 0 0 var(--color-brick);
 }

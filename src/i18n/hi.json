@@ -8,6 +8,15 @@
     "bannerCta": "हिंदी में देखें",
     "bannerClose": "बंद करें"
   },
+  "theme": {
+    "label": "थीम",
+    "menuAria": "रंग थीम",
+    "current": "थीम: {name}",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "reading": "पढ़ने वाला",
+    "system": "सिस्टम"
+  },
   "nav": {
     "aria": "कन्वर्टर",
     "typingTools": "टाइपिंग टूल",

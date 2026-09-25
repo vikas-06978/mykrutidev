@@ -13,6 +13,7 @@
     "test": "node --test \"src/lib/*.test.js\" \"src/i18n/*.test.js\"",
     "test:dist": "node --test \"tests/*.test.js\"",
     "test:e2e": "astro build && playwright test",
+    "screenshots": "astro build && playwright test --config=playwright.screenshots.config.js",
     "i18n:review": "node scripts/translations-review.mjs",
     "astro": "astro"
   },
@@ -28,6 +29,7 @@
     "esbuild": true
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@xmldom/xmldom": "^0.9.12"
   }

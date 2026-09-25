@@ -8,6 +8,15 @@
     "bannerCta": "View in Hindi",
     "bannerClose": "Close"
   },
+  "theme": {
+    "label": "Theme",
+    "menuAria": "Colour theme",
+    "current": "Theme: {name}",
+    "light": "Light",
+    "dark": "Dark",
+    "reading": "Reading",
+    "system": "System"
+  },
   "nav": {
     "aria": "Converters",
     "typingTools": "Typing tools",

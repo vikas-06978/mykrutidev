@@ -90,7 +90,7 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgb(250 247 242 / 0.82);
+  background: color-mix(in srgb, var(--color-paper) 82%, transparent);
   text-align: center;
   /* Clicks fall through to the textarea underneath, which then takes focus. */
   pointer-events: none;
@@ -108,7 +108,7 @@
 */
 .tt-c[data-s='current'] {
   box-shadow: inset 2px 0 0 0 var(--color-brick);
-  background-color: rgb(168 68 42 / 0.13);
+  background-color: color-mix(in srgb, var(--color-brick) 13%, transparent);
   color: var(--color-ink);
   transition:
     background-color 90ms ease,
@@ -210,8 +210,7 @@
 .tt[data-state='paused'] .tt-pause {
   background-color: var(--color-brick);
   border-color: var(--color-brick);
-  /* White on brick, as `.btn-primary` does - there is no --color-on-brick. */
-  color: #fff;
+  color: var(--color-on-brick);
 }
 .tt[data-state='paused'] .tt-pause:hover {
   background-color: var(--color-brick-deep);
@@ -321,7 +320,7 @@
   border: 1px solid var(--color-brick);
   border-radius: var(--radius-chrome);
   background-color: var(--color-brick);
-  color: var(--color-on-brick, #fff);
+  color: var(--color-on-brick);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875rem;
   font-weight: 500;
@@ -463,7 +462,7 @@
 .kbd-cap[data-next='true'] .kbd-eng,
 .kbd-cap[data-next='true'] .kbd-shift,
 .kbd-cap[data-next='true'] .kbd-mod {
-  color: var(--color-on-brick, #fff);
+  color: var(--color-on-brick);
 }
 
 /* The Shift that has to be held with it, marked a step down so the letter key
@@ -485,7 +484,7 @@
 .kbd-cap[data-hit='ok'] .kbd-eng,
 .kbd-cap[data-hit='ok'] .kbd-shift,
 .kbd-cap[data-hit='ok'] .kbd-mod {
-  color: #fff;
+  color: var(--color-on-ok);
 }
 .kbd-cap[data-hit='bad'] {
   border-color: var(--color-err);
@@ -495,7 +494,7 @@
 .kbd-cap[data-hit='bad'] .kbd-eng,
 .kbd-cap[data-hit='bad'] .kbd-shift,
 .kbd-cap[data-hit='bad'] .kbd-mod {
-  color: #fff;
+  color: var(--color-on-err);
 }
 
 /* A cap with no Hindi on it is real but useless here, and says so quietly. */
@@ -581,7 +580,7 @@
 .tt-level[data-state='current'] .tt-level-n,
 .tt-level[data-state='current'] .tt-level-name,
 .tt-level[data-state='current'] .tt-level-meta {
-  color: var(--color-on-brick, #fff);
+  color: var(--color-on-brick);
 }
 
 /* Cleared. Marked on the border rather than by fill, so the current level is

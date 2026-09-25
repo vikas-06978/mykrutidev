@@ -6,6 +6,8 @@ const PORT = 4401;
 
 export default defineConfig({
   testDir: 'e2e',
+  // Pictures for a human, not assertions: `npm run screenshots`.
+  testIgnore: '**/screenshots.spec.js',
   fullyParallel: true,
   retries: 0,
   reporter: 'list',

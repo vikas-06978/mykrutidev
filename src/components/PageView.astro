@@ -84,7 +84,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
       <Fragment set:html={render(text('h1'))} />
       {
         page.beta && (
-          <span class="ml-2 inline-block rounded-full border border-saffron/40 bg-warn-bg px-2.5 py-0.5 align-middle text-xs font-semibold tracking-wide text-saffron uppercase">
+          <span class="ml-2 inline-block rounded-full border border-saffron/40 bg-warn-bg px-2.5 py-0.5 align-middle text-xs font-semibold tracking-wide text-badge uppercase">
             {t('page.beta')}
           </span>
         )
@@ -117,7 +117,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
           aria-labelledby="soon"
           class="mt-6 card border-saffron/40 bg-warn-bg p-6 sm:p-8"
         >
-          <p class="text-xs font-semibold tracking-wide text-saffron uppercase">
+          <p class="text-xs font-semibold tracking-wide text-badge uppercase">
             {t('page.comingSoon')}
           </p>
           <h2

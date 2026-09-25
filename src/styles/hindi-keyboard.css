@@ -45,7 +45,7 @@
 .hk-text:focus {
   outline: none;
   border-color: var(--color-brick);
-  box-shadow: 0 0 0 3px rgb(168 68 42 / 0.14);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brick) 14%, transparent);
 }
 
 .hk-actions {
@@ -176,7 +176,7 @@
     flex-direction: column;
     border-top: 1px solid var(--color-hairline);
     border-radius: 0;
-    box-shadow: 0 -6px 20px rgb(26 39 68 / 0.12);
+    box-shadow: 0 -6px 20px color-mix(in srgb, var(--color-shadow) 12%, transparent);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .hk[data-docked='true'] .hk-scroll {

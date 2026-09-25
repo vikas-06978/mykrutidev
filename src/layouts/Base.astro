@@ -81,6 +81,54 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
+    {/*
+      Theme: runs before the first paint, so a dark or reading page never
+      flashes light. Resolves "system" from prefers-color-scheme and follows
+      the device live; the header switcher calls window.mkdTheme.set().
+      BAR must match --color-paper per theme in global.css (tests/dist and
+      e2e/theme.spec.js check it).
+    */}
+    <script is:inline>
+      (function () {
+        var KEY = 'mkd-theme';
+        var BAR = { light: '#faf7f2', dark: '#151618', reading: '#f4ecd8' };
+        var root = document.documentElement;
+        var dark = window.matchMedia('(prefers-color-scheme: dark)');
+        var pref = 'system';
+        try {
+          pref = localStorage.getItem(KEY) || 'system';
+        } catch (e) {}
+        if (!/^(light|dark|reading|system)$/.test(pref)) pref = 'system';
+        function apply() {
+          var theme = pref === 'system' ? (dark.matches ? 'dark' : 'light') : pref;
+          root.setAttribute('data-theme', theme);
+          root.setAttribute('data-theme-pref', pref);
+          var bar = document.querySelector('meta[name="theme-color"]');
+          if (bar) bar.setAttribute('content', BAR[theme]);
+          document.dispatchEvent(new CustomEvent('mkd:theme', { detail: { pref: pref, theme: theme } }));
+        }
+        function onDevice() {
+          if (pref === 'system') apply();
+        }
+        if (dark.addEventListener) dark.addEventListener('change', onDevice);
+        else if (dark.addListener) dark.addListener(onDevice);
+        window.mkdTheme = {
+          get: function () {
+            return pref;
+          },
+          set: function (p) {
+            if (!/^(light|dark|reading|system)$/.test(p)) return;
+            pref = p;
+            try {
+              localStorage.setItem(KEY, p);
+            } catch (e) {}
+            apply();
+          },
+        };
+        apply();
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <meta name="generator" content={Astro.generator} />
@@ -114,7 +162,7 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
   <body class="min-h-screen flex flex-col">
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-(--radius-chrome) focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
+      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-(--radius-chrome) focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
       >{t('meta.skipLink')}</a
     >
     <Header />
