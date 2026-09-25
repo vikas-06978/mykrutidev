@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import { fileURLToPath } from 'node:url';
 
 import { SITE, isIndexable } from './src/lib/routes.js';
 
@@ -30,6 +31,18 @@ export default defineConfig({
       // Each entry lists its other-language twin (hreflang en / hi).
       i18n: { defaultLocale: 'en', locales: { en: 'en', hi: 'hi' } },
     }),
+    // The printable PDFs, printed from the built pages at the end of every
+    // build (scripts/build-pdfs.mjs). A wrong page count, a non-A4 page, a
+    // file of 500 KB or more, or a non-Noto font fails the build.
+    {
+      name: 'printable-pdfs',
+      hooks: {
+        'astro:build:done': async ({ dir, logger }) => {
+          const { buildPdfs } = await import('./scripts/build-pdfs.mjs');
+          await buildPdfs(fileURLToPath(dir), logger);
+        },
+      },
+    },
   ],
   vite: {
     plugins: [tailwindcss()],

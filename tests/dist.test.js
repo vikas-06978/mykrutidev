@@ -15,6 +15,12 @@ import { fileURLToPath } from 'node:url';
 import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
+import { PRINTABLES, keyboardRows, practiceSheets, matraRows } from '../src/lib/printables.js';
+import { wholeKeys } from '../src/lib/tutor.build.js';
+import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
+import { PDFDocument } from 'pdf-lib';
+
+const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const FIXTURES = JSON.parse(
@@ -135,7 +141,7 @@ describe('language and SEO tags', () => {
 });
 
 describe('links', () => {
-  const NOT_A_PAGE = /^\/(?:_astro|data|fonts|favicon|sitemap|robots\.txt)/;
+  const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
 
   test('internal links on a Hindi page go to Hindi pages', () => {
     for (const p of english()) {
@@ -293,6 +299,107 @@ describe('font names in the nav, the footer and /all-converters', () => {
   test('a Hindi tool page keeps the exact Latin font name in its own text', () => {
     const h1 = pages.get('/hi/devlys-to-unicode').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)[1];
     assert.match(h1, /<span translate="no">DevLys<\/span>/);
+  });
+});
+
+describe('printable charts and PDFs', () => {
+  const DOWNLOADS = join(DIST, 'downloads');
+  const both = (p) => [p, hindiOf(p)];
+
+  test('the build wrote every PDF: it opens, is A4, has the right page count, is under 500 KB', async () => {
+    for (const p of PRINTABLES) {
+      for (const lang of ['en', 'hi']) {
+        const file = join(DOWNLOADS, `${p.pdf}-${lang}.pdf`);
+        assert.ok(existsSync(file), `missing ${file}`);
+        const bytes = readFileSync(file);
+        assert.ok(bytes.length < MAX_BYTES, `${p.pdf}-${lang}: ${bytes.length} bytes`);
+        const doc = await PDFDocument.load(bytes); // throws if it does not open
+        assert.equal(doc.getPageCount(), p.pages, `${p.pdf}-${lang}: pages`);
+        for (const page of doc.getPages()) {
+          const { width, height } = page.getSize();
+          const [w, h] = p.landscape ? [841.89, 595.28] : [595.28, 841.89];
+          assert.ok(Math.abs(width - w) < 1 && Math.abs(height - h) < 1, `${p.pdf}-${lang}: ${width}x${height} is not A4`);
+        }
+        const fonts = embeddedFonts(bytes);
+        assert.ok(fonts.length > 0, `${p.pdf}-${lang}: no embedded font`);
+        for (const f of fonts) assert.match(f, OPEN_FONTS, `${p.pdf}-${lang} embeds ${f}`);
+      }
+    }
+  });
+
+  test('every key on the keyboard and finger charts IS the tutor keyboard (normal + Shift)', () => {
+    const want = keyboardRows()
+      .flat()
+      .map((c) => ({ base: c.base, shift: c.shift, baseDeva: c.baseDeva, shiftDeva: c.shiftDeva, finger: c.finger, home: String(c.home) }));
+    for (const route of ['/kruti-dev-keyboard', '/hindi-typing-finger-chart']) {
+      for (const p of both(route)) {
+        // Quoted values may contain ">" (the "." key's Shift character is ">").
+        const got = [...pages.get(p).matchAll(/<span\b(?:[^>"]|"[^"]*")*\bdata-cap-key\b(?:[^>"]|"[^"]*")*>/g)].map(([tag]) => ({
+          base: attr(tag, 'data-base'),
+          shift: attr(tag, 'data-shift'),
+          baseDeva: attr(tag, 'data-base-deva') ?? '',
+          shiftDeva: attr(tag, 'data-shift-deva') ?? '',
+          finger: attr(tag, 'data-finger'),
+          home: attr(tag, 'data-home'),
+        }));
+        assert.deepEqual(got, want, p);
+      }
+    }
+  });
+
+  test('the practice sheets are the tutor lessons, line for line, with the tutor keystrokes', () => {
+    const sheets = practiceSheets();
+    for (const p of both('/hindi-typing-practice-sheets')) {
+      const html = pages.get(p);
+      const deva = [...html.matchAll(/data-deva[^>]*>\s*([^<]*?)\s*</g)].map((m) => decode(m[1]));
+      const keys = [...html.matchAll(/data-keys[^>]*>([^<]*)</g)].map((m) => decode(m[1]));
+      assert.deepEqual(deva, sheets.flatMap((s) => s.drills.map((d) => d.deva)), `${p}: drills`);
+      assert.deepEqual(keys, sheets.flatMap((s) => s.drills.map((d) => d.keys)), `${p}: keys`);
+      assert.equal((html.match(/<section class="pr-sheet"/g) ?? []).length, sheets.length, `${p}: one sheet per level`);
+    }
+  });
+
+  test('the matra and conjunct chart: each row carries the tutor keystrokes for its example', () => {
+    for (const p of both('/kruti-dev-matra-chart')) {
+      const rows = [...pages.get(p).matchAll(/<tr\b[^>]*data-matra="([^"]+)"[^>]*>/g)].map(([tag]) => ({
+        id: attr(tag, 'data-matra'),
+        example: attr(tag, 'data-example'),
+        keys: attr(tag, 'data-keys'),
+      }));
+      assert.deepEqual(rows, matraRows().map((r) => ({ id: r.id, example: r.example, keys: wholeKeys(r.example) })), p);
+    }
+  });
+
+  test('the progress log has 30 rows', () => {
+    for (const p of both('/hindi-typing-progress-log')) {
+      assert.equal((pages.get(p).match(/data-log-row/g) ?? []).length, 30, p);
+    }
+  });
+
+  test('each printable page: its PDF in its own language, Print, "Practise online", the others, a FAQ', () => {
+    for (const pr of PRINTABLES) {
+      for (const [p, lang] of [[pr.path, 'en'], [hindiOf(pr.path), 'hi']]) {
+        const html = pages.get(p);
+        assert.match(html, new RegExp(`<a href="/downloads/${pr.pdf}-${lang}\\.pdf" download`), `${p}: PDF link`);
+        assert.match(html, /data-print\b/, `${p}: Print`);
+        assert.match(html, new RegExp(`href="${lang === 'hi' ? '/hi' : ''}/hindi-typing-test"`), `${p}: Practise online`);
+        for (const other of PRINTABLES.filter((o) => o !== pr)) {
+          assert.ok(html.includes(`/downloads/${other.pdf}-${lang}.pdf`), `${p}: no link to ${other.pdf}`);
+        }
+        assert.match(html, /<h2 id="faq-heading"/, `${p}: FAQ`);
+      }
+    }
+  });
+
+  test('the Typing Tutor, the Hindi Keyboard, the menu and the home page link to the printables', () => {
+    for (const p of [...both('/hindi-typing-test'), ...both('/hindi-keyboard')]) {
+      const lang = isHiPath(p) ? 'hi' : 'en';
+      for (const pr of PRINTABLES) assert.ok(pages.get(p).includes(`/downloads/${pr.pdf}-${lang}.pdf`), `${p}: ${pr.pdf}`);
+    }
+    for (const [p, html] of pages) {
+      const prefix = isHiPath(p) ? '/hi' : '';
+      assert.ok(html.includes(`href="${prefix}/kruti-dev-keyboard"`), `${p}: no menu link to the printables`);
+    }
   });
 });
 

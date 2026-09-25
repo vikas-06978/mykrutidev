@@ -379,14 +379,59 @@ export const PAGES = [
     group: 'More',
     related: ['/kruti-dev-keyboard', '/'],
   },
+  // ---- Printables: an HTML page + a PDF each, built from the tutor's data
+  // (src/lib/printables.js). The keyboard chart carries the one menu entry;
+  // every printable page lists the other four.
   {
     path: '/kruti-dev-keyboard',
-    ready: false,
+    ready: true,
     kind: 'content',
     from: null,
     to: null,
+    printable: true,
+    menu: true,
     group: 'More',
-    related: ['/kruti-dev-font-download', '/'],
+    related: ['/hindi-typing-test', '/hindi-typing-finger-chart', '/hindi-keyboard'],
+  },
+  {
+    path: '/hindi-typing-finger-chart',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    printable: true,
+    group: 'More',
+    related: ['/hindi-typing-test', '/kruti-dev-keyboard', '/hindi-typing-practice-sheets'],
+  },
+  {
+    path: '/hindi-typing-practice-sheets',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    printable: true,
+    group: 'More',
+    related: ['/hindi-typing-test', '/hindi-typing-progress-log', '/kruti-dev-keyboard'],
+  },
+  {
+    path: '/kruti-dev-matra-chart',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    printable: true,
+    group: 'More',
+    related: ['/hindi-typing-test', '/unicode-to-kruti-dev', '/kruti-dev-keyboard'],
+  },
+  {
+    path: '/hindi-typing-progress-log',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    printable: true,
+    group: 'More',
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
   },
   {
     path: '/about',
@@ -482,7 +527,7 @@ export function navGroups() {
  * question its visitor arrives with. A tool like Roman typing has no source
  * font at all, so it has nowhere to be filed and gets its own entry.
  */
-export const navTools = () => PAGES.filter((p) => p.tool && isLive(p));
+export const navTools = () => PAGES.filter((p) => (p.tool || p.menu) && isLive(p));
 
 /** /all-converters, grouped the same way but showing every group. */
 export function allGroups() {

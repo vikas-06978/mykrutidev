@@ -105,7 +105,7 @@ export function localizePath(path, lang) {
 }
 
 /** Paths that are files, not pages - never given a locale prefix. */
-const NOT_A_PAGE = /^\/(?:_astro|data|fonts|favicon|sitemap|robots\.txt)/;
+const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
 
 /**
  * Point every internal page link inside a block of HTML at the given locale.

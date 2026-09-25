@@ -4,8 +4,8 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **983 keys**, identical in both files (enforced by `npm test` and at build time).
-- **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
+- **1099 keys**, identical in both files (enforced by `npm test` and at build time).
+- **80 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
   Mangal, DevLys 010, Abbasi Chanakya New). Brand (MyKrutiDev), file types
@@ -969,14 +969,22 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./kruti-dev-font-download.body.0` | &lt;h2>Coming in phase 3&lt;/h2> | &lt;h2>फ़ेज़ 3 में आ रहा है&lt;/h2> |  |
 | `pages./kruti-dev-font-download.body.1` | &lt;p>This page will cover installing Kruti Dev 010 on Windows, Mac and Android, and the licensing position on redistributing the font file.&lt;/p> | &lt;p>इस पेज पर Windows, Mac और Android पर Kruti Dev 010 इंस्टॉल करने का तरीका होगा, और फ़ॉन्ट फ़ाइल को आगे बाँटने के लाइसेंस की जानकारी भी।&lt;/p> |  |
 | `pages./kruti-dev-font-download.body.2` | &lt;p>If a document is showing text like &lt;code>Hkkjr&lt;/code> and you do not want to install anything, you do not have to. Run it through the &lt;a href="/">Kruti Dev to Unicode converter&lt;/a> instead and read it in any font.&lt;/p> | &lt;p>अगर कोई डॉक्यूमेंट &lt;code>Hkkjr&lt;/code> जैसा टेक्स्ट दिखा रहा है और आप कुछ इंस्टॉल नहीं करना चाहते, तो करना भी नहीं पड़ेगा। उसकी जगह उसे &lt;a href="/">कृतिदेव से यूनिकोड कन्वर्टर&lt;/a> से बदलें और किसी भी फ़ॉन्ट में पढ़ें।&lt;/p> |  |
-| `pages./kruti-dev-keyboard.nav` | Keyboard chart | कीबोर्ड चार्ट |  |
-| `pages./kruti-dev-keyboard.h1` | Kruti Dev Keyboard Layout and Typing Chart | कृतिदेव कीबोर्ड लेआउट और टाइपिंग चार्ट |  |
-| `pages./kruti-dev-keyboard.title` | Kruti Dev Keyboard Layout \| KrutiDev 010 Typing Chart and Shortcuts | कृतिदेव कीबोर्ड लेआउट \| Kruti Dev 010 टाइपिंग चार्ट और शॉर्टकट | ⚠️ SEO mix - see pages./.title |
-| `pages./kruti-dev-keyboard.description` | Full Kruti Dev 010 keyboard layout: which key types which Hindi letter, matras, half-letters and conjuncts, with a printable chart. | पूरा Kruti Dev 010 कीबोर्ड लेआउट: कौन-सा बटन कौन-सा हिंदी अक्षर टाइप करता है, मात्राएँ, आधे अक्षर और संयुक्त अक्षर, प्रिंट करने लायक चार्ट के साथ। |  |
-| `pages./kruti-dev-keyboard.lede` | Which key types which Hindi letter in Kruti Dev 010: consonants, matras, half letters and conjuncts. | Kruti Dev 010 में कौन-सा बटन कौन-सा हिंदी अक्षर टाइप करता है: व्यंजन, मात्राएँ, आधे अक्षर और संयुक्त अक्षर। |  |
-| `pages./kruti-dev-keyboard.body.0` | &lt;h2>Coming in phase 3&lt;/h2> | &lt;h2>फ़ेज़ 3 में आ रहा है&lt;/h2> |  |
-| `pages./kruti-dev-keyboard.body.1` | &lt;p>This page will carry the full Kruti Dev 010 layout as a printable chart: every consonant, the matras, the half letters, the reph and rakar, and the conjuncts that have their own key.&lt;/p> | &lt;p>इस पेज पर पूरा Kruti Dev 010 लेआउट प्रिंट करने लायक चार्ट के रूप में होगा: हर व्यंजन, मात्राएँ, आधे अक्षर, रेफ़ और नीचे वाला र, और वे संयुक्त अक्षर जिनका अपना बटन है।&lt;/p> |  |
-| `pages./kruti-dev-keyboard.body.2` | &lt;p>The short version, if you need it now: &lt;code>d&lt;/code> is &lt;strong lang="hi">क&lt;/strong>, &lt;code>k&lt;/code> is the vertical bar that both completes a consonant and serves as &lt;strong lang="hi">ा&lt;/strong>, &lt;code>f&lt;/code> is &lt;strong lang="hi">ि&lt;/strong> and is typed &lt;em>before&lt;/em> its consonant, and &lt;code>Z&lt;/code> is the reph, typed &lt;em>after&lt;/em> the syllable it sits on.&lt;/p> | &lt;p>अगर अभी चाहिए, तो छोटे में: &lt;code>d&lt;/code> से &lt;strong lang="hi">क&lt;/strong> बनता है, &lt;code>k&lt;/code> वह खड़ी पाई है जो व्यंजन को पूरा भी करती है और &lt;strong lang="hi">ा&lt;/strong> का काम भी करती है, &lt;code>f&lt;/code> से &lt;strong lang="hi">ि&lt;/strong> बनती है और यह अपने अक्षर से &lt;em>पहले&lt;/em> टाइप होती है, और &lt;code>Z&lt;/code> रेफ़ है, जो अपने अक्षर के &lt;em>बाद&lt;/em> टाइप होता है।&lt;/p> |  |
+| `pages./kruti-dev-keyboard.nav` | Printable charts (PDF) | प्रिंट चार्ट (PDF) |  |
+| `pages./kruti-dev-keyboard.navSub` | Keyboard chart, fingers, practice sheets | कीबोर्ड चार्ट, उँगलियाँ, अभ्यास शीट |  |
+| `pages./kruti-dev-keyboard.h1` | Kruti Dev Keyboard Chart (Remington) - Free PDF | कृतिदेव कीबोर्ड चार्ट (रेमिंगटन) - मुफ़्त PDF |  |
+| `pages./kruti-dev-keyboard.title` | Kruti Dev Keyboard Chart PDF \| Remington Hindi Typing Layout (Free) | कृतिदेव कीबोर्ड चार्ट PDF \| रेमिंगटन हिंदी टाइपिंग लेआउट (मुफ़्त) | ⚠️ SEO mix - see pages./.title |
+| `pages./kruti-dev-keyboard.description` | Free printable Kruti Dev 010 keyboard chart PDF: every key with its Hindi letter and Shift letter, home row marked. Remington Hindi typing layout on A4. | मुफ़्त प्रिंट करने लायक Kruti Dev 010 कीबोर्ड चार्ट PDF: हर बटन का हिंदी अक्षर और Shift वाला अक्षर, होम रो चिह्नित। A4 पर रेमिंगटन हिंदी टाइपिंग लेआउट। |  |
+| `pages./kruti-dev-keyboard.lede` | Every key of the Remington (Kruti Dev 010) layout on one A4 page: the English key, the Hindi it types, and the Shift character. Print it and keep it beside your keyboard. | रेमिंगटन (Kruti Dev 010) लेआउट का हर बटन एक A4 पेज पर: अंग्रेज़ी बटन, उससे टाइप होने वाली हिंदी, और Shift वाला अक्षर। प्रिंट करें और कीबोर्ड के पास रखें। |  |
+| `pages./kruti-dev-keyboard.body.0` | &lt;h2>Who this chart is for&lt;/h2> | &lt;h2>यह चार्ट किसके लिए है&lt;/h2> |  |
+| `pages./kruti-dev-keyboard.body.1` | &lt;p>Beginners learning Hindi typing from scratch, and anyone preparing for a typing test in &lt;strong>SSC, CPCT, court or state recruitment&lt;/strong> exams that use the Remington (Kruti Dev) layout. The chart is drawn from the same data as the &lt;a href="/hindi-typing-test">Hindi typing tutor&lt;/a>, so what you see here is exactly what the tutor asks you to press.&lt;/p> | &lt;p>शुरू से हिंदी टाइपिंग सीखने वालों के लिए, और उन सबके लिए जो &lt;strong>SSC, CPCT, कोर्ट या राज्य भर्ती&lt;/strong> परीक्षाओं के टाइपिंग टेस्ट की तैयारी कर रहे हैं, जिनमें रेमिंगटन (कृतिदेव) लेआउट चलता है। यह चार्ट उसी डेटा से बना है जिससे &lt;a href="/hindi-typing-test">हिंदी टाइपिंग ट्यूटर&lt;/a> चलता है, इसलिए यहाँ वही दिखता है जो ट्यूटर आपसे दबवाता है।&lt;/p> |  |
+| `pages./kruti-dev-keyboard.body.2` | &lt;h2>How to use it&lt;/h2> | &lt;h2>इस्तेमाल कैसे करें&lt;/h2> |  |
+| `pages./kruti-dev-keyboard.body.3` | &lt;p>Learn the home row first - the shaded keys - and keep your fingers resting there. Look at the chart, not at your hands. Letters with no key of their own, like भ or श, are typed as two keys; the &lt;a href="/kruti-dev-matra-chart">matra and conjunct chart&lt;/a> lists those sequences.&lt;/p> | &lt;p>पहले होम रो सीखें - गहरे रंग वाले बटन - और उँगलियाँ वहीं टिकाए रखें। हाथों को नहीं, चार्ट को देखें। जिन अक्षरों का अपना बटन नहीं है, जैसे भ या श, वे दो बटन से टाइप होते हैं; ये क्रम &lt;a href="/kruti-dev-matra-chart">मात्रा और संयुक्ताक्षर चार्ट&lt;/a> में हैं।&lt;/p> |  |
+| `pages./kruti-dev-keyboard.faq.0.q` | Is Kruti Dev the same as the Remington layout? | क्या कृतिदेव और रेमिंगटन लेआउट एक ही हैं? |  |
+| `pages./kruti-dev-keyboard.faq.0.a` | Kruti Dev is a font; Remington is the keyboard layout it follows. Typing in Kruti Dev 010 means typing on the Remington layout - the same key positions the old Hindi typewriters used - which is why exams call the test "Remington" or "Kruti Dev" interchangeably. | कृतिदेव एक फ़ॉन्ट है; रेमिंगटन वह कीबोर्ड लेआउट है जिस पर यह चलता है। Kruti Dev 010 में टाइप करने का मतलब रेमिंगटन लेआउट पर टाइप करना है - वही बटन जो पुराने हिंदी टाइपराइटर में थे - इसीलिए परीक्षाएँ इस टेस्ट को "रेमिंगटन" या "कृतिदेव" दोनों नामों से बुलाती हैं। |  |
+| `pages./kruti-dev-keyboard.faq.1.q` | Why do some keys show a dash? | कुछ बटनों पर डैश क्यों है? |  |
+| `pages./kruti-dev-keyboard.faq.1.a` | Those keys type nothing in Kruti Dev 010, so the chart leaves them empty rather than printing a guess. Everything else is read straight from the character map the converter uses. | वे बटन Kruti Dev 010 में कुछ टाइप नहीं करते, इसलिए चार्ट उन्हें खाली छोड़ता है, अंदाज़ा नहीं छापता। बाकी सब कुछ सीधे उसी अक्षर-मैप से लिया गया है जिसे कन्वर्टर इस्तेमाल करता है। |  |
+| `pages./kruti-dev-keyboard.faq.2.q` | Can I print it in black and white? | क्या इसे ब्लैक एंड व्हाइट में प्रिंट कर सकते हैं? |  |
+| `pages./kruti-dev-keyboard.faq.2.a` | Yes. The chart uses no colour to carry meaning: the home row is marked with shading and a heavy border, which prints clearly on any office printer. | हाँ। चार्ट में कोई बात सिर्फ़ रंग से नहीं बताई गई: होम रो गहरे रंग और मोटी किनारी से चिह्नित है, जो किसी भी दफ़्तर के प्रिंटर पर साफ़ छपता है। |  |
 | `pages./about.nav` | About | हमारे बारे में |  |
 | `pages./about.h1` | About MyKrutiDev | MyKrutiDev के बारे में |  |
 | `pages./about.title` | About MyKrutiDev \| Accurate, Private Hindi Font Conversion | MyKrutiDev के बारे में \| सटीक और सुरक्षित हिंदी फ़ॉन्ट कन्वर्जन | ⚠️ SEO mix - see pages./.title |
@@ -989,6 +997,57 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `pages./about.body.4` | &lt;h2>Where it is incomplete&lt;/h2> | &lt;h2>यह कहाँ अधूरा है&lt;/h2> |  |
 | `pages./about.body.5` | &lt;p>Kruti Dev and Unicode are done and covered by tests. DevLys is seeded from the Kruti Dev layout and mostly works but has not been verified. Chanakya is not mapped at all yet, and the converter refuses that pair rather than guessing. Pages that are not finished are marked and kept out of search results.&lt;/p> | &lt;p>कृतिदेव और यूनिकोड पूरे हैं और टेस्ट से जाँचे हुए हैं। DevLys कृतिदेव लेआउट से शुरू किया गया है और ज़्यादातर चलता है, पर इसकी जाँच नहीं हुई है। Chanakya का अभी कोई मैप नहीं है, और कन्वर्टर अंदाज़ा लगाने की जगह उस जोड़ी को मना कर देता है। जो पेज पूरे नहीं हैं उन पर निशान लगा है और वे सर्च नतीजों से बाहर रखे गए हैं।&lt;/p> |  |
 | `pages./about.body.6` | &lt;p>English-word detection is a heuristic, not a certainty. A legacy font stores Hindi as plain ASCII, so there is no way to be perfect about it. Numbers, dates, URLs and email addresses are always safe.&lt;/p> | &lt;p>अंग्रेज़ी शब्दों की पहचान एक अंदाज़ा है, पक्की बात नहीं। पुराना फ़ॉन्ट हिंदी को सादे ASCII में रखता है, इसलिए इसमें पूरी तरह सही होने का कोई तरीका नहीं। अंक, तारीख, URL और ईमेल पते हमेशा सुरक्षित रहते हैं।&lt;/p> |  |
+| `pages./hindi-typing-finger-chart.nav` | Finger chart | उँगलियों का चार्ट |  |
+| `pages./hindi-typing-finger-chart.h1` | Hindi Typing Finger Chart - Free PDF | हिंदी टाइपिंग उँगलियों का चार्ट - मुफ़्त PDF |  |
+| `pages./hindi-typing-finger-chart.title` | Hindi Typing Finger Chart PDF \| Which Finger for Which Key (Remington) | हिंदी टाइपिंग फ़िंगर चार्ट PDF \| कौन-सी उँगली कौन-सा बटन (रेमिंगटन) | ⚠️ SEO mix - see pages./.title |
+| `pages./hindi-typing-finger-chart.description` | Free printable finger chart for Remington (Kruti Dev) Hindi typing: every key marked with the finger that presses it, readable in black and white. | रेमिंगटन (कृतिदेव) हिंदी टाइपिंग के लिए मुफ़्त प्रिंट करने लायक फ़िंगर चार्ट: हर बटन पर लिखा कि उसे कौन-सी उँगली दबाती है, ब्लैक एंड व्हाइट में भी पढ़ने लायक। |  |
+| `pages./hindi-typing-finger-chart.lede` | Which finger presses which key on the Remington (Kruti Dev) layout. Each key carries a short finger code, so the chart reads just as well printed in black and white. | रेमिंगटन (कृतिदेव) लेआउट पर कौन-सी उँगली कौन-सा बटन दबाती है। हर बटन पर उँगली का छोटा कोड है, इसलिए चार्ट ब्लैक एंड व्हाइट प्रिंट में भी उतना ही साफ़ पढ़ा जाता है। |  |
+| `pages./hindi-typing-finger-chart.body.0` | &lt;h2>Why fingers matter&lt;/h2> | &lt;h2>उँगलियाँ क्यों ज़रूरी हैं&lt;/h2> |  |
+| `pages./hindi-typing-finger-chart.body.1` | &lt;p>Speed in a typing test comes from never looking down, and that only works if every key always belongs to the same finger. Beginners who type with two fingers plateau early; learners preparing for &lt;strong>SSC, CPCT or court typing tests&lt;/strong> should fix the finger for each key before chasing speed.&lt;/p> | &lt;p>टाइपिंग टेस्ट में स्पीड नीचे देखे बिना टाइप करने से आती है, और यह तभी होता है जब हर बटन हमेशा एक ही उँगली का हो। दो उँगलियों से टाइप करने वाले जल्दी अटक जाते हैं; &lt;strong>SSC, CPCT या कोर्ट टाइपिंग टेस्ट&lt;/strong> की तैयारी करने वाले पहले हर बटन की उँगली पक्की करें, फिर स्पीड बढ़ाएँ।&lt;/p> |  |
+| `pages./hindi-typing-finger-chart.body.2` | &lt;p>The &lt;a href="/hindi-typing-test">typing tutor&lt;/a> shows the same assignment live, lighting up the finger for each key as you type.&lt;/p> | &lt;p>&lt;a href="/hindi-typing-test">टाइपिंग ट्यूटर&lt;/a> यही बँटवारा लाइव दिखाता है और टाइप करते समय हर बटन की उँगली चमकाता है।&lt;/p> |  |
+| `pages./hindi-typing-finger-chart.faq.0.q` | Which finger presses Shift? | Shift कौन-सी उँगली दबाती है? |  |
+| `pages./hindi-typing-finger-chart.faq.0.a` | The little finger of the other hand. For a letter typed with the left hand, hold Shift with the right little finger, and the other way round - holding Shift with the same hand is the most common beginner mistake. | दूसरे हाथ की छोटी उँगली। बाएँ हाथ से टाइप होने वाले अक्षर के लिए Shift दाएँ हाथ की छोटी उँगली से पकड़ें, और उल्टा भी - उसी हाथ से Shift दबाना शुरुआती लोगों की सबसे आम गलती है। |  |
+| `pages./hindi-typing-finger-chart.faq.1.q` | Why do the index fingers have so many keys? | तर्जनी उँगलियों के पास इतने बटन क्यों हैं? |  |
+| `pages./hindi-typing-finger-chart.faq.1.a` | Each index finger covers two columns, so it owns eight keys, not four. Those are also the easiest reaches, which is why many common Hindi letters sit there. | हर तर्जनी दो कॉलम संभालती है, इसलिए उसके पास चार नहीं, आठ बटन होते हैं। ये सबसे आसान पहुँच वाले बटन भी हैं, इसीलिए कई आम हिंदी अक्षर वहीं हैं। |  |
+| `pages./hindi-typing-practice-sheets.nav` | Practice sheets | अभ्यास शीट |  |
+| `pages./hindi-typing-practice-sheets.h1` | Hindi Typing Practice Sheets - Free PDF | हिंदी टाइपिंग अभ्यास शीट - मुफ़्त PDF |  |
+| `pages./hindi-typing-practice-sheets.title` | Hindi Typing Practice Sheet PDF \| 11 Kruti Dev Lessons with Keys (Free) | हिंदी टाइपिंग प्रैक्टिस शीट PDF \| बटनों के साथ 11 कृतिदेव पाठ (मुफ़्त) | ⚠️ SEO mix - see pages./.title |
+| `pages./hindi-typing-practice-sheets.description` | Free Hindi typing practice sheets PDF: one A4 sheet per lesson, home row to paragraphs, each line with the Kruti Dev keys to press. Remington layout. | मुफ़्त हिंदी टाइपिंग प्रैक्टिस शीट PDF: हर पाठ के लिए एक A4 शीट, होम रो से पैराग्राफ़ तक, हर लाइन के साथ दबाने वाले कृतिदेव बटन। रेमिंगटन लेआउट। |  |
+| `pages./hindi-typing-practice-sheets.lede` | Eleven A4 sheets, one for every lesson in the typing tutor - from the home row to full paragraphs. Every line shows the keys to press on the Remington (Kruti Dev) layout. | ग्यारह A4 शीट, टाइपिंग ट्यूटर के हर पाठ के लिए एक - होम रो से पूरे पैराग्राफ़ तक। हर लाइन के साथ रेमिंगटन (कृतिदेव) लेआउट पर दबाने वाले बटन छपे हैं। |  |
+| `pages./hindi-typing-practice-sheets.body.0` | &lt;h2>Who these sheets are for&lt;/h2> | &lt;h2>ये शीट किसके लिए हैं&lt;/h2> |  |
+| `pages./hindi-typing-practice-sheets.body.1` | &lt;p>Beginners who want to practise away from the screen, teachers running a typing class, and learners preparing for &lt;strong>SSC, CPCT, court and state typing tests&lt;/strong>. The lines are the tutor's own drills, and the keys under each line are exactly the keystrokes the tutor checks.&lt;/p> | &lt;p>स्क्रीन से दूर अभ्यास करना चाहने वाले शुरुआती लोगों के लिए, टाइपिंग क्लास चलाने वाले शिक्षकों के लिए, और &lt;strong>SSC, CPCT, कोर्ट और राज्य टाइपिंग टेस्ट&lt;/strong> की तैयारी करने वालों के लिए। लाइनें ट्यूटर के अपने अभ्यास हैं, और हर लाइन के नीचे के बटन ठीक वही हैं जिन्हें ट्यूटर जाँचता है।&lt;/p> |  |
+| `pages./hindi-typing-practice-sheets.body.2` | &lt;h2>How to use them&lt;/h2> | &lt;h2>इस्तेमाल कैसे करें&lt;/h2> |  |
+| `pages./hindi-typing-practice-sheets.body.3` | &lt;p>Work through the sheets in order; each lesson only uses keys the earlier ones taught. Type each line on paper-in-front, eyes-on-sheet, then check your speed and accuracy in the &lt;a href="/hindi-typing-test">online tutor&lt;/a> and write it in the &lt;a href="/hindi-typing-progress-log">progress log&lt;/a>.&lt;/p> | &lt;p>शीट क्रम से करें; हर पाठ में सिर्फ़ वही बटन आते हैं जो पिछले पाठ सिखा चुके हैं। शीट सामने रखकर, उसी पर नज़र रखकर हर लाइन टाइप करें, फिर &lt;a href="/hindi-typing-test">ऑनलाइन ट्यूटर&lt;/a> में अपनी स्पीड और शुद्धता देखें और &lt;a href="/hindi-typing-progress-log">प्रोग्रेस लॉग&lt;/a> में लिखें।&lt;/p> |  |
+| `pages./hindi-typing-practice-sheets.faq.0.q` | How long does it take to learn Hindi typing? | हिंदी टाइपिंग सीखने में कितना समय लगता है? |  |
+| `pages./hindi-typing-practice-sheets.faq.0.a` | With 20-30 minutes a day, most learners know the whole keyboard in two to three weeks and reach 25-30 words per minute in about two months. Daily practice matters more than long sessions. | रोज़ 20-30 मिनट अभ्यास से ज़्यादातर लोग दो-तीन हफ़्ते में पूरा कीबोर्ड सीख लेते हैं और लगभग दो महीने में 25-30 शब्द प्रति मिनट तक पहुँच जाते हैं। लंबे अभ्यास से ज़्यादा ज़रूरी रोज़ का अभ्यास है। |  |
+| `pages./hindi-typing-practice-sheets.faq.1.q` | Why are the keys printed under every line? | हर लाइन के नीचे बटन क्यों छपे हैं? |  |
+| `pages./hindi-typing-practice-sheets.faq.1.a` | Remington typing is learned by the keys, not the letters: भ is two keys, and ि is typed before its consonant. Seeing the sequence while you type builds the right habit from the first day. | रेमिंगटन टाइपिंग अक्षरों से नहीं, बटनों से सीखी जाती है: भ दो बटन है, और ि अपने व्यंजन से पहले टाइप होती है। टाइप करते समय क्रम देखने से पहले दिन से सही आदत बनती है। |  |
+| `pages./hindi-typing-practice-sheets.faq.2.q` | Are these the same lessons as the online tutor? | क्या ये वही पाठ हैं जो ऑनलाइन ट्यूटर में हैं? |  |
+| `pages./hindi-typing-practice-sheets.faq.2.a` | Yes - the sheets are printed from the tutor's lesson data, so sheet 4 is lesson 4, line for line. | हाँ - शीट ट्यूटर के पाठ-डेटा से ही छपती हैं, इसलिए शीट 4 लाइन-दर-लाइन पाठ 4 है। |  |
+| `pages./kruti-dev-matra-chart.nav` | Matra &amp; conjunct chart | मात्रा और संयुक्ताक्षर चार्ट |  |
+| `pages./kruti-dev-matra-chart.h1` | Kruti Dev Matra and Conjunct Chart - Free PDF | कृतिदेव मात्रा और संयुक्ताक्षर चार्ट - मुफ़्त PDF |  |
+| `pages./kruti-dev-matra-chart.title` | Kruti Dev Matra Chart PDF \| How to Type ि ी र् क्ष त्र ज्ञ श्र (Free) | कृतिदेव मात्रा चार्ट PDF \| ि ी र् क्ष त्र ज्ञ श्र कैसे टाइप करें (मुफ़्त) | ⚠️ SEO mix - see pages./.title |
+| `pages./kruti-dev-matra-chart.description` | Free Kruti Dev matra and conjunct chart PDF: the exact keys for ि ी ु ू े ै ो ौ, ्र, reph, क्ष त्र ज्ञ श्र and nukta on the Remington layout. | मुफ़्त कृतिदेव मात्रा और संयुक्ताक्षर चार्ट PDF: रेमिंगटन लेआउट पर ि ी ु ू े ै ो ौ, ्र, रेफ, क्ष त्र ज्ञ श्र और नुक़्ता के सटीक बटन। |  |
+| `pages./kruti-dev-matra-chart.lede` | The key sequence for every matra, the two ways of writing र (्र below, reph above), the four joined conjuncts क्ष त्र ज्ञ श्र, and the nukta - on one A4 page. | हर मात्रा का बटन-क्रम, र लिखने के दोनों तरीके (नीचे ्र, ऊपर रेफ), चार जुड़े संयुक्ताक्षर क्ष त्र ज्ञ श्र, और नुक़्ता - एक A4 पेज पर। |  |
+| `pages./kruti-dev-matra-chart.body.0` | &lt;h2>The two rules that trip everyone up&lt;/h2> | &lt;h2>दो नियम जिनमें सब अटकते हैं&lt;/h2> |  |
+| `pages./kruti-dev-matra-chart.body.1` | &lt;p>The i-matra ि is typed &lt;strong>before&lt;/strong> its consonant, and the reph (the र that sits on top) is typed &lt;strong>after&lt;/strong> the whole syllable. Everything else goes in the order you read it. Beginners and exam candidates (&lt;strong>SSC, CPCT, court&lt;/strong>) lose more marks to these two than to anything else.&lt;/p> | &lt;p>इ की मात्रा ि अपने व्यंजन से &lt;strong>पहले&lt;/strong> टाइप होती है, और रेफ (ऊपर लगने वाला र) पूरे अक्षर के &lt;strong>बाद&lt;/strong>। बाकी सब उसी क्रम में जाता है जिसमें आप पढ़ते हैं। शुरुआती लोग और परीक्षार्थी (&lt;strong>SSC, CPCT, कोर्ट&lt;/strong>) सबसे ज़्यादा अंक इन्हीं दो में खोते हैं।&lt;/p> |  |
+| `pages./kruti-dev-matra-chart.body.2` | &lt;p>Practise them in lessons 6-8 of the &lt;a href="/hindi-typing-test">typing tutor&lt;/a>, or convert a finished text with &lt;a href="/unicode-to-kruti-dev">Unicode to Kruti Dev&lt;/a> to see the keys for any word.&lt;/p> | &lt;p>इन्हें &lt;a href="/hindi-typing-test">टाइपिंग ट्यूटर&lt;/a> के पाठ 6-8 में अभ्यास करें, या किसी भी शब्द के बटन देखने के लिए तैयार टेक्स्ट को &lt;a href="/unicode-to-kruti-dev">यूनिकोड से कृतिदेव&lt;/a> में बदलें।&lt;/p> |  |
+| `pages./kruti-dev-matra-chart.faq.0.q` | Why is the i-matra typed first? | इ की मात्रा पहले क्यों टाइप होती है? |  |
+| `pages./kruti-dev-matra-chart.faq.0.a` | Remington follows the typewriter, which printed what you see from left to right - and ि is drawn to the left of its consonant. Unicode stores it after, which is why converters have to reorder it. | रेमिंगटन टाइपराइटर पर चलता है, जो बाएँ से दाएँ वही छापता था जो दिखता है - और ि अपने व्यंजन के बाईं ओर बनती है। यूनिकोड इसे बाद में रखता है, इसीलिए कन्वर्टर को इसका क्रम बदलना पड़ता है। |  |
+| `pages./kruti-dev-matra-chart.faq.1.q` | How do I type a half letter? | आधा अक्षर कैसे टाइप करें? |  |
+| `pages./kruti-dev-matra-chart.faq.1.a` | Most consonants have a half form on their own key, usually the Shift layer. For the joined conjuncts क्ष त्र ज्ञ श्र the chart gives the exact keys. | ज़्यादातर व्यंजनों का आधा रूप उनके अपने बटन पर होता है, अक्सर Shift वाली परत पर। जुड़े संयुक्ताक्षरों क्ष त्र ज्ञ श्र के सटीक बटन चार्ट में दिए हैं। |  |
+| `pages./hindi-typing-progress-log.nav` | Progress log | प्रोग्रेस लॉग |  |
+| `pages./hindi-typing-progress-log.h1` | Hindi Typing Progress Log - Free PDF | हिंदी टाइपिंग प्रोग्रेस लॉग - मुफ़्त PDF |  |
+| `pages./hindi-typing-progress-log.title` | Hindi Typing Progress Log PDF \| Track WPM and Accuracy (Free) | हिंदी टाइपिंग प्रोग्रेस लॉग PDF \| WPM और शुद्धता का रिकॉर्ड (मुफ़्त) | ⚠️ SEO mix - see pages./.title |
+| `pages./hindi-typing-progress-log.description` | Free printable Hindi typing progress log: 30 rows for date, lesson, WPM, accuracy and notes. Track your practice for SSC, CPCT and court typing tests. | मुफ़्त प्रिंट करने लायक हिंदी टाइपिंग प्रोग्रेस लॉग: तारीख़, पाठ, WPM, शुद्धता और नोट्स के लिए 30 लाइनें। SSC, CPCT और कोर्ट टाइपिंग टेस्ट की तैयारी का रिकॉर्ड रखें। |  |
+| `pages./hindi-typing-progress-log.lede` | A one-page log with 30 rows: date, lesson or test, WPM, accuracy and the keys to work on. Filling it in takes ten seconds and shows you exactly where your speed comes from. | 30 लाइनों वाला एक पेज का लॉग: तारीख़, पाठ या टेस्ट, WPM, शुद्धता और जिन बटनों पर काम करना है। इसे भरने में दस सेकंड लगते हैं और यह ठीक-ठीक दिखाता है कि आपकी स्पीड कहाँ से आ रही है। |  |
+| `pages./hindi-typing-progress-log.body.0` | &lt;h2>Why keep a log&lt;/h2> | &lt;h2>लॉग क्यों रखें&lt;/h2> |  |
+| `pages./hindi-typing-progress-log.body.1` | &lt;p>Progress in typing is slow enough that you cannot feel it day to day. A written record makes the plateau visible - and shows whether you are pushing speed before accuracy. Candidates for &lt;strong>SSC, CPCT and court typing tests&lt;/strong> should log every timed test.&lt;/p> | &lt;p>टाइपिंग में सुधार इतना धीमा होता है कि रोज़ महसूस नहीं होता। लिखा हुआ रिकॉर्ड ठहराव को दिखा देता है - और यह भी कि कहीं आप शुद्धता से पहले स्पीड तो नहीं बढ़ा रहे। &lt;strong>SSC, CPCT और कोर्ट टाइपिंग टेस्ट&lt;/strong> के उम्मीदवार हर टाइम्ड टेस्ट लिखें।&lt;/p> |  |
+| `pages./hindi-typing-progress-log.body.2` | &lt;p>Take the numbers from the &lt;a href="/hindi-typing-test">online tutor&lt;/a>, which shows WPM and accuracy after every lesson and test.&lt;/p> | &lt;p>आँकड़े &lt;a href="/hindi-typing-test">ऑनलाइन ट्यूटर&lt;/a> से लें, जो हर पाठ और टेस्ट के बाद WPM और शुद्धता दिखाता है।&lt;/p> |  |
+| `pages./hindi-typing-progress-log.faq.0.q` | What speed do I need for a typing test? | टाइपिंग टेस्ट के लिए कितनी स्पीड चाहिए? |  |
+| `pages./hindi-typing-progress-log.faq.0.a` | It depends on the exam: many Hindi typing tests ask for 25 to 30 words per minute, with a limit on mistakes. Check your notification, and log your accuracy as well as your speed. | यह परीक्षा पर निर्भर है: कई हिंदी टाइपिंग टेस्ट 25 से 30 शब्द प्रति मिनट माँगते हैं, गलतियों की सीमा के साथ। अपना नोटिफ़िकेशन देखें, और स्पीड के साथ शुद्धता भी लिखें। |  |
+| `pages./hindi-typing-progress-log.faq.1.q` | How often should I test myself? | कितनी बार खुद को टेस्ट करें? |  |
+| `pages./hindi-typing-progress-log.faq.1.a` | Once a day is plenty. Practise lessons for most of your session and finish with one timed test, then write the result here. | दिन में एक बार काफ़ी है। अभ्यास का ज़्यादातर समय पाठों में लगाएँ और आख़िर में एक टाइम्ड टेस्ट दें, फिर उसका नतीजा यहाँ लिखें। |  |
 | `guide.howToHeading` | How to use | कैसे इस्तेमाल करें |  |
 | `guide.tipLabel` | Tip | सुझाव |  |
 | `guide.tasksHeading` | What do you want to do? | आप क्या करना चाहते हैं? |  |
@@ -1011,8 +1070,65 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `home.tasks.tutor.benefit` | Learn Remington (Kruti Dev) typing for CPCT, SSC and court exams. | CPCT, SSC और कोर्ट परीक्षाओं के लिए रेमिंगटन (कृतिदेव) टाइपिंग सीखें। |  |
 | `home.tasks.document.title` | Convert a Word file | Word फ़ाइल कन्वर्ट करें |  |
 | `home.tasks.document.benefit` | Convert a whole .docx; tables and formatting stay as they are. | पूरी .docx फ़ाइल बदलें; टेबल और फ़ॉर्मेटिंग वैसी ही रहती है। |  |
+| `home.tasks.printables.title` | Printable charts (PDF) | प्रिंट चार्ट (PDF) |  |
+| `home.tasks.printables.benefit` | Keyboard and finger charts, practice sheets and a progress log to print. | प्रिंट करने के लिए कीबोर्ड और उँगलियों के चार्ट, अभ्यास शीट और प्रोग्रेस लॉग। |  |
 | `home.why.0` | &lt;strong>Accurate&lt;/strong>: matras, half letters and conjuncts come out in the right order. | &lt;strong>सटीक&lt;/strong>: मात्राएँ, आधे अक्षर और संयुक्ताक्षर सही क्रम में आते हैं। |  |
 | `home.why.1` | &lt;strong>Runs in your browser&lt;/strong>: conversion keeps working if the connection drops. | &lt;strong>आपके ब्राउज़र में चलता है&lt;/strong>: इंटरनेट चला जाए तब भी कन्वर्जन चलता रहता है। |  |
 | `home.why.2` | &lt;strong>Private&lt;/strong>: your text and files are never uploaded. | &lt;strong>निजी&lt;/strong>: आपका टेक्स्ट और फ़ाइलें कभी अपलोड नहीं होतीं। |  |
 | `home.why.3` | &lt;strong>Free&lt;/strong>, with no sign-up. | &lt;strong>मुफ़्त&lt;/strong>, कोई साइन-अप नहीं। |  |
 | `home.why.4` | &lt;strong>Hindi and English&lt;/strong>: the whole site in both languages. | &lt;strong>हिंदी और अंग्रेज़ी&lt;/strong>: पूरी साइट दोनों भाषाओं में। |  |
+| `print.downloadPdf` | Download PDF | PDF डाउनलोड करें |  |
+| `print.printPage` | Print | प्रिंट करें |  |
+| `print.practiseOnline` | Practise online | ऑनलाइन अभ्यास करें |  |
+| `print.pdfOne` | Free PDF, 1 A4 page. No sign-up. | मुफ़्त PDF, 1 A4 पेज। कोई साइन-अप नहीं। |  |
+| `print.pdfMany` | Free PDF, {n} A4 pages. No sign-up. | मुफ़्त PDF, {n} A4 पेज। कोई साइन-अप नहीं। |  |
+| `print.listHeading` | Printable charts and practice sheets | प्रिंट करने लायक चार्ट और अभ्यास शीट |  |
+| `print.listIntro` | Free PDFs to print at home or in the office. No sign-up, no email. | घर या दफ़्तर में प्रिंट करने के लिए मुफ़्त PDF। न साइन-अप, न ईमेल। |  |
+| `print.footer` | MyKrutiDev.com - free Hindi typing practice | MyKrutiDev.com - free Hindi typing practice |  |
+| `print.kbd.how` | On each key: the Shift character on top, the English key in the middle, the Hindi character below. | हर बटन पर: ऊपर Shift वाला अक्षर, बीच में अंग्रेज़ी बटन, नीचे हिंदी अक्षर। |  |
+| `print.kbd.home` | Shaded keys with a heavy border are the home row: rest your fingers there. | मोटी किनारी वाले गहरे बटन होम रो हैं: उँगलियाँ यहीं टिकाएँ। |  |
+| `print.kbd.dead` | A dash means the key types nothing in Kruti Dev. | डैश का मतलब है कि वह बटन कृतिदेव में कुछ टाइप नहीं करता। |  |
+| `print.fingers.legend` | Which finger presses which key | कौन-सी उँगली कौन-सा बटन दबाती है |  |
+| `print.fingers.tags` | The code on each key: L = left hand, R = right hand; 2 = index, 3 = middle, 4 = ring, 5 = little finger. The thumbs press Space. | हर बटन पर कोड: L = बायाँ हाथ, R = दायाँ हाथ; 2 = तर्जनी, 3 = बीच की, 4 = अनामिका, 5 = छोटी उँगली। Space अँगूठे से दबता है। |  |
+| `print.fingers.shift` | Shift is held with the little finger of the OTHER hand. | Shift हमेशा दूसरे हाथ की छोटी उँगली से दबाएँ। |  |
+| `print.sheets.keys` | Keys | बटन |  |
+| `print.sheets.howTo` | Type each line on the Remington (Kruti Dev) layout. The keys are printed under it. Say each key as you press it, then write the line once in the ruled space. | हर लाइन रेमिंगटन (कृतिदेव) लेआउट पर टाइप करें। उसके नीचे बटन छपे हैं। हर बटन दबाते समय उसका नाम बोलें, फिर लाइन को एक बार लकीरों वाली जगह में लिखें। |  |
+| `print.matras.sign` | Sign | चिह्न |  |
+| `print.matras.example` | Example | उदाहरण |  |
+| `print.matras.keys` | Keys to press, in order | दबाने वाले बटन, क्रम से |  |
+| `print.matras.note` | Note | ध्यान दें |  |
+| `print.matras.then` | then | फिर |  |
+| `print.matras.intro` | Every sequence below is what the Typing Tutor and the converter use. Press the keys left to right. | नीचे का हर क्रम वही है जो टाइपिंग ट्यूटर और कन्वर्टर इस्तेमाल करते हैं। बटन बाएँ से दाएँ दबाएँ। |  |
+| `print.matras.notes.i` | Typed BEFORE the consonant it belongs to. | जिस व्यंजन की है, उससे पहले टाइप होती है। |  |
+| `print.matras.notes.ii` | Typed after the consonant. | व्यंजन के बाद टाइप होती है। |  |
+| `print.matras.notes.u` | After the consonant. | व्यंजन के बाद। |  |
+| `print.matras.notes.uu` | After the consonant. | व्यंजन के बाद। |  |
+| `print.matras.notes.e` | After the consonant. | व्यंजन के बाद। |  |
+| `print.matras.notes.ai` | After the consonant, with Shift. | व्यंजन के बाद, Shift के साथ। |  |
+| `print.matras.notes.o` | Two keys: the aa-matra, then the e-matra. | दो बटन: आ की मात्रा, फिर ए की मात्रा। |  |
+| `print.matras.notes.au` | Two keys: the aa-matra, then the ai-matra. | दो बटन: आ की मात्रा, फिर ऐ की मात्रा। |  |
+| `print.matras.notes.anusvara` | After the syllable, like a matra. | अक्षर के बाद, मात्रा की तरह। |  |
+| `print.matras.notes.visarga` | After the syllable, with Shift. | अक्षर के बाद, Shift के साथ। |  |
+| `print.matras.notes.ri` | After the consonant. | व्यंजन के बाद। |  |
+| `print.matras.notes.rakar` | The र under a letter: typed after that letter. | अक्षर के नीचे वाला र: उस अक्षर के बाद। |  |
+| `print.matras.notes.reph` | The र on top: typed AFTER the whole syllable it sits on. | ऊपर वाला र: जिस पूरे अक्षर पर लगता है, उसके बाद टाइप होता है। |  |
+| `print.matras.notes.halant` | A half letter has its own key, usually the Shift one. | आधे अक्षर का अपना बटन होता है, अक्सर Shift वाला। |  |
+| `print.matras.notes.ksha` | A half क्ष, then the vertical bar. | आधा क्ष, फिर खड़ी पाई। |  |
+| `print.matras.notes.tra` | One key. | एक बटन। |  |
+| `print.matras.notes.gya` | One key, with Shift. | एक बटन, Shift के साथ। |  |
+| `print.matras.notes.shra` | One key, with Shift. | एक बटन, Shift के साथ। |  |
+| `print.matras.notes.nukta` | The letter, then the dot. | अक्षर, फिर बिंदु। |  |
+| `print.matras.notes.nuktaZa` | The letter, then the dot. | अक्षर, फिर बिंदु। |  |
+| `print.log.intro` | Note every practice session. Speed follows accuracy: aim for 95% before you push the WPM. | हर अभ्यास को लिखें। स्पीड शुद्धता के बाद आती है: WPM बढ़ाने से पहले 95% शुद्धता का लक्ष्य रखें। |  |
+| `print.log.date` | Date | तारीख़ |  |
+| `print.log.lesson` | Lesson or test | पाठ या टेस्ट |  |
+| `print.log.wpm` | WPM | WPM |  |
+| `print.log.accuracy` | Accuracy | शुद्धता |  |
+| `print.log.notes` | Notes (keys to work on) | नोट्स (किन बटनों पर काम करना है) |  |
+| `print.names.keyboard` | Keyboard chart | कीबोर्ड चार्ट |  |
+| `print.names.fingers` | Finger chart | उँगलियों का चार्ट |  |
+| `print.names.sheets` | Practice sheets (11 lessons) | अभ्यास शीट (11 पाठ) |  |
+| `print.names.matras` | Matra and conjunct chart | मात्रा और संयुक्ताक्षर चार्ट |  |
+| `print.names.log` | Progress log | प्रोग्रेस लॉग |  |
+| `print.pdfAria` | Download PDF: {name} | PDF डाउनलोड करें: {name} |  |
+| `print.thumb` | Thumb: Space | अँगूठा: Space |  |

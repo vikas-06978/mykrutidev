@@ -1,0 +1,86 @@
+---
+/**
+ * The Remington (Kruti Dev) keyboard for paper: the keyboard chart
+ * (mode="layout") and the finger chart (mode="fingers").
+ *
+ * Every letter comes from keyboardRows() - layout() over the Kruti Dev map,
+ * the same call the typing tutor's keyboard makes. The data-* attributes on
+ * each key are what tests/dist.test.js compares with that data.
+ */
+import { keyboardRows, FINGER_TAG } from '../lib/printables.js';
+
+interface Props {
+  mode: 'layout' | 'fingers';
+}
+const { mode } = Astro.props;
+const rows = keyboardRows();
+
+// Modifier keys, as on the tutor's keyboard: they make it read as a keyboard.
+const LEADING = [null, { label: 'Tab', w: 1.5, finger: 'l-pinky' }, { label: 'Caps', w: 1.75, finger: 'l-pinky' }, { label: 'Shift', w: 2.25, finger: 'l-pinky' }];
+const TRAILING = [{ label: 'Bksp', w: 2, finger: 'r-pinky' }, null, { label: 'Enter', w: 2.25, finger: 'r-pinky' }, { label: 'Shift', w: 2.75, finger: 'r-pinky' }];
+const fingers = mode === 'fingers';
+---
+
+<div class="pr-scroll">
+  <div class="pr-kbd" data-mode={mode} role="img" aria-label="Remington (Kruti Dev) keyboard" translate="no">
+    {
+      rows.map((row, i) => (
+        <div class="pr-row">
+          {LEADING[i] && (
+            <span class="pr-key" data-mod style={`--w:${LEADING[i].w}`} data-finger={fingers ? LEADING[i].finger : undefined}>
+              {LEADING[i].label}
+            </span>
+          )}
+          {row.map((cap) => (
+            <span
+              class="pr-key"
+              data-cap-key
+              data-base={cap.base}
+              data-shift={cap.shift}
+              data-base-deva={cap.baseDeva}
+              data-shift-deva={cap.shiftDeva}
+              data-finger={cap.finger}
+              data-home={String(cap.home)}
+            >
+              {fingers ? (
+                <>
+                  <span class="pr-eng">{cap.base}</span>
+                  <span class="pr-base" lang="hi">
+                    {cap.baseLabel || <span class="pr-dead">-</span>}
+                  </span>
+                  <span class="pr-tag">{FINGER_TAG[cap.finger]}</span>
+                </>
+              ) : (
+                <>
+                  <span class="pr-shift" lang="hi">
+                    {cap.shiftLabel || <span class="pr-dead">-</span>}
+                  </span>
+                  <span class="pr-eng">{cap.base}</span>
+                  <span class="pr-base" lang="hi">
+                    {cap.baseLabel || <span class="pr-dead">-</span>}
+                  </span>
+                </>
+              )}
+            </span>
+          ))}
+          {TRAILING[i] && (
+            <span class="pr-key" data-mod style={`--w:${TRAILING[i].w}`} data-finger={fingers ? TRAILING[i].finger : undefined}>
+              {TRAILING[i].label}
+            </span>
+          )}
+        </div>
+      ))
+    }
+    {/* The space row, sized to the same 15 key widths as the rows above so it fits the page. */}
+    <div class="pr-row">
+      <span class="pr-key" data-mod style="--w:2.25">Ctrl</span>
+      <span class="pr-key" data-mod style="--w:1.5">Win</span>
+      <span class="pr-key" data-mod style="--w:1.5">Alt</span>
+      <span class="pr-key" data-mod style="--w:6" data-finger={fingers ? 'thumb' : undefined}>
+        {fingers ? <span class="pr-tag">{FINGER_TAG.thumb}</span> : 'Space'}
+      </span>
+      <span class="pr-key" data-mod style="--w:1.5">Alt</span>
+      <span class="pr-key" data-mod style="--w:2.25">Ctrl</span>
+    </div>
+  </div>
+</div>

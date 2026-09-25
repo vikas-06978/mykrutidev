@@ -9,6 +9,9 @@ import Faq from './Faq.astro';
 import HowTo from './HowTo.astro';
 import HomeTasks from './HomeTasks.astro';
 import GuidedTour from './GuidedTour.astro';
+import Printable from './Printable.astro';
+import PrintablesList from './PrintablesList.astro';
+import { printableFor } from '../lib/printables.js';
 import AllConverters from './AllConverters.astro';
 import { getPage, isLive, reversePage, statusOf } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
@@ -77,6 +80,7 @@ const body: string[] = maybe(`pages.${path}.body`) ?? [];
 const faq: { q: string; a: string }[] = maybe(`pages.${path}.faq`) ?? [];
 const howTo: { steps: string[]; tip: string } | undefined = maybe(`pages.${path}.howTo`);
 const tour: string[] | undefined = maybe(`pages.${path}.tour`);
+const printable = printableFor(path);
 const note = maybe(`pages.${path}.note`);
 const betaNote = maybe(`pages.${path}.betaNote`);
 ---
@@ -129,8 +133,13 @@ const betaNote = maybe(`pages.${path}.betaNote`);
       )
     }
 
+    {live && printable && <Printable printable={printable} />}
+    {live && printable && <PrintablesList except={path} />}
+
     {/* Help sits UNDER the tool, never over it: the tool is the first thing on the page. */}
     {live && howTo && <HowTo steps={howTo.steps} tip={howTo.tip} />}
+
+    {live && (path === '/hindi-typing-test' || path === '/hindi-keyboard') && <PrintablesList />}
 
     {live && page.documents && docDirection && <DocumentConverter direction={docDirection} />}
 

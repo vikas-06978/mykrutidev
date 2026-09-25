@@ -1421,15 +1421,31 @@
       ]
     },
     "/kruti-dev-keyboard": {
-      "nav": "Keyboard chart",
-      "h1": "Kruti Dev Keyboard Layout and Typing Chart",
-      "title": "Kruti Dev Keyboard Layout | KrutiDev 010 Typing Chart and Shortcuts",
-      "description": "Full Kruti Dev 010 keyboard layout: which key types which Hindi letter, matras, half-letters and conjuncts, with a printable chart.",
-      "lede": "Which key types which Hindi letter in Kruti Dev 010: consonants, matras, half letters and conjuncts.",
+      "nav": "Printable charts (PDF)",
+      "navSub": "Keyboard chart, fingers, practice sheets",
+      "h1": "Kruti Dev Keyboard Chart (Remington) - Free PDF",
+      "title": "Kruti Dev Keyboard Chart PDF | Remington Hindi Typing Layout (Free)",
+      "description": "Free printable Kruti Dev 010 keyboard chart PDF: every key with its Hindi letter and Shift letter, home row marked. Remington Hindi typing layout on A4.",
+      "lede": "Every key of the Remington (Kruti Dev 010) layout on one A4 page: the English key, the Hindi it types, and the Shift character. Print it and keep it beside your keyboard.",
       "body": [
-        "<h2>Coming in phase 3</h2>",
-        "<p>This page will carry the full Kruti Dev 010 layout as a printable chart: every consonant, the matras, the half letters, the reph and rakar, and the conjuncts that have their own key.</p>",
-        "<p>The short version, if you need it now: <code>d</code> is <strong lang=\"hi\">क</strong>, <code>k</code> is the vertical bar that both completes a consonant and serves as <strong lang=\"hi\">ा</strong>, <code>f</code> is <strong lang=\"hi\">ि</strong> and is typed <em>before</em> its consonant, and <code>Z</code> is the reph, typed <em>after</em> the syllable it sits on.</p>"
+        "<h2>Who this chart is for</h2>",
+        "<p>Beginners learning Hindi typing from scratch, and anyone preparing for a typing test in <strong>SSC, CPCT, court or state recruitment</strong> exams that use the Remington (Kruti Dev) layout. The chart is drawn from the same data as the <a href=\"/hindi-typing-test\">Hindi typing tutor</a>, so what you see here is exactly what the tutor asks you to press.</p>",
+        "<h2>How to use it</h2>",
+        "<p>Learn the home row first - the shaded keys - and keep your fingers resting there. Look at the chart, not at your hands. Letters with no key of their own, like भ or श, are typed as two keys; the <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a> lists those sequences.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Is Kruti Dev the same as the Remington layout?",
+          "a": "Kruti Dev is a font; Remington is the keyboard layout it follows. Typing in Kruti Dev 010 means typing on the Remington layout - the same key positions the old Hindi typewriters used - which is why exams call the test \"Remington\" or \"Kruti Dev\" interchangeably."
+        },
+        {
+          "q": "Why do some keys show a dash?",
+          "a": "Those keys type nothing in Kruti Dev 010, so the chart leaves them empty rather than printing a guess. Everything else is read straight from the character map the converter uses."
+        },
+        {
+          "q": "Can I print it in black and white?",
+          "a": "Yes. The chart uses no colour to carry meaning: the home row is marked with shading and a heavy border, which prints clearly on any office printer."
+        }
       ]
     },
     "/about": {
@@ -1446,6 +1462,99 @@
         "<h2>Where it is incomplete</h2>",
         "<p>Kruti Dev and Unicode are done and covered by tests. DevLys is seeded from the Kruti Dev layout and mostly works but has not been verified. Chanakya is not mapped at all yet, and the converter refuses that pair rather than guessing. Pages that are not finished are marked and kept out of search results.</p>",
         "<p>English-word detection is a heuristic, not a certainty. A legacy font stores Hindi as plain ASCII, so there is no way to be perfect about it. Numbers, dates, URLs and email addresses are always safe.</p>"
+      ]
+    },
+    "/hindi-typing-finger-chart": {
+      "nav": "Finger chart",
+      "h1": "Hindi Typing Finger Chart - Free PDF",
+      "title": "Hindi Typing Finger Chart PDF | Which Finger for Which Key (Remington)",
+      "description": "Free printable finger chart for Remington (Kruti Dev) Hindi typing: every key marked with the finger that presses it, readable in black and white.",
+      "lede": "Which finger presses which key on the Remington (Kruti Dev) layout. Each key carries a short finger code, so the chart reads just as well printed in black and white.",
+      "body": [
+        "<h2>Why fingers matter</h2>",
+        "<p>Speed in a typing test comes from never looking down, and that only works if every key always belongs to the same finger. Beginners who type with two fingers plateau early; learners preparing for <strong>SSC, CPCT or court typing tests</strong> should fix the finger for each key before chasing speed.</p>",
+        "<p>The <a href=\"/hindi-typing-test\">typing tutor</a> shows the same assignment live, lighting up the finger for each key as you type.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Which finger presses Shift?",
+          "a": "The little finger of the other hand. For a letter typed with the left hand, hold Shift with the right little finger, and the other way round - holding Shift with the same hand is the most common beginner mistake."
+        },
+        {
+          "q": "Why do the index fingers have so many keys?",
+          "a": "Each index finger covers two columns, so it owns eight keys, not four. Those are also the easiest reaches, which is why many common Hindi letters sit there."
+        }
+      ]
+    },
+    "/hindi-typing-practice-sheets": {
+      "nav": "Practice sheets",
+      "h1": "Hindi Typing Practice Sheets - Free PDF",
+      "title": "Hindi Typing Practice Sheet PDF | 11 Kruti Dev Lessons with Keys (Free)",
+      "description": "Free Hindi typing practice sheets PDF: one A4 sheet per lesson, home row to paragraphs, each line with the Kruti Dev keys to press. Remington layout.",
+      "lede": "Eleven A4 sheets, one for every lesson in the typing tutor - from the home row to full paragraphs. Every line shows the keys to press on the Remington (Kruti Dev) layout.",
+      "body": [
+        "<h2>Who these sheets are for</h2>",
+        "<p>Beginners who want to practise away from the screen, teachers running a typing class, and learners preparing for <strong>SSC, CPCT, court and state typing tests</strong>. The lines are the tutor's own drills, and the keys under each line are exactly the keystrokes the tutor checks.</p>",
+        "<h2>How to use them</h2>",
+        "<p>Work through the sheets in order; each lesson only uses keys the earlier ones taught. Type each line on paper-in-front, eyes-on-sheet, then check your speed and accuracy in the <a href=\"/hindi-typing-test\">online tutor</a> and write it in the <a href=\"/hindi-typing-progress-log\">progress log</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "How long does it take to learn Hindi typing?",
+          "a": "With 20-30 minutes a day, most learners know the whole keyboard in two to three weeks and reach 25-30 words per minute in about two months. Daily practice matters more than long sessions."
+        },
+        {
+          "q": "Why are the keys printed under every line?",
+          "a": "Remington typing is learned by the keys, not the letters: भ is two keys, and ि is typed before its consonant. Seeing the sequence while you type builds the right habit from the first day."
+        },
+        {
+          "q": "Are these the same lessons as the online tutor?",
+          "a": "Yes - the sheets are printed from the tutor's lesson data, so sheet 4 is lesson 4, line for line."
+        }
+      ]
+    },
+    "/kruti-dev-matra-chart": {
+      "nav": "Matra & conjunct chart",
+      "h1": "Kruti Dev Matra and Conjunct Chart - Free PDF",
+      "title": "Kruti Dev Matra Chart PDF | How to Type ि ी र् क्ष त्र ज्ञ श्र (Free)",
+      "description": "Free Kruti Dev matra and conjunct chart PDF: the exact keys for ि ी ु ू े ै ो ौ, ्र, reph, क्ष त्र ज्ञ श्र and nukta on the Remington layout.",
+      "lede": "The key sequence for every matra, the two ways of writing र (्र below, reph above), the four joined conjuncts क्ष त्र ज्ञ श्र, and the nukta - on one A4 page.",
+      "body": [
+        "<h2>The two rules that trip everyone up</h2>",
+        "<p>The i-matra ि is typed <strong>before</strong> its consonant, and the reph (the र that sits on top) is typed <strong>after</strong> the whole syllable. Everything else goes in the order you read it. Beginners and exam candidates (<strong>SSC, CPCT, court</strong>) lose more marks to these two than to anything else.</p>",
+        "<p>Practise them in lessons 6-8 of the <a href=\"/hindi-typing-test\">typing tutor</a>, or convert a finished text with <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> to see the keys for any word.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why is the i-matra typed first?",
+          "a": "Remington follows the typewriter, which printed what you see from left to right - and ि is drawn to the left of its consonant. Unicode stores it after, which is why converters have to reorder it."
+        },
+        {
+          "q": "How do I type a half letter?",
+          "a": "Most consonants have a half form on their own key, usually the Shift layer. For the joined conjuncts क्ष त्र ज्ञ श्र the chart gives the exact keys."
+        }
+      ]
+    },
+    "/hindi-typing-progress-log": {
+      "nav": "Progress log",
+      "h1": "Hindi Typing Progress Log - Free PDF",
+      "title": "Hindi Typing Progress Log PDF | Track WPM and Accuracy (Free)",
+      "description": "Free printable Hindi typing progress log: 30 rows for date, lesson, WPM, accuracy and notes. Track your practice for SSC, CPCT and court typing tests.",
+      "lede": "A one-page log with 30 rows: date, lesson or test, WPM, accuracy and the keys to work on. Filling it in takes ten seconds and shows you exactly where your speed comes from.",
+      "body": [
+        "<h2>Why keep a log</h2>",
+        "<p>Progress in typing is slow enough that you cannot feel it day to day. A written record makes the plateau visible - and shows whether you are pushing speed before accuracy. Candidates for <strong>SSC, CPCT and court typing tests</strong> should log every timed test.</p>",
+        "<p>Take the numbers from the <a href=\"/hindi-typing-test\">online tutor</a>, which shows WPM and accuracy after every lesson and test.</p>"
+      ],
+      "faq": [
+        {
+          "q": "What speed do I need for a typing test?",
+          "a": "It depends on the exam: many Hindi typing tests ask for 25 to 30 words per minute, with a limit on mistakes. Check your notification, and log your accuracy as well as your speed."
+        },
+        {
+          "q": "How often should I test myself?",
+          "a": "Once a day is plenty. Practise lessons for most of your session and finish with one timed test, then write the result here."
+        }
       ]
     }
   },
@@ -1486,6 +1595,10 @@
       "document": {
         "title": "Convert a Word file",
         "benefit": "Convert a whole .docx; tables and formatting stay as they are."
+      },
+      "printables": {
+        "title": "Printable charts (PDF)",
+        "benefit": "Keyboard and finger charts, practice sheets and a progress log to print."
       }
     },
     "why": [
@@ -1495,5 +1608,76 @@
       "<strong>Free</strong>, with no sign-up.",
       "<strong>Hindi and English</strong>: the whole site in both languages."
     ]
+  },
+  "print": {
+    "downloadPdf": "Download PDF",
+    "printPage": "Print",
+    "practiseOnline": "Practise online",
+    "pdfOne": "Free PDF, 1 A4 page. No sign-up.",
+    "pdfMany": "Free PDF, {n} A4 pages. No sign-up.",
+    "listHeading": "Printable charts and practice sheets",
+    "listIntro": "Free PDFs to print at home or in the office. No sign-up, no email.",
+    "footer": "MyKrutiDev.com - free Hindi typing practice",
+    "kbd": {
+      "how": "On each key: the Shift character on top, the English key in the middle, the Hindi character below.",
+      "home": "Shaded keys with a heavy border are the home row: rest your fingers there.",
+      "dead": "A dash means the key types nothing in Kruti Dev."
+    },
+    "fingers": {
+      "legend": "Which finger presses which key",
+      "tags": "The code on each key: L = left hand, R = right hand; 2 = index, 3 = middle, 4 = ring, 5 = little finger. The thumbs press Space.",
+      "shift": "Shift is held with the little finger of the OTHER hand."
+    },
+    "sheets": {
+      "keys": "Keys",
+      "howTo": "Type each line on the Remington (Kruti Dev) layout. The keys are printed under it. Say each key as you press it, then write the line once in the ruled space."
+    },
+    "matras": {
+      "sign": "Sign",
+      "example": "Example",
+      "keys": "Keys to press, in order",
+      "note": "Note",
+      "then": "then",
+      "intro": "Every sequence below is what the Typing Tutor and the converter use. Press the keys left to right.",
+      "notes": {
+        "i": "Typed BEFORE the consonant it belongs to.",
+        "ii": "Typed after the consonant.",
+        "u": "After the consonant.",
+        "uu": "After the consonant.",
+        "e": "After the consonant.",
+        "ai": "After the consonant, with Shift.",
+        "o": "Two keys: the aa-matra, then the e-matra.",
+        "au": "Two keys: the aa-matra, then the ai-matra.",
+        "anusvara": "After the syllable, like a matra.",
+        "visarga": "After the syllable, with Shift.",
+        "ri": "After the consonant.",
+        "rakar": "The र under a letter: typed after that letter.",
+        "reph": "The र on top: typed AFTER the whole syllable it sits on.",
+        "halant": "A half letter has its own key, usually the Shift one.",
+        "ksha": "A half क्ष, then the vertical bar.",
+        "tra": "One key.",
+        "gya": "One key, with Shift.",
+        "shra": "One key, with Shift.",
+        "nukta": "The letter, then the dot.",
+        "nuktaZa": "The letter, then the dot."
+      }
+    },
+    "log": {
+      "intro": "Note every practice session. Speed follows accuracy: aim for 95% before you push the WPM.",
+      "date": "Date",
+      "lesson": "Lesson or test",
+      "wpm": "WPM",
+      "accuracy": "Accuracy",
+      "notes": "Notes (keys to work on)"
+    },
+    "names": {
+      "keyboard": "Keyboard chart",
+      "fingers": "Finger chart",
+      "sheets": "Practice sheets (11 lessons)",
+      "matras": "Matra and conjunct chart",
+      "log": "Progress log"
+    },
+    "pdfAria": "Download PDF: {name}",
+    "thumb": "Thumb: Space"
   }
 }

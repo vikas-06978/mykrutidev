@@ -59,6 +59,9 @@
 /* The first-visit tour on the typing tools and its "?" button. */
 @import './tour.css';
 
+/* Printable charts and practice sheets: screen, print and the PDFs. */
+@import './printables.css';
+
 /* Colour themes (Light is the @theme block below) and accent colours. Order
    matters: accents.css maps --color-brick after themes.css sets it. */
 @import './themes.css';

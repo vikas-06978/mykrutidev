@@ -1,0 +1,223 @@
+---
+/**
+ * One printable: "Download PDF / Print / Practise online", then the chart or
+ * sheets themselves inside .pr-area - the only thing that prints (see
+ * printables.css). The PDFs under /downloads/ are printed from this very
+ * markup at build time (scripts/build-pdfs.mjs).
+ */
+import { langOf, useT, fill } from '../i18n/index.js';
+import { LEVELS } from '../lib/lessons.js';
+import PrintKeyboard from './PrintKeyboard.astro';
+import {
+  pdfHref,
+  practiceSheets,
+  matraRows,
+  LEGEND_FINGERS,
+  FINGER_TAG,
+  LOG_ROWS,
+} from '../lib/printables.js';
+
+interface Props {
+  printable: { path: string; kind: string; pdf: string; landscape: boolean; pages: number };
+}
+const { printable: p } = Astro.props;
+const lang = langOf(Astro.url);
+const { t, render, path: to } = useT(lang);
+const title = t(`pages.${p.path}.h1`);
+const pdf = pdfHref(p, lang);
+const pagesNote = p.pages === 1 ? t('print.pdfOne') : fill(t('print.pdfMany'), { n: p.pages });
+
+const sheets = p.kind === 'sheets' ? practiceSheets() : [];
+const matras = p.kind === 'matras' ? matraRows() : [];
+// A sheet whose drills run long keeps one ruled line per drill, not two, so it
+// still fits one A4 page.
+const isLong = (s: { drills: { keys: string }[] }) => s.drills.some((d) => d.keys.length > 70);
+// A sign that has no shape alone (ि, ्र, ़) is shown on a dotted circle, the
+// Unicode convention - the same one the tutor's keyboard uses.
+const MARK = 'ऀ-ःऺ-ॏ॑-ॗॢॣ';
+const onCircle = (mark: string) => (new RegExp(`^[${MARK}]`).test(mark) ? `◌${mark}` : mark);
+// A lesson's focus line lists bare vowel signs ("ि ी ु ..."). A sign with no
+// letter before it has no shape of its own, and on paper Chrome fell back to
+// a system font for it - so each one gets the dotted circle it is drawn on.
+const circleBareMarks = (text: string) =>
+  text.replace(new RegExp(`(^|[\\s(])([${MARK}])`, 'g'), (_, before, mark) => `${before}◌${mark}`);
+---
+
+<div class="pr-actions mt-6">
+  <a href={pdf} download class="btn btn-primary" data-pdf-link>{t('print.downloadPdf')}</a>
+  <button type="button" class="btn btn-outline" data-print>{t('print.printPage')}</button>
+  <a href={to('/hindi-typing-test')} class="btn btn-ghost">{t('print.practiseOnline')}</a>
+  <span class="pr-note">{pagesNote}</span>
+</div>
+
+<div class="pr-area" id="tool" data-kind={p.kind} data-wide={p.landscape ? '' : undefined}>
+  {/* On paper the page's own h1 and intro are hidden, so the sheet carries its own. */}
+  <div class="pr-only">
+    <p class="pr-title" set:html={render(title)} />
+  </div>
+
+  {
+    p.kind === 'keyboard' && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.kbd.how'))} />
+          <span set:html={render(t('print.kbd.home'))} />
+          <span set:html={render(t('print.kbd.dead'))} />
+        </div>
+        <PrintKeyboard mode="layout" />
+      </>
+    )
+  }
+
+  {
+    p.kind === 'fingers' && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.fingers.tags'))} />
+          <span set:html={render(t('print.fingers.shift'))} />
+        </div>
+        <PrintKeyboard mode="fingers" />
+        <h2 class="mt-6 text-lg">{t('print.fingers.legend')}</h2>
+        <ul class="pr-legend">
+          {LEGEND_FINGERS.map((f) => (
+            <li>
+              <span class="pr-swatch" data-finger={f.id}>
+                <span class="pr-tag">{FINGER_TAG[f.id]}</span>
+              </span>
+              {t(`tutor.fingers.${f.id}`)}
+            </li>
+          ))}
+          <li>
+            <span class="pr-swatch" data-finger="thumb">
+              <span class="pr-tag">{FINGER_TAG.thumb}</span>
+            </span>
+            {t('print.thumb')}
+          </li>
+        </ul>
+      </>
+    )
+  }
+
+  {
+    p.kind === 'sheets' &&
+      sheets.map((s) => (
+        <section class="pr-sheet" data-level={s.id} data-long={isLong(s) ? '' : undefined}>
+          <h2 class="pr-sheet-title">{t(`tutor.levels.${s.id}.title`)}</h2>
+          <p class="pr-sheet-focus" set:html={render(circleBareMarks(t(`tutor.levels.${s.id}.focus`)))} />
+          <p class="pr-sheet-focus" set:html={render(t('print.sheets.howTo'))} />
+          <ol class="pr-drills">
+            {s.drills.map((d) => (
+              <li data-drill>
+                <div class="pr-deva" lang="hi" data-deva>
+                  {d.deva}
+                </div>
+                <div class="pr-keys" translate="no">
+                  <b>{t('print.sheets.keys')}:</b> <span data-keys>{d.keys}</span>
+                </div>
+                <div class="pr-ruled" aria-hidden="true" />
+                <div class="pr-ruled" aria-hidden="true" />
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))
+  }
+
+  {
+    p.kind === 'matras' && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.matras.intro'))} />
+        </div>
+        <table class="pr-table">
+          <thead>
+            <tr>
+              <th scope="col">{t('print.matras.sign')}</th>
+              <th scope="col">{t('print.matras.example')}</th>
+              <th scope="col">{t('print.matras.keys')}</th>
+              <th scope="col">{t('print.matras.note')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matras.map((m) => (
+              <tr data-matra={m.id} data-example={m.example} data-keys={m.keys}>
+                <td class="pr-mark" lang="hi">
+                  {onCircle(m.mark)}
+                </td>
+                <td class="pr-mark" lang="hi">
+                  {m.example}
+                </td>
+                <td translate="no">
+                  {m.steps.map((s, i) => (
+                    <>
+                      {i > 0 && <span class="pr-then">{t('print.matras.then')}</span>}
+                      {s.shift && (
+                        <>
+                          <span class="pr-cap">Shift</span>
+                          <span class="pr-plus">+</span>
+                        </>
+                      )}
+                      <span class="pr-cap" data-step={s.ch}>
+                        {s.cap}
+                      </span>
+                    </>
+                  ))}
+                </td>
+                <td>{t(`print.matras.notes.${m.id}`)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )
+  }
+
+  {
+    p.kind === 'log' && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.log.intro'))} />
+        </div>
+        <table class="pr-table pr-log">
+          <thead>
+            <tr>
+              <th scope="col" style="width:16%">{t('print.log.date')}</th>
+              <th scope="col" style="width:24%">{t('print.log.lesson')}</th>
+              <th scope="col" style="width:11%">{t('print.log.wpm')}</th>
+              <th scope="col" style="width:13%">{t('print.log.accuracy')}</th>
+              <th scope="col">{t('print.log.notes')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: LOG_ROWS }, () => (
+              <tr data-log-row>
+                <td />
+                <td />
+                <td />
+                <td />
+                <td />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )
+  }
+</div>
+
+<script>
+  // Print: make sure the print font is in before the dialog lays the page out.
+  document.querySelector('[data-print]')?.addEventListener('click', async () => {
+    try {
+      await Promise.all(
+        ['400', '600'].flatMap((w) => [
+          document.fonts.load(`${w} 16px "MKD Print"`, 'कA1'),
+          document.fonts.load(`${w} 16px "MKD Print Latin"`, '`A1'),
+        ]),
+      );
+    } catch {
+      // Printing still works with the fallback font.
+    }
+    window.print();
+  });
+</script>

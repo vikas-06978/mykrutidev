@@ -18,13 +18,14 @@ const TASKS = [
   ['keyboard', '/hindi-keyboard'],
   ['tutor', '/hindi-typing-test'],
   ['document', '#convert-document'],
+  ['printables', '/kruti-dev-keyboard'],
 ] as const;
 const why: string[] = raw('home.why');
 ---
 
 <section aria-labelledby="tasks-heading" class="mt-12">
   <h2 id="tasks-heading" class="text-xl">{t('guide.tasksHeading')}</h2>
-  <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     {
       TASKS.map(([key, href]) => (
         <li>

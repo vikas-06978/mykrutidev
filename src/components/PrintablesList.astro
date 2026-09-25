@@ -1,0 +1,40 @@
+---
+/**
+ * The printable charts, as a list: each one's page and its PDF, direct.
+ * On the Typing Tutor and the Hindi Keyboard it lists all five; on a
+ * printable page, the other four.
+ */
+import { langOf, useT, fill } from '../i18n/index.js';
+import { PRINTABLES, pdfHref } from '../lib/printables.js';
+
+interface Props {
+  /** The printable page this is on, left out of the list. */
+  except?: string;
+}
+const { except } = Astro.props;
+const lang = langOf(Astro.url);
+const { t, render, path: to } = useT(lang);
+const items = PRINTABLES.filter((p) => p.path !== except);
+---
+
+<section aria-labelledby="printables-heading" class="mt-12">
+  <h2 id="printables-heading" class="text-xl">{t('print.listHeading')}</h2>
+  <p class="mt-1 text-sm text-body">{t('print.listIntro')}</p>
+  <ul class="pr-list">
+    {
+      items.map((p) => (
+        <li class="flex items-center justify-between gap-3 card px-4 py-3">
+          <a href={to(p.path)} class="font-medium text-ink no-underline hover:underline" set:html={render(t(`print.names.${p.kind}`))} />
+          <a
+            href={pdfHref(p, lang)}
+            download
+            class="btn btn-outline shrink-0"
+            aria-label={fill(t('print.pdfAria'), { name: t(`print.names.${p.kind}`) })}
+          >
+            PDF
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
