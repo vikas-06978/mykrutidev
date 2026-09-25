@@ -17,7 +17,7 @@
    inconsistently, and static hosts serve case-sensitively even though Windows
    does not, so a mismatch fails only in production.
 
-   format() DESCRIBES THE CONTENT, NOT THE EXTENSION. chanakya.woff and
+   format() DESCRIBES THE CONTENT, NOT THE EXTENSION. Walkman-Chanakya.woff and
    preeti.woff are named .woff but start with 00 01 00 00, which is raw
    TrueType. Get this wrong and the browser fetches the file, fails to parse it
    and silently drops the face.
@@ -60,7 +60,19 @@
   src:
     local('Chanakya'),
     local('Chanakya 905'),
-    url('/fonts/chanakya.woff') format('truetype');
+    url('/fonts/Walkman-Chanakya.woff') format('truetype');
+  font-display: swap;
+}
+
+/* Abbasi Chanakya New: converted offline from the TTF in
+   vendor/fonts/Abbasi Chanakya New/, the same file the mapping was built from.
+   A real WOFF, so format('woff'). Used on the INPUT box of
+   /abbasi-chanakya-to-unicode, so pasted keys show as the Hindi they are. */
+@font-face {
+  font-family: 'MKD Abbasi Chanakya New';
+  src:
+    local('Abbasi Chanakya New'),
+    url('/fonts/abbasi-chanakya-new.woff') format('woff');
   font-display: swap;
 }
 

@@ -1,0 +1,189 @@
+/* ===========================================================================
+   The typing test and the on-screen keyboard
+   ===========================================================================
+
+   Two retention tools that share a vocabulary with the converter shell but not
+   its layout. They reuse .btn-*, .cv-seg and .cv-strip from converter.css -
+   a button must not look different here - and add only what is genuinely new:
+   a highlighted target panel, a stat row, and a grid of key caps.
+
+   Consumers: TypingTutor.astro (via tutor.css), HindiKeyboard.astro,
+   KrutiKeyHints.astro.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Typing test
+   --------------------------------------------------------------------------- */
+
+.tt {
+  @apply overflow-hidden;
+}
+
+/* The settings strip is the first thing inside the card, so its own top border
+   would double up with the card's. Written as a rule rather than a `border-t-0`
+   utility in the markup: this file is unlayered and Tailwind's utilities are
+   not, so an unlayered class here wins and the utility would silently do
+   nothing. */
+.tt > .cv-strip:first-child {
+  border-top: 0;
+}
+
+/* --- Stat row ------------------------------------------------------------ */
+/* Four numbers, equal width, always visible. They sit above the passage
+   rather than below the input because a typist's eyes are already at the top
+   of the card and must not have to leave the text to check the clock.
+
+   The rules between them are a 1px grid gap showing the hairline through from
+   behind, not borders on the tiles. `divide-x` on a wrapping grid puts a left
+   border on the first tile of every row after the first, which lands as a
+   stray line in the middle of the card at exactly the 2-column breakpoint. */
+.tt-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background-color: var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+@media (width >= 40rem) {
+  .tt-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.tt-stat {
+  @apply bg-surface px-4 py-3 text-center;
+}
+.tt-stat-value {
+  @apply block text-2xl leading-tight font-semibold tabular-nums text-ink;
+}
+.tt-stat-label {
+  @apply mt-0.5 block text-xs tracking-wide text-mute uppercase;
+}
+/* The clock is the one number that changes meaning as it runs out. */
+.tt-stat[data-low='true'] .tt-stat-value {
+  color: var(--color-err);
+}
+
+/* --- Cluster highlighting ------------------------------------------------ */
+/* The passage panel itself lives in tutor.css (`.tt-passage`, `.tt-line`),
+   because the tutor types ONTO the passage rather than into a box beside it.
+   These colours are here because they are shared: they describe an akshara's
+   state, not the panel it happens to sit in. */
+/* One span per cluster - see the note at the top of src/lib/typing.js for why
+   the unit is a cluster and not a character. */
+.tt-c {
+  border-radius: 2px;
+  /* No transition: at 60 WPM a fade is still running when the next character
+     lands, and the passage shimmers. */
+}
+.tt-c[data-s='correct'] {
+  color: var(--color-ok);
+}
+.tt-c[data-s='wrong'] {
+  color: var(--color-err);
+  background-color: var(--color-err-bg);
+  /* Colour is never the only signal. A mistake is also underlined, so it
+     survives a monochrome screen and the commoner colour deficiencies. */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+/* A space typed wrong has no glyph to colour, so it needs a visible body of
+   its own. Marked by the renderer, because CSS cannot match on text content -
+   `:not(:has(*))` would have matched every cluster, since they all hold text
+   and no elements. */
+.tt-c[data-ws][data-s='wrong'] {
+  display: inline-block;
+  min-width: 0.4em;
+}
+.tt-c[data-s='current'] {
+  color: var(--color-ink);
+  background-color: rgb(168 68 42 / 0.13);
+  /* Inset, so marking the caret position never reflows the passage. */
+  box-shadow: inset 2px 0 0 0 var(--color-brick);
+}
+.tt-c[data-s='pending'] {
+  color: var(--color-mute);
+}
+
+/* There is no visible input box to style. The tutor's textarea is transparent
+   and sits on top of the passage - see `.tt-capture` in tutor.css. */
+
+/* --- Result -------------------------------------------------------------- */
+.tt-result {
+  @apply border-t border-hairline bg-inset px-4 py-5 sm:px-5;
+}
+.tt-result-grid {
+  @apply mt-4 grid gap-3 sm:grid-cols-4;
+}
+.tt-result-cell {
+  @apply rounded-(--radius-chrome) border border-hairline bg-surface px-3 py-3 text-center;
+}
+
+/* ---------------------------------------------------------------------------
+   Key caps - the on-screen keyboard and the Kruti Dev hint chart
+   --------------------------------------------------------------------------- */
+
+.kb-row + .kb-row {
+  @apply mt-4;
+}
+.kb-row-label {
+  @apply mb-2 block text-xs font-semibold tracking-wide text-mute uppercase;
+}
+.kb-keys {
+  @apply flex flex-wrap gap-1.5;
+}
+
+/* 44px in both directions, per DESIGN.md, and that is a floor rather than a
+   target: these are the only controls on the site a user presses hundreds of
+   times in a row. */
+.kb-key {
+  @apply inline-flex items-center justify-center rounded-(--radius-chrome);
+  @apply border border-hairline bg-surface px-2 text-ink;
+  font-family: var(--font-deva);
+  font-size: 1.125rem;
+  line-height: 1;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 100ms ease,
+    border-color 100ms ease;
+}
+.kb-key:hover {
+  @apply border-mute bg-inset;
+}
+.kb-key:active,
+.kb-key[data-pressed='true'] {
+  @apply border-brick bg-warn-bg;
+}
+
+/* Space, backspace and the like: Latin labels, so they leave the Hindi stack. */
+.kb-key-util {
+  @apply px-4 text-sm font-medium;
+  font-family: var(--font-sans);
+}
+.kb-key-space {
+  @apply flex-1;
+  min-width: 8rem;
+}
+
+/* --- The Kruti Dev hint chart -------------------------------------------- */
+/* Not buttons: pressing one would type into nothing. A key cap and the letter
+   it produces, stacked, read-only. */
+.kb-hints {
+  @apply grid gap-1.5;
+  grid-template-columns: repeat(auto-fill, minmax(3.25rem, 1fr));
+}
+.kb-hint {
+  @apply flex flex-col items-center justify-center gap-0.5 rounded-(--radius-chrome);
+  @apply border border-hairline bg-surface px-1 py-1.5;
+}
+.kb-hint-key {
+  @apply text-xs tabular-nums text-mute;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.kb-hint-deva {
+  @apply text-lg leading-none text-ink;
+  font-family: var(--font-deva);
+}

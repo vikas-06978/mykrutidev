@@ -4,7 +4,7 @@ import { navGroups, navTools, getPage, isLive } from '../lib/routes.js';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 // Only groups with at least one live page appear. Pending pages are listed
-// inside their group but greyed and not linked — never send a visitor to a page
+// inside their group but greyed and not linked - never send a visitor to a page
 // that cannot convert yet.
 const groups = navGroups();
 // Tools sit beside the groups, not inside one: they have no source font to be
@@ -94,7 +94,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                     </li>
                   ) : (
                     <li>
-                      {/* Not a link on purpose — the page exists but cannot convert yet. */}
+                      {/* Not a link on purpose - the page exists but cannot convert yet. */}
                       <span
                         aria-disabled="true"
                         aria-current={isCurrent(p.path) ? 'page' : undefined}
@@ -116,24 +116,78 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
           ))
         }
 
+        {/*
+          Tools live in a disclosure of their own rather than as flat links.
+          They used to be flat, and that was right while there was one of them;
+          at three the menubar stops fitting its container well before the
+          container stops growing, and this nav must never scroll or wrap -
+          see the warning above.
+
+          Same markup as a converter group (`data-group`, trigger, menu), so
+          the keyboard handling, hover-open and click-outside below pick it up
+          with no special case.
+        */}
         {
-          tools.map((t) => (
-            <li>
-              <a
-                href={t.path}
-                aria-current={isCurrent(t.path) ? 'page' : undefined}
-                title={t.navSub}
+          tools.length > 0 && (
+            <li class="relative" data-group>
+              <button
+                type="button"
+                id="navtrigger-tools"
+                aria-expanded="false"
+                aria-controls="navmenu-tools"
+                data-trigger
                 class:list={[
-                  'block rounded-(--radius-chrome) px-2.5 py-2 no-underline whitespace-nowrap',
-                  isCurrent(t.path)
+                  'flex cursor-pointer items-center gap-1.5 rounded-(--radius-chrome) px-2.5 py-2 whitespace-nowrap',
+                  groupHasCurrent(tools)
                     ? 'bg-inset font-medium text-ink'
                     : 'text-body hover:bg-inset hover:text-ink',
                 ]}
               >
-                {t.nav}
-              </a>
+                Typing tools
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  class="h-1.5 w-2.5 shrink-0 transition-transform duration-150"
+                  data-chevron
+                >
+                  <path
+                    d="M1 1l4 4 4-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+
+              <ul
+                id="navmenu-tools"
+                aria-labelledby="navtrigger-tools"
+                hidden
+                data-menu
+                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu"
+              >
+                {tools.map((t) => (
+                  <li>
+                    <a
+                      href={t.path}
+                      aria-current={isCurrent(t.path) ? 'page' : undefined}
+                      class:list={[
+                        'block rounded-(--radius-chrome) px-3 py-2.5 no-underline',
+                        isCurrent(t.path)
+                          ? 'bg-inset font-medium text-brick'
+                          : 'text-body hover:bg-inset hover:text-ink',
+                      ]}
+                    >
+                      {t.nav}
+                      {t.navSub && <span class="block text-xs text-mute">{t.navSub}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </li>
-          ))
+          )
         }
 
         {
@@ -255,22 +309,56 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
         ))
       }
 
+      {/* Same accordion as the converter groups, so the panel stays short. */}
       {
-        tools.map((t) => (
+        tools.length > 0 && (
           <li>
-            <a
-              href={t.path}
-              aria-current={isCurrent(t.path) ? 'page' : undefined}
-              class:list={[
-                'flex min-h-11 flex-col justify-center py-3 no-underline',
-                isCurrent(t.path) ? 'font-medium text-brick' : 'text-body',
-              ]}
-            >
-              <span class="text-base">{t.nav}</span>
-              {t.navSub && <span class="text-xs text-mute">{t.navSub}</span>}
-            </a>
+            <details data-acc class="group">
+              <summary
+                class:list={[
+                  'flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base marker:hidden',
+                  groupHasCurrent(tools) ? 'font-medium text-ink' : 'text-body',
+                ]}
+              >
+                Typing tools
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  class="h-2 w-3.5 shrink-0 text-mute transition-transform duration-150 group-open:rotate-180"
+                >
+                  <path
+                    d="M1 1l4 4 4-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </summary>
+
+              <ul class="pb-2">
+                {tools.map((t) => (
+                  <li>
+                    <a
+                      href={t.path}
+                      aria-current={isCurrent(t.path) ? 'page' : undefined}
+                      class:list={[
+                        'flex min-h-11 flex-col justify-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
+                        isCurrent(t.path)
+                          ? 'bg-inset font-medium text-brick'
+                          : 'text-body',
+                      ]}
+                    >
+                      <span class="text-base">{t.nav}</span>
+                      {t.navSub && <span class="text-xs text-mute">{t.navSub}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </li>
-        ))
+        )
       }
 
       {
@@ -299,7 +387,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   @reference '../styles/global.css';
 
   /* The one shadow in the system. DESIGN.md is otherwise flat, but a menu that
-     floats over content needs to read as floating — a hairline alone leaves it
+     floats over content needs to read as floating - a hairline alone leaves it
      ambiguous against the card borders underneath. */
   .shadow-menu {
     box-shadow:

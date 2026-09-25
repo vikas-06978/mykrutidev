@@ -3,7 +3,7 @@
  *
  * The competitor ships an HTML file renamed to .doc, which Word opens with a
  * warning and which loses the font binding. This builds actual Office Open XML
- * so the paragraphs carry the right typeface — for a legacy font that matters,
+ * so the paragraphs carry the right typeface - for a legacy font that matters,
  * because Kruti Dev text rendered in Calibri is unreadable mojibake.
  *
  * Loaded on demand (dynamic import from the Converter), so fflate stays out of
@@ -51,7 +51,14 @@ function paragraph(line, fontName, sizeHalfPoints) {
   return `<w:p><w:r>${rPr}<w:t xml:space="preserve">${escapeXml(line)}</w:t></w:r></w:p>`;
 }
 
-export function buildDocx(text, { fontName = 'Mangal', fontSize = 12 } = {}) {
+export function buildDocx(text, opts = {}) {
+  return new Blob([buildDocxBytes(text, opts)], {
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  });
+}
+
+/** The same .docx as raw bytes - for callers that process it further. */
+export function buildDocxBytes(text, { fontName = 'Mangal', fontSize = 12 } = {}) {
   const halfPoints = Math.round(fontSize * 2);
   const body = String(text)
     .split(/\r\n|\r|\n/)
@@ -63,7 +70,7 @@ export function buildDocx(text, { fontName = 'Mangal', fontSize = 12 } = {}) {
 <w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body>
 </w:document>`;
 
-  const zipped = zipSync(
+  return zipSync(
     {
       '[Content_Types].xml': strToU8(CONTENT_TYPES),
       '_rels/.rels': strToU8(RELS),
@@ -72,10 +79,6 @@ export function buildDocx(text, { fontName = 'Mangal', fontSize = 12 } = {}) {
     // Word rejects some aggressive settings; level 6 is the safe default.
     { level: 6 },
   );
-
-  return new Blob([zipped], {
-    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  });
 }
 
 export function downloadDocx(text, { fontName, fileName = 'mykrutidev.docx', fontSize } = {}) {

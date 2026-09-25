@@ -65,7 +65,7 @@ describe('no sentinels leak into output', () => {
 
 /**
  * The comma bug generalised. A character is safe only if unicodeToLegacy leaves
- * something the forward pass reads back as that same character — either a real
+ * something the forward pass reads back as that same character - either a real
  * Kruti Dev key, or a character the forward map does not claim at all. There is
  * no third option, so this closure check replaces listing examples.
  */
@@ -86,7 +86,7 @@ describe('punctuation survives a round trip', () => {
     ['`', 'the ` slot draws ृ'],
     // Slots spent on the punctuation above, so the ASCII character itself is
     // now the one with no key. All rare in Hindi prose, and `@` and `/` are
-    // protected inside emails and dates by splitProtected anyway — a worthwhile
+    // protected inside emails and dates by splitProtected anyway - a worthwhile
     // trade for making the comma, full stop, slash and quotes work.
     [']', 'the ] slot IS the comma'],
     ['@', 'the @ slot IS the slash'],
@@ -98,7 +98,7 @@ describe('punctuation survives a round trip', () => {
 
   const PROBE = [
     ...' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
-    '‘', '’', '“', '”', '–', '—', '…', '₹',
+    '‘', '’', '“', '”', '–', '-', '…', '₹',
   ];
 
   for (const c of PROBE) {
@@ -133,7 +133,7 @@ describe('punctuation survives a round trip', () => {
 });
 
 /**
- * DevLys 010 shares the Kruti Dev 010 layout, verified outline by outline — but
+ * DevLys 010 shares the Kruti Dev 010 layout, verified outline by outline - but
  * only on the keys the map uses. The two fonts genuinely disagree in the
  * 0x80-0x9F block, so sharing one object is safe exactly as long as no key lands
  * there. This is the test that notices if one ever does.
@@ -224,8 +224,15 @@ describe('convert() routing', () => {
     assert.throws(() => convert('x', 'kruti-dev', 'nope'), /Unknown font/);
   });
 
-  test('chanakya is flagged unavailable until its map is filled', () => {
-    assert.equal(isPairUnavailable('chanakya', 'unicode'), true);
+  test('a font with no map at all is flagged unavailable', () => {
+    // "Unavailable" means there is nothing to convert WITH - an empty table.
+    // It is not the same question as `accurate`, which asks whether a table
+    // that does exist has been verified. Chanakya now has a table and so is no
+    // longer unavailable; it is still not accurate, and the test for that gate
+    // lives in chanakya.test.js.
+    assert.equal(isPairUnavailable('shusha', 'unicode'), true);
+    assert.equal(isPairUnavailable('preeti', 'unicode'), true);
+    assert.equal(isPairUnavailable('chanakya', 'unicode'), false);
     assert.equal(isPairUnavailable('kruti-dev', 'unicode'), false);
   });
 });
@@ -245,13 +252,99 @@ describe('english safety toggle', () => {
       /https:\/\/mykrutidev\.com/,
     );
   });
+
+  /**
+   * Rule 3, the only rule of the three that has to look at what the token
+   * decodes to: a capitalised word whose Devanagari would be structurally
+   * impossible was never Hindi to begin with.
+   *
+   * These are the names and words that actually show up in a Kruti Dev
+   * document - a signature line, a place, a product - and the toggle exists so
+   * they come out of a converted file still readable.
+   */
+  test('a capitalised word that decodes to nonsense is left as English', () => {
+    for (const word of ['Rahul', 'Sharma', 'Singh', 'Chennai', 'Sunday']) {
+      assert.equal(
+        legacyToUnicode(word, KD, { keepEnglish: true }),
+        word,
+        `${word} was converted instead of being kept`,
+      );
+    }
+  });
+
+  test('the same words convert when the toggle is off', () => {
+    // Otherwise the test above would pass on a converter that never converts.
+    for (const word of ['Rahul', 'Sharma', 'Singh']) {
+      assert.notEqual(legacyToUnicode(word, KD, { keepEnglish: false }), word);
+    }
+  });
+
+  test('rule 3 needs the capital - the same letters lowercase convert', () => {
+    // RE_CAPITALISED is what separates a name from a Hindi word that happens to
+    // decode badly, so the capital is doing real work and not decoration.
+    assert.notEqual(legacyToUnicode('rahul', KD, { keepEnglish: true }), 'rahul');
+  });
+
+  /**
+   * The documented limit of rule 3, pinned so it stays honest. A capitalised
+   * proper noun that decodes to structurally valid Devanagari cannot be caught,
+   * and "Delhi" is the real example: it is not in the word list, it is not
+   * all-caps, and क्मसीप breaks no rule. If one of these ever starts being kept
+   * the heuristic widened and the comment in looksEnglish() needs rewriting.
+   */
+  test('a capitalised name that decodes cleanly is still a known miss', () => {
+    for (const word of ['Delhi', 'Meena']) {
+      assert.notEqual(legacyToUnicode(word, KD, { keepEnglish: true }), word);
+    }
+  });
+
+  test('the word list catches what the decode check cannot', () => {
+    // "India" decodes cleanly too, so only rule 1 saves it - which is why the
+    // list exists alongside the structural check rather than instead of it.
+    assert.equal(legacyToUnicode('India', KD, { keepEnglish: true }), 'India');
+    assert.ok(isWellFormedDevanagari(legacyToUnicode('India', KD, { keepEnglish: false })));
+  });
+
+  test('an ALL-CAPS run is kept without needing to decode it', () => {
+    for (const word of ['PAN', 'IFSC', 'GST']) {
+      assert.equal(legacyToUnicode(word, KD, { keepEnglish: true }), word);
+    }
+  });
 });
 
 describe('isWellFormedDevanagari', () => {
   const ok = ['भारत', 'कि', 'कर्म', 'क्रम', 'क़', 'हिन्दी'];
-  const bad = ['ा', 'ेक', 'क्', 'ंक'];
+  const bad = [
+    'ा', 'ेक', 'क्', 'ंक',
+    // A halant with nothing to kill. This is what an English word decodes to
+    // when a `z` lands somewhere a consonant never was - "Azure" gives ।्रनतम.
+    '्र', 'ा्र', '।्रनतम',
+    // A vowel sign on an independent vowel: आे is not how ओ is written.
+    'आे',
+    // A nukta with no consonant under it.
+    '़',
+  ];
   for (const s of ok) test(`well formed: ${s}`, () => assert.ok(isWellFormedDevanagari(s)));
   for (const s of bad) test(`malformed: ${s}`, () => assert.ok(!isWellFormedDevanagari(s)));
+
+  test('an orphan halant is rejected for being orphaned, not for trailing', () => {
+    // 'क्' is already rejected by the word-final-halant rule. '्क' can only be
+    // caught by the rule that a halant needs a consonant before it, so this is
+    // the case that keeps that rule honest.
+    assert.ok(!isWellFormedDevanagari('्क'));
+  });
+
+  test('a decode with no Devanagari in it is not well-formed Devanagari', () => {
+    // The check answers "is this Hindi", so a run of Latin is a no.
+    assert.ok(!isWellFormedDevanagari('abc'));
+    assert.ok(!isWellFormedDevanagari('123'));
+  });
+
+  test('an empty decode is vacuously fine, not malformed', () => {
+    // looksEnglish() would otherwise treat every token that decodes to nothing
+    // as English on the strength of an empty string.
+    assert.ok(isWellFormedDevanagari(''));
+  });
 });
 
 describe('buildReverse', () => {
@@ -347,7 +440,7 @@ describe('font registry', () => {
   });
 });
 
-describe('describeMismatch — the wrong-page hint', () => {
+describe('describeMismatch - the wrong-page hint', () => {
   const KDsample = FONTS['kruti-dev'].sample;
 
   test('stays quiet on correct Kruti Dev input', () => {
@@ -413,8 +506,8 @@ describe('whitespace and line breaks pass through untouched', () => {
     ['\t', 'tab'],
     ['    ', 'runs of spaces'],
     ['\n   \n', 'a whitespace-only line'],
-    ['\u000b', 'vertical tab — what Shift+Enter in Word pastes as'],
-    ['\u000c', 'form feed — a Word page break'],
+    ['\u000b', 'vertical tab - what Shift+Enter in Word pastes as'],
+    ['\u000c', 'form feed - a Word page break'],
     [' ', 'non-breaking space'],
     [' ', 'LINE SEPARATOR, common in PDF copy'],
     [' ', 'PARAGRAPH SEPARATOR, common in PDF copy'],
@@ -466,9 +559,9 @@ describe('whitespace and line breaks pass through untouched', () => {
 
   test('line count survives a long document unchanged', () => {
     // Blank every third line, so the run includes empty lines as well as full
-    // ones — an empty line is the case a naive split/join drops.
+    // ones - an empty line is the case a naive split/join drops.
     const doc = Array.from({ length: 60 }, (_, i) =>
-      i % 3 === 2 ? '' : `पैराग्राफ ${i} — राष्ट्रभाषा हिंदी है, जो देश को बांधती है।`,
+      i % 3 === 2 ? '' : `पैराग्राफ ${i} - राष्ट्रभाषा हिंदी है, जो देश को बांधती है।`,
     ).join('\n');
     const back = legacyToUnicode(unicodeToLegacy(doc, KD), KD);
     assert.equal(back.split('\n').length, 60);

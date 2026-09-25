@@ -33,13 +33,13 @@ const inputIsUnicode = fromFont.kind === 'unicode';
 const outputIsLegacy = toFont.kind === 'legacy';
 const previewFont = outputIsLegacy ? previewFontFor(to) : null;
 
-// The copy button names the font THIS page outputs — "Copy DevLys code" on a
+// The copy button names the font THIS page outputs - "Copy DevLys code" on a
 // DevLys page, not whichever font happened to be written into the markup first.
 // Getting this wrong is not a cosmetic slip: the two buttons differ only by
 // their labels, so a stale name is an instruction to paste legacy keys under a
 // font the recipient does not have.
 const outputCodeName = outputIsLegacy ? codeLabel(to) : null;
-// The installed face name, e.g. "DevLys 010" — what Word has to resolve.
+// The installed face name, e.g. "DevLys 010" - what Word has to resolve.
 const outputFaceName = previewFont?.label ?? toFont.label;
 
 // One preview face, no picker. The variants all shared a keyboard layout and
@@ -144,6 +144,19 @@ const previewStack = previewFont?.stack ?? toFont.css;
           placeholder="Your converted text appears here."
           class="cv-area cv-out deva text-base"></textarea>
       </div>
+
+      {/*
+        Only for output fonts that opt in (warnUnmapped in fontMaps.js). Some
+        Unicode has no key in the font at all - ॐ, ऌ - and is left as-is, which
+        Word will then draw as the wrong glyph. Say so rather than stay silent.
+      */}
+      {
+        toFont.warnUnmapped && (
+          <p data-role="unmapped" hidden class="cv-hint">
+            Some characters have no {codeLabel(to)} equivalent and were left as-is.
+          </p>
+        )
+      }
 
       <div class="cv-actions">
         {
@@ -266,7 +279,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
     with Transliterator.astro so the two tools cannot drift apart visually. */}
 
 <script>
-  import { convert, FONTS, describeMismatch } from '../lib/fontMaps.js';
+  import { convert, FONTS, describeMismatch, unmappedChars } from '../lib/fontMaps.js';
   import { previewFontFor } from '../lib/legacyFonts.js';
 
   const WHATSAPP_LIMIT = 2000;
@@ -295,6 +308,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
     const hint = q<HTMLElement>('hint');
     const whatsapp = q<HTMLAnchorElement>('whatsapp');
     const viewGroup = maybe<HTMLElement>('view');
+    const unmapped = maybe<HTMLElement>('unmapped');
 
     // Fixed for the life of the page. This is the whole no-dropdown design.
     const from = root.dataset.from!;
@@ -412,6 +426,10 @@ const previewStack = previewFont?.stack ?? toFont.css;
         countOut.textContent = String(result.length);
       }
       showHint(text);
+      if (unmapped) {
+        unmapped.hidden =
+          unmappedChars(text, to, { keepEnglish: keepEnglish.checked }).length === 0;
+      }
       whatsapp.setAttribute('aria-disabled', result ? 'false' : 'true');
     }
 

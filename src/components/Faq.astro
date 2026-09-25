@@ -8,7 +8,7 @@ interface Props {
 const { items, schema = true } = Astro.props;
 
 // Answers are authored here (never user input), so inline markup is safe to
-// render — but the schema wants plain text, so strip tags for that copy.
+// render - but the schema wants plain text, so strip tags for that copy.
 const plain = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
 const faqSchema = {

@@ -1,0 +1,236 @@
+/* ===========================================================================
+   The Hindi Keyboard page (HindiKeyboard.astro)
+
+   The one rule this layout exists for: the text box and the whole keyboard are
+   on screen together, so nobody scrolls between typing and reading.
+
+     desktop (>= 1024px)  text box sticky at the top of the tool, keyboard in
+                          flow under it; the tool fits a 1366x768 viewport.
+     tablet  (768-1023)   text box sticky at the top, keyboard docked to the
+     phone   (< 768)      bottom of the screen like a phone keyboard - max 45vh
+                          on a tablet, 55vh on a phone - scrolling inside itself.
+
+   Own class names (hk-*), not the kb-* caps in typing.css: those are shared with
+   the Kruti Dev hint chart on the typing tutor, which must not change.
+   =========================================================================== */
+
+.hk {
+  /* Set from the script to the measured height of the docked keyboard, so the
+     spacer holds its place and docking never makes the page jump. */
+  --hk-pad-h: 0px;
+  overflow: visible; /* .card clips; sticky children need to escape it */
+}
+
+/* --- Text box + actions: sticky -------------------------------------------- */
+.hk-top {
+  @apply border-b border-hairline bg-surface px-3 pt-3 pb-2 sm:px-4;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.hk-text {
+  @apply w-full rounded-(--radius-chrome) border border-hairline bg-surface px-3 py-2 text-ink;
+  @apply placeholder:font-sans placeholder:text-sm placeholder:text-mute;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  /* 3 lines by default; the script grows it to 6, then it scrolls inside. */
+  min-height: calc(3 * 1.75em + 1rem + 2px);
+  resize: none;
+  overflow-y: auto;
+  display: block;
+}
+.hk-text:focus {
+  outline: none;
+  border-color: var(--color-brick);
+  box-shadow: 0 0 0 3px rgb(168 68 42 / 0.14);
+}
+
+.hk-actions {
+  @apply mt-2 flex flex-wrap items-center gap-2;
+}
+.hk-actions .btn {
+  min-height: 36px;
+  @apply px-3;
+}
+.hk-count {
+  @apply ms-auto text-xs tabular-nums text-mute;
+}
+
+/* --- The keyboard ----------------------------------------------------------- */
+.hk-pad {
+  @apply bg-inset;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.hk-bar {
+  @apply flex flex-wrap items-center justify-between gap-2 px-3 pt-2 sm:px-4;
+}
+.hk-bar .cv-seg button {
+  min-height: 32px;
+}
+.hk-scroll {
+  @apply px-3 pt-2 sm:px-4;
+}
+
+.hk-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.hk-row + .hk-row {
+  margin-top: 6px;
+}
+/* One small line, inline, instead of a heading above each group. */
+.hk-label {
+  @apply shrink-0 pt-3 text-xs font-semibold text-mute;
+  font-family: var(--font-deva);
+  width: 3.25rem;
+  line-height: 1.2;
+}
+.hk-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hk-key {
+  @apply inline-flex items-center justify-center rounded-(--radius-chrome);
+  @apply border border-hairline bg-surface px-1.5 text-ink;
+  font-family: var(--font-deva);
+  font-size: 20px;
+  line-height: 1;
+  min-width: 44px;
+  height: 44px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation; /* no double-tap zoom on fast typing */
+  transition:
+    background-color 100ms ease,
+    border-color 100ms ease;
+}
+.hk-key:hover {
+  @apply border-mute bg-inset;
+}
+.hk-key:focus-visible {
+  outline: 2px solid var(--color-brick);
+  outline-offset: 2px;
+}
+.hk-key:active,
+.hk-key[data-pressed='true'] {
+  @apply border-brick bg-warn-bg;
+}
+/* A vowel key currently showing its matra: tinted so the change is noticed. */
+.hk-key[data-matra='true'] {
+  @apply border-saffron/60;
+}
+
+/* Bottom row: Space wide, Latin labels on the utility keys. */
+.hk-bottom {
+  @apply flex gap-1.5 px-3 pt-2 pb-3 sm:px-4;
+}
+.hk-key-util {
+  @apply px-3 text-sm font-medium;
+  font-family: var(--font-sans);
+}
+.hk-key-space {
+  flex: 1;
+}
+
+.hk-foot {
+  @apply border-t border-hairline bg-surface px-3 py-2 text-xs leading-relaxed text-mute sm:px-4;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+/* "Use my keyboard" and the collapsed-keyboard reopen button are phone/tablet
+   controls: on a desktop there is no on-screen keyboard to fight with. */
+.hk-own {
+  display: none;
+}
+.hk-reopen {
+  display: none;
+}
+
+/* --- Phone and tablet: the keyboard docks to the bottom ---------------------- */
+@media (max-width: 1023px) {
+  .hk-own {
+    display: inline-flex;
+  }
+  .hk-key {
+    min-width: 40px;
+    height: 44px;
+  }
+
+  .hk[data-docked='true'] .hk-pad {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    max-height: 45vh;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-hairline);
+    border-radius: 0;
+    box-shadow: 0 -6px 20px rgb(26 39 68 / 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .hk[data-docked='true'] .hk-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .hk[data-docked='true'] .hk-spacer {
+    height: var(--hk-pad-h);
+  }
+
+  /* "Use my keyboard": ours folds away so the phone's can take the space. */
+  .hk[data-own='true'] .hk-pad {
+    display: none;
+  }
+  .hk[data-own='true'] .hk-reopen {
+    display: inline-flex;
+  }
+  .hk[data-own='true'] .hk-own {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .hk[data-docked='true'] .hk-pad {
+    max-height: 55vh;
+  }
+  /* Narrow screens: the group label goes above its keys, full width. */
+  .hk-row {
+    flex-direction: column;
+    /* stretch, so the key grid gets the full width to fill */
+    align-items: stretch;
+    gap: 3px;
+  }
+  .hk-label {
+    width: auto;
+    padding-top: 0;
+    font-size: 11px;
+  }
+  .hk-key {
+    min-width: 40px;
+    font-size: 19px;
+    @apply px-1;
+  }
+  /* Fill the width: as many >= 40px columns as fit, stretched evenly, so a
+     phone row holds 8 keys instead of leaving a gap at the right. */
+  .hk-keys {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 5px;
+  }
+  /* Grid cells only - the bottom row keeps its 44px minimum. */
+  .hk-keys .hk-key {
+    min-width: 0;
+  }
+}

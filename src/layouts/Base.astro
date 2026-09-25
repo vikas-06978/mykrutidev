@@ -18,7 +18,7 @@ const page = getPage(path);
 
 // Self-canonical unless routes.js says otherwise. The override exists for a
 // page that is genuinely useful but duplicates a conversion already published
-// at another path — it stays crawlable and points the ranking signal there
+// at another path - it stays crawlable and points the ranking signal there
 // rather than competing with itself.
 const selfUrl = new URL(path, SITE).href;
 const canonical = page?.canonical ? new URL(page.canonical, SITE).href : selfUrl;

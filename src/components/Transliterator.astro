@@ -1,6 +1,5 @@
 ---
-import { FONTS, codeLabel } from '../lib/fontMaps.js';
-import { previewFontFor } from '../lib/legacyFonts.js';
+import { FONTS } from '../lib/fontMaps.js';
 import { MODES, tipsFor } from '../lib/translit.js';
 
 /**
@@ -9,52 +8,31 @@ import { MODES, tipsFor } from '../lib/translit.js';
  * Deliberately NOT Converter.astro with a different engine bolted on. The font
  * converter maps one exact representation onto another; this guesses at what
  * Hindi someone meant. They share a shell (src/styles/converter.css) and
- * nothing else — no shared script, no shared state, no shared route.
+ * nothing else - no shared script, no shared state, no shared route.
  *
- * The one place they meet is the Kruti Dev output option, which is a plain
- * composition: transliterate to Unicode, then hand that Unicode to convert().
- * The pipeline is one-way and the font engine never learns this page exists.
+ * The output is Unicode Hindi and only that. Anyone who needs Kruti Dev is
+ * linked to the Unicode -> Kruti Dev converter, which owns that job.
  */
 
-// This page's legacy output is fixed at Kruti Dev, but every name it prints is
-// read off the font record rather than typed in, so the button can never end up
-// advertising a font the page does not actually produce — the bug the converter
-// pages had when "Copy Kruti code" was hardcoded into a shared component.
-const LEGACY = 'kruti-dev';
-const kruti = FONTS[LEGACY];
-const legacyPreview = previewFontFor(LEGACY);
-const previewStack = legacyPreview?.stack ?? kruti.css;
-// "Kruti" on the narrow copy button, "Kruti Dev" on the panel label, and the
-// installed face name "Kruti Dev 010" in the .docx, which is what Word resolves.
-const legacyCodeName = codeLabel(LEGACY);
-const legacyFaceName = legacyPreview?.label ?? kruti.label;
+// The output box's font. The SAME Unicode stack the converter pages use for a
+// Unicode output, and nothing else: this page used to set the Kruti Dev preview
+// face here, which drew a typed `?` as the Kruti glyph घ्. romanTyping.test.js
+// reads this file to keep a legacy font from ever coming back.
+const OUTPUT_FONT = FONTS.unicode.css;
 
-const EXAMPLE = 'namaste bharat';
+const EXAMPLE = 'namaste bharat, aap kaise hain?';
 
-// Both tip sets are produced by RUNNING the engine at build time — see tipsFor()
+// Both tip sets are produced by RUNNING the engine at build time - see tipsFor()
 // in translit.js. Nothing here writes a Devanagari letter by hand, because the
 // bug this replaced was a hand-written table that promised `ri` = ऋ while the
 // engine produced री. A tip can now only ever say what the engine does.
-//
-// Both are rendered and the inactive one is hidden, so switching mode is an
-// attribute flip rather than a reason to ship the engine to the client.
 const TIPS = {
   hinglish: tipsFor('hinglish'),
   itrans: tipsFor('itrans'),
 };
 ---
 
-<div
-  class="cv card"
-  data-translit
-  data-view="preview"
-  data-format="unicode"
-  data-mode="hinglish"
-  data-legacy-key={LEGACY}
-  data-legacy-label={kruti.label}
-  data-legacy-face={legacyFaceName}
-  style={`--cv-preview:${previewStack}`}
->
+<div class="cv card" data-translit data-mode="hinglish" style={`--cv-preview:${OUTPUT_FONT}`}>
   <div class="grid md:grid-cols-2 md:divide-x md:divide-hairline">
     {/* ---------------------------- Input ---------------------------- */}
     <div class="cv-panel border-b border-hairline md:border-b-0">
@@ -94,103 +72,73 @@ const TIPS = {
     {/* ---------------------------- Output ---------------------------- */}
     <div class="cv-panel bg-surface">
       <div class="cv-head">
-        <label for="tl-out" class="cv-eyebrow" data-role="out-label">Hindi (Unicode)</label>
-
+        <label for="tl-out" class="cv-eyebrow">Hindi (Unicode)</label>
         {/*
-          This toggle changes WHAT THE OUTPUT IS, not how it looks, which is why
-          it sits here next to the text rather than down in the settings strip.
+          How detected English words are written. Changes what the output IS,
+          so it sits by the output. Only meaningful in Hinglish mode.
         */}
-        <div data-role="format" role="group" aria-labelledby="tl-fmt" class="cv-seg">
-          <span id="tl-fmt" class="cv-seg-label">Output:</span>
-          <button type="button" data-format="unicode" aria-pressed="true">
-            Hindi (Unicode)
-          </button>
-          <button type="button" data-format={LEGACY} aria-pressed="false">
-            {kruti.label}
-          </button>
+        <div data-role="english" role="group" aria-labelledby="tl-eng" class="cv-seg">
+          <span id="tl-eng" class="cv-seg-label">English words:</span>
+          <button type="button" data-english="hindi" aria-pressed="true">Hindi letters</button>
+          <button type="button" data-english="keep" aria-pressed="false">Keep English</button>
         </div>
-
-        {/*
-          Only meaningful once the output is legacy keystrokes. Purely visual,
-          exactly as on the converter pages: it swaps a font and never touches
-          what the copy buttons hand over.
-        */}
-        <div data-role="view" role="group" aria-labelledby="tl-view" class="cv-seg" hidden>
-          <span id="tl-view" class="cv-seg-label">View:</span>
-          <button type="button" data-view="preview" aria-pressed="true">Preview (Hindi)</button>
-          <button type="button" data-view="raw" aria-pressed="false">Raw code</button>
-        </div>
-
         <span data-role="count-out" class="cv-count">0</span>
       </div>
 
       <div class="cv-field">
         {/*
-          Editable, unlike the font converter's output.
-
-          There the output is derived exactly and editing it would only let
-          someone corrupt a correct answer. Here it is a phonetic guess, so the
-          last word on a rare spelling has to belong to the person who knows
-          what they meant. Typing in the left box still overwrites it — that is
-          a new guess replacing an old one — but nothing else touches it, and
-          both copy buttons read whatever is in the box at the moment they run.
+          Editable, unlike the font converter's output: this is a phonetic
+          guess, so the last word belongs to the person who knows what they
+          meant. Typing in the left box still overwrites it. Tapping a word
+          offers Google's other candidates for it (below).
         */}
         <textarea
           id="tl-out"
           data-role="output"
           spellcheck="false"
           lang="hi"
-          placeholder="Your Hindi appears here. You can edit it."
+          placeholder="Your Hindi appears here. Tap a word for other spellings."
           class="cv-area cv-out deva text-lg"></textarea>
       </div>
 
+      {/*
+        The tapped word's candidates. Picking one replaces that word only, and
+        the choice survives further typing on the left.
+      */}
+      <div data-role="suggest" hidden class="cv-strip flex flex-wrap items-center gap-2 text-sm">
+        <span class="text-mute">
+          Other spellings for <code data-role="suggest-roman"></code>:
+        </span>
+        <span data-role="suggest-list" class="flex flex-wrap gap-2" lang="hi"></span>
+      </div>
+
       <div class="cv-actions">
-        {/* Unicode output is already readable Hindi: one button, nothing to disambiguate. */}
-        <div data-role="copies-unicode" class="cv-secondary">
-          <button type="button" data-role="copy-unicode-only" class="btn btn-primary">
-            <span data-label>Copy text</span>
+        <div class="cv-secondary">
+          <button type="button" data-role="copy" class="btn btn-primary">
+            <span data-label>Copy Hindi</span>
           </button>
-          <button type="button" data-role="docx-unicode" class="btn btn-ghost">
-            Download .docx
-          </button>
+          <button type="button" data-role="docx" class="btn btn-ghost">Download .docx</button>
         </div>
-
-        {/*
-          Legacy output is not one copyable string — the box reads as Hindi only
-          because the Kruti Dev font is drawing ASCII. Both are generated and
-          labelled rather than left to whichever the user assumes.
-        */}
-        <div data-role="copies-legacy" hidden>
-          <div class="cv-copies">
-            <div class="cv-copy">
-              <button type="button" data-role="copy-raw" class="btn btn-primary">
-                <span data-label>Copy {legacyCodeName} code</span>
-              </button>
-              <span class="cv-sub">For MS Word / forms</span>
-            </div>
-            <div class="cv-copy">
-              <button type="button" data-role="copy-unicode" class="btn btn-outline">
-                <span data-label>Copy as Hindi (Unicode)</span>
-              </button>
-              <span class="cv-sub">For WhatsApp / web</span>
-            </div>
-          </div>
-          <div class="cv-secondary mt-3">
-            <button
-              type="button"
-              data-role="docx"
-              class="btn btn-ghost"
-              title={`Word file with the ${legacyFaceName} font already applied`}
-            >
-              Download .docx
-            </button>
-          </div>
-        </div>
-
         <span data-role="status" role="status" aria-live="polite" class="sr-only"></span>
       </div>
+
+      <p class="px-4 pb-4 text-sm text-body">
+        Need Kruti Dev? Use the
+        <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev converter</a>.
+      </p>
     </div>
   </div>
+
+  {/* --------------------------- Fallback note --------------------------- */}
+  {/*
+    Only visible when Google could not be reached for at least one word, and
+    the built-in engine spelled it. Not an error: the page is still working.
+  */}
+  <p data-role="offline-note" hidden class="cv-strip bg-inset text-xs leading-relaxed text-mute">
+    <span class="font-medium text-body">Offline spelling.</span>
+    Google could not be reached, so some words come from the built-in dictionary and
+    rules. It still works - rare words are just likelier to need a correction.
+  </p>
 
   {/* ------------------------- Spelling tips ------------------------- */}
   <div class="cv-strip bg-inset">
@@ -214,16 +162,22 @@ const TIPS = {
               </span>
             </span>
           ))}
+          <span class="whitespace-nowrap">
+            <code class="text-xs">|</code>
+            <span aria-hidden="true" class="mx-1 text-mute">=</span>
+            <span lang="hi" class="text-ink">।</span>
+          </span>
+          <span class="whitespace-nowrap">
+            <code class="text-xs">`Google`</code>
+            <span aria-hidden="true" class="mx-1 text-mute">=</span>
+            <span class="text-ink">Google</span>
+          </span>
         </p>
       ))
     }
   </div>
 
   {/* --------------------------- Typing mode --------------------------- */}
-  {/*
-    A setting with a caveat attached, so it lives in the settings strip beside
-    its explanation rather than as a third chip in a panel header.
-  */}
   <div class="cv-strip bg-surface">
     <div class="flex flex-wrap items-start gap-x-4 gap-y-2">
       <div data-role="mode" role="group" aria-labelledby="tl-mode" class="cv-seg">
@@ -249,42 +203,74 @@ const TIPS = {
 
   {/* --------------------------- Honesty strip --------------------------- */}
   <p class="cv-strip bg-surface text-sm leading-relaxed text-body">
-    <span class="font-medium text-ink">Transliteration is phonetic</span> — if a word
-    looks wrong, try a different spelling or edit the output.
+    <span class="font-medium text-ink">Each word is spelled by Google's Hindi input service</span>
+    as you type, which is what gets <code>thela</code> to <span lang="hi">ठेला</span>
+    rather than <span lang="hi">थेला</span>. Only letters are transliterated: numbers,
+    punctuation and symbols stay exactly as typed. If Google cannot be reached, the
+    built-in dictionary takes over automatically.
   </p>
 
   <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
-    <span class="font-medium text-body">This one guesses, and the converter does not.</span>
+    <span class="font-medium text-body">Where your text goes.</span>
     English spelling does not record whether an <code>a</code> is
-    <span lang="hi">अ</span> or <span lang="hi">आ</span>, so common words are looked
-    up and the rest are worked out from rules. A rare word may need respelling —
-    write <code>bhaarat</code> if <code>bharat</code> comes out wrong, or switch
-    Typing to Exact. Nothing you type is uploaded.
+    <span lang="hi">अ</span> or <span lang="hi">आ</span>, nor whether a <code>d</code>
+    is <span lang="hi">द</span> or <span lang="hi">ड़</span>. Resolving that needs a
+    language model, so in <strong>Hinglish</strong> mode each word you type is sent to
+    Google's public input-tools service to be spelled. Numbers, punctuation, web
+    addresses and email addresses are never sent.
+    <strong>Exact (ITRANS)</strong> never touches the network - it is precise by
+    construction, so it runs entirely in your browser. If you would rather nothing
+    left the page, use that mode.
   </p>
 </div>
 
 <script>
-  /** Roman input is short and the engine is cheap, so this can sit lower than
-   *  the converter's 90ms and still never run mid-keystroke. */
+  import type { Typed } from '../lib/romanTyping.js';
+
+  /** The local engine is cheap, so it runs between keystrokes. */
   const DEBOUNCE_MS = 80;
+  /** Google waits for a pause between words, since it costs a request. */
+  const GOOGLE_DEBOUNCE_MS = 220;
 
   // --------------------------------------------------------------------------
-  // The engine is loaded on demand, not with the page.
-  //
-  // Sanscript carries scheme tables for 82 scripts and we use two of them, which
-  // makes it ~33 KB gzipped — several times the weight of everything else on
-  // this site. It also cannot possibly be needed before someone types. So it is
-  // split out and fetched when the browser is idle, or on the first keystroke if
-  // that comes first. First paint costs nothing, and by the time anyone has
-  // typed a word it is already there.
-  //
-  // Both engines load together. They are separate modules and stay separate —
-  // this is only a loading concern, not a merge.
+  // The engines load on demand, not with the page: Sanscript alone is ~33 KB
+  // gzipped and cannot be needed before someone types.
   // --------------------------------------------------------------------------
   type Engine = {
     romanToUnicode: typeof import('../lib/translit.js')['romanToUnicode'];
-    convert: typeof import('../lib/fontMaps.js')['convert'];
+    googleSuggestions: typeof import('../lib/googleTranslit.js')['googleSuggestions'];
+    isAvailable: typeof import('../lib/googleTranslit.js')['isAvailable'];
+    typing: typeof import('../lib/romanTyping.js');
   };
+  type English = ReturnType<typeof import('../lib/englishWords.js')['makeEnglish']>;
+
+  /** Where the "English words" choice is remembered. */
+  const ENGLISH_PREF_KEY = 'mkd-typing-english-words';
+
+  // --------------------------------------------------------------------------
+  // The English word list (~190 KB gzipped) is fetched after the page is idle,
+  // never with it. Until it arrives every word is treated as Hinglish, exactly
+  // as before; when it lands the text is re-rendered once.
+  // --------------------------------------------------------------------------
+  let english: English | null = null;
+  let englishLoading: Promise<English | null> | null = null;
+
+  function loadEnglish(): Promise<English | null> {
+    englishLoading ??= Promise.all([
+      fetch('/data/english-words.json').then((r) => {
+        if (!r.ok) throw new Error(`english-words.json: HTTP ${r.status}`);
+        return r.json();
+      }),
+      import('../lib/englishWords.js'),
+    ])
+      .then(([data, mod]) => (english = mod.makeEnglish(data.words)))
+      .catch((err) => {
+        // Not fatal: the page simply keeps treating every word as Hinglish.
+        console.error(err);
+        return null;
+      });
+    return englishLoading;
+  }
 
   let engine: Engine | null = null;
   let loading: Promise<Engine> | null = null;
@@ -292,9 +278,15 @@ const TIPS = {
   function loadEngine(): Promise<Engine> {
     loading ??= Promise.all([
       import('../lib/translit.js'),
-      import('../lib/fontMaps.js'),
-    ]).then(([t, f]) => {
-      engine = { romanToUnicode: t.romanToUnicode, convert: f.convert };
+      import('../lib/googleTranslit.js'),
+      import('../lib/romanTyping.js'),
+    ]).then(([t, g, typing]) => {
+      engine = {
+        romanToUnicode: t.romanToUnicode,
+        googleSuggestions: g.googleSuggestions,
+        isAvailable: g.isAvailable,
+        typing,
+      };
       return engine;
     });
     return loading;
@@ -303,8 +295,6 @@ const TIPS = {
   const root = document.querySelector<HTMLElement>('[data-translit]');
   if (root) {
     setup(root);
-    // Warm it during idle time so the first keystroke is never the one that
-    // waits for a network round trip.
     const idle = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 200));
     idle(() => void loadEngine());
   }
@@ -317,21 +307,16 @@ const TIPS = {
     const output = q<HTMLTextAreaElement>('output');
     const countIn = q('count-in');
     const countOut = q('count-out');
-    const outLabel = q('out-label');
     const status = q('status');
-    const viewGroup = q('view');
     const modeHint = q('mode-hint');
-    const copiesUnicode = q('copies-unicode');
-    const copiesLegacy = q('copies-legacy');
+    const offlineNote = q('offline-note');
+    const suggest = q('suggest');
+    const suggestRoman = q('suggest-roman');
+    const suggestList = q('suggest-list');
 
-    // Rendered onto the root from the font record, so no font name is spelled
-    // out twice. The script only ever repeats what the markup already says.
-    const legacyKey = root.dataset.legacyKey!;
-    const legacyLabel = root.dataset.legacyLabel!;
-    const legacyFace = root.dataset.legacyFace!;
-
-    let format = 'unicode';
     let mode: 'hinglish' | 'itrans' = 'hinglish';
+    let keepEnglish = false;
+    const englishGroup = q('english');
 
     let flash: ReturnType<typeof setTimeout> | undefined;
     function say(msg: string) {
@@ -341,122 +326,168 @@ const TIPS = {
     }
 
     // ----------------------------------------------------------------------
-    // Conversion. Two steps, always in this order, never merged: Roman becomes
-    // Unicode, and only then does Unicode become a legacy font. The Unicode is
-    // kept because both copy buttons need it and re-deriving it from the legacy
-    // output would be a lossy round trip for no reason.
+    // Two passes over the same input:
+    //   1. LOCAL  - every word from the built-in engine, instantly.
+    //   2. GOOGLE - every word from Google (first candidate), replacing pass 1;
+    //               any word Google fails on keeps its local spelling.
+    // A dead network therefore costs the better spelling, never a blank box.
     // ----------------------------------------------------------------------
-    let unicodeText = '';
-    // The exact string this code last wrote into the output box. Anything else
-    // in there is the user's own edit, which the copy buttons must respect.
-    let lastWritten = '';
-    // Monotonic, so a slow first run that had to wait for the engine can never
-    // overwrite the result of a later keystroke.
+
+    /** What is on screen, with each word's span and candidates. */
+    let current: Typed = { text: '', words: [], fellBack: false };
+    /** Words the user picked from the list, keyed by position + spelling. */
+    const picks = new Map<string, string>();
     let seq = 0;
+    let handEdited = false;
+    let inFlight: AbortController | null = null;
 
-    const outputWasEdited = () => output.value !== lastWritten;
+    const fallback = (e: Engine) => (w: string) => e.romanToUnicode(w, { mode: 'hinglish' });
 
-    async function convertNow() {
-      const run = ++seq;
+    function publish(typed: Typed, run: number) {
+      if (run !== seq) return;
+      current = typed;
+      if (output.value !== typed.text) output.value = typed.text;
+      countOut.textContent = String(typed.text.length);
+      hideSuggestions();
+    }
+
+    async function renderLocal(run: number) {
       const e = engine ?? (await loadEngine());
       if (run !== seq) return;
-
-      // Read AFTER the await: with the engine still loading the user may have
-      // typed several more characters, and the box is the source of truth.
-      const src = input.value;
       try {
-        unicodeText = e.romanToUnicode(src, { mode });
+        const typed =
+          mode === 'itrans'
+            ? e.typing.typeItrans(input.value, (s) => e.romanToUnicode(s, { mode: 'itrans' }))
+            : e.typing.typeHindiLocal(input.value, {
+                fallback: fallback(e),
+                picks,
+                english,
+                keepEnglish,
+              });
+        publish(typed, run);
       } catch (err) {
         console.error(err);
-        unicodeText = '';
         say('Conversion failed');
       }
-
-      const result =
-        format === legacyKey ? e.convert(unicodeText, 'unicode', legacyKey) : unicodeText;
-
-      if (output.value !== result) output.value = result;
-      lastWritten = result;
-      countOut.textContent = String(result.length);
     }
 
-    // A hand edit keeps the count honest and nothing else. It deliberately does
-    // NOT re-run the engine: converting the user's correction back into Roman
-    // and forward again would simply undo it.
+    async function renderGoogle(run: number) {
+      if (mode !== 'hinglish' || !/[A-Za-z]/.test(input.value)) {
+        offlineNote.hidden = true;
+        return;
+      }
+      const e = engine ?? (await loadEngine());
+      if (run !== seq) return;
+      // Breaker open after repeated failures: the local pass IS the answer.
+      if (!e.isAvailable()) {
+        offlineNote.hidden = false;
+        return;
+      }
+
+      inFlight?.abort();
+      const ctrl = new AbortController();
+      inFlight = ctrl;
+      try {
+        const typed = await e.typing.typeHindi(input.value, {
+          lookup: (w) => e.googleSuggestions(w, { signal: ctrl.signal }),
+          fallback: fallback(e),
+          picks,
+          english,
+          keepEnglish,
+        });
+        if (run !== seq) return;
+        // A correction typed into the output while this was in flight wins.
+        if (handEdited) return;
+        publish(typed, run);
+        offlineNote.hidden = !typed.fellBack;
+      } catch (err) {
+        if ((err as Error)?.name !== 'AbortError') console.error(err);
+      } finally {
+        if (inFlight === ctrl) inFlight = null;
+      }
+    }
+
     output.addEventListener('input', () => {
+      handEdited = true;
       countOut.textContent = String(output.value.length);
+      hideSuggestions();
     });
 
-    /**
-     * The Unicode form of what is on screen right now.
-     *
-     * Untouched, that is the value the engine produced. Once the box has been
-     * edited by hand it has to be derived back from the box, or "Copy as Hindi"
-     * would quietly hand over the version the user had just corrected.
-     */
-    function currentUnicode() {
-      if (!outputWasEdited()) return unicodeText;
-      if (format !== legacyKey) return output.value;
-      return engine ? engine.convert(output.value, legacyKey, 'unicode') : output.value;
-    }
+    let pendingLocal: ReturnType<typeof setTimeout> | undefined;
+    let pendingGoogle: ReturnType<typeof setTimeout> | undefined;
 
-    let pending: ReturnType<typeof setTimeout> | undefined;
     function tick() {
       countIn.textContent = String(input.value.length);
-      clearTimeout(pending);
-      pending = setTimeout(convertNow, DEBOUNCE_MS);
+      handEdited = false;
+      const run = ++seq;
+      clearTimeout(pendingLocal);
+      clearTimeout(pendingGoogle);
+      pendingLocal = setTimeout(() => void renderLocal(run), DEBOUNCE_MS);
+      pendingGoogle = setTimeout(() => void renderGoogle(run), GOOGLE_DEBOUNCE_MS);
     }
-    function flush() {
-      clearTimeout(pending);
-      return convertNow();
+
+    /** Everything settled now - for copy and download. */
+    async function flush() {
+      clearTimeout(pendingLocal);
+      clearTimeout(pendingGoogle);
+      const run = ++seq;
+      inFlight?.abort();
+      await renderLocal(run);
+      await renderGoogle(run);
     }
 
     input.addEventListener('input', tick);
 
     // ----------------------------------------------------------------------
-    // Output format. Swaps the engine's second step, the panel label, the copy
-    // buttons and whether the visual Preview/Raw toggle is offered at all.
+    // Tap a word -> its other suggestions.
     // ----------------------------------------------------------------------
-    function setFormat(next: string) {
-      format = next;
-      root.dataset.format = next;
+    function hideSuggestions() {
+      suggest.hidden = true;
+      suggestList.textContent = '';
+    }
 
-      const legacy = next === legacyKey;
-      outLabel.textContent = legacy ? legacyLabel : 'Hindi (Unicode)';
-      copiesUnicode.hidden = legacy;
-      copiesLegacy.hidden = !legacy;
-      viewGroup.hidden = !legacy;
-      // Devanagari needs its leading; raw Kruti keys do not and look cramped
-      // at the larger size the Hindi output uses.
-      output.classList.toggle('text-lg', !legacy);
-      output.classList.toggle('text-base', legacy);
-      output.lang = legacy ? '' : 'hi';
+    function showSuggestionsAtCaret() {
+      // Offsets are only valid for text this code wrote. After a hand edit the
+      // spans no longer line up, so offer nothing rather than the wrong word.
+      if (!engine || output.value !== current.text) return hideSuggestions();
+      if (output.selectionStart !== output.selectionEnd) return hideSuggestions();
+      const k = engine.typing.wordAt(current, output.selectionStart);
+      const word = current.words[k];
+      if (!word || word.suggestions.length < 2) return hideSuggestions();
 
-      for (const b of root.querySelectorAll<HTMLButtonElement>('[data-role="format"] button')) {
-        b.setAttribute('aria-pressed', String(b.dataset.format === next));
+      suggestRoman.textContent = word.roman;
+      suggestList.textContent = '';
+      const shown = output.value.slice(word.start, word.end);
+      for (const s of word.suggestions) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-outline';
+        b.textContent = s;
+        b.setAttribute('aria-pressed', String(s === shown));
+        b.addEventListener('click', () => choose(k, s));
+        suggestList.append(b);
       }
-      // Back to Preview whenever the output becomes legacy again, so nobody is
-      // left staring at ASCII they did not ask for.
-      if (legacy) setView('preview');
-      void flush();
+      suggest.hidden = false;
     }
 
-    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-role="format"] button')) {
-      b.addEventListener('click', () => setFormat(b.dataset.format!));
+    function choose(k: number, s: string) {
+      if (!engine) return;
+      const word = current.words[k];
+      picks.set(engine.typing.pickKey(word.index, word.roman), s);
+      current = engine.typing.replaceWord(current, k, s);
+      output.value = current.text;
+      countOut.textContent = String(current.text.length);
+      const end = current.words[k].end;
+      output.focus();
+      output.setSelectionRange(end, end);
+      hideSuggestions();
+      say(`Changed to ${s}`);
     }
 
-    // ----------------------------------------------------------------------
-    // Preview / Raw. One attribute, read by CSS. Never reaches the clipboard.
-    // ----------------------------------------------------------------------
-    function setView(next: string) {
-      root.dataset.view = next;
-      for (const b of viewGroup.querySelectorAll<HTMLButtonElement>('button')) {
-        b.setAttribute('aria-pressed', String(b.dataset.view === next));
-      }
-    }
-    for (const b of viewGroup.querySelectorAll<HTMLButtonElement>('button')) {
-      b.addEventListener('click', () => setView(b.dataset.view!));
-    }
+    output.addEventListener('click', showSuggestionsAtCaret);
+    output.addEventListener('keyup', (e) => {
+      if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End') showSuggestionsAtCaret();
+    });
 
     // ----------------------------------------------------------------------
     // Typing mode.
@@ -465,33 +496,63 @@ const TIPS = {
       b.addEventListener('click', () => {
         mode = b.dataset.mode as 'hinglish' | 'itrans';
         root.dataset.mode = mode;
-        for (const other of root.querySelectorAll<HTMLButtonElement>(
-          '[data-role="mode"] button',
-        )) {
+        for (const other of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
           other.setAttribute('aria-pressed', String(other === b));
         }
-        // Rendered onto the button server-side, so the hints do not have to be
-        // imported into the client bundle just to be read back out.
         modeHint.textContent = b.dataset.hint ?? '';
-        showTipsFor(mode);
+        // ITRANS spells every letter exactly; there is no "English word" to detect.
+        englishGroup.hidden = mode !== 'hinglish';
+        for (const p of root.querySelectorAll<HTMLElement>('[data-tips-mode]')) {
+          p.hidden = p.dataset.tipsMode !== mode;
+        }
+        picks.clear();
         void flush();
       });
     }
 
-    /**
-     * The two notations spell the same letters differently — a bare consonant
-     * carries a halant in ITRANS and does not in Hinglish — so the tips have to
-     * follow the mode. Both lists are already in the DOM, built by running the
-     * engine at build time, so this is a visibility flip and nothing more.
-     */
-    function showTipsFor(active: string) {
-      for (const p of root.querySelectorAll<HTMLElement>('[data-tips-mode]')) {
-        p.hidden = p.dataset.tipsMode !== active;
+    // ----------------------------------------------------------------------
+    // English words: Hindi letters (nice -> नाइस) or Keep English (nice).
+    // Remembered per browser; storage can be blocked, so every access is
+    // guarded and the default simply applies when it is.
+    // ----------------------------------------------------------------------
+    function setEnglishMode(keep: boolean, save: boolean) {
+      keepEnglish = keep;
+      for (const b of englishGroup.querySelectorAll<HTMLButtonElement>('button')) {
+        b.setAttribute('aria-pressed', String((b.dataset.english === 'keep') === keep));
+      }
+      if (save) {
+        try {
+          localStorage.setItem(ENGLISH_PREF_KEY, keep ? 'keep' : 'hindi');
+        } catch {
+          // Private mode or blocked storage: the choice just is not remembered.
+        }
       }
     }
+    try {
+      setEnglishMode(localStorage.getItem(ENGLISH_PREF_KEY) === 'keep', false);
+    } catch {
+      setEnglishMode(false, false);
+    }
+    for (const b of englishGroup.querySelectorAll<HTMLButtonElement>('button')) {
+      b.addEventListener('click', () => {
+        setEnglishMode(b.dataset.english === 'keep', true);
+        // Picks were made against the other spelling of these words.
+        picks.clear();
+        void flush();
+      });
+    }
+
+    // When the word list lands, redo the text once - unless the user has
+    // already started correcting the output by hand.
+    const idleEnglish = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 300));
+    idleEnglish(() => {
+      void loadEnglish().then((en) => {
+        if (en && !handEdited && input.value && mode === 'hinglish') void flush();
+      });
+    });
 
     // ----------------------------------------------------------------------
-    // Copy / download.
+    // Copy / download: whatever is in the box, including a hand correction.
     // ----------------------------------------------------------------------
     async function writeClipboard(text: string) {
       try {
@@ -511,76 +572,64 @@ const TIPS = {
       }
     }
 
-    function wireCopy(role: string, text: () => string) {
-      const btn = root.querySelector<HTMLButtonElement>(`[data-role="${role}"]`);
-      if (!btn) return;
-      const label = btn.querySelector<HTMLElement>('[data-label]')!;
-      const original = label.textContent!;
-      let reset: ReturnType<typeof setTimeout> | undefined;
+    /** Settle pending passes, unless the user has edited or picked in the box. */
+    const settle = () => (handEdited || output.value !== current.text ? Promise.resolve() : flush());
 
-      btn.addEventListener('click', async () => {
-        await flush();
-        const value = text();
-        if (!value) return say('Nothing to copy');
-        await writeClipboard(value);
-        label.textContent = 'Copied!';
-        btn.dataset.copied = 'true';
-        say('Copied to clipboard');
-        clearTimeout(reset);
-        reset = setTimeout(() => {
-          label.textContent = original;
-          delete btn.dataset.copied;
-        }, 1600);
-      });
-    }
+    const copyBtn = q<HTMLButtonElement>('copy');
+    const copyLabel = copyBtn.querySelector<HTMLElement>('[data-label]')!;
+    let reset: ReturnType<typeof setTimeout> | undefined;
+    copyBtn.addEventListener('click', async () => {
+      await settle();
+      const value = output.value;
+      if (!value) return say('Nothing to copy');
+      await writeClipboard(value);
+      copyLabel.textContent = 'Copied!';
+      copyBtn.dataset.copied = 'true';
+      say('Copied to clipboard');
+      clearTimeout(reset);
+      reset = setTimeout(() => {
+        copyLabel.textContent = 'Copy Hindi';
+        delete copyBtn.dataset.copied;
+      }, 1600);
+    });
 
-    // Always the raw string in the box, and always the Unicode, regardless of
-    // which one the preview happens to be drawing — and in both cases whatever
-    // is in the box now, including a hand correction.
-    wireCopy('copy-unicode-only', () => output.value);
-    wireCopy('copy-raw', () => output.value);
-    wireCopy('copy-unicode', currentUnicode);
+    q<HTMLButtonElement>('docx').addEventListener('click', async (e) => {
+      await settle();
+      const body = output.value;
+      if (!body) return say('Nothing to download');
+      const btn = e.currentTarget as HTMLButtonElement;
+      btn.disabled = true;
+      try {
+        const { downloadDocx } = await import('../lib/docx.js');
+        downloadDocx(body, { fontName: 'Mangal', fileName: 'mykrutidev-typing.docx' });
+        say('Downloaded');
+      } catch (err) {
+        console.error(err);
+        say('Download failed');
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
-    function wireDocx(role: string, text: () => string, fontName: string, suffix: string) {
-      root.querySelector<HTMLButtonElement>(`[data-role="${role}"]`)
-        ?.addEventListener('click', async (e) => {
-          await flush();
-          const body = text();
-          if (!body) return say('Nothing to download');
-          const btn = e.currentTarget as HTMLButtonElement;
-          btn.disabled = true;
-          try {
-            const { downloadDocx } = await import('../lib/docx.js');
-            downloadDocx(body, { fontName, fileName: `mykrutidev-typing${suffix}.docx` });
-            say('Downloaded');
-          } catch (err) {
-            console.error(err);
-            say('Download failed');
-          } finally {
-            btn.disabled = false;
-          }
-        });
-    }
-
-    wireDocx('docx-unicode', currentUnicode, 'Mangal', '');
-    wireDocx('docx', () => output.value, legacyFace, `-${legacyKey}`);
-
-    // ----------------------------------------------------------------------
+    // Both of these REPLACE the input, so earlier picks no longer apply.
     q<HTMLButtonElement>('clear').addEventListener('click', () => {
       input.value = '';
-      void flush();
+      picks.clear();
+      handEdited = false;
       countIn.textContent = '0';
+      void flush();
       input.focus();
     });
 
     q<HTMLButtonElement>('sample').addEventListener('click', (e) => {
       input.value = (e.currentTarget as HTMLElement).dataset.sample || '';
+      picks.clear();
+      handEdited = false;
       countIn.textContent = String(input.value.length);
       void flush();
       input.focus();
     });
 
     tick();
-    void flush();
   }
 </script>

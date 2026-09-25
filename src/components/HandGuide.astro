@@ -1,0 +1,86 @@
+---
+import {
+  VIEWBOX,
+  PALM,
+  FINGER_SHAPES,
+  THUMB,
+  HANDS,
+} from '../lib/hands.js';
+
+/**
+ * Two hands, with the finger that presses the next key coloured in.
+ *
+ * Markup only - TypingTutor.astro drives it through `data-finger`, the same
+ * attribute the keyboard uses, so one lookup lights both the cap and the
+ * finger and they can never point at different things.
+ *
+ * The right hand is the left hand mirrored, which is both true of hands and
+ * the reason the geometry lives in one table in src/lib/hands.js.
+ */
+
+const thumbTransform = `rotate(${THUMB.rotate} ${THUMB.originX} ${THUMB.originY})`;
+---
+
+<div class="hands" data-hands>
+  {
+    HANDS.map((hand) => {
+      const side = hand.id === 'left' ? 'l' : 'r';
+      return (
+        <figure class="hand-fig">
+          <svg
+            class="hand"
+            viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
+            role="img"
+            aria-label={hand.label}
+          >
+            {/* Mirrored as a whole, so the left hand's pinky ends up on the
+                outside of the right hand too. */}
+            <g
+              transform={
+                hand.id === 'right'
+                  ? `translate(${VIEWBOX.width},0) scale(-1,1)`
+                  : undefined
+              }
+            >
+              <rect
+                class="hand-palm"
+                x={PALM.x}
+                y={PALM.y}
+                width={PALM.width}
+                height={PALM.height}
+                rx={PALM.rx}
+              />
+
+              {FINGER_SHAPES.map((f) => (
+                <rect
+                  class="hand-finger"
+                  data-finger={`${side}-${f.name}`}
+                  x={f.x}
+                  y={f.y}
+                  width={f.width}
+                  height={f.height}
+                  rx={f.rx}
+                />
+              ))}
+
+              {/* Both thumbs answer to the same id: space is pressed by
+                  whichever one the typist favours, and telling someone which
+                  thumb to use would be inventing a rule. */}
+              <rect
+                class="hand-finger"
+                data-finger="thumb"
+                x={THUMB.x}
+                y={THUMB.y}
+                width={THUMB.width}
+                height={THUMB.height}
+                rx={THUMB.rx}
+                transform={thumbTransform}
+              />
+            </g>
+          </svg>
+          <figcaption class="hand-cap">{hand.label}</figcaption>
+        </figure>
+      );
+    })
+  }
+</div>

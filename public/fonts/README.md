@@ -21,7 +21,7 @@ DESIGN.md.
 | `KRDEV016.woff`      | Kruti Dev 016   | WOFF              | nothing, kept for later |
 | `KRDEV020.woff`      | Kruti Dev 020   | WOFF              | nothing, kept for later |
 | `KRDEV055.woff`      | Kruti Dev 055   | WOFF              | nothing, kept for later |
-| `chanakya.woff`      | Chanakya        | **TrueType**      | nothing yet, no verified map |
+| `Walkman-Chanakya.woff` | Chanakya     | **TrueType**      | registered for preview; pages stay off, map does not match this font |
 | `preeti.woff`        | Preeti          | **TrueType**      | nothing yet, no verified map |
 
 The numbered Kruti Dev variants used to fill a dropdown in the output box. That
@@ -45,7 +45,7 @@ Two things to know about that table:
    together. Static hosts are case-sensitive even though Windows is not, so
    `krdev010.woff` would 404 in production while working locally.
 
-2. **`chanakya.woff` and `preeti.woff` are not WOFF.** Their first four bytes are
+2. **`Walkman-Chanakya.woff` and `preeti.woff` are not WOFF.** Their first four bytes are
    `00 01 00 00`, which is raw TrueType. They are declared
    `format('truetype')` for that reason. A `format()` hint that disagrees with
    the file's actual contents makes the browser download it and then silently

@@ -40,14 +40,14 @@
     { "k": "/keZ", "u": "धर्म", "why": "reph after a two-char full consonant" },
     { "k": "dk;Z", "u": "कार्य", "why": "reph over ya, following aa-matra" },
     { "k": "loZ", "u": "सर्व", "why": "reph over va" },
-    { "k": "dhfrZ", "u": "कीर्ति", "why": "reph AND i-matra interacting — the hard one" },
+    { "k": "dhfrZ", "u": "कीर्ति", "why": "reph AND i-matra interacting - the hard one" },
     { "k": "iwoZ", "u": "पूर्व", "why": "uu-matra then reph" }
   ],
 
   "rakar_and_conjuncts": [
     { "k": "izdkj", "u": "प्रकार", "why": "rakar hangs under pa" },
     { "k": "Øe", "u": "क्रम", "why": "dedicated kra glyph" },
-    { "k": "cz", "u": "ब्र", "why": "ba + rakar — the canonical spelling" },
+    { "k": "cz", "u": "ब्र", "why": "ba + rakar - the canonical spelling" },
     { "k": "Cz", "u": "ब्र", "why": "half-ba + rakar collapses the double halant", "rt": false },
     { "k": "cPpk", "u": "बच्चा", "why": "half-cha + cha" },
     { "k": "lR;", "u": "सत्य", "why": "half-ta + ya" },
@@ -73,7 +73,7 @@
     {
       "k": "jk\"Vªh;",
       "u": "राष्ट्रीय",
-      "why": "`ª` is the rakar used under stemless ta/tha/da/dha — was leaking a raw Latin-1 byte"
+      "why": "`ª` is the rakar used under stemless ta/tha/da/dha - was leaking a raw Latin-1 byte"
     },
     { "k": "jk\"Vªifr", "u": "राष्ट्रपति", "why": "same cluster mid-word" },
     { "k": "MªkbZo", "u": "ड्राईव", "why": "rakar under da" },
@@ -149,7 +149,7 @@
     {
       "k": "lekIrAA",
       "u": "समाप्त॥",
-      "why": "double danda beats single (longest match). Written attached to the word, as it always is in practice — a bare 'AA' token is indistinguishable from an acronym"
+      "why": "double danda beats single (longest match). Written attached to the word, as it always is in practice - a bare 'AA' token is indistinguishable from an acronym"
     },
     { "k": "¼d½", "u": "(क)", "why": "brackets" },
     {

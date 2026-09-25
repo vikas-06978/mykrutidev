@@ -1,0 +1,1402 @@
+---
+import { PASSAGES, DURATIONS } from '../lib/passages.js';
+import { LEVELS, levelText } from '../lib/lessons.js';
+import { buildVerifiedUnits } from '../lib/tutor.build.js';
+import { FINGERS } from '../lib/remington.js';
+import RemingtonKeyboard from './RemingtonKeyboard.astro';
+import HandGuide from './HandGuide.astro';
+
+/**
+ * The Hindi typing tutor.
+ *
+ * ---------------------------------------------------------------------------
+ * WHAT IS SHOWN AND WHAT IS TYPED ARE DIFFERENT STRINGS.
+ *
+ * The passage is Unicode Devanagari, so it renders on any machine with no font
+ * to install. The keystrokes are Remington: English keys that a legacy font
+ * draws as Hindi. Holding the two together is the whole job, and it is done by
+ * UNITS - one akshara paired with the exact keys that type it - built at BUILD
+ * time by the verified converter. See src/lib/tutor.js.
+ *
+ * Because of that, the conversion engine never reaches the browser. The client
+ * receives finished units as JSON and imports only arithmetic.
+ * ---------------------------------------------------------------------------
+ */
+
+// No legacy preview font anywhere on this page, deliberately: the passage is
+// Unicode Devanagari so it renders on any machine with nothing installed, and
+// the input is invisible. The Kruti Dev face is a converter-page concern.
+const LEGACY = 'kruti-dev';
+
+// Every passage, pre-split into (akshara, keystrokes). buildVerifiedUnits
+// throws at build time if a passage does not align, or if it needs a key that
+// is not on the keyboard this page draws - so neither can reach a visitor.
+const passages = PASSAGES.map((p) => ({
+  id: p.id,
+  title: p.title,
+  units: buildVerifiedUnits(p.text, p.id),
+}));
+
+// The lesson ladder, converted the same way. A level whose drills reached past
+// the keyboard would fail the build here rather than on somebody's screen.
+const levels = LEVELS.map((l, i) => ({
+  id: l.id,
+  n: i + 1,
+  name: l.name,
+  title: l.title,
+  focus: l.focus,
+  threshold: l.threshold,
+  units: buildVerifiedUnits(levelText(l), l.id),
+}));
+
+// Named here rather than in the client bundle: nine short strings that would
+// otherwise be a second copy of the finger table.
+const fingerNames = Object.fromEntries(FINGERS.map((f) => [f.id, f.name]));
+---
+
+<div class="tt card" data-tutor data-state="idle" data-focused="false">
+  {/* ------------------------------ Settings ----------------------------- */}
+  <div class="cv-strip bg-inset">
+    <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+      <div data-role="mode" role="group" aria-labelledby="tt-mode" class="cv-seg">
+        <span id="tt-mode" class="cv-seg-label">Mode:</span>
+        <button type="button" data-mode="lesson" aria-pressed="true">Lessons</button>
+        <button type="button" data-mode="practice" aria-pressed="false">Practice test</button>
+      </div>
+
+      {/* Practice only: a lesson ends when the drill does, not on a clock. */}
+      <div
+        data-role="duration"
+        role="group"
+        aria-labelledby="tt-dur"
+        class="cv-seg"
+        hidden
+      >
+        <span id="tt-dur" class="cv-seg-label">Length:</span>
+        {
+          DURATIONS.map((d, i) => (
+            <button type="button" data-seconds={String(d.value)} aria-pressed={String(i === 0)}>
+              {d.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <p class="text-xs text-mute">
+        Remington layout, as used by CPCT, SSC and the court typing papers. The
+        clock starts when you press your first key.
+      </p>
+
+      {/*
+        Off by default and stays off until asked for. A page that starts making
+        noise is a page people close, and a tutor is used in offices and
+        libraries as often as at home.
+      */}
+      <label class="tt-sound">
+        <input type="checkbox" data-role="sound" class="size-4 accent-[var(--color-brick)]" />
+        <span>Key sounds</span>
+      </label>
+    </div>
+  </div>
+
+  {/* ------------------------------ Levels ------------------------------- */}
+  {/*
+    Rendered whole, server-side. The client only flips `data-state` on each
+    chip, so the ladder is visible - and crawlable - before any JavaScript runs
+    and with it turned off.
+  */}
+  <div data-role="levels-wrap" class="tt-levels-wrap">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <span class="cv-eyebrow">Lessons</span>
+      <button type="button" data-role="reset-progress" class="tt-reset">
+        Reset progress
+      </button>
+    </div>
+
+    <div data-role="levels" class="tt-levels" role="group" aria-label="Lessons">
+      {
+        levels.map((l, i) => (
+          <button
+            type="button"
+            class="tt-level"
+            data-level={l.id}
+            data-state={i === 0 ? 'current' : 'locked'}
+            aria-pressed={String(i === 0)}
+          >
+            <span class="tt-level-n">{l.n}</span>
+            <span class="tt-level-name">{l.name}</span>
+            <span class="tt-level-meta" data-role="level-meta">
+              {i === 0 ? 'Start here' : 'Locked'}
+            </span>
+          </button>
+        ))
+      }
+    </div>
+
+    <p data-role="level-focus" class="tt-level-focus"></p>
+  </div>
+
+  {/* ------------------------------- Stats ------------------------------- */}
+  <div class="tt-stats">
+    <div class="tt-stat" data-role="stat-time">
+      <span data-role="time" class="tt-stat-value">0:00</span>
+      {/* "Time left" while a clock is running down, "Time" while a lesson
+          counts up: a lesson ends when the drill does, not on a timer. */}
+      <span data-role="time-label" class="tt-stat-label">Time</span>
+    </div>
+    <div class="tt-stat">
+      <span data-role="wpm" class="tt-stat-value">0</span>
+      <span class="tt-stat-label">WPM</span>
+    </div>
+    <div class="tt-stat">
+      <span data-role="accuracy" class="tt-stat-value">100%</span>
+      <span class="tt-stat-label">Accuracy</span>
+    </div>
+    <div class="tt-stat">
+      <span data-role="errors" class="tt-stat-value">0</span>
+      <span class="tt-stat-label">Mistakes</span>
+    </div>
+  </div>
+
+  {/* ------------------------------ Passage ------------------------------ */}
+  {/*
+    How far through the passage you are, which the raw "155 / 480" count never
+    actually answered - on a two-hour test those are five-digit numbers and no
+    one is doing that division while typing. The bar is the answer at a glance
+    and the numbers stay underneath it for anyone who wants them.
+  */}
+  <div class="tt-progress">
+    <div class="tt-progress-head">
+      <span data-role="passage-title" class="cv-eyebrow">Practice passage</span>
+
+      {/*
+        Pause lives HERE, not down in the controls strip.
+
+        That strip sits below the keyboard and the hand guide, which on a phone
+        is most of a screen away from the passage - so the one control you need
+        WHILE typing was the one you had to go looking for. This band is already
+        in the eyeline: it is directly above the text you are reading and
+        directly below the clock the button acts on.
+
+        It appears only once the clock is running, so the row is just a label
+        and a count until there is something to pause.
+      */}
+      <button
+        type="button"
+        data-role="pause"
+        class="tt-pause"
+        title="Pause the clock (Escape)"
+        hidden
+      >
+        Pause
+      </button>
+    </div>
+
+    <div
+      class="tt-progress-track"
+      role="progressbar"
+      aria-labelledby="tt-progress-label"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-role="progress-track"
+    >
+      <span data-role="progress-fill" class="tt-progress-fill"></span>
+    </div>
+
+    <div class="tt-progress-foot">
+      <span id="tt-progress-label" data-role="progress-pct">0% complete</span>
+      <span class="tt-progress-rest">
+        <span data-role="progress" class="cv-count">0 / 0</span>
+        <span data-role="progress-left"></span>
+      </span>
+    </div>
+  </div>
+
+  <div class="tt-stage">
+    <div class="tt-passage" data-role="passage">
+      {/* Filled by the client: the passage is chosen at random per visit, so
+          rendering one here would give every visitor the same paragraph. */}
+      <p data-role="line" class="tt-line"></p>
+    </div>
+
+    {/*
+      The real input, invisible and exactly on top. A label and a genuine
+      textarea, so a tap opens the phone keyboard and a screen reader has
+      something to announce - only its ink is hidden, because the passage
+      underneath already draws the state.
+    */}
+    <label for="tt-capture" class="sr-only">Type the passage shown above</label>
+    <textarea
+      id="tt-capture"
+      data-role="capture"
+      class="tt-capture"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      aria-describedby="tt-prompt-text"></textarea>
+
+    <div class="tt-veil">
+      <span
+        data-role="veil-text"
+        class="rounded-(--radius-chrome) border border-hairline bg-surface px-4 py-2 text-sm font-medium text-ink"
+      >
+        Click here, then start typing
+      </span>
+    </div>
+  </div>
+
+  {/* ---------------------------- Next key ------------------------------- */}
+  <div class="tt-prompt">
+    <span class="tt-prompt-label">Press</span>
+    <span data-role="prompt-keys" class="tt-prompt-keys"></span>
+    <span data-role="prompt-deva" class="tt-prompt-deva" lang="hi"></span>
+    <span id="tt-prompt-text" data-role="prompt-finger" class="tt-prompt-finger"></span>
+  </div>
+
+  {/* ---------------------------- Keyboard ------------------------------- */}
+  <RemingtonKeyboard font={LEGACY} />
+
+  {/* ---------------------------- Hands ---------------------------------- */}
+  <div class="border-t border-hairline bg-inset">
+    <HandGuide />
+  </div>
+
+  {/* ---------------------------- Controls ------------------------------- */}
+  <div class="cv-strip">
+    <div class="cv-secondary">
+      {/*
+        Submit is the primary action once typing has started, because stopping
+        early and being told how you did is the thing a practising typist
+        actually wants at that moment. It is disabled until there is something
+        to score, so it can never hand back a result from nothing.
+      */}
+      <button type="button" data-role="submit" class="btn btn-primary" disabled>
+        Submit and see result
+      </button>
+      <button type="button" data-role="restart" class="btn btn-ghost">Restart</button>
+      <button type="button" data-role="new" class="btn btn-ghost">New passage</button>
+      <button type="button" data-role="next-level" class="btn btn-outline" hidden>
+        Next lesson
+      </button>
+    </div>
+  </div>
+
+  {/* ----------------------------- Result -------------------------------- */}
+  <div data-role="result" hidden class="tt-result" role="status">
+    <h3 class="text-xl" data-role="result-title">Test complete</h3>
+    <p class="mt-1 text-sm text-body" data-role="result-note"></p>
+
+    <div class="tt-result-grid">
+      <div class="tt-result-cell">
+        <span data-role="r-wpm" class="tt-stat-value">0</span>
+        <span class="tt-stat-label">Net WPM</span>
+      </div>
+      <div class="tt-result-cell">
+        <span data-role="r-gross" class="tt-stat-value">0</span>
+        <span class="tt-stat-label">Gross WPM</span>
+      </div>
+      <div class="tt-result-cell">
+        <span data-role="r-acc" class="tt-stat-value">0%</span>
+        <span class="tt-stat-label">Accuracy</span>
+      </div>
+      <div class="tt-result-cell">
+        <span data-role="r-err" class="tt-stat-value">0</span>
+        <span class="tt-stat-label">Mistakes</span>
+      </div>
+    </div>
+
+    <div data-role="missed-wrap" hidden class="mt-4">
+      <p class="text-xs font-semibold tracking-wide text-mute uppercase">Keys you missed most</p>
+      <div data-role="missed" class="kb-hints mt-2"></div>
+    </div>
+  </div>
+
+  <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
+    <span class="font-medium text-body">Nothing is uploaded and nothing is scored by us.</span>
+    The passage, the clock and your result stay in this browser tab. Your best speed
+    is remembered on this device only.
+  </p>
+</div>
+
+<script
+  type="application/json"
+  data-tutor-passages
+  set:html={JSON.stringify(passages)}
+/>
+<script type="application/json" data-tutor-levels set:html={JSON.stringify(levels)} />
+<script type="application/json" data-tutor-fingers set:html={JSON.stringify(fingerNames)} />
+
+<script>
+  import { clusterStates, formatClock } from '../lib/typing.js';
+  import {
+    unitsToKeys,
+    unitKeyRuns,
+    nextKey,
+    missedKeys,
+    summarise,
+  } from '../lib/tutor.js';
+  import { locate } from '../lib/remington.js';
+  import { planPassages, JOINER, DURATIONS } from '../lib/passages.js';
+
+  type Unit = { deva: string; keys: string };
+  type Passage = { id: string; title: string; units: Unit[] };
+  type Level = {
+    id: string;
+    n: number;
+    name: string;
+    title: string;
+    focus: string;
+    threshold: number;
+    units: Unit[];
+  };
+  type Mode = 'lesson' | 'practice';
+
+  /** Live stats tick. Fast enough to feel continuous, cheap enough to be free. */
+  const TICK_MS = 200;
+  /** How long a key cap stays flashed after a press. */
+  const FLASH_MS = 120;
+
+  /**
+   * How much of the passage is put in the DOM at once, and how close the caret
+   * may get to the end of what is rendered before more is added.
+   *
+   * ---------------------------------------------------------------------------
+   * WHY THE PASSAGE IS NOT RENDERED IN ONE GO
+   *
+   * Every akshara is its own <span>, which is what lets a matra stay attached
+   * to its consonant while the two are coloured separately. That is fine for a
+   * lesson drill of 200 aksharas and fine for a 15-minute test. A two-hour test
+   * queues ~36,000 keystrokes, which is ~24,000 spans - enough to cost a
+   * noticeable freeze before the first keystroke on the mid-range Android this
+   * site is mostly used from, and to hold memory nobody needs.
+   *
+   * So the passage is built a chunk at a time and extended as the caret
+   * approaches the end of what exists. Nothing else changes: `expected` and
+   * `runs` are always the whole test, because the score is over the whole test.
+   * Only the drawing is lazy.
+   *
+   * A chunk is far more than one screen, so extending never happens mid-glance,
+   * and the lookahead is wide enough that the work lands long before the caret
+   * could reach it.
+   * ---------------------------------------------------------------------------
+   */
+  const CHUNK_UNITS = 900;
+  const LOOKAHEAD_UNITS = 300;
+
+  const BEST_KEY = 'mykrutidev:best-wpm';
+  const PROGRESS_KEY = 'mykrutidev:tutor';
+  const SOUND_KEY = 'mykrutidev:tutor-sound';
+
+  const read = (sel: string) => {
+    const el = document.querySelector<HTMLElement>(sel);
+    try {
+      return el ? JSON.parse(el.textContent || 'null') : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const PASSAGES: Passage[] = read('[data-tutor-passages]') ?? [];
+  const LEVELS: Level[] = read('[data-tutor-levels]') ?? [];
+  const FINGER_NAMES: Record<string, string> = read('[data-tutor-fingers]') ?? {};
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-tutor]')) {
+    if (PASSAGES.length > 0 && LEVELS.length > 0) setup(root);
+  }
+
+  function setup(root: HTMLElement) {
+    const q = <T extends HTMLElement>(role: string) =>
+      root.querySelector<T>(`[data-role="${role}"]`)!;
+
+    const capture = q<HTMLTextAreaElement>('capture');
+    const passage = q<HTMLElement>('passage');
+    const lineEl = q<HTMLElement>('line');
+    const titleEl = q<HTMLElement>('passage-title');
+    const progressEl = q<HTMLElement>('progress');
+    const result = q<HTMLElement>('result');
+
+    const timeEl = q<HTMLElement>('time');
+    const statTime = q<HTMLElement>('stat-time');
+    const wpmEl = q<HTMLElement>('wpm');
+    const accEl = q<HTMLElement>('accuracy');
+    const errEl = q<HTMLElement>('errors');
+
+    const promptKeys = q<HTMLElement>('prompt-keys');
+    const promptDeva = q<HTMLElement>('prompt-deva');
+    const promptFinger = q<HTMLElement>('prompt-finger');
+
+    const board = root.querySelector<HTMLElement>('[data-keyboard]')!;
+    const caps = new Map<string, HTMLElement>();
+    const shiftCaps: HTMLElement[] = [];
+    for (const cap of board.querySelectorAll<HTMLElement>('.kbd-cap')) {
+      if (cap.dataset.cap !== undefined) caps.set(cap.dataset.cap, cap);
+      if (cap.dataset.mod === 'shift') shiftCaps.push(cap);
+    }
+
+    /**
+     * Finger shapes, grouped by id. `thumb` has two - one per hand - because
+     * either thumb presses space and naming one would be inventing a rule.
+     */
+    const fingerShapes = new Map<string, SVGElement[]>();
+    for (const shape of root.querySelectorAll<SVGElement>('[data-hands] [data-finger]')) {
+      const id = shape.dataset.finger!;
+      if (!fingerShapes.has(id)) fingerShapes.set(id, []);
+      fingerShapes.get(id)!.push(shape);
+    }
+
+    const progressTrack = q<HTMLElement>('progress-track');
+    const progressFill = q<HTMLElement>('progress-fill');
+    const progressPct = q<HTMLElement>('progress-pct');
+    const progressLeft = q<HTMLElement>('progress-left');
+    const veilText = q<HTMLElement>('veil-text');
+    const pauseBtn = q<HTMLButtonElement>('pause');
+
+    const timeLabel = q<HTMLElement>('time-label');
+    const levelsWrap = q<HTMLElement>('levels-wrap');
+    const levelFocus = q<HTMLElement>('level-focus');
+    const nextLevelBtn = q<HTMLButtonElement>('next-level');
+    const newBtn = q<HTMLButtonElement>('new');
+    const submitBtn = q<HTMLButtonElement>('submit');
+    const durationGroup = q<HTMLElement>('duration');
+
+    const levelChips = new Map<string, HTMLButtonElement>();
+    for (const chip of root.querySelectorAll<HTMLButtonElement>('[data-level]')) {
+      levelChips.set(chip.dataset.level!, chip);
+    }
+
+    let mode: Mode = 'lesson';
+    let levelId = LEVELS[0].id;
+    let seconds = DURATIONS[0].value;
+
+    /** The lesson: aksharas to read, keystrokes to press. */
+    let units: Unit[] = [];
+    let runs: string[] = [];
+    let expected = '';
+
+    /** One span per akshara, so a keystroke touches only what changed. */
+    let spans: HTMLElement[] = [];
+    let lastStates: string[] = [];
+    /** How many units are currently drawn, and their runs, sliced once. */
+    let rendered = 0;
+    let renderedRuns: string[] = [];
+
+    /**
+     * The clock is kept as SEGMENTS rather than a start time, because it can
+     * now be stopped. `accumulated` is every millisecond already counted and
+     * `segmentStart` is when the running stretch began; a pause closes the
+     * segment and a resume opens a new one. Storing a single startedAt and
+     * subtracting would hand back the time spent paused, which is the whole
+     * thing a pause button exists to prevent.
+     */
+    let accumulated = 0;
+    let segmentStart = 0;
+    let ticker: ReturnType<typeof setInterval> | undefined;
+    let running = false;
+    let paused = false;
+    let done = false;
+
+    // ----------------------------------------------------------------------
+    // localStorage, which may throw or lie
+    // ----------------------------------------------------------------------
+    function readBest(): number {
+      try {
+        const raw = localStorage.getItem(BEST_KEY);
+        const n = raw === null ? 0 : Number(JSON.parse(raw));
+        return Number.isFinite(n) && n >= 0 && n < 1000 ? n : 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    function writeBest(n: number) {
+      try {
+        localStorage.setItem(BEST_KEY, JSON.stringify(Math.round(n)));
+      } catch {
+        // Private window, blocked storage, full quota. The tutor still works.
+      }
+    }
+
+    type Progress = { done: string[]; best: Record<string, number> };
+
+    /**
+     * Lesson progress, validated on the way in.
+     *
+     * Anything could be under this key - an older shape of this feature, a
+     * different site on the same origin during development, or a person who
+     * edited it. Every field is checked against the levels that actually
+     * exist, so a stale id cannot unlock a level or crash the picker.
+     */
+    function readProgress(): Progress {
+      const empty: Progress = { done: [], best: {} };
+      try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        if (!raw) return empty;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return empty;
+
+        const ids = new Set(LEVELS.map((l) => l.id));
+        const done = Array.isArray(parsed.done)
+          ? [...new Set(parsed.done.filter((id: unknown) => typeof id === 'string' && ids.has(id)))]
+          : [];
+
+        const best: Record<string, number> = {};
+        if (parsed.best && typeof parsed.best === 'object') {
+          for (const [id, v] of Object.entries(parsed.best)) {
+            const n = Number(v);
+            if (ids.has(id) && Number.isFinite(n) && n >= 0 && n < 1000) best[id] = n;
+          }
+        }
+        return { done, best };
+      } catch {
+        return empty;
+      }
+    }
+
+    function writeProgress(p: Progress) {
+      try {
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+      } catch {
+        // The ladder still works for this session; it just will not be
+        // remembered. Not worth interrupting anyone over.
+      }
+    }
+
+    let progress = readProgress();
+
+    /** The first level is always open; each other needs the one before it. */
+    function unlocked(id: string) {
+      const i = LEVELS.findIndex((l) => l.id === id);
+      if (i <= 0) return i === 0;
+      return progress.done.includes(LEVELS[i - 1].id);
+    }
+
+    const levelOf = (id: string) => LEVELS.find((l) => l.id === id)!;
+
+    // ----------------------------------------------------------------------
+    // Building a lesson
+    // ----------------------------------------------------------------------
+
+    function buildLesson() {
+      if (mode === 'lesson') {
+        const level = levelOf(levelId);
+        units = level.units;
+        titleEl.textContent = level.title;
+        levelFocus.textContent = level.focus;
+      } else {
+        // Sized in KEYSTROKES, not aksharas. They are not the same count - भा
+        // is one akshara and three keys - and the clock is spent on keystrokes.
+        const order = planPassages(
+          seconds,
+          PASSAGES.map((p) => p.units.reduce((n, u) => n + u.keys.length, 0)),
+        );
+
+        units = [];
+        order.forEach((i, n) => {
+          if (n > 0) units.push({ deva: JOINER, keys: JOINER });
+          units.push(...PASSAGES[i].units);
+        });
+
+        titleEl.textContent =
+          order.length === 1
+            ? PASSAGES[order[0]].title
+            : `${PASSAGES[order[0]].title} +${order.length - 1} more`;
+      }
+
+      runs = unitKeyRuns(units);
+      expected = unitsToKeys(units);
+    }
+
+    /**
+     * Repaint the level picker from the stored progress.
+     *
+     * Four states, and the distinction that matters is `locked` versus the
+     * rest: a locked chip is not a link to somewhere you cannot go, it is
+     * disabled, so nobody tabs into a dead end.
+     */
+    function renderLevels() {
+      for (const level of LEVELS) {
+        const chip = levelChips.get(level.id)!;
+        const open = unlocked(level.id);
+        const done = progress.done.includes(level.id);
+        const current = mode === 'lesson' && level.id === levelId;
+
+        chip.dataset.state = current ? 'current' : done ? 'done' : open ? 'open' : 'locked';
+        chip.disabled = !open;
+        chip.setAttribute('aria-pressed', String(current));
+
+        const meta = chip.querySelector<HTMLElement>('[data-role="level-meta"]')!;
+        const best = progress.best[level.id];
+        if (!open) meta.textContent = 'Locked';
+        else if (best) meta.textContent = `best ${Math.round(best)} wpm`;
+        else if (done) meta.textContent = 'Done';
+        else meta.textContent = level.n === 1 ? 'Start here' : 'Open';
+      }
+    }
+
+    /**
+     * Render the passage once, as one span per akshara.
+     *
+     * Rebuilt only when the passage changes. On a keystroke only the spans
+     * whose state changed are touched - rewriting a thousand spans per
+     * character is what makes a tutor feel like treacle at speed.
+     */
+    function renderPassage() {
+      lineEl.textContent = '';
+      spans = [];
+      lastStates = [];
+      rendered = 0;
+      renderedRuns = [];
+      extendTo(CHUNK_UNITS);
+      paint('');
+    }
+
+    /**
+     * Draw up to `n` units, appending to whatever is already there.
+     *
+     * One fragment and one append per chunk: appending each span to a live
+     * element is what makes building a long passage slow, and it is the whole
+     * reason this is chunked in the first place.
+     */
+    function extendTo(n: number) {
+      const target = Math.min(units.length, n);
+      if (target <= rendered) return;
+
+      const frag = document.createDocumentFragment();
+      for (let i = rendered; i < target; i++) {
+        const u = units[i];
+        const span = document.createElement('span');
+        span.className = 'tt-c';
+        span.dataset.s = 'pending';
+        if (/^\s+$/.test(u.deva)) span.dataset.ws = '';
+        span.textContent = u.deva;
+        frag.append(span);
+        spans.push(span);
+        lastStates.push('pending');
+      }
+      lineEl.append(frag);
+      rendered = target;
+      // Sliced here rather than per keystroke: it only changes when a chunk is
+      // added, and clusterStates() is called on every character typed.
+      renderedRuns = runs.slice(0, rendered);
+    }
+
+    function paint(typed: string) {
+      // Extend before painting, so the caret always has a span to land on.
+      if (rendered < units.length) {
+        const caret = unitIndexFor(typed.length);
+        if (caret + LOOKAHEAD_UNITS > rendered) extendTo(caret + CHUNK_UNITS);
+      }
+
+      // The target stays whole - only the cluster list is short, so the states
+      // that come back are exactly the spans that exist. Everything past the
+      // end of it is unrendered and therefore untyped, which is 'pending'.
+      const states = clusterStates(expected, typed, renderedRuns);
+      let current: HTMLElement | null = null;
+
+      for (let i = 0; i < states.length; i++) {
+        if (states[i] !== lastStates[i]) {
+          spans[i].dataset.s = states[i];
+          lastStates[i] = states[i];
+        }
+        if (states[i] === 'current') current = spans[i];
+      }
+
+      keepInView(current);
+    }
+
+    /**
+     * Scroll the caret into view inside the passage panel only.
+     *
+     * Not scrollIntoView(): that walks up to the document and scrolls the whole
+     * page, pulling the keyboard out from under the eyes that are using it.
+     */
+    function keepInView(el: HTMLElement | null) {
+      if (!el) return;
+      const box = passage.getBoundingClientRect();
+      const line = el.getBoundingClientRect();
+      const pad = 28;
+      if (line.bottom > box.bottom - pad) {
+        passage.scrollTop += line.bottom - box.bottom + pad;
+      } else if (line.top < box.top + pad) {
+        passage.scrollTop -= box.top + pad - line.top;
+      }
+    }
+
+    // ----------------------------------------------------------------------
+    // The next key
+    // ----------------------------------------------------------------------
+
+    let litCap: HTMLElement | null = null;
+    let litShift: HTMLElement[] = [];
+    let litFingers: SVGElement[] = [];
+
+    /** Colour a finger on both hands' worth of shapes for that id. */
+    function lightFinger(id: string, how: 'true' | 'hold') {
+      for (const shape of fingerShapes.get(id) ?? []) {
+        shape.dataset.active = how;
+        litFingers.push(shape);
+      }
+    }
+
+    function showNextKey(typed: string) {
+      const ch = nextKey(expected, typed);
+
+      // Clear whatever was lit, before working out what is lit now.
+      litCap?.removeAttribute('data-next');
+      for (const s of litShift) s.removeAttribute('data-next');
+      for (const f of litFingers) f.removeAttribute('data-active');
+      litCap = null;
+      litShift = [];
+      litFingers = [];
+
+      if (!ch) {
+        promptKeys.textContent = '';
+        promptDeva.textContent = '';
+        promptFinger.textContent = 'Finished.';
+        return;
+      }
+
+      const at = locate(ch);
+      const unitIndex = unitIndexFor(typed.length);
+      const deva = units[unitIndex]?.deva ?? '';
+
+      // The prompt: the key or keys to press, drawn as keys.
+      promptKeys.textContent = '';
+      if (at?.shift) {
+        promptKeys.append(kbd('Shift'), plus(), kbd(at.cap));
+      } else {
+        promptKeys.append(kbd(ch === ' ' ? 'Space' : ch));
+      }
+
+      promptDeva.textContent = deva;
+
+      if (at) {
+        const name = FINGER_NAMES[at.finger] ?? '';
+        promptFinger.textContent = '';
+        const strong = document.createElement('strong');
+        strong.textContent = name;
+        promptFinger.append('with your ', strong);
+        if (at.shift) {
+          const other = FINGER_NAMES[at.shiftFinger] ?? '';
+          promptFinger.append(`, holding Shift with your ${other.toLowerCase()}`);
+        }
+
+        // Light the board and the hand from the same lookup, so the cap and
+        // the finger can never point at different things.
+        const cap = caps.get(at.cap);
+        if (cap) {
+          cap.dataset.next = 'true';
+          litCap = cap;
+          keepCapInView(cap);
+        }
+        lightFinger(at.finger, 'true');
+
+        if (at.shift) {
+          // Only the Shift on the opposite side - reaching for the one under
+          // the typing hand is the habit this is trying to prevent.
+          for (const s of shiftCaps) {
+            if (s.dataset.finger === at.shiftFinger) {
+              s.dataset.next = 'hold';
+              litShift.push(s);
+            }
+          }
+          lightFinger(at.shiftFinger, 'hold');
+        }
+      } else {
+        promptFinger.textContent = '';
+      }
+
+      root.dispatchEvent(
+        new CustomEvent('tutor:nextkey', { detail: { char: ch, at }, bubbles: false }),
+      );
+    }
+
+    /**
+     * Keep the highlighted cap on screen when the board is wider than the
+     * phone.
+     *
+     * A full QWERTY keyboard cannot be drawn legibly at 360px, and wrapping it
+     * would stop it being a picture of a keyboard - so it scrolls sideways,
+     * and the thing it is pointing at has to come with it. Horizontal only,
+     * and only within the board: nothing here may move the page.
+     */
+    function keepCapInView(cap: HTMLElement) {
+      if (board.scrollWidth <= board.clientWidth) return;
+      const box = board.getBoundingClientRect();
+      const key = cap.getBoundingClientRect();
+      const pad = 24;
+      if (key.right > box.right - pad) {
+        board.scrollLeft += key.right - box.right + pad;
+      } else if (key.left < box.left + pad) {
+        board.scrollLeft -= box.left + pad - key.left;
+      }
+    }
+
+    const kbd = (label: string) => {
+      const el = document.createElement('span');
+      el.className = 'tt-kbd';
+      el.textContent = label;
+      return el;
+    };
+    const plus = () => {
+      const el = document.createElement('span');
+      el.className = 'tt-kbd-plus';
+      el.textContent = '+';
+      return el;
+    };
+
+    /** Which akshara the caret sits in, for the prompt's Hindi glyph. */
+    function unitIndexFor(typedLength: number) {
+      let at = 0;
+      for (let i = 0; i < runs.length; i++) {
+        const end = at + runs[i].length;
+        if (typedLength < end) return i;
+        at = end;
+      }
+      return runs.length - 1;
+    }
+
+    // ----------------------------------------------------------------------
+    // Press feedback
+    // ----------------------------------------------------------------------
+    //
+    // Read from keydown rather than from the input event, because this is the
+    // one thing that genuinely needs to know WHICH KEY was pressed rather than
+    // what the text became. The input event remains the authority for state.
+
+    const flashTimers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
+
+    function flash(cap: HTMLElement, hit: 'ok' | 'bad') {
+      cap.dataset.hit = hit;
+      clearTimeout(flashTimers.get(cap));
+      flashTimers.set(
+        cap,
+        setTimeout(() => {
+          delete cap.dataset.hit;
+          flashTimers.delete(cap);
+        }, FLASH_MS),
+      );
+    }
+
+    // ----------------------------------------------------------------------
+    // Key sounds
+    // ----------------------------------------------------------------------
+    //
+    // Two short tones, synthesised rather than downloaded: an audio file would
+    // be the largest asset on the page by an order of magnitude, for a feature
+    // that is off by default.
+    //
+    // The AudioContext is created on the first sounded keystroke, never at
+    // load. Browsers suspend one built before a user gesture, and building it
+    // eagerly would also leave an audio device open on a page that may never
+    // make a sound.
+
+    const soundBox = q<HTMLInputElement>('sound');
+    let audio: AudioContext | null = null;
+
+    function readSound() {
+      try {
+        return localStorage.getItem(SOUND_KEY) === 'on';
+      } catch {
+        return false;
+      }
+    }
+
+    function writeSound(on: boolean) {
+      try {
+        localStorage.setItem(SOUND_KEY, on ? 'on' : 'off');
+      } catch {
+        // Stays on for this session and is not remembered. Harmless.
+      }
+    }
+
+    soundBox.checked = readSound();
+    soundBox.addEventListener('change', () => writeSound(soundBox.checked));
+
+    function click(ok: boolean) {
+      if (!soundBox.checked) return;
+      try {
+        const Ctx = window.AudioContext ?? (window as any).webkitAudioContext;
+        if (!Ctx) return;
+        audio ??= new Ctx();
+        if (audio.state === 'suspended') void audio.resume();
+
+        const t = audio.currentTime;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        // A wrong key is lower and a little longer, so the two are told apart
+        // without looking away from the passage.
+        osc.type = 'square';
+        osc.frequency.value = ok ? 1050 : 300;
+        const peak = ok ? 0.035 : 0.05;
+        const len = ok ? 0.05 : 0.09;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+        osc.connect(gain).connect(audio.destination);
+        osc.start(t);
+        osc.stop(t + len + 0.01);
+      } catch {
+        // No Web Audio, a blocked context, or a device with no output. A tutor
+        // that threw because it could not beep would be absurd.
+      }
+    }
+
+    capture.addEventListener('keydown', (e) => {
+      if (done) return;
+      // The hands are on the keyboard; reaching for a button to stop the clock
+      // is the one moment a tutor should not make you use the mouse.
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        pause();
+        return;
+      }
+      if (e.key === 'Enter') e.preventDefault();
+      // Printable keys only: a modifier or an arrow is not an attempt.
+      if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const want = nextKey(expected, capture.value);
+      const right = e.key === want;
+      const at = locate(e.key);
+      const cap = at ? caps.get(at.cap) : null;
+      if (cap) flash(cap, right ? 'ok' : 'bad');
+      click(right);
+    });
+
+    // A typing test is not a copy-paste exercise.
+    capture.addEventListener('paste', (e) => e.preventDefault());
+    capture.addEventListener('drop', (e) => e.preventDefault());
+
+    // ----------------------------------------------------------------------
+    // The clock
+    // ----------------------------------------------------------------------
+
+    const elapsed = () => accumulated + (running ? Date.now() - segmentStart : 0);
+    const remaining = () => Math.max(0, seconds * 1000 - elapsed());
+
+    function start() {
+      if (running || done) return;
+      running = true;
+      paused = false;
+      segmentStart = Date.now();
+      root.dataset.state = 'running';
+      pauseBtn.hidden = false;
+      pauseBtn.textContent = 'Pause';
+      ticker = setInterval(tick, TICK_MS);
+    }
+
+    /**
+     * Stop the clock and stop counting keystrokes.
+     *
+     * The input is DISABLED rather than merely ignored. A field that still
+     * takes text while the clock is stopped is a way to type the passage for
+     * free, and on a phone leaving the keyboard up over a paused test invites
+     * exactly that. Disabling it also blurs, which brings the veil back - so
+     * the veil says why.
+     */
+    function pause() {
+      if (!running || done) return;
+      accumulated += Date.now() - segmentStart;
+      running = false;
+      paused = true;
+      clearInterval(ticker);
+      root.dataset.state = 'paused';
+      capture.disabled = true;
+      pauseBtn.textContent = 'Resume';
+      veilText.textContent = 'Paused - press Resume to carry on';
+      updateStats();
+    }
+
+    function resume() {
+      if (!paused || done) return;
+      capture.disabled = false;
+      veilText.textContent = 'Click here, then start typing';
+      start();
+      capture.focus();
+    }
+
+    function tick() {
+      updateStats();
+      // A lesson has no clock to run out: it ends when the drill is typed.
+      if (mode === 'practice' && remaining() <= 0) finish('time');
+    }
+
+    /**
+     * `submitted` is the user stopping on purpose. It is deliberately not the
+     * same as running out of time: an attempt that was cut short has not
+     * cleared a lesson, however accurate it was up to that point, and the
+     * result card says which of the three happened.
+     */
+    function finish(reason: 'time' | 'passage' | 'submitted') {
+      if (done) return;
+      // Close the open segment before stopping, or the last stretch of typing
+      // would not be counted and every result would flatter the typist.
+      if (running) accumulated += Date.now() - segmentStart;
+      done = true;
+      running = false;
+      paused = false;
+      clearInterval(ticker);
+      root.dataset.state = 'done';
+      capture.disabled = true;
+      pauseBtn.hidden = true;
+      updateStats();
+      showResult(reason);
+    }
+
+    // ----------------------------------------------------------------------
+    // Stats
+    // ----------------------------------------------------------------------
+
+    function updateStats() {
+      const s = summarise(expected, capture.value, elapsed());
+
+      // Practice counts down to a deadline; a lesson counts up, because there
+      // is no deadline and a falling number would invent one.
+      timeEl.textContent = formatClock(mode === 'practice' ? remaining() : elapsed());
+      statTime.dataset.low = String(
+        mode === 'practice' && running && remaining() <= 10_000,
+      );
+      wpmEl.textContent = String(Math.round(s.net));
+      accEl.textContent = `${Math.round(s.accuracy)}%`;
+      errEl.textContent = String(s.wrong);
+
+      // Progress is measured in keystrokes, like everything else on this page.
+      // Aksharas would read as a smaller number that moves at a different
+      // speed from the clock, and the clock is spent on keystrokes.
+      const typedLength = Math.min(capture.value.length, expected.length);
+      const left = expected.length - typedLength;
+      const pct = expected.length === 0 ? 0 : Math.round((typedLength / expected.length) * 100);
+
+      progressEl.textContent = `${typedLength} / ${expected.length}`;
+      progressFill.style.width = `${expected.length === 0 ? 0 : (typedLength / expected.length) * 100}%`;
+      progressPct.textContent = `${pct}% complete`;
+      progressTrack.setAttribute('aria-valuenow', String(pct));
+      progressTrack.setAttribute(
+        'aria-valuetext',
+        `${pct} percent complete, ${left} keystrokes left`,
+      );
+      // Words as well as characters: five keystrokes to the word is the unit
+      // the WPM figure beside it already uses, so the two agree.
+      progressLeft.textContent =
+        left === 0 ? 'All typed' : `${left} left · about ${Math.max(1, Math.round(left / 5))} words`;
+
+      // Nothing typed means nothing to score, so there is nothing to submit.
+      submitBtn.disabled = done || s.typed === 0;
+      return s;
+    }
+
+    function showResult(reason: 'time' | 'passage' | 'submitted') {
+      const s = summarise(expected, capture.value, elapsed() || 1);
+      const net = Math.round(s.net);
+
+      q('r-wpm').textContent = String(net);
+      q('r-gross').textContent = String(Math.round(s.gross));
+      q('r-acc').textContent = `${Math.round(s.accuracy)}%`;
+      q('r-err').textContent = String(s.wrong);
+
+      // What to practise next, named rather than implied.
+      const missed = missedKeys(expected, capture.value).slice(0, 8);
+      const wrap = q<HTMLElement>('missed-wrap');
+      const list = q<HTMLElement>('missed');
+      list.textContent = '';
+      wrap.hidden = missed.length === 0;
+      for (const m of missed) {
+        const cell = document.createElement('div');
+        cell.className = 'kb-hint';
+        const deva = document.createElement('span');
+        deva.className = 'kb-hint-deva';
+        deva.lang = 'hi';
+        deva.textContent = devaForKey(m.key);
+        const key = document.createElement('span');
+        key.className = 'kb-hint-key';
+        key.textContent = `${m.key === ' ' ? 'space' : m.key} × ${m.count}`;
+        cell.append(deva, key);
+        list.append(cell);
+      }
+
+      const note = q('result-note');
+      nextLevelBtn.hidden = true;
+
+      if (mode === 'lesson') {
+        recordLesson(s, net, note, reason);
+      } else {
+        const best = readBest();
+        q('result-title').textContent =
+          reason === 'passage'
+            ? 'Passage finished'
+            : reason === 'submitted'
+              ? 'Your result'
+              : "Time's up";
+
+        // A best speed is only meaningful over a run that went the distance.
+        // Submitting after four words would otherwise post a flattering number
+        // that no full-length attempt could ever beat.
+        const ranks = reason !== 'submitted' || s.complete;
+
+        if (ranks && net > best) {
+          writeBest(net);
+          note.textContent =
+            best > 0
+              ? `A new best on this device. Your previous best was ${best} WPM.`
+              : 'Saved as your best on this device.';
+        } else if (!ranks) {
+          note.textContent =
+            `Submitted after ${formatClock(elapsed())}. Short runs are not saved as a ` +
+            `best speed` +
+            (best > 0 ? `; yours on this device is ${best} WPM.` : '.');
+        } else if (best > 0) {
+          note.textContent = `Your best on this device is ${best} WPM.`;
+        } else {
+          note.textContent = '';
+        }
+      }
+
+      result.hidden = false;
+      result.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    /**
+     * Mark a lesson attempt, and unlock the next one if it was clean enough.
+     *
+     * Accuracy is the only gate. Gating on speed teaches people to rush a drill
+     * they have not learned, which is how a typist builds a plateau they then
+     * cannot get out of - so speed is recorded and celebrated, never required.
+     */
+    function recordLesson(
+      s: ReturnType<typeof summarise>,
+      net: number,
+      note: HTMLElement,
+      reason: 'time' | 'passage' | 'submitted',
+    ) {
+      const level = levelOf(levelId);
+      const acc = Math.round(s.accuracy);
+      const cleared = s.typed > 0 && s.complete && s.accuracy >= level.threshold;
+
+      // The best speed for a level is only meaningful for an attempt that
+      // actually finished it.
+      if (s.complete && (!progress.best[levelId] || net > progress.best[levelId])) {
+        progress.best[levelId] = net;
+      }
+
+      if (cleared) {
+        if (!progress.done.includes(levelId)) progress.done.push(levelId);
+        const next = LEVELS[LEVELS.findIndex((l) => l.id === levelId) + 1];
+        q('result-title').textContent = `${level.title} complete`;
+        note.textContent = next
+          ? `${acc}% accurate. ${next.title} is now unlocked.`
+          : `${acc}% accurate. That is the last lesson - try a practice test next.`;
+        if (next) {
+          nextLevelBtn.hidden = false;
+          nextLevelBtn.textContent = `Start ${next.title}`;
+        }
+      } else if (!s.complete) {
+        const through = Math.round((s.typed / expected.length) * 100);
+        q('result-title').textContent =
+          reason === 'submitted' ? 'Submitted early' : 'Lesson stopped early';
+        note.textContent =
+          `${acc}% accurate over the ${through}% of the drill you typed. ` +
+          `Type all of it to clear this lesson.`;
+      } else {
+        q('result-title').textContent = 'Not quite';
+        note.textContent =
+          `${acc}% accurate - this lesson needs ${level.threshold}%. ` +
+          `Slow down until the mistakes stop; the speed comes on its own.`;
+      }
+
+      writeProgress(progress);
+      renderLevels();
+    }
+
+    /** The Hindi printed on a cap, for the missed-keys list. */
+    function devaForKey(key: string) {
+      const at = locate(key);
+      const cap = at ? caps.get(at.cap) : null;
+      if (!cap) return '';
+      const el = cap.querySelector(at!.shift ? '.kbd-shift' : '.kbd-base');
+      return el?.textContent ?? '';
+    }
+
+    // ----------------------------------------------------------------------
+    // Resetting
+    // ----------------------------------------------------------------------
+
+    function reset({ newPassage = true } = {}) {
+      clearInterval(ticker);
+      running = false;
+      paused = false;
+      done = false;
+      accumulated = 0;
+      segmentStart = 0;
+
+      capture.disabled = false;
+      capture.value = '';
+      result.hidden = true;
+      nextLevelBtn.hidden = true;
+      pauseBtn.hidden = true;
+      pauseBtn.textContent = 'Pause';
+      veilText.textContent = 'Click here, then start typing';
+      root.dataset.state = 'idle';
+      passage.scrollTop = 0;
+
+      if (newPassage || units.length === 0) buildLesson();
+      renderPassage();
+      updateStats();
+      showNextKey('');
+    }
+
+    /** Swap between the ladder and the timed test, and re-dress the UI for it. */
+    function setMode(next: Mode) {
+      mode = next;
+      root.dataset.mode = next;
+
+      for (const b of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
+        b.setAttribute('aria-pressed', String(b.dataset.mode === next));
+      }
+
+      const lesson = next === 'lesson';
+      levelsWrap.hidden = !lesson;
+      durationGroup.hidden = lesson;
+      timeLabel.textContent = lesson ? 'Time' : 'Time left';
+      // "New passage" makes no sense on a fixed drill - a lesson is the same
+      // text every time, which is the point of practising it.
+      newBtn.hidden = lesson;
+
+      renderLevels();
+      reset({ newPassage: true });
+    }
+
+    function setLevel(id: string) {
+      if (!unlocked(id)) return;
+      levelId = id;
+      renderLevels();
+      reset({ newPassage: true });
+      capture.focus();
+    }
+
+    // ----------------------------------------------------------------------
+    // Wiring
+    // ----------------------------------------------------------------------
+
+    capture.addEventListener('input', () => {
+      // Paused disables the field, so this cannot normally fire - but an
+      // autofill or an IME commit can still deliver one, and a paused test
+      // must not silently restart its own clock.
+      if (done || paused) return;
+      if (!running && capture.value.length > 0) start();
+
+      paint(capture.value);
+      showNextKey(capture.value);
+      const s = updateStats();
+
+      // Finishing the passage ends the run early: there is nothing left to
+      // type, and leaving the clock going only punishes a fast typist.
+      if (s.complete) finish('passage');
+    });
+
+    capture.addEventListener('focus', () => (root.dataset.focused = 'true'));
+    capture.addEventListener('blur', () => (root.dataset.focused = 'false'));
+
+    // The veil does not take pointer events, so a click on the passage lands
+    // on the textarea underneath and focuses it. This only covers the case of
+    // clicking the passage panel's padding.
+    passage.addEventListener('click', () => {
+      // While paused the field is disabled and focusing it does nothing, so
+      // the click means the obvious thing instead.
+      if (paused) return resume();
+      capture.focus();
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (paused) resume();
+      else pause();
+    });
+
+    submitBtn.addEventListener('click', () => {
+      // Guarded as well as disabled: a disabled button can still be clicked
+      // through the keyboard in some assistive setups.
+      if (done || capture.value.length === 0) return;
+      finish('submitted');
+    });
+
+    q<HTMLButtonElement>('restart').addEventListener('click', () => {
+      reset({ newPassage: false });
+      capture.focus();
+    });
+
+    q<HTMLButtonElement>('new').addEventListener('click', () => {
+      reset({ newPassage: true });
+      capture.focus();
+    });
+
+    for (const btn of root.querySelectorAll<HTMLButtonElement>('[data-role="duration"] button')) {
+      btn.addEventListener('click', () => {
+        const next = Number(btn.dataset.seconds);
+        if (next === seconds) return;
+        seconds = next;
+        for (const other of root.querySelectorAll<HTMLButtonElement>(
+          '[data-role="duration"] button',
+        )) {
+          other.setAttribute('aria-pressed', String(other === btn));
+        }
+        reset({ newPassage: true });
+      });
+    }
+
+    for (const btn of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.mode as Mode;
+        if (next !== mode) setMode(next);
+      });
+    }
+
+    for (const [id, chip] of levelChips) {
+      chip.addEventListener('click', () => setLevel(id));
+    }
+
+    nextLevelBtn.addEventListener('click', () => {
+      const i = LEVELS.findIndex((l) => l.id === levelId);
+      const next = LEVELS[i + 1];
+      if (next) setLevel(next.id);
+    });
+
+    /**
+     * Clearing progress is destructive and cannot be undone, so it asks - but
+     * with a button rather than confirm(), which blocks the page and reads as
+     * a browser error to anyone who did not expect it.
+     */
+    const resetBtn = q<HTMLButtonElement>('reset-progress');
+    let armed = false;
+    let disarm: ReturnType<typeof setTimeout> | undefined;
+
+    resetBtn.addEventListener('click', () => {
+      if (!armed) {
+        armed = true;
+        resetBtn.textContent = 'Tap again to erase';
+        resetBtn.dataset.armed = 'true';
+        clearTimeout(disarm);
+        disarm = setTimeout(() => {
+          armed = false;
+          resetBtn.textContent = 'Reset progress';
+          delete resetBtn.dataset.armed;
+        }, 4000);
+        return;
+      }
+
+      clearTimeout(disarm);
+      armed = false;
+      resetBtn.textContent = 'Reset progress';
+      delete resetBtn.dataset.armed;
+
+      progress = { done: [], best: {} };
+      writeProgress(progress);
+      levelId = LEVELS[0].id;
+      renderLevels();
+      reset({ newPassage: true });
+    });
+
+    setMode('lesson');
+  }
+</script>

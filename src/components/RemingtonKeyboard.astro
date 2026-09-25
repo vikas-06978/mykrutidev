@@ -1,0 +1,125 @@
+---
+import { layout } from '../lib/remington.js';
+import { FONTS } from '../lib/fontMaps.js';
+
+/**
+ * A drawing of the Remington keyboard.
+ *
+ * Markup only - no script. TypingTutor.astro owns the interaction and drives
+ * this through `data-cap` and `data-finger`, which is what lets one keyboard
+ * serve the lesson mode, the practice mode and the finger guide without three
+ * copies of the highlighting logic.
+ *
+ * Every Hindi letter printed here is read out of the character map, so a cap
+ * can never promise a letter the converter disagrees about. A key that types
+ * nothing in Kruti Dev is drawn greyed rather than borrowed for something else.
+ */
+
+interface Props {
+  /** Any legacy font with a verified map. */
+  font?: string;
+}
+
+const { font = 'kruti-dev' } = Astro.props;
+
+const f = FONTS[font];
+if (!f?.map) throw new Error(`RemingtonKeyboard: ${font} has no character map`);
+
+const rows = layout(f.map);
+
+/**
+ * The caps that carry no letter. They exist so the board reads as a keyboard -
+ * a row of letters floating without a Tab or a Shift beside them is a chart,
+ * and the thing being taught is where your hands go.
+ *
+ * Shift carries a finger because the tutor highlights it: it is held by the
+ * hand NOT typing, and that is the part beginners get wrong.
+ */
+const LEADING = [
+  null,
+  { label: 'Tab', w: 1.5, finger: 'l-pinky' },
+  { label: 'Caps', w: 1.75, finger: 'l-pinky' },
+  { label: 'Shift', w: 2.25, finger: 'l-pinky', mod: 'shift' },
+];
+const TRAILING = [
+  { label: 'Bksp', w: 2, finger: 'r-pinky' },
+  null,
+  { label: 'Enter', w: 2.25, finger: 'r-pinky' },
+  { label: 'Shift', w: 2.75, finger: 'r-pinky', mod: 'shift' },
+];
+---
+
+<div class="kbd" data-keyboard role="img" aria-label="Remington Hindi keyboard layout">
+  {
+    rows.map((row, i) => (
+      <div class="kbd-row">
+        {LEADING[i] && (
+          <span
+            class="kbd-cap"
+            style={`--w:${LEADING[i].w}`}
+            data-finger={LEADING[i].finger}
+            data-mod={LEADING[i].mod}
+          >
+            <span class="kbd-mod">{LEADING[i].label}</span>
+          </span>
+        )}
+
+        {row.map((cap) => (
+          <span
+            class="kbd-cap"
+            data-cap={cap.base}
+            data-finger={cap.finger}
+            data-home={String(cap.home)}
+            data-dead={String(!cap.baseDeva && !cap.shiftDeva)}
+          >
+            {/*
+              Three lines, smallest first: what the shifted key gives, the
+              English cap the finger is looking for, and the Hindi it types.
+              The English letter sits in the middle because it is the thing
+              being searched for on the physical keyboard.
+            */}
+            <span class="kbd-shift" lang="hi">
+              {cap.shiftLabel}
+            </span>
+            <span class="kbd-eng">{cap.base}</span>
+            <span class="kbd-base" lang="hi">
+              {cap.baseLabel}
+            </span>
+          </span>
+        ))}
+
+        {TRAILING[i] && (
+          <span
+            class="kbd-cap"
+            style={`--w:${TRAILING[i].w}`}
+            data-finger={TRAILING[i].finger}
+            data-mod={TRAILING[i].mod}
+          >
+            <span class="kbd-mod">{TRAILING[i].label}</span>
+          </span>
+        )}
+      </div>
+    ))
+  }
+
+  <div class="kbd-row">
+    <span class="kbd-cap" style="--w:3.25" data-finger="l-pinky" data-mod="shift">
+      <span class="kbd-mod">Shift</span>
+    </span>
+    <span class="kbd-cap" style="--w:1.25" data-finger="l-pinky">
+      <span class="kbd-mod">Ctrl</span>
+    </span>
+    <span class="kbd-cap" style="--w:1.25" data-finger="l-pinky">
+      <span class="kbd-mod">Alt</span>
+    </span>
+    <span class="kbd-cap" style="--w:6.5" data-cap=" " data-finger="thumb">
+      <span class="kbd-mod">Space</span>
+    </span>
+    <span class="kbd-cap" style="--w:1.25" data-finger="r-pinky">
+      <span class="kbd-mod">Alt</span>
+    </span>
+    <span class="kbd-cap" style="--w:3.25" data-finger="r-pinky" data-mod="shift">
+      <span class="kbd-mod">Shift</span>
+    </span>
+  </div>
+</div>

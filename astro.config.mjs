@@ -18,5 +18,10 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    // docConvert.js is import()ed only when a file is dropped, so Vite would
+    // discover fflate late, re-optimise, and answer the page's request with
+    // "504 Outdated Optimize Dep" - the upload then failed in dev. Bundling it
+    // up front means that request can never be stale.
+    optimizeDeps: { include: ['fflate'] },
   },
 });

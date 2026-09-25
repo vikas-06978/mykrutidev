@@ -15,12 +15,25 @@
 @import './legacy-fonts.css';
 
 /* The two-box converter shell: panels, buttons, segmented toggle, strips.
-   Shared by Converter.astro and Transliterator.astro — see the note at the top
+   Shared by Converter.astro and Transliterator.astro - see the note at the top
    of the file for why it is not scoped to either. */
 @import './converter.css';
 
+/* The typing test and the on-screen keyboard. Reuses the converter's buttons
+   and segmented toggle; adds only the highlighted passage, the stat row and
+   the key caps. */
+@import './typing.css';
+
+/* The tutor: the typed-onto passage, the drawn keyboard and the hand guide.
+   Builds on typing.css rather than repeating it. */
+@import './tutor.css';
+
+/* The Hindi Keyboard page: sticky text box, docked keyboard on phones. Its own
+   hk-* classes, so the typing tutor's kb-* caps are untouched. */
+@import './hindi-keyboard.css';
+
 /* ===========================================================================
-   Design tokens — see DESIGN.md
+   Design tokens - see DESIGN.md
    Deep navy ink on warm paper, muted brick accent. Trustworthy, not flashy.
    =========================================================================== */
 @theme {
@@ -29,7 +42,7 @@
   --color-surface: #ffffff;
   --color-inset: #f4efe7;
 
-  /* Text — step down deliberately: ink -> body -> mute */
+  /* Text - step down deliberately: ink -> body -> mute */
   --color-ink: #1a2744;
   --color-body: #46536b;
   --color-mute: #6b7789;
@@ -40,13 +53,25 @@
 
   /* Accent. Contrast measured on --color-paper:
        ink 13.9:1 · body 7.2:1 · brick 5.6:1 · white-on-brick 6.0:1  (all AA)
-       saffron 3.0:1 — FAILS. It is decoration only: rules, fills, icon
+       saffron 3.0:1 - FAILS. It is decoration only: rules, fills, icon
        accents. It never carries text and is never the sole focus indicator. */
   --color-brick: #a8442a;
   --color-brick-deep: #8a3722;
   --color-saffron: #c8811f;
   --color-ok: #15803d;
   --color-warn-bg: #fdf6e7;
+
+  /* Error. Added for the typing test, which is the first thing on the site
+     that has to mark a character WRONG rather than merely draw attention.
+     Everything before it either succeeded or was a notice.
+
+     It is deliberately not brick: brick means "this is the action" everywhere
+     else, and a passage where every mistake is painted in the primary accent
+     reads as a page full of buttons. Measured 6.5:1 on white, 6.0:1 on paper
+     and 5.6:1 on its own wash - all AA - and it is never the only signal,
+     since a wrong character is underlined as well as recoloured. */
+  --color-err: #b91c1c;
+  --color-err-bg: #fdeaea;
 
   /* Type. System stack for Latin chrome costs zero bytes; Noto Sans
      Devanagari is only paid for where Hindi actually renders. */

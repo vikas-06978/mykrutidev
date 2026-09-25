@@ -1,0 +1,1255 @@
+{
+ "font": {
+  "name": "Abbasi Chanakya New",
+  "designer": "Jamal Abbasi",
+  "created": "2010-02-23 (Macromedia Fontographer 4.1)",
+  "glyphs": 172
+ },
+ "note": "Built glyph-by-glyph from the font file. confidence H = visually verified; M = best reading, confirm with a real document before relying on it.",
+ "multi": [
+  {
+   "from": "vkS",
+   "to": "औ",
+   "confidence": "H"
+  },
+  {
+   "from": "vks",
+   "to": "ओ",
+   "confidence": "H"
+  },
+  {
+   "from": "vkW",
+   "to": "ऑ",
+   "confidence": "H"
+  },
+  {
+   "from": "vk",
+   "to": "आ",
+   "confidence": "H"
+  },
+  {
+   "from": "baZ",
+   "to": "ईं",
+   "confidence": "H"
+  },
+  {
+   "from": "b±",
+   "to": "ईं",
+   "confidence": "H"
+  },
+  {
+   "from": "bZ",
+   "to": "ई",
+   "confidence": "H"
+  },
+  {
+   "from": ",s",
+   "to": "ऐ",
+   "confidence": "H"
+  },
+  {
+   "from": "[+k",
+   "to": "ख़",
+   "confidence": "H"
+  },
+  {
+   "from": "d+",
+   "to": "क़",
+   "confidence": "H"
+  },
+  {
+   "from": "[+",
+   "to": "ख़्",
+   "confidence": "H"
+  },
+  {
+   "from": "x+",
+   "to": "ग़",
+   "confidence": "H"
+  },
+  {
+   "from": "T+",
+   "to": "ज़्",
+   "confidence": "H"
+  },
+  {
+   "from": "t+",
+   "to": "ज़",
+   "confidence": "H"
+  },
+  {
+   "from": "M+",
+   "to": "ड़",
+   "confidence": "H"
+  },
+  {
+   "from": "<+",
+   "to": "ढ़",
+   "confidence": "H"
+  },
+  {
+   "from": "Q+",
+   "to": "फ़",
+   "confidence": "H"
+  },
+  {
+   "from": ";+",
+   "to": "य़",
+   "confidence": "H"
+  },
+  {
+   "from": "j+",
+   "to": "ऱ",
+   "confidence": "H"
+  },
+  {
+   "from": "u+",
+   "to": "ऩ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ùk",
+   "to": "त्त",
+   "confidence": "H"
+  },
+  {
+   "from": "{k",
+   "to": "क्ष",
+   "confidence": "H"
+  },
+  {
+   "from": "«k",
+   "to": "त्र",
+   "confidence": "H"
+  },
+  {
+   "from": "Nî",
+   "to": "छ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "Vî",
+   "to": "ट्य",
+   "confidence": "H"
+  },
+  {
+   "from": "Bî",
+   "to": "ठ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "Mî",
+   "to": "ड्य",
+   "confidence": "H"
+  },
+  {
+   "from": "<î",
+   "to": "ढ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "NÓ",
+   "to": "छ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "VÓ",
+   "to": "ट्य",
+   "confidence": "H"
+  },
+  {
+   "from": "BÓ",
+   "to": "ठ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "MÓ",
+   "to": "ड्य",
+   "confidence": "H"
+  },
+  {
+   "from": "<Ó",
+   "to": "ढ्य",
+   "confidence": "H"
+  },
+  {
+   "from": "Dk",
+   "to": "क",
+   "confidence": "M"
+  },
+  {
+   "from": "[k",
+   "to": "ख",
+   "confidence": "H"
+  },
+  {
+   "from": "Xk",
+   "to": "ग",
+   "confidence": "H"
+  },
+  {
+   "from": "?k",
+   "to": "घ",
+   "confidence": "H"
+  },
+  {
+   "from": "Pk",
+   "to": "च",
+   "confidence": "H"
+  },
+  {
+   "from": "Tk",
+   "to": "ज",
+   "confidence": "H"
+  },
+  {
+   "from": "Ök",
+   "to": "झ",
+   "confidence": "H"
+  },
+  {
+   "from": "÷k",
+   "to": "झ",
+   "confidence": "H"
+  },
+  {
+   "from": ".k",
+   "to": "ण",
+   "confidence": "H"
+  },
+  {
+   "from": "Rk",
+   "to": "त",
+   "confidence": "H"
+  },
+  {
+   "from": "Fk",
+   "to": "थ",
+   "confidence": "H"
+  },
+  {
+   "from": "/k",
+   "to": "ध",
+   "confidence": "H"
+  },
+  {
+   "from": "èk",
+   "to": "ध",
+   "confidence": "H"
+  },
+  {
+   "from": "Ëk",
+   "to": "ध",
+   "confidence": "H"
+  },
+  {
+   "from": "Uk",
+   "to": "न",
+   "confidence": "H"
+  },
+  {
+   "from": "Úk",
+   "to": "न",
+   "confidence": "M"
+  },
+  {
+   "from": "Ik",
+   "to": "प",
+   "confidence": "H"
+  },
+  {
+   "from": "¶k",
+   "to": "फ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ck",
+   "to": "ब",
+   "confidence": "H"
+  },
+  {
+   "from": "Hk",
+   "to": "भ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ek",
+   "to": "म",
+   "confidence": "H"
+  },
+  {
+   "from": "¸k",
+   "to": "य",
+   "confidence": "H"
+  },
+  {
+   "from": "Yk",
+   "to": "ल",
+   "confidence": "H"
+  },
+  {
+   "from": "Ok",
+   "to": "व",
+   "confidence": "H"
+  },
+  {
+   "from": "'k",
+   "to": "श",
+   "confidence": "H"
+  },
+  {
+   "from": "\"k",
+   "to": "ष",
+   "confidence": "H"
+  },
+  {
+   "from": "Lk",
+   "to": "स",
+   "confidence": "H"
+  }
+ ],
+ "single": [
+  {
+   "from": "v",
+   "to": "अ",
+   "confidence": "H"
+  },
+  {
+   "from": "b",
+   "to": "इ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ã",
+   "to": "ई",
+   "confidence": "H"
+  },
+  {
+   "from": "m",
+   "to": "उ",
+   "confidence": "H"
+  },
+  {
+   "from": "Å",
+   "to": "ऊ",
+   "confidence": "H"
+  },
+  {
+   "from": "_",
+   "to": "ऋ",
+   "confidence": "H"
+  },
+  {
+   "from": ",",
+   "to": "ए",
+   "confidence": "H"
+  },
+  {
+   "from": "d",
+   "to": "क",
+   "confidence": "H"
+  },
+  {
+   "from": "D",
+   "to": "क्",
+   "confidence": "H"
+  },
+  {
+   "from": "[",
+   "to": "ख्",
+   "confidence": "H"
+  },
+  {
+   "from": "x",
+   "to": "ग",
+   "confidence": "H"
+  },
+  {
+   "from": "X",
+   "to": "ग्",
+   "confidence": "H"
+  },
+  {
+   "from": "Ä",
+   "to": "घ",
+   "confidence": "H"
+  },
+  {
+   "from": "?",
+   "to": "घ्",
+   "confidence": "H"
+  },
+  {
+   "from": "³",
+   "to": "ङ",
+   "confidence": "H"
+  },
+  {
+   "from": "p",
+   "to": "च",
+   "confidence": "H"
+  },
+  {
+   "from": "P",
+   "to": "च्",
+   "confidence": "H"
+  },
+  {
+   "from": "N",
+   "to": "छ",
+   "confidence": "H"
+  },
+  {
+   "from": "t",
+   "to": "ज",
+   "confidence": "H"
+  },
+  {
+   "from": "T",
+   "to": "ज्",
+   "confidence": "H"
+  },
+  {
+   "from": ">",
+   "to": "झ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ö",
+   "to": "झ्",
+   "confidence": "H"
+  },
+  {
+   "from": "÷",
+   "to": "झ्",
+   "confidence": "H"
+  },
+  {
+   "from": "¥",
+   "to": "ञ",
+   "confidence": "H"
+  },
+  {
+   "from": "´",
+   "to": "ञ",
+   "confidence": "H"
+  },
+  {
+   "from": "V",
+   "to": "ट",
+   "confidence": "H"
+  },
+  {
+   "from": "B",
+   "to": "ठ",
+   "confidence": "H"
+  },
+  {
+   "from": "M",
+   "to": "ड",
+   "confidence": "H"
+  },
+  {
+   "from": "<",
+   "to": "ढ",
+   "confidence": "H"
+  },
+  {
+   "from": ".",
+   "to": "ण्",
+   "confidence": "H"
+  },
+  {
+   "from": "r",
+   "to": "त",
+   "confidence": "H"
+  },
+  {
+   "from": "R",
+   "to": "त्",
+   "confidence": "H"
+  },
+  {
+   "from": "F",
+   "to": "थ्",
+   "confidence": "H"
+  },
+  {
+   "from": "n",
+   "to": "द",
+   "confidence": "H"
+  },
+  {
+   "from": "/",
+   "to": "ध्",
+   "confidence": "H"
+  },
+  {
+   "from": "è",
+   "to": "ध्",
+   "confidence": "H"
+  },
+  {
+   "from": "Ë",
+   "to": "ध्",
+   "confidence": "H"
+  },
+  {
+   "from": "u",
+   "to": "न",
+   "confidence": "H"
+  },
+  {
+   "from": "U",
+   "to": "न्",
+   "confidence": "H"
+  },
+  {
+   "from": "i",
+   "to": "प",
+   "confidence": "H"
+  },
+  {
+   "from": "I",
+   "to": "प्",
+   "confidence": "H"
+  },
+  {
+   "from": "Q",
+   "to": "फ",
+   "confidence": "H"
+  },
+  {
+   "from": "¶",
+   "to": "फ्",
+   "confidence": "H"
+  },
+  {
+   "from": "c",
+   "to": "ब",
+   "confidence": "H"
+  },
+  {
+   "from": "C",
+   "to": "ब्",
+   "confidence": "H"
+  },
+  {
+   "from": "Ò",
+   "to": "भ",
+   "confidence": "H"
+  },
+  {
+   "from": "H",
+   "to": "भ्",
+   "confidence": "H"
+  },
+  {
+   "from": "e",
+   "to": "म",
+   "confidence": "H"
+  },
+  {
+   "from": "E",
+   "to": "म्",
+   "confidence": "H"
+  },
+  {
+   "from": ";",
+   "to": "य",
+   "confidence": "H"
+  },
+  {
+   "from": "¸",
+   "to": "य्",
+   "confidence": "H"
+  },
+  {
+   "from": "j",
+   "to": "र",
+   "confidence": "H"
+  },
+  {
+   "from": "y",
+   "to": "ल",
+   "confidence": "H"
+  },
+  {
+   "from": "Y",
+   "to": "ल्",
+   "confidence": "H"
+  },
+  {
+   "from": "G",
+   "to": "ळ",
+   "confidence": "H"
+  },
+  {
+   "from": "o",
+   "to": "व",
+   "confidence": "H"
+  },
+  {
+   "from": "O",
+   "to": "व्",
+   "confidence": "H"
+  },
+  {
+   "from": "Ü",
+   "to": "श",
+   "confidence": "H"
+  },
+  {
+   "from": "'",
+   "to": "श्",
+   "confidence": "H"
+  },
+  {
+   "from": "\"",
+   "to": "ष्",
+   "confidence": "H"
+  },
+  {
+   "from": "l",
+   "to": "स",
+   "confidence": "H"
+  },
+  {
+   "from": "L",
+   "to": "स्",
+   "confidence": "H"
+  },
+  {
+   "from": "g",
+   "to": "ह",
+   "confidence": "H"
+  },
+  {
+   "from": "{",
+   "to": "क्ष्",
+   "confidence": "H"
+  },
+  {
+   "from": "«",
+   "to": "त्र्",
+   "confidence": "H"
+  },
+  {
+   "from": "=",
+   "to": "त्र",
+   "confidence": "H"
+  },
+  {
+   "from": "K",
+   "to": "ज्ञ",
+   "confidence": "H"
+  },
+  {
+   "from": "J",
+   "to": "श्र",
+   "confidence": "H"
+  },
+  {
+   "from": "ô",
+   "to": "क्क",
+   "confidence": "H"
+  },
+  {
+   "from": "ä",
+   "to": "क्त",
+   "confidence": "H"
+  },
+  {
+   "from": "Ø",
+   "to": "क्र",
+   "confidence": "H"
+  },
+  {
+   "from": "Ñ",
+   "to": "कृ",
+   "confidence": "H"
+  },
+  {
+   "from": "£",
+   "to": "ख्र",
+   "confidence": "H"
+  },
+  {
+   "from": "Ù",
+   "to": "त्त्",
+   "confidence": "H"
+  },
+  {
+   "from": "|",
+   "to": "द्य",
+   "confidence": "H"
+  },
+  {
+   "from": "}",
+   "to": "द्व",
+   "confidence": "H"
+  },
+  {
+   "from": ")",
+   "to": "द्ध",
+   "confidence": "H"
+  },
+  {
+   "from": "Ì",
+   "to": "द्द",
+   "confidence": "H"
+  },
+  {
+   "from": "í",
+   "to": "द्द",
+   "confidence": "H"
+  },
+  {
+   "from": "ù",
+   "to": "द्म",
+   "confidence": "H"
+  },
+  {
+   "from": "æ",
+   "to": "द्र",
+   "confidence": "H"
+  },
+  {
+   "from": "é",
+   "to": "न्न",
+   "confidence": "H"
+  },
+  {
+   "from": "ç",
+   "to": "प्र",
+   "confidence": "H"
+  },
+  {
+   "from": "Á",
+   "to": "प्र",
+   "confidence": "H"
+  },
+  {
+   "from": "Ý",
+   "to": "फ्र",
+   "confidence": "H"
+  },
+  {
+   "from": "ó",
+   "to": "स्न",
+   "confidence": "H"
+  },
+  {
+   "from": "º",
+   "to": "ह्",
+   "confidence": "H"
+  },
+  {
+   "from": "à",
+   "to": "ह्न",
+   "confidence": "M"
+  },
+  {
+   "from": "á",
+   "to": "ह्य",
+   "confidence": "H"
+  },
+  {
+   "from": "â",
+   "to": "हृ",
+   "confidence": "H"
+  },
+  {
+   "from": "ã",
+   "to": "ह्म",
+   "confidence": "H"
+  },
+  {
+   "from": "ê",
+   "to": "ट्ट",
+   "confidence": "H"
+  },
+  {
+   "from": "Í",
+   "to": "ट्ट",
+   "confidence": "H"
+  },
+  {
+   "from": "ë",
+   "to": "ट्ठ",
+   "confidence": "H"
+  },
+  {
+   "from": "Î",
+   "to": "ट्ठ",
+   "confidence": "H"
+  },
+  {
+   "from": "ð",
+   "to": "ठ्ठ",
+   "confidence": "H"
+  },
+  {
+   "from": "ì",
+   "to": "ड्ड",
+   "confidence": "H"
+  },
+  {
+   "from": "Ï",
+   "to": "ड्ड",
+   "confidence": "H"
+  },
+  {
+   "from": "ï",
+   "to": "ड्ढ",
+   "confidence": "H"
+  },
+  {
+   "from": "Ô",
+   "to": "ड्ढ",
+   "confidence": "H"
+  },
+  {
+   "from": "î",
+   "to": "्य",
+   "confidence": "H"
+  },
+  {
+   "from": "Ó",
+   "to": "्य",
+   "confidence": "H"
+  },
+  {
+   "from": "¨",
+   "to": "ो",
+   "confidence": "H"
+  },
+  {
+   "from": "®",
+   "to": "ो",
+   "confidence": "H"
+  },
+  {
+   "from": "©",
+   "to": "ौ",
+   "confidence": "H"
+  },
+  {
+   "from": "k",
+   "to": "ा",
+   "confidence": "H"
+  },
+  {
+   "from": "h",
+   "to": "ी",
+   "confidence": "H"
+  },
+  {
+   "from": "È",
+   "to": "ीं",
+   "confidence": "H"
+  },
+  {
+   "from": "q",
+   "to": "ु",
+   "confidence": "H"
+  },
+  {
+   "from": "w",
+   "to": "ू",
+   "confidence": "H"
+  },
+  {
+   "from": "`",
+   "to": "ृ",
+   "confidence": "H"
+  },
+  {
+   "from": "s",
+   "to": "े",
+   "confidence": "H"
+  },
+  {
+   "from": "¢",
+   "to": "े",
+   "confidence": "H"
+  },
+  {
+   "from": "S",
+   "to": "ै",
+   "confidence": "H"
+  },
+  {
+   "from": "õ",
+   "to": "ैं",
+   "confidence": "H"
+  },
+  {
+   "from": "a",
+   "to": "ं",
+   "confidence": "H"
+  },
+  {
+   "from": "¡",
+   "to": "ँ",
+   "confidence": "H"
+  },
+  {
+   "from": "W",
+   "to": "ॅ",
+   "confidence": "H"
+  },
+  {
+   "from": "z",
+   "to": "्र",
+   "confidence": "H"
+  },
+  {
+   "from": "ª",
+   "to": "्र",
+   "confidence": "H"
+  },
+  {
+   "from": "~",
+   "to": "्",
+   "confidence": "H"
+  },
+  {
+   "from": "+",
+   "to": "़",
+   "confidence": "H"
+  },
+  {
+   "from": "A",
+   "to": "।",
+   "confidence": "H"
+  },
+  {
+   "from": "·",
+   "to": "ऽ",
+   "confidence": "H"
+  },
+  {
+   "from": "∙",
+   "to": "ऽ",
+   "confidence": "H"
+  },
+  {
+   "from": "#",
+   "to": "रु",
+   "confidence": "H"
+  },
+  {
+   "from": ":",
+   "to": "रू",
+   "confidence": "H"
+  },
+  {
+   "from": "å",
+   "to": "०",
+   "confidence": "M"
+  },
+  {
+   "from": "ú",
+   "to": "०",
+   "confidence": "M"
+  },
+  {
+   "from": "ñ",
+   "to": "॰",
+   "confidence": "M"
+  },
+  {
+   "from": "%",
+   "to": ":",
+   "confidence": "H"
+  },
+  {
+   "from": "(",
+   "to": ";",
+   "confidence": "H"
+  },
+  {
+   "from": "\\",
+   "to": "?",
+   "confidence": "H"
+  },
+  {
+   "from": "]",
+   "to": ",",
+   "confidence": "H"
+  },
+  {
+   "from": "-",
+   "to": ".",
+   "confidence": "H"
+  },
+  {
+   "from": "‐",
+   "to": ".",
+   "confidence": "H"
+  },
+  {
+   "from": "&",
+   "to": "-",
+   "confidence": "H"
+  },
+  {
+   "from": "@",
+   "to": "/",
+   "confidence": "H"
+  },
+  {
+   "from": "$",
+   "to": "+",
+   "confidence": "H"
+  },
+  {
+   "from": "¾",
+   "to": "=",
+   "confidence": "H"
+  },
+  {
+   "from": "»",
+   "to": "÷",
+   "confidence": "H"
+  },
+  {
+   "from": "¼",
+   "to": "(",
+   "confidence": "H"
+  },
+  {
+   "from": "½",
+   "to": ")",
+   "confidence": "H"
+  },
+  {
+   "from": "¿",
+   "to": "[",
+   "confidence": "H"
+  },
+  {
+   "from": "ø",
+   "to": "[",
+   "confidence": "H"
+  },
+  {
+   "from": "À",
+   "to": "]",
+   "confidence": "H"
+  },
+  {
+   "from": "*",
+   "to": "’",
+   "confidence": "H"
+  },
+  {
+   "from": "^",
+   "to": "‘",
+   "confidence": "H"
+  },
+  {
+   "from": "Û",
+   "to": "•",
+   "confidence": "H"
+  }
+ ],
+ "reorder": {
+  "preBase_iMatra": {
+   "f": "ि",
+   "Ç": "िं"
+  },
+  "postSyllable_reph": {
+   "Z": {
+    "emit": "",
+    "reph": true
+   },
+   "±": {
+    "emit": "ं",
+    "reph": true
+   },
+   "Æ": {
+    "emit": "ि",
+    "reph": true
+   },
+   "É": {
+    "emit": "िं",
+    "reph": true
+   },
+   "Ê": {
+    "emit": "ी",
+    "reph": true
+   }
+  }
+ },
+ "excluded": {
+  "¤": "unidentified mark below base (looks like a doubled hook) - needs a real document",
+  "§": "same glyph as ¤",
+  "ö": "wide द्ध/द्व-like conjunct, lower part unclear - needs a real document",
+  "Ú": "narrow half-न piece; only 'Úk'->न is mapped"
+ },
+ "passthrough": "ASCII digits 0-9 and ! are the font's own Latin glyphs: pass through unchanged.",
+ "tests": [
+  {
+   "input": "Hkkjr",
+   "expected": "भारत"
+  },
+  {
+   "input": "fgUnh",
+   "expected": "हिन्दी"
+  },
+  {
+   "input": "jk\"Vª",
+   "expected": "राष्ट्र"
+  },
+  {
+   "input": "d`fr",
+   "expected": "कृति"
+  },
+  {
+   "input": "deZ",
+   "expected": "कर्म"
+  },
+  {
+   "input": "vkSj",
+   "expected": "और"
+  },
+  {
+   "input": "ÅtkZ",
+   "expected": "ऊर्जा"
+  },
+  {
+   "input": "f'k{kk",
+   "expected": "शिक्षा"
+  },
+  {
+   "input": "Kku",
+   "expected": "ज्ञान"
+  },
+  {
+   "input": "Jh",
+   "expected": "श्री"
+  },
+  {
+   "input": "çdk'k",
+   "expected": "प्रकाश"
+  },
+  {
+   "input": "fo|ky;",
+   "expected": "विद्यालय"
+  },
+  {
+   "input": "vkWfQl",
+   "expected": "ऑफिस"
+  },
+  {
+   "input": "yM+dk",
+   "expected": "लड़का"
+  },
+  {
+   "input": "dhrÆ",
+   "expected": "कीर्ति"
+  },
+  {
+   "input": "e`R;q",
+   "expected": "मृत्यु"
+  },
+  {
+   "input": "fnYyh",
+   "expected": "दिल्ली"
+  },
+  {
+   "input": "prqFkZ",
+   "expected": "चतुर्थ"
+  },
+  {
+   "input": "vk'khokZn",
+   "expected": "आशीर्वाद"
+  },
+  {
+   "input": "lkèkq",
+   "expected": "साधु"
+  },
+  {
+   "input": "çèkkuea=h",
+   "expected": "प्रधानमंत्री"
+  },
+  {
+   "input": "xk¡o",
+   "expected": "गाँव"
+  },
+  {
+   "input": "gSa",
+   "expected": "हैं"
+  },
+  {
+   "input": "dõi",
+   "expected": "कैंप"
+  },
+  {
+   "input": "Çlg",
+   "expected": "सिंह"
+  },
+  {
+   "input": "fLFkfr",
+   "expected": "स्थिति"
+  },
+  {
+   "input": "dÉ",
+   "expected": "र्किं"
+  },
+  {
+   "input": "dÊ",
+   "expected": "र्की"
+  },
+  {
+   "input": "b±",
+   "expected": "ईं"
+  },
+  {
+   "input": "gS A",
+   "expected": "है ।"
+  },
+  {
+   "input": "fpà",
+   "expected": "चिह्न"
+  },
+  {
+   "input": "Åij",
+   "expected": "ऊपर"
+  },
+  {
+   "input": "_f\"k",
+   "expected": "ऋषि"
+  },
+  {
+   "input": "fp=",
+   "expected": "चित्र"
+  },
+  {
+   "input": "fo'o",
+   "expected": "विश्व"
+  },
+  {
+   "input": "Ùkj",
+   "expected": "त्तर"
+  },
+  {
+   "input": "egÙo",
+   "expected": "महत्त्व"
+  },
+  {
+   "input": "vè;;u",
+   "expected": "अध्ययन"
+  },
+  {
+   "input": "n'kZu",
+   "expected": "दर्शन"
+  },
+  {
+   "input": "/keZ",
+   "expected": "धर्म"
+  }
+ ]
+}

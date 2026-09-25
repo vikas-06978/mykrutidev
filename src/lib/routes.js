@@ -16,7 +16,7 @@
  *
  * It is necessary but NOT sufficient: isLive() also requires both of the page's
  * fonts to carry `accurate: true` in fontMaps.js. So a converter page cannot go
- * live on an unverified mapping even if someone flips `ready` by mistake — the
+ * live on an unverified mapping even if someone flips `ready` by mistake - the
  * page keeps rendering "coming soon" until the map is actually done and tested.
  * That is deliberate. Accuracy is the entire product.
  *
@@ -35,7 +35,7 @@ export const SITE = 'https://mykrutidev.com';
 /**
  * @typedef {object} Page
  * @property {string}  path
- * @property {boolean} ready     author's switch — see the note above
+ * @property {boolean} ready     author's switch - see the note above
  * @property {'converter'|'content'} kind  decides which "not ready" panel shows
  * @property {string|null} from  font key, null on content pages
  * @property {string|null} to
@@ -46,12 +46,14 @@ export const SITE = 'https://mykrutidev.com';
  * @property {string}  description
  * @property {string[]} related
  * @property {string}  [note]    why it is not ready yet, shown on the panel
+ * @property {boolean} [beta]    live, but shows a Beta badge beside the h1
+ * @property {string}  [betaNote] one line under the badge saying what it is for
  */
 
 /** @type {Page[]} */
 export const PAGES = [
   // ==========================================================================
-  // LIVE — mapping verified against real documents and covered by fixtures
+  // LIVE - mapping verified against real documents and covered by fixtures
   // ==========================================================================
   {
     path: '/',
@@ -128,8 +130,43 @@ export const PAGES = [
     h1: 'English to Hindi Typing (Roman to Hindi)',
     title: 'English to Hindi Typing - Type Hindi in Roman (Free)',
     description:
-      'Free English to Hindi typing tool. Type Hindi in Roman letters — namaste becomes नमस्ते — and get Unicode Hindi or Kruti Dev instantly. Nothing is uploaded.',
-    related: ['/', '/unicode-to-kruti-dev', '/all-converters'],
+      'Free English to Hindi typing tool. Type Hindi in Roman letters - namaste becomes नमस्ते - and get Unicode Hindi or Kruti Dev instantly. Nothing is uploaded.',
+    related: ['/hindi-keyboard', '/hindi-typing-test', '/unicode-to-kruti-dev'],
+  },
+  {
+    path: '/hindi-typing-test',
+    ready: true,
+    // Not a converter: nothing is mapped onto anything. It scores keystrokes
+    // against a passage, and the Kruti Dev half of it only borrows the engine
+    // at build time to produce the target text.
+    kind: 'content',
+    from: null,
+    to: null,
+    tool: true,
+    group: 'More',
+    nav: 'Hindi Typing Test',
+    navSub: 'Tutor, lessons and speed test',
+    h1: 'Hindi Typing Test - Kruti Dev Remington Typing Tutor (Free)',
+    title: 'Hindi Typing Test | KrutiDev Remington Typing Tutor for CPCT & SSC',
+    description:
+      'Free Hindi typing tutor and test on the Kruti Dev Remington layout. On-screen keyboard, next-key and finger guide, eleven lessons from the home row up, and speed tests from 1 minute to 2 hours with live WPM, accuracy and a progress bar. Pause the clock or submit any time to see your result. Built for CPCT, SSC and court exams. Nothing uploaded.',
+    related: ['/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev'],
+  },
+  {
+    path: '/hindi-keyboard',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    tool: true,
+    group: 'More',
+    nav: 'Hindi Keyboard',
+    navSub: 'On-screen Devanagari',
+    h1: 'Hindi Keyboard Online - Type in Hindi Without a Hindi Keypad',
+    title: 'Hindi Keyboard Online | Type in Hindi Free, No Install Needed',
+    description:
+      'Free on-screen Hindi keyboard. Tap the Devanagari letters to write Hindi without installing a keypad - vowels turn into matras automatically - then copy the Unicode. Works on phones, nothing uploaded.',
+    related: ['/hindi-typing-test', '/english-to-hindi-typing', '/unicode-to-kruti-dev'],
   },
   {
     path: '/all-converters',
@@ -204,8 +241,48 @@ export const PAGES = [
     related: ['/devlys-to-mangal', '/unicode-to-devlys', '/mangal-to-kruti-dev'],
   },
 
+  // ---- Abbasi Chanakya New: built from the real font file, glyph by glyph ---
+  // Filed under "Chanakya" because that is what its visitors call the font, but
+  // it is its own map and its own font key. The generic Chanakya pages below
+  // stay "coming soon": that layout differs from this one in several keys.
+  {
+    path: '/abbasi-chanakya-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'abbasi-chanakya',
+    to: 'unicode',
+    group: 'Chanakya',
+    nav: 'Abbasi Chanakya → Unicode',
+    h1: 'Abbasi Chanakya New to Unicode Converter',
+    title: 'Abbasi Chanakya New to Unicode Converter | Chanakya Font to Hindi Unicode',
+    description:
+      'Convert Hindi typed in the Abbasi Chanakya New font to Unicode, with the i-matra and reph put in the right order. Free, instant and entirely in your browser - nothing is uploaded.',
+    related: ['/unicode-to-abbasi-chanakya', '/', '/devlys-to-unicode'],
+    // Not yet checked against a real document typed in this font - see the
+    // handoff in vendor/fonts/Abbasi Chanakya New/. Drop both once it has been.
+    beta: true,
+    betaNote: 'For text typed in the Abbasi Chanakya New font.',
+  },
+  {
+    path: '/unicode-to-abbasi-chanakya',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'abbasi-chanakya',
+    // Under "Chanakya" rather than "Unicode / Hindi" so both Abbasi pages sit
+    // together in one dropdown.
+    group: 'Chanakya',
+    nav: 'Unicode → Abbasi Chanakya',
+    h1: 'Unicode to Abbasi Chanakya New Converter',
+    title: 'Unicode to Abbasi Chanakya New Converter | Hindi to Chanakya Font Code',
+    description:
+      'Convert Unicode Hindi to Abbasi Chanakya New font code for MS Word, with the i-matra and reph placed the way the font types them. Live Hindi preview, free, nothing uploaded.',
+    related: ['/abbasi-chanakya-to-unicode', '/unicode-to-kruti-dev', '/unicode-to-devlys'],
+    beta: true,
+  },
+
   // ==========================================================================
-  // SCAFFOLDED — routes and SEO exist, mapping does not. Coming soon panel.
+  // SCAFFOLDED - routes and SEO exist, mapping does not. Coming soon panel.
   // ==========================================================================
 
   // ---- Chanakya: a genuinely different vendor layout, map is empty ---------
@@ -222,7 +299,7 @@ export const PAGES = [
     description:
       'Convert Chanakya font Hindi to Unicode instantly in your browser. Free, no signup, nothing uploaded.',
     related: ['/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/'],
-    note: 'Chanakya uses a completely different keyboard layout from Kruti Dev — none of the 105 keys in the existing map lands on the same letter, and Chanakya spends most of its lowercase range on ready-made conjunct ligatures rather than plain consonants. That layout has to be built and checked against real Chanakya documents; reading it off the font alone would produce fluent-looking Hindi with silently wrong conjuncts.',
+    note: 'The Chanakya layout is now written and round-trips cleanly through conjuncts, matras and nukta letters, and every key it uses exists in the Chanakya font file we hold. What is still missing is proof that it matches the font rather than only itself: the font names itself simply "Chanakya", and Walkman Chanakya 905 is one of several cuts that do not all share a keyboard layout. Until a real Chanakya document confirms it, this page stays off - a converter that is confidently wrong is worse than one that is honestly unfinished.',
   },
   {
     path: '/unicode-to-chanakya',
@@ -237,7 +314,7 @@ export const PAGES = [
     description:
       'Convert Unicode Hindi back to Chanakya font encoding. Live, free and fully client-side.',
     related: ['/chanakya-to-unicode', '/'],
-    note: 'Waiting on the Chanakya 905 layout, which is being built from real documents.',
+    note: 'The Chanakya layout is written and round-trips cleanly, but it has not yet been confirmed against a real Chanakya document - and the font file names itself only `Chanakya`, not Walkman Chanakya 905. This page stays off until that is settled.',
   },
   {
     path: '/kruti-dev-to-chanakya',
@@ -252,7 +329,7 @@ export const PAGES = [
     description:
       'Convert Kruti Dev text to Chanakya font encoding online. Free, browser-based, no upload.',
     related: ['/chanakya-to-kruti-dev', '/chanakya-to-unicode', '/'],
-    note: 'Waiting on the Chanakya 905 layout. The Kruti Dev half of this conversion is already done and tested.',
+    note: 'The Kruti Dev half of this conversion is done and tested. The Chanakya half is written and round-trips cleanly, but is not yet confirmed against a real Chanakya document, so the page stays off.',
   },
   {
     path: '/chanakya-to-kruti-dev',
@@ -267,7 +344,7 @@ export const PAGES = [
     description:
       'Convert Chanakya font Hindi to Kruti Dev 010 text online, free and entirely in your browser.',
     related: ['/kruti-dev-to-chanakya', '/chanakya-to-unicode'],
-    note: 'Waiting on the Chanakya 905 layout. The Kruti Dev half of this conversion is already done and tested.',
+    note: 'The Kruti Dev half of this conversion is done and tested. The Chanakya half is written and round-trips cleanly, but is not yet confirmed against a real Chanakya document, so the page stays off.',
   },
 
   // ---- Shusha: older Hindi DTP font, map is empty --------------------------
@@ -335,7 +412,7 @@ export const PAGES = [
   },
 
   // ==========================================================================
-  // PLANNED — other Indic scripts. Routes only, no mapping work started.
+  // PLANNED - other Indic scripts. Routes only, no mapping work started.
   // Activate only after a keyword-volume check AND a tested mapping.
   // ==========================================================================
   {
@@ -418,13 +495,13 @@ export const PAGES = [
   },
 
   // ==========================================================================
-  // CONTENT — reference pages, not converters. Copy still to be written.
+  // CONTENT - reference pages, not converters. Copy still to be written.
   // ==========================================================================
   {
     path: '/hindi-font-converter',
     ready: true,
     // A hub page that also converts. kind stays 'content' so it is not listed
-    // as a converter in the nav or the footer — those are keyed by direction,
+    // as a converter in the nav or the footer - those are keyed by direction,
     // and this page's direction is already "/".
     kind: 'content',
     from: 'kruti-dev',
@@ -522,7 +599,7 @@ function groupConverters() {
  * A group only appears if it has at least one live page: a menu containing
  * nothing but "soon" items is a dead end. Within a group every converter is
  * listed, live ones first, and `live` tells the menu whether to render a link
- * or a greyed-out placeholder — so the menu doubles as a roadmap without ever
+ * or a greyed-out placeholder - so the menu doubles as a roadmap without ever
  * linking somewhere unusable.
  */
 export function navGroups() {
@@ -550,7 +627,7 @@ export function allGroups() {
 }
 
 /**
- * The reverse-direction page, when one exists — powers the swap arrow.
+ * The reverse-direction page, when one exists - powers the swap arrow.
  *
  * Converter pages only, on both sides. A content page may carry a `from`/`to`
  * pair so it can host a working converter, but it does not own that direction:
@@ -586,11 +663,26 @@ export function isIndexable(absoluteUrl) {
   return page ? isSelfCanonical(page) : false;
 }
 
-/** Guard: catch a typo'd font key at build time rather than at runtime. */
-for (const p of PAGES) {
-  for (const key of [p.from, p.to]) {
-    if (key && !FONTS[key]) {
-      throw new Error(`routes.js: ${p.path} references unknown font "${key}"`);
+/**
+ * Guard: catch a typo'd font key at build time rather than at runtime.
+ *
+ * Separated from the call below so it can be tested, for the same reason
+ * assertAligned() in tutor.build.js is: every entry in PAGES is correct, which
+ * leaves the throw path with nothing to exercise it. A guard nobody has ever
+ * seen fire is a guard that might throw a TypeError instead of the message it
+ * promises, on the one day somebody mistypes a font key.
+ *
+ * @param {{path: string, from?: string, to?: string}[]} pages
+ * @param {Record<string, unknown>} fonts
+ */
+export function assertKnownFonts(pages, fonts) {
+  for (const p of pages) {
+    for (const key of [p.from, p.to]) {
+      if (key && !fonts[key]) {
+        throw new Error(`routes.js: ${p.path} references unknown font "${key}"`);
+      }
     }
   }
 }
+
+assertKnownFonts(PAGES, FONTS);

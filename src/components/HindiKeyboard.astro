@@ -1,0 +1,393 @@
+---
+import { BASE_ROWS, EXTRA_ROWS, BOTTOM_KEYS, VOWEL_MATRA } from '../lib/keyboard.js';
+
+/**
+ * The on-screen Devanagari keyboard.
+ *
+ * A text box with the keys under it, laid out so both are on screen at once:
+ * the text box sticks to the top of the tool, and on phones and tablets the
+ * keys dock to the bottom of the screen like a phone keyboard. See
+ * src/styles/hindi-keyboard.css for the layout rules.
+ *
+ * Vowel keys are "smart": after a consonant they insert the matra (क + इ ->
+ * कि) and show it on the cap. See keyboard.js.
+ *
+ * The physical keyboard is never intercepted, so anyone with a Hindi layout can
+ * type straight into the box.
+ */
+
+const isVowel = (ins: string) => Object.hasOwn(VOWEL_MATRA, ins);
+---
+
+<div class="hk card" data-keyboard data-docked="false" data-own="false">
+  {/* ------------------- Text box + actions (sticky) ------------------- */}
+  <div class="hk-top" data-role="top">
+    <label for="kb-out" class="sr-only">Hindi text</label>
+    {/*
+      An ordinary, fully editable textarea: arrow keys, selection, paste and
+      undo all keep working. On touch screens it gets inputmode="none" while
+      our keys are open, so the phone's own keyboard does not cover them.
+    */}
+    <textarea
+      id="kb-out"
+      data-role="text"
+      rows="3"
+      lang="hi"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="यहाँ हिंदी टाइप करें - नीचे के अक्षर दबाएँ"
+      class="hk-text deva"></textarea>
+
+    <div class="hk-actions">
+      <button type="button" data-role="copy" class="btn btn-primary">
+        <span data-label>Copy text</span>
+      </button>
+      <button type="button" data-role="clear" class="btn btn-ghost">Clear</button>
+      <button
+        type="button"
+        data-role="own"
+        class="hk-own btn btn-ghost"
+        aria-pressed="false"
+        title="Hide these keys and type with your phone's keyboard"
+      >
+        Use my keyboard
+      </button>
+      <button type="button" data-role="reopen" class="hk-reopen btn btn-outline">
+        Show Hindi keys
+      </button>
+      <span data-role="count" class="hk-count" aria-label="characters">0</span>
+    </div>
+  </div>
+
+  {/* Holds the docked keyboard's place in the page, so docking never jumps. */}
+  <div class="hk-spacer" aria-hidden="true"></div>
+
+  {/* ----------------------------- The keys ----------------------------- */}
+  <div class="hk-pad" data-role="pad" role="group" aria-label="Hindi keyboard">
+    <div class="hk-bar">
+      <div data-role="layer" role="group" aria-labelledby="kb-layer" class="cv-seg">
+        <span id="kb-layer" class="cv-seg-label">Show:</span>
+        <button type="button" data-layer="base" aria-pressed="true">Common</button>
+        <button type="button" data-layer="extra" aria-pressed="false">More letters</button>
+      </div>
+    </div>
+
+    {/*
+      One listener on this container rather than a hundred on the caps, and a
+      pointerdown that preventDefaults so the caret never leaves the textarea.
+    */}
+    <div class="hk-scroll" data-role="keys">
+      {
+        [
+          { layer: 'base', rows: BASE_ROWS },
+          { layer: 'extra', rows: EXTRA_ROWS },
+        ].map(({ layer, rows }) => (
+          <div data-layer-panel={layer} hidden={layer !== 'base'}>
+            {rows.map((row) => (
+              <div class="hk-row">
+                <span class="hk-label" lang="hi">
+                  {row.label}
+                </span>
+                <div class="hk-keys">
+                  {row.keys.map((k) => (
+                    <button
+                      type="button"
+                      class="hk-key"
+                      data-ins={k.ins}
+                      data-vowel={isVowel(k.ins) ? k.ins : undefined}
+                      aria-label={k.name ?? k.ins}
+                      title={k.name}
+                    >
+                      {k.key}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="hk-bottom" data-role="bottom">
+      <button type="button" class="hk-key hk-key-util hk-key-space" data-ins=" " aria-label="Space">
+        Space
+      </button>
+      <button type="button" class="hk-key hk-key-util" data-role="backspace" aria-label="Backspace">
+        &#8592;
+      </button>
+      <button type="button" class="hk-key hk-key-util" data-ins="&#10;" aria-label="Enter">
+        Enter
+      </button>
+      {
+        BOTTOM_KEYS.map((k) => (
+          <button type="button" class="hk-key" data-ins={k.ins} aria-label={k.name ?? k.ins}>
+            {k.key}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <p class="hk-foot">
+    Need Kruti Dev? Use the <a href="/unicode-to-kruti-dev">Unicode to Kruti Dev converter</a>.
+    Your own keyboard still works, and nothing you type leaves your browser.
+  </p>
+</div>
+
+<script>
+  import { clusters } from '../lib/typing.js';
+  import { consonantBefore, pressKey, vowelLabel, vowelName } from '../lib/keyboard.js';
+
+  /** Phones and tablets: the keyboard docks and the phone keyboard is held back. */
+  const NARROW = window.matchMedia('(max-width: 1023px)');
+  const COARSE = window.matchMedia('(pointer: coarse)');
+  const MAX_LINES = 6;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-keyboard]')) {
+    setup(root);
+  }
+
+  function setup(root: HTMLElement) {
+    const q = <T extends HTMLElement>(role: string) =>
+      root.querySelector<T>(`[data-role="${role}"]`)!;
+
+    const text = q<HTMLTextAreaElement>('text');
+    const top = q<HTMLElement>('top');
+    const pad = q<HTMLElement>('pad');
+    const count = q<HTMLElement>('count');
+    const keys = q<HTMLElement>('keys');
+    const ownBtn = q<HTMLButtonElement>('own');
+    const reopenBtn = q<HTMLButtonElement>('reopen');
+    const vowelKeys = [...root.querySelectorAll<HTMLButtonElement>('[data-vowel]')];
+
+    let ownKeyboard = false;
+
+    // ----------------------------------------------------------------------
+    // The phone's own keyboard: held back while ours is open on a touch
+    // screen, released by "Use my keyboard". A desktop never gets
+    // inputmode="none" - the physical keyboard must always just work.
+    // ----------------------------------------------------------------------
+    function applyInputMode() {
+      const holdBack = (NARROW.matches || COARSE.matches) && !ownKeyboard;
+      if (holdBack) text.setAttribute('inputmode', 'none');
+      else text.removeAttribute('inputmode');
+    }
+
+    function setOwnKeyboard(on: boolean) {
+      ownKeyboard = on;
+      root.dataset.own = String(on);
+      ownBtn.setAttribute('aria-pressed', String(on));
+      applyInputMode();
+      // Re-focus so the change takes effect: the phone keyboard opens now, or
+      // closes for ours.
+      text.blur();
+      text.focus();
+      dock();
+    }
+    ownBtn.addEventListener('click', () => setOwnKeyboard(true));
+    reopenBtn.addEventListener('click', () => setOwnKeyboard(false));
+
+    // ----------------------------------------------------------------------
+    // Docking (phones and tablets). The keys go fixed to the bottom of the
+    // screen once the text box has stuck to the top, and come back into the
+    // page once the tool scrolls away. The spacer keeps their height in the
+    // page so neither switch moves anything.
+    // ----------------------------------------------------------------------
+    // Synchronous on purpose: one layout read per scroll event is cheap, and a
+    // requestAnimationFrame here would never run in a backgrounded tab, leaving
+    // the keys undocked when the tab comes back.
+    function dock() {
+      const r = root.getBoundingClientRect();
+      const on = NARROW.matches && !ownKeyboard && r.top <= 1 && r.bottom > top.offsetHeight + 24;
+      if ((root.dataset.docked === 'true') !== on) {
+        root.dataset.docked = String(on);
+      }
+      if (on) root.style.setProperty('--hk-pad-h', `${pad.offsetHeight}px`);
+    }
+    window.addEventListener('scroll', dock, { passive: true });
+    window.addEventListener('resize', () => {
+      // Also re-derive the input mode: a width change that happened before
+      // the NARROW listener below was attached would otherwise be missed.
+      applyInputMode();
+      dock();
+    });
+    NARROW.addEventListener('change', () => {
+      applyInputMode();
+      dock();
+    });
+
+    /** On a phone, bring the whole tool into view so the keys can dock. */
+    function bringIntoView() {
+      if (!NARROW.matches || ownKeyboard) return;
+      if (root.getBoundingClientRect().top > 1) {
+        root.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+      // Already at the top means no scroll event will come to do this.
+      dock();
+    }
+    text.addEventListener('focus', bringIntoView);
+
+    // ----------------------------------------------------------------------
+    // Text box: 3 lines, grows to 6, then scrolls inside itself.
+    // ----------------------------------------------------------------------
+    function autoGrow() {
+      const cs = getComputedStyle(text);
+      const line = parseFloat(cs.lineHeight) || 30;
+      const chrome =
+        parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) +
+        parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      text.style.height = 'auto';
+      text.style.height = `${Math.min(text.scrollHeight + 2, line * MAX_LINES + chrome)}px`;
+    }
+
+    // ----------------------------------------------------------------------
+    // Smart vowels: the caps show what a tap will insert right now.
+    // ----------------------------------------------------------------------
+    let afterConsonant: boolean | null = null;
+    function refreshVowels() {
+      const now = consonantBefore(text.value, text.selectionStart);
+      if (now === afterConsonant) return;
+      afterConsonant = now;
+      for (const k of vowelKeys) {
+        const v = k.dataset.vowel!;
+        k.textContent = vowelLabel(v, now);
+        k.setAttribute('aria-label', vowelName(v, now));
+        k.dataset.matra = String(now && vowelLabel(v, now) !== v);
+      }
+    }
+    document.addEventListener('selectionchange', () => {
+      if (document.activeElement === text) refreshVowels();
+    });
+
+    // ----------------------------------------------------------------------
+    // Inserting
+    // ----------------------------------------------------------------------
+    function insert(ins: string) {
+      const { text: next, caret } = pressKey(
+        text.value,
+        text.selectionStart,
+        text.selectionEnd,
+        ins,
+      );
+      if (next !== text.value) {
+        // setRangeText keeps the browser's undo history closer to a real
+        // keystroke than assigning .value would.
+        text.setRangeText(next.slice(text.selectionStart, caret), text.selectionStart, text.selectionEnd, 'end');
+      }
+      text.focus();
+      update();
+    }
+
+    /**
+     * Delete one cluster, not one codepoint, so the on-screen and physical
+     * Backspace agree: after कि both characters go.
+     */
+    function backspace() {
+      const start = text.selectionStart;
+      const end = text.selectionEnd;
+      if (start !== end) {
+        text.setRangeText('', start, end, 'end');
+      } else if (start > 0) {
+        const last = clusters(text.value.slice(0, start)).at(-1) ?? '';
+        text.setRangeText('', start - last.length, start, 'end');
+      }
+      text.focus();
+      update();
+    }
+
+    // Keep the caret in the box: without preventDefault the button takes
+    // focus on pointerdown and every tap inserts at the end. It also kills the
+    // native :active state, so the press is marked by hand.
+    pad.addEventListener('pointerdown', (e) => {
+      const cap = (e.target as Element).closest<HTMLElement>('.hk-key');
+      if (!cap) return;
+      e.preventDefault();
+      cap.dataset.pressed = 'true';
+    });
+    for (const done of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
+      pad.addEventListener(done, (e) => {
+        (e.target as Element).closest<HTMLElement>('.hk-key')?.removeAttribute('data-pressed');
+      });
+    }
+    pad.addEventListener('click', (e) => {
+      const cap = (e.target as Element).closest<HTMLButtonElement>('.hk-key');
+      if (!cap) return;
+      if (cap.dataset.role === 'backspace') backspace();
+      else if (cap.dataset.ins !== undefined) insert(cap.dataset.ins);
+    });
+
+    text.addEventListener('input', update);
+
+    // ----------------------------------------------------------------------
+    // Layers. "More letters" swaps the rows in place; the text box above is
+    // sticky and the bottom row stays put, so nothing is pushed off screen.
+    // ----------------------------------------------------------------------
+    const layerButtons = root.querySelectorAll<HTMLButtonElement>('[data-role="layer"] button');
+    for (const btn of layerButtons) {
+      btn.addEventListener('click', () => {
+        for (const other of layerButtons) {
+          other.setAttribute('aria-pressed', String(other === btn));
+        }
+        for (const panel of keys.querySelectorAll<HTMLElement>('[data-layer-panel]')) {
+          panel.hidden = panel.dataset.layerPanel !== btn.dataset.layer;
+        }
+        dock();
+      });
+    }
+
+    function update() {
+      count.textContent = String(text.value.length);
+      autoGrow();
+      refreshVowels();
+      // The text box may have grown, which changes where docking starts.
+      dock();
+    }
+
+    // ----------------------------------------------------------------------
+    // Copy / clear
+    // ----------------------------------------------------------------------
+    async function writeClipboard(value: string) {
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch {
+        const scratch = document.createElement('textarea');
+        scratch.value = value;
+        scratch.setAttribute('readonly', '');
+        scratch.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
+        document.body.append(scratch);
+        scratch.select();
+        try {
+          document.execCommand('copy');
+        } finally {
+          scratch.remove();
+        }
+      }
+    }
+
+    const copyBtn = q<HTMLButtonElement>('copy');
+    const copyLabel = copyBtn.querySelector<HTMLElement>('[data-label]')!;
+    let reset: ReturnType<typeof setTimeout> | undefined;
+    copyBtn.addEventListener('click', async () => {
+      if (!text.value) return;
+      await writeClipboard(text.value);
+      copyLabel.textContent = 'Copied!';
+      copyBtn.dataset.copied = 'true';
+      clearTimeout(reset);
+      reset = setTimeout(() => {
+        copyLabel.textContent = 'Copy text';
+        delete copyBtn.dataset.copied;
+      }, 1600);
+    });
+
+    q<HTMLButtonElement>('clear').addEventListener('click', () => {
+      text.value = '';
+      update();
+      text.focus();
+    });
+
+    applyInputMode();
+    update();
+    dock();
+  }
+</script>

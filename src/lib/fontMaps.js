@@ -1,16 +1,19 @@
 /**
- * MyKrutiDev conversion engine — legacy Hindi fonts <-> Unicode Devanagari.
+ * MyKrutiDev conversion engine - legacy Hindi fonts <-> Unicode Devanagari.
  *
  * Everything here runs in the browser. No network, no upload, no state.
  *
+ * Abbasi Chanakya New's table lives in abbasiChanakya.js (read from its handoff
+ * JSON); it is registered below as `abbasi-chanakya`.
+ *
  * ---------------------------------------------------------------------------
- * TEST with real Kruti Dev documents and EXPAND — rare conjuncts/symbols may be
+ * TEST with real Kruti Dev documents and EXPAND - rare conjuncts/symbols may be
  * missing; this accuracy is the site's competitive advantage.
  *
  * The mapping table is KRUTI_DEV, below. Ground truth lives in
  * __fixtures__/kruti-dev.json and runs under `npm test`.
  *
- * QUICK MANUAL CHECK — paste the left column into the Kruti Dev box and confirm
+ * QUICK MANUAL CHECK - paste the left column into the Kruti Dev box and confirm
  * the right column comes out. Then swap the boxes and confirm it comes back.
  *
  *   fganh Hkkjr dh jkt/kkuh gSA  ->  हिंदी भारत की राजधानी है।
@@ -32,7 +35,7 @@
  *  1. A full consonant is often typed as "half consonant + vertical bar", and
  *     the vertical bar glyph is the SAME key as the aa-matra. So `Hk` is भ
  *     (भ् + bar) while `Hkk` is भा (भ + ा). Only longest-key-first matching can
- *     tell those apart — hence the trie.
+ *     tell those apart - hence the trie.
  *
  *  2. Glyphs are stored in visual order, not logical order. The i-matra ि is
  *     typed BEFORE its consonant and the reph र् is typed AFTER its cluster.
@@ -40,8 +43,20 @@
  *     the reorder passes below are the actual work.
  */
 
+import {
+  ABBASI_CHANAKYA_TABLE,
+  ABBASI_CHANAKYA_REVERSE,
+  PRE_BASE_I_MATRA,
+  POST_SYLLABLE_REPH,
+} from './abbasiChanakya.js';
+
 // --- Private-use sentinels. Never survive a conversion. ----------------------
 const REPH = ''; // marks "a reph belongs in front of the cluster I follow"
+
+// Only the Abbasi Chanakya New map emits the two below, so on every other font
+// the passes that resolve them never match anything.
+const PRE_I_NASAL = ''; // "िं, typed before the cluster I precede"
+const FIXED_I = ''; // "ि already in logical order - do not move it"
 
 // --- Devanagari character classes -------------------------------------------
 const NUKTA = '़';
@@ -52,7 +67,7 @@ const RE_MATRA = new RegExp(`[${VOWEL_SIGNS}]`);
 /**
  * Vowel signs EXCEPT the i-matra. The reph passes need this: a reph is typed
  * after the whole syllable including its matra (`dk;kZy;` = का + य + ा + reph
- * = कार्यालय), so the passes must step over a trailing matra — but never over
+ * = कार्यालय), so the passes must step over a trailing matra - but never over
  * the i-matra, which lives on the other side of the cluster in visual order.
  */
 const MATRA_NO_I = 'ऺ-ाी-ौॎॏॕ-ॗॢॣ';
@@ -73,7 +88,7 @@ const KRUTI_DEV = {
   // -- Conjuncts that own a dedicated glyph --------------------------------
   // क्ष obeys the SAME "half + vertical bar" rule as ख/घ/भ below: `{` is the
   // half form क्ष् and `{k` is the full क्ष. Reading `{` as a full क्ष is the
-  // single most damaging mapping error available here — it turns the real
+  // single most damaging mapping error available here - it turns the real
   // spellings `ijh{kk` (परीक्षा) and `f'k{kk` (शिक्षा) into परीक्षाा / शिक्षाा,
   // and `{ks=` (क्षेत्र) into क्षोत्र, because the bar is then read as an
   // aa-matra. `y{;` -> लक्ष्य is the case that pins the half form down.
@@ -162,7 +177,7 @@ const KRUTI_DEV = {
 
   // -- Rakar: the ्र that hangs under a consonant. Already in logical order. --
   // `z` is the stroke that tucks under a stemmed letter. `ª` is the variant the
-  // font uses under ट ठ ड ढ, which have no stem to hang it from — without it
+  // font uses under ट ठ ड ढ, which have no stem to hang it from - without it
   // राष्ट्रीय (`jk"Vªh;`), one of the commonest words in official Hindi, comes
   // out as राष्टªीय with a raw Latin-1 byte still in it.
   z: '्र',
@@ -172,7 +187,7 @@ const KRUTI_DEV = {
   // Forward, the `z` ones are redundant: `i` + `z` already yields प्र. They earn
   // their place in the REVERSE direction. buildReverse feeds the same trie, and
   // longest-match would otherwise prefer the half-consonant key `I` (प्) over
-  // `i` (प), spelling प्र as `Ij` — half-pa followed by a full ra, which renders
+  // `i` (प), spelling प्र as `Ij` - half-pa followed by a full ra, which renders
   // with a visible half-form instead of the rakar hook. The `ª` entries are NOT
   // redundant; they are the only way those clusters read at all.
   '[kz': 'ख्र',
@@ -215,7 +230,7 @@ const KRUTI_DEV = {
   ',': 'ए',
 
   // -- Matras ----------------------------------------------------------------
-  k: 'ा', // ा  (also the vertical bar — see header note)
+  k: 'ा', // ा  (also the vertical bar - see header note)
   f: 'ि', // ि  moved right by the reorder pass
   h: 'ी', // ी
   q: 'ु', // ु
@@ -252,7 +267,7 @@ const KRUTI_DEV = {
   // left over, and they are nowhere near their ASCII meaning: the comma is `]`,
   // the full stop is `-`, the semicolon is `(`, the slash is `@`.
   //
-  // THIS IS WHAT THE COMMA BUG WAS. `,` is ए — `,d` really is एक — so a literal
+  // THIS IS WHAT THE COMMA BUG WAS. `,` is ए - `,d` really is एक - so a literal
   // comma has no business being a comma here. With no entry whose VALUE was a
   // comma, buildReverse produced no comma key, unicodeToLegacy passed a real
   // comma straight through, and the forward pass then correctly read it back as
@@ -262,7 +277,7 @@ const KRUTI_DEV = {
   // Verified glyph by glyph against the outlines in public/fonts/KRDEV010.woff,
   // not from a keyboard chart. `!` is the one key that means itself, so it needs
   // no entry. The slots that draw a letter rather than punctuation (`:` is रु,
-  // `)` is छ, `#` is रु, `G` and `%`) are deliberately left out — see the
+  // `)` is छ, `#` is रु, `G` and `%`) are deliberately left out - see the
   // "unverified layouts" note above on why guessing is worse than not mapping.
   AA: '॥',
   A: '।',
@@ -291,7 +306,7 @@ const KRUTI_DEV = {
 };
 
 // ============================================================================
-// DevLys 010 — VERIFIED to share the Kruti Dev 010 layout on every mapped key
+// DevLys 010 - VERIFIED to share the Kruti Dev 010 layout on every mapped key
 // ============================================================================
 //
 // This used to be a hopeful copy with a TODO on it. It is now a checked one.
@@ -300,7 +315,7 @@ const KRUTI_DEV = {
 // text, but by comparing the two fonts' own glyph outlines. For each of the 105
 // codepoints this map uses, the advance width, contour count and bounding box
 // were read out of `public/fonts/KRDEV010.woff` and `public/fonts/devlys-010.woff`
-// and compared. All 105 agree to within 10 units on a 1000-unit em — i.e. the
+// and compared. All 105 agree to within 10 units on a 1000-unit em - i.e. the
 // same letter, redrawn with the tiny differences you would expect between two
 // cuts of one layout. A sample was then rendered and read by eye as well.
 //
@@ -308,7 +323,7 @@ const KRUTI_DEV = {
 // in the 0x80-0x9F block (codepoints 128-159, plus 252): different advances,
 // different contour counts, several slots empty in one font and filled in the
 // other. That is the "close but not identical" everyone warns about, and it is
-// real. It costs nothing today because THIS MAP TOUCHES NONE OF THOSE SLOTS —
+// real. It costs nothing today because THIS MAP TOUCHES NONE OF THOSE SLOTS -
 // every key is ASCII or >= 0xA1.
 //
 //   >> Before adding any key in 128-159 to KRUTI_DEV, split this map. <<
@@ -317,7 +332,7 @@ const KRUTI_DEV = {
 // silent corruption the moment a key lands in the range where they disagree.
 // There is a test in fontMaps.test.js that fails if one ever does.
 //
-// TEST PAIRS — paste the left side into a DevLys 010 document to check by hand:
+// TEST PAIRS - paste the left side into a DevLys 010 document to check by hand:
 //   fgUnh          -> हिन्दी
 //   Hkkjr          -> भारत
 //   jk"Vªh;        -> राष्ट्रीय
@@ -332,18 +347,405 @@ const DEVLYS = { ...KRUTI_DEV };
 export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 
 // ============================================================================
-// Unverified layouts — deliberately EMPTY
+// Walkman-Chanakya - a genuinely different vendor layout
+// ============================================================================
+//
+// STATUS: accurate: false, and NOT merely because nobody has got round to
+// checking it. The table below is complete and round-trips cleanly. It also
+// does not describe the Chanakya font this repo ships. Both of those are true
+// at once, and the second is why the pages stay on "coming soon".
+//
+// ---------------------------------------------------------------------------
+// WHAT THIS TABLE ACTUALLY IS
+//
+// It is a Remington-family layout, and specifically it is very nearly the
+// KRUTI_DEV table above: of the 105 keys the two have in common, 99 carry the
+// SAME Unicode value - 94%. The six that differ are `½ > / } % ñ`. That is not
+// a coincidence; several legacy Hindi fonts, Walkman's among them, were cut to
+// the same Remington typewriter layout, so a Walkman-Chanakya map looking like
+// a Kruti Dev map is expected rather than suspicious.
+//
+// ---------------------------------------------------------------------------
+// WHY IT IS NOT SWITCHED ON: IT DISAGREES WITH public/fonts/Walkman-Chanakya.woff
+//
+// Measured the same way DEVLYS was verified above - glyph by glyph, comparing
+// contour count, bounding box and advance width across ASCII 33-126:
+//
+//   DevLys 010 vs Kruti Dev 010 ........... 94 of 94 glyphs agree  (100%)
+//   Walkman-Chanakya.woff vs Kruti Dev 010 .. 6 of 94 glyphs agree   (6%)
+//
+// DevLys is the control: two fonts that really do share a layout agree on
+// everything. The shipped file agrees on almost nothing, so it does NOT use the
+// Remington layout this table describes.
+//
+// The direct check is worse still, and is the one to quote. Render each key in
+// the shipped font and compare it with the letter this table claims the key is.
+// Kruti Dev draws the claimed letter every time; the shipped font draws it
+// essentially never, because its lowercase range holds ready-made conjunct
+// ligatures where Remington has plain consonants:
+//
+//   key   table says   Kruti draws   Walkman-Chanakya.woff draws
+//    d       क             क                स्त
+//    x       ग             ग                फ
+//    p       च             च                श्र
+//    t       ज             ज                ह्
+//    r       त             त                ह्र
+//    i       प             प                द्ध
+//    l       स             स                द्य
+//    g       ह             ह                द्र
+//    v       अ             अ                क
+//    K      ज्ञ            ज्ञ                च
+//
+// The file has been renamed twice - chanakya.woff, then Walkman-Chanakya.woff -
+// and is byte-identical through both. A rename does not change a glyph, so the
+// numbers above are unchanged as well.
+//
+// So one of the two is mislabelled. Either the supplied mapping is not
+// Walkman-Chanakya, or the shipped file is not Walkman-Chanakya 905.
+// The font's own name table says only "Chanakya" (Fontographer 4.1.5, 2003) -
+// no "Walkman", no "905" - and Chanakya is a family with several incompatible
+// cuts, so the file cannot settle the question either.
+//
+// This matters concretely rather than theoretically: legacyFonts.js uses
+// this file as the PREVIEW face for this font key. Switching the pages on
+// would show every user their text rendered in a font that draws different
+// letters than the converter produced - fluent-looking Devanagari that is the
+// wrong Devanagari, which is the exact failure the `accurate` gate exists to
+// prevent.
+//
+// ---------------------------------------------------------------------------
+// TO FINISH THIS, one of:
+//
+//   a) obtain the real Walkman-Chanakya 905 font, confirm its glyphs against
+//      this table, and replace public/fonts/Walkman-Chanakya.woff with it; or
+//   b) obtain a real document in the Chanakya cut we already ship and build the
+//      map for THAT layout instead - in which case this table is the wrong
+//      starting point and should be replaced, not adjusted.
+//
+// Either way, then add a fixture next to __fixtures__/kruti-dev.json and flip
+// `accurate`. The check below (chanakya.test.js) fails loudly if anyone flips
+// it while the font and the table still disagree.
+//
+// The eight pairs worth checking by hand once a matching font is in place -
+// between them they cover both reorder rules, the conjuncts that break first,
+// and the nukta:
+//
+//   fgUnh            ->  हिंदी        (i-matra reorder)
+//   Hkkjr            ->  भारत
+//   ijh{kk           ->  परीक्षा      (क्ष)
+//   jk"Vªh;          ->  राष्ट्रीय
+//   dk;kZy;          ->  कार्यालय     (reph reorder over a matra)
+//   iz/kkuea=h       ->  प्रधानमंत्री  (त्र)
+//   cM+k             ->  बड़ा          (nukta)
+//   Kku              ->  ज्ञान
+//
+// ----------------------------------------------------------------------------
+// HOW THIS TABLE RELATES TO THE SUPPLIED DATA
+//
+// The values are the supplied ones. Three supplied entries are deliberately
+// NOT here, because including them would corrupt output rather than improve it:
+//
+//   "f=k" -> "f="    Not a mapping at all - the value is legacy keystrokes, not
+//   "f="  -> "त्रि"   Unicode. It is one converter's two-pass trick for the
+//                    i-matra. This engine reorders properly, so `f` + `=k`
+//                    already composes to त्रि on its own. Keeping the pair would
+//                    hard-code one spelling of a rule that handles every word.
+//
+//   "I+ks" -> "पे़"   Malformed: a nukta AFTER a vowel sign is not a sequence
+//                    Devanagari permits, and the pieces (`I`+`+`+`ks`) say
+//                    प्+़+ो, which is not पे़ either. Something is wrong with
+//                    this entry at the source, so it is left out rather than
+//                    guessed at. `I`, `+` and `ks` all still work separately.
+//
+// Order matters for ONE reason, exactly as in KRUTI_DEV: buildReverse() keeps
+// the FIRST key it sees for each Unicode value, so whichever spelling comes
+// first is the one the Unicode -> Chanakya direction will produce. Where the
+// layout offers two keys for one letter (क is `d`, `Dk` and `oQ`; ज is `t`,
+// `Tk` and `”k`) the plain one is listed first on purpose.
+const CHANAKYA = {
+  // -- Nukta letters. First, because `d+` must beat `d`. --------------------
+  'd+': 'क़',
+  '[+k': 'ख़',
+  '[+': 'ख़्',
+  'x+': 'ग़',
+  't+': 'ज़',
+  'T+': 'ज़्',
+  'M+': 'ड़',
+  '<+': 'ढ़',
+  ';+': 'य़',
+  'j+': 'ऱ',
+  'u+': 'ऩ',
+
+  // -- Conjuncts with a dedicated glyph or spelling -------------------------
+  '¼Z': 'र्द्ध',
+  nzZ: 'र्द्र',
+  '{k': 'क्ष',
+  '=k': 'त्र',
+  xz: 'ग्र',
+  // º is ह् and z is ्र, so composing them would give ह् + ्र - two halants in
+  // a row, which is not a thing. The pair has its own entry for that reason.
+  'ºz': 'ह्र',
+  'Ùk': 'त्त',
+  'Nî': 'छ्य',
+  'Vî': 'ट्य',
+  'Bî': 'ठ्य',
+  'Mî': 'ड्य',
+  '<î': 'ढ्य',
+
+  // -- Independent vowels ---------------------------------------------------
+  // `vk` is आ the same way `Dk` is क: a half form plus the vertical bar. And
+  // `bZ` is ई rather than इ + reph, so it has to outrank both `b` and `Z`.
+  'v‚': 'ऑ',
+  vkS: 'औ',
+  vks: 'ओ',
+  vk: 'आ',
+  baZ: 'ईं',
+  'b±': 'ईं',
+  bZ: 'ई',
+  mQ: 'ऊ',
+  ',s': 'ऐ',
+  v: 'अ',
+  b: 'इ',
+  m: 'उ',
+  'Å': 'ऊ',
+  ',': 'ए', // NOT a comma - the comma is `]`. See the note in KRUTI_DEV.
+  '½': 'ऋ',
+  'Ã': 'ई',
+
+  // -- Full consonants written as "half + vertical bar" ---------------------
+  Dk: 'क',
+  '[k': 'ख',
+  Xk: 'ग',
+  '?k': 'घ',
+  Pk: 'च',
+  Tk: 'ज',
+  '”k': 'ज',
+  '.k': 'ण',
+  Rk: 'त',
+  Fk: 'थ',
+  'èk': 'ध',
+  Uk: 'न',
+  IkQ: 'फ',
+  iQ: 'फ',
+  Ik: 'प',
+  Ck: 'ब',
+  Hk: 'भ',
+  Ek: 'म',
+  'Õk': 'य',
+  jQ: 'रू',
+  Yk: 'ल',
+  oQ: 'क',
+  Ok: 'व',
+  "'k": 'श',
+  'Ük': 'श',
+  '"k': 'ष',
+  Lk: 'स',
+
+  // -- Single consonants, full then half ------------------------------------
+  'ô': 'क्क',
+  d: 'क',
+  D: 'क्',
+  '[': 'ख्',
+  x: 'ग',
+  X: 'ग्',
+  'Ä': 'घ',
+  '?': 'घ्',
+  '³': 'ङ',
+  p: 'च',
+  P: 'च्',
+  N: 'छ',
+  t: 'ज',
+  T: 'ज्',
+  '”': 'ज्',
+  '>': 'झ',
+  '÷': 'झ्',
+  '¥': 'ञ',
+  'ê': 'ट्ट',
+  'ë': 'ट्ठ',
+  V: 'ट',
+  B: 'ठ',
+  'ì': 'ड्ड',
+  'ï': 'ड्ढ',
+  M: 'ड',
+  '<': 'ढ',
+  '.': 'ण्',
+  r: 'त',
+  R: 'त्',
+  F: 'थ्',
+  n: 'द',
+  '/': 'ध',
+  'è': 'ध्',
+  u: 'न',
+  U: 'न्',
+  i: 'प',
+  I: 'प्',
+  c: 'ब',
+  C: 'ब्',
+  H: 'भ्',
+  e: 'म',
+  E: 'म्',
+  ';': 'य',
+  'Õ': 'य्',
+  j: 'र',
+  y: 'ल',
+  Y: 'ल्',
+  G: 'ळ',
+  o: 'व',
+  O: 'व्',
+  "'": 'श्',
+  'Ü': 'श्',
+  '"': 'ष्',
+  l: 'स',
+  L: 'स्',
+  g: 'ह',
+
+  // -- Conjuncts that are one key ------------------------------------------
+  'Ù': 'त्त्',
+  'ä': 'क्त',
+  '|': 'द्य',
+  K: 'ज्ञ',
+  '}': 'द्व',
+  J: 'श्र',
+  'Ø': 'क्र',
+  'æ': 'द्र',
+  'ç': 'प्र',
+  'Á': 'प्र',
+  'º': 'ह्',
+  'à': 'ह्न',
+  'á': 'ह्य',
+  'â': 'हृ',
+  'ã': 'ह्म',
+  'í': 'द्द',
+  'é': 'न्न',
+  'Â': 'न्न',
+  // फ् and फ्र have no other spelling in this layout. The full फ is `iQ`/`IkQ`
+  // - a half प plus the Q hook - and that construction has no half form, so
+  // without these two keys the Unicode -> Chanakya direction simply cannot
+  // write either one. Kruti Dev has the same pair as `Q`/`Qz`.
+  'Ý': 'फ्',
+  'Ú': 'फ्र',
+
+  // -- Matras and signs -----------------------------------------------------
+  'ks±': 'ोर्ं',
+  ks: 'ो',
+  kS: 'ौ',
+  '‚': 'ॉ',
+  '¨': 'ो',
+  '©': 'ौ',
+  k: 'ा', // ा  (also the vertical bar - see the header note on KRUTI_DEV)
+  f: 'ि', // ि  moved right by the reorder pass, exactly as in Kruti Dev
+  h: 'ी',
+  q: 'ु',
+  w: 'ू',
+  '`': 'ृ',
+  s: 'े',
+  S: 'ै',
+  a: 'ं',
+  '¡': 'ँ',
+  W: 'ॅ',
+  'È': 'ीं',
+  z: '्र',
+  'ª': '्र',
+  '~': '्',
+  '+': '़',
+
+  // -- Reph: typed AFTER its cluster, belongs BEFORE it ----------------------
+  Z: REPH,
+
+  // -- Digits ---------------------------------------------------------------
+  'å': '०',
+  'ƒ': '१',
+  '„': '२',
+  '…': '३',
+  '†': '४',
+  '‡': '५',
+  'ˆ': '६',
+  '‰': '७',
+  'Š': '८',
+  '‹': '९',
+
+  // -- Punctuation, in THIS font's encoding ---------------------------------
+  // Chanakya spends these ASCII slots on Devanagari, so none of them may pass
+  // through untouched: `]` is the comma, `,` is ए, `%` is the colon and `:` is
+  // रू. This is the same trap documented at length in KRUTI_DEV - a font that
+  // draws ए on the comma key will read a real comma back as ए unless the
+  // reverse direction has somewhere else to put it.
+  A: '।',
+  '&': '-',
+  '@': '/',
+  ']': ',',
+  '¾': '=',
+  '#': 'रु',
+  ':': 'रू',
+  '¿': '{',
+  'À': '}',
+  '%': ':',
+  '¢': 'ः',
+  'ñ': '॰',
+};
+
+// ============================================================================
+// Unverified layouts - deliberately EMPTY
 // ============================================================================
 // A half-remembered map would silently corrupt text, which is far worse than
 // refusing to convert. Every font below is `accurate: false`, which keeps its
 // pages on "coming soon" instead of shipping guesses. Fill one in from real
 // documents, add fixtures, THEN flip the flag.
-const CHANAKYA = {}; // Chanakya 905 — a genuinely different vendor layout
-const SHUSHA = {}; // Shusha — older Hindi DTP font
-const PREETI = {}; // Preeti — the Nepali Devanagari equivalent of Kruti Dev
+// ============================================================================
+// Abbasi Chanakya New - its own font, NOT the `chanakya` table above
+// ============================================================================
+// The table itself lives in abbasiChanakya.js, read verbatim from the handoff
+// JSON. All this adds is the reorder markers, translated into the engine's
+// sentinels. Nothing is written by hand, so the shapes the JSON may use are
+// checked and anything else throws rather than being guessed at.
+//
+//   pre-base   `f` ि   -> plain ि: pass 2 hops it over the cluster, as in Kruti
+//              `Ç` िं  -> PRE_I_NASAL: the ि must land after the cluster with
+//                        the ं after it, and plain ि + ं would strand the ं
+//   post reph  REPH, then the sign. A ि here (`Æ`, `É`) is typed where it
+//              belongs, so it is FIXED_I: pass 2 must not hop it forward
+//              over whatever cluster happens to follow.
+function abbasiEngineMap() {
+  const map = { ...ABBASI_CHANAKYA_TABLE };
+  for (const [key, sign] of Object.entries(PRE_BASE_I_MATRA)) {
+    if (sign === 'ि') map[key] = 'ि';
+    else if (sign === 'िं') map[key] = PRE_I_NASAL;
+    else throw new Error(`Abbasi Chanakya: no rule for pre-base "${key}" -> "${sign}"`);
+  }
+  for (const [key, { emit, reph }] of Object.entries(POST_SYLLABLE_REPH)) {
+    if (!reph) throw new Error(`Abbasi Chanakya: post-syllable "${key}" has no reph`);
+    map[key] = REPH + emit.replace(/^ि/, FIXED_I);
+  }
+  return map;
+}
+const ABBASI_CHANAKYA = abbasiEngineMap();
+
+// Unicode -> Abbasi: the explicit canonical table from abbasiChanakya.js, not
+// buildReverse(), plus the keys the reorder sentinels become.
+const ABBASI_CHANAKYA_REV = {
+  ...ABBASI_CHANAKYA_REVERSE,
+  [REPH]: 'Z',
+  [PRE_I_NASAL]: 'Ç',
+};
+
+/**
+ * Logical -> visual order for Abbasi Chanakya New. The Kruti passes do the
+ * work (ि before the cluster, reph after the syllable as Z); two additions:
+ *
+ *  - NFD first, so a precomposed nukta letter (U+0958 क़) is looked up as
+ *    क + ़ like every other one;
+ *  - ि ... ं with only the cluster between them becomes the single Ç key,
+ *    which is how this font types िं. The inverse of RE_PRE_I_NASAL_FWD.
+ */
+function abbasiToVisualOrder(s) {
+  return toVisualOrder(s.normalize('NFD')).replace(RE_PRE_I_NASAL_REV, `${PRE_I_NASAL}$1`);
+}
+
+const SHUSHA = {}; // Shusha - older Hindi DTP font
+const PREETI = {}; // Preeti - the Nepali Devanagari equivalent of Kruti Dev
 
 // ============================================================================
-// Font registry — adding a font is adding one entry.
+// Font registry - adding a font is adding one entry.
 // ============================================================================
 //
 // `accurate` is the gate. It means "verified against real documents and covered
@@ -391,7 +793,7 @@ export const FONTS = {
     altLabel: 'Mangal (Unicode)',
     kind: 'unicode',
     accurate: true,
-    // Mangal IS Unicode — the only difference is which font renders it.
+    // Mangal IS Unicode - the only difference is which font renders it.
     css: 'Mangal, "Noto Sans Devanagari", "Nirmala UI", sans-serif',
     sample: 'हिन्दी भारत की राजधानी भाषा है।',
     placeholder: 'यहाँ हिंदी टेक्स्ट टाइप करें',
@@ -401,7 +803,7 @@ export const FONTS = {
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
-    // Verified by comparing glyph outlines against Kruti Dev 010 — see the note
+    // Verified by comparing glyph outlines against Kruti Dev 010 - see the note
     // above DEVLYS. Every codepoint this map uses draws the same letter in both
     // fonts; the ranges where they differ are ones the map never touches.
     accurate: true,
@@ -414,10 +816,37 @@ export const FONTS = {
     label: 'Chanakya',
     kind: 'legacy',
     map: CHANAKYA,
+    // STILL FALSE ON PURPOSE, even though the map above is complete and green.
+    // `accurate` means "verified against real documents", and this one is
+    // verified against itself. See the long note above CHANAKYA for exactly
+    // what is and is not known, and what would settle it.
     accurate: false,
     css: '"Chanakya", monospace',
-    sample: '',
-    placeholder: '',
+    sample: 'fgUnh Hkkjr Dkh jkTkèkkUkh gSA',
+    placeholder: 'fgUnh Hkkjr  (example)',
+  },
+  'abbasi-chanakya': {
+    key: 'abbasi-chanakya',
+    label: 'Abbasi Chanakya New',
+    shortLabel: 'Abbasi Chanakya',
+    kind: 'legacy',
+    map: ABBASI_CHANAKYA,
+    // Built from the real font file, glyph by glyph, with every entry drawn in
+    // that font next to its Unicode - the same kind of evidence DEVLYS went
+    // live on. `beta` says what is still missing: a run over a real document
+    // typed in this font. Until then the page carries a Beta badge.
+    accurate: true,
+    beta: true,
+    // Plain monospace, so the input box shows the raw keys as pasted. The real
+    // font is only for previewing OUTPUT (legacyFonts.js).
+    css: 'monospace',
+    // Unicode -> Abbasi uses its own canonical table and reorder, not the
+    // Kruti defaults, and warns about characters the font has no key for.
+    reverse: ABBASI_CHANAKYA_REV,
+    toVisual: abbasiToVisualOrder,
+    warnUnmapped: true,
+    sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
+    placeholder: 'Hkkjr dh jkt/kkuh  (example)',
   },
   shusha: {
     key: 'shusha',
@@ -432,7 +861,7 @@ export const FONTS = {
   preeti: {
     key: 'preeti',
     label: 'Preeti',
-    // Nepali, not Hindi — same script, different language and layout.
+    // Nepali, not Hindi - same script, different language and layout.
     lang: 'ne',
     kind: 'legacy',
     map: PREETI,
@@ -449,7 +878,7 @@ export const getFont = (key) => FONTS[key] ?? null;
 /** Verified against real documents. Only these may power a live page. */
 export const isAccurate = (key) => Boolean(FONTS[key]?.accurate);
 
-/** Both ends verified — the precondition routes.js checks before going live. */
+/** Both ends verified - the precondition routes.js checks before going live. */
 export const isPairAccurate = (fromKey, toKey) =>
   isAccurate(fromKey) && isAccurate(toKey);
 
@@ -460,13 +889,13 @@ export const boxLabel = (key) => {
 };
 
 /**
- * The font name inside "Copy {name} code" — the button that hands over raw
+ * The font name inside "Copy {name} code" - the button that hands over raw
  * legacy keystrokes.
  *
  * Its own helper rather than boxLabel() because the two want opposite things:
  * a box label spells the ambiguity out ("Unicode / Hindi"), while a button
  * label has to stay narrow enough to sit beside a second button of equal width.
- * Never hardcode the name at a call site — the button must always name the font
+ * Never hardcode the name at a call site - the button must always name the font
  * the page actually outputs, or it sends people to Word with the wrong one.
  */
 export const codeLabel = (key) => {
@@ -475,7 +904,7 @@ export const codeLabel = (key) => {
 };
 
 // ============================================================================
-// Trie — longest-key-first matching in O(input x longest key)
+// Trie - longest-key-first matching in O(input x longest key)
 // ============================================================================
 
 function buildTrie(map) {
@@ -505,8 +934,11 @@ function trieFor(map) {
   return trie;
 }
 
-/** Greedy longest match. Unmatched characters pass through verbatim. */
-function transliterate(text, trie) {
+/**
+ * Greedy longest match. Unmatched characters pass through verbatim, and are
+ * added to `missed` when a Set is given.
+ */
+function transliterate(text, trie, missed) {
   let out = '';
   let i = 0;
   while (i < text.length) {
@@ -525,6 +957,7 @@ function transliterate(text, trie) {
       out += match;
       i = matchEnd;
     } else {
+      missed?.add(text[i]);
       out += text[i];
       i += 1;
     }
@@ -533,7 +966,7 @@ function transliterate(text, trie) {
 }
 
 // ============================================================================
-// Reorder passes — where the accuracy actually comes from
+// Reorder passes - where the accuracy actually comes from
 // ============================================================================
 
 const RE_REPH_FWD = new RegExp(`(${CLUSTER}[${MATRA_NO_I}]*)${REPH}`, 'g');
@@ -543,6 +976,9 @@ const RE_REPH_REV = new RegExp(
   'g',
 );
 const RE_IMATRA_REV = new RegExp(`(${CLUSTER_R})ि`, 'g');
+const RE_PRE_I_NASAL_REV = new RegExp(`ि(${CLUSTER_R})ं`, 'g');
+const RE_PRE_I_NASAL_FWD = new RegExp(`${PRE_I_NASAL}(${CLUSTER})`, 'g');
+const RE_ABBASI_LEFTOVERS = new RegExp(`[${PRE_I_NASAL}${FIXED_I}]`, 'g');
 
 /** Visual order (legacy) -> logical order (Unicode). Order of passes is load-bearing. */
 function toLogicalOrder(s) {
@@ -552,6 +988,13 @@ function toLogicalOrder(s) {
   s = s.replace(RE_REPH_FWD, `र${HALANT}$1`);
   // 2. i-matra hops to the far side of its (possibly reph'd) cluster.
   s = s.replace(RE_IMATRA_FWD, '$1ि');
+  //    Abbasi Chanakya only: `Ç` (िं) hops the same way, and a ि that `Æ`/`É`
+  //    typed after its syllable stays put. Resolved here, after the hop, so it
+  //    cannot be mistaken for a pre-base ि. A PRE_I_NASAL with no cluster
+  //    after it stays where it is, as a stray ि does above.
+  s = s
+    .replace(RE_PRE_I_NASAL_FWD, '$1िं')
+    .replace(RE_ABBASI_LEFTOVERS, (m) => (m === PRE_I_NASAL ? 'िं' : 'ि'));
   // 3. Recompose split matras: the legacy fonts build ो/ौ/ॉ out of ा + े/ै/ॅ.
   s = s
     .replace(/ाे/g, 'ो')
@@ -559,7 +1002,7 @@ function toLogicalOrder(s) {
     .replace(/ाॅ/g, 'ॉ');
   // 4. Defensive repair only. Well-formed Kruti Dev types the nasal AFTER the
   //    matra (हैं = `gSa`, में = `esa`), so this pass does not fire on clean
-  //    input — it just rescues text that was typed the other way round.
+  //    input - it just rescues text that was typed the other way round.
   //    It MUST exclude the i-matra: by this point pass 2 has already moved ि to
   //    its logical position, and `ंि` in हिंदी is correct, not a transposition.
   s = s.replace(
@@ -576,7 +1019,7 @@ function toLogicalOrder(s) {
  * one deliberate exception: there is NO nasal-reorder pass here.
  *
  * Kruti Dev already types the nasal after the matra, so moving it would produce
- * spellings the font never uses — `gaS` for हैं instead of `gSa`, `ugah` for
+ * spellings the font never uses - `gaS` for हैं instead of `gSa`, `ugah` for
  * नहीं instead of `ugha`. Worse, applied to the i-matra it fought with the
  * i-matra pass below and corrupted the output outright: हिंदी came back as
  * `gafnh`, which decodes to हंदिी. Pass 4 of toLogicalOrder is the defensive
@@ -599,7 +1042,7 @@ function toVisualOrder(s) {
 // ============================================================================
 
 // Always protected, in every mode: converting these is never what anyone wants.
-// ONE alternation, not three passes — a placeholder for an email contains a
+// ONE alternation, not three passes - a placeholder for an email contains a
 // digit, so a later number pass would happily chew a hole in it.
 const URL_SRC = '(?:[Hh][Tt][Tt][Pp][Ss]?://|[Ww][Ww][Ww]\\.)[^\\s<>"\']+';
 const EMAIL_SRC = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
@@ -664,7 +1107,7 @@ const RE_CAPITALISED = /^[A-Z][a-z]+$/;
 /**
  * Is this a sequence Devanagari actually permits?
  *
- * Used as a SECONDARY signal only — see looksEnglish(). On its own it is too
+ * Used as a SECONDARY signal only - see looksEnglish(). On its own it is too
  * permissive: "India" decodes to प्दकपं, which breaks no structural rule.
  */
 export function isWellFormedDevanagari(s) {
@@ -712,7 +1155,7 @@ function isConsonantChar(ch) {
  * Should this token be left alone as English?
  *
  * HONEST LIMITS. Kruti Dev *is* remapped ASCII, so an English word and a Hindi
- * word are byte-identical in kind — no rule can be perfect. We therefore only
+ * word are byte-identical in kind - no rule can be perfect. We therefore only
  * apply rules with very high precision, and accept misses:
  *
  *   rule 1  in the English word list          -> English  (precision 1.0)
@@ -723,7 +1166,8 @@ function isConsonantChar(ch) {
  *           malformed Devanagari
  *
  * Known miss: a capitalised proper noun that happens to decode cleanly, e.g.
- * "India" -> प्दकपं. The UI says so, and the toggle turns all of this off.
+ * "Delhi" -> क्मसीप. ("India" decodes cleanly too, but rule 1 catches it - it
+ * is in the word list.) The UI says so, and the toggle turns all of this off.
  */
 function looksEnglish(token, decoded) {
   const bare = token.replace(/[^A-Za-z'’.-]/g, '');
@@ -812,12 +1256,47 @@ export function buildReverse(map) {
   return rev;
 }
 
-export function unicodeToLegacy(text, map, { keepEnglish = true } = {}) {
+/**
+ * `reverse` and `toVisual` default to the Kruti Dev behaviour. A font whose
+ * registry entry carries its own (Abbasi Chanakya New) passes them in via
+ * convert(). `missed` collects characters no key was found for.
+ */
+export function unicodeToLegacy(
+  text,
+  map,
+  { keepEnglish = true, reverse = null, toVisual = toVisualOrder, missed } = {},
+) {
   if (!text) return '';
-  const trie = trieFor(buildReverse(map));
+  const trie = trieFor(reverse ?? buildReverse(map));
   return splitProtected(text, keepEnglish ? RE_PROTECT_ALL : RE_PROTECT_LINKS)
-    .map(({ skip, v }) => (skip ? v : transliterate(toVisualOrder(v), trie)))
+    .map(({ skip, v }) => (skip ? v : transliterate(toVisual(v), trie, missed)))
     .join('');
+}
+
+/** The per-font overrides unicodeToLegacy() takes, read off the registry. */
+const reverseOpts = (font) => ({
+  reverse: font.reverse ?? null,
+  toVisual: font.toVisual ?? toVisualOrder,
+});
+
+// Passed through untouched and never worth a warning: whitespace, English
+// letters and digits (as on every legacy page), and `!`, which is this font's
+// own Latin glyph.
+const RE_EXPECTED_PASSTHROUGH = /[\sA-Za-z0-9!]/;
+
+/**
+ * Characters in `text` that the output font has no key for and that were left
+ * as-is by Unicode -> `toKey` conversion. Empty for fonts without
+ * `warnUnmapped`, so only pages that opt in can show a warning.
+ *
+ * @returns {string[]}
+ */
+export function unmappedChars(text, toKey, opts = {}) {
+  const to = FONTS[toKey];
+  if (!text || !to?.warnUnmapped) return [];
+  const missed = new Set();
+  unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to), missed });
+  return [...missed].filter((ch) => !RE_EXPECTED_PASSTHROUGH.test(ch));
 }
 
 // ============================================================================
@@ -846,10 +1325,13 @@ export function convert(text, fromKey, toKey, opts = {}) {
     return legacyToUnicode(text, from.map, opts);
   }
   if (from.kind === 'unicode' && to.kind === 'legacy') {
-    return unicodeToLegacy(text, to.map, opts);
+    return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
   }
   // legacy -> legacy routes through Unicode.
-  return unicodeToLegacy(legacyToUnicode(text, from.map, opts), to.map, opts);
+  return unicodeToLegacy(legacyToUnicode(text, from.map, opts), to.map, {
+    ...opts,
+    ...reverseOpts(to),
+  });
 }
 
 /** True when the pair has no mapping at all to convert with (empty map). */
@@ -862,13 +1344,13 @@ export function isPairUnavailable(fromKey, toKey) {
 }
 
 // ============================================================================
-// Input sniffing — the gentle "are you on the right page?" hint
+// Input sniffing - the gentle "are you on the right page?" hint
 // ============================================================================
 //
 // Each page now converts in ONE fixed direction, so the commonest mistake is no
 // longer picking the wrong dropdown: it is landing on the wrong page and pasting
 // anyway. This detects the two ways that goes wrong and returns a CODE for the
-// UI to phrase. It never blocks, and it stays quiet unless it is fairly sure —
+// UI to phrase. It never blocks, and it stays quiet unless it is fairly sure -
 // a false alarm on correct input is worse than saying nothing.
 
 const RE_DEVANAGARI = /[ऀ-ॿ]/g;
@@ -903,13 +1385,13 @@ export function describeMismatch(text, fromKey) {
   const latin = count(t, RE_LATIN_LETTER);
 
   if (from.kind === 'unicode') {
-    // Devanagari present means they are typing Hindi — fine, whatever else is
+    // Devanagari present means they are typing Hindi - fine, whatever else is
     // in there. Only pure Latin is worth mentioning.
     return deva === 0 && latin >= 4 ? 'expected-unicode-got-latin' : null;
   }
 
   // Legacy source. Devanagari in the box means they pasted Unicode into the
-  // wrong page — this is the single most common misuse.
+  // wrong page - this is the single most common misuse.
   if (deva > 0 && deva >= latin) return 'expected-legacy-got-unicode';
   if (looksLikePlainEnglish(t)) return 'expected-legacy-got-english';
   return null;

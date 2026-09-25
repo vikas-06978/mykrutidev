@@ -52,7 +52,14 @@ const preview = (label, file, format = 'woff') => ({
 export const PREVIEW_FONTS = {
   'kruti-dev': preview('Kruti Dev 010', 'KRDEV010.woff'),
   devlys: preview('DevLys 010', 'devlys-010.woff'),
-  chanakya: preview('Chanakya', 'chanakya.woff', 'truetype'),
+  // The file was renamed to Walkman-Chanakya.woff, but its `name` table still
+  // says "Chanakya" and its glyphs are unchanged - see the note above CHANAKYA
+  // in fontMaps.js. The label stays "Chanakya" because that is what the face
+  // actually is; renaming a file does not make it a different font.
+  chanakya: preview('Chanakya', 'Walkman-Chanakya.woff', 'truetype'),
+  // Converted from vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf,
+  // the exact file the mapping was built from. Unrelated to the file above.
+  'abbasi-chanakya': preview('Abbasi Chanakya New', 'abbasi-chanakya-new.woff'),
   preeti: preview('Preeti', 'preeti.woff', 'truetype'),
 };
 

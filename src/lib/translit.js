@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------------------
  * WHY THIS LAYER EXISTS AT ALL
  *
- * Sanscript does the hard part — matras, halants, conjunct formation — and does
+ * Sanscript does the hard part - matras, halants, conjunct formation - and does
  * it correctly. What it cannot do is read Hinglish, because ITRANS is a precise
  * notation and Hinglish is not:
  *
@@ -26,17 +26,17 @@
  * Sanscript stays the only thing that knows how to build Devanagari.
  *
  * ---------------------------------------------------------------------------
- * HOW ACCURATE THIS CAN BE — read before trusting it
+ * HOW ACCURATE THIS CAN BE - read before trusting it
  *
  * Not perfectly, and not as a matter of implementation quality. `bharat` is
  * भारत and `karat` is करत; both are consonant-a-consonant-a-consonant, and
  * nothing in the spelling says which `a` is long. Google's input tools resolve
  * this with a language model. Here it is resolved two ways:
  *
- *   1. WORDS  — a dictionary of the common words people actually type, where
+ *   1. WORDS  - a dictionary of the common words people actually type, where
  *               the answer is known rather than guessed. Exact, and the reason
  *               `bharat`, `main`, `hindi` and `shiksha` come out right.
- *   2. RULES  — everything else falls through to a syllable rewriter. Sensible,
+ *   2. RULES  - everything else falls through to a syllable rewriter. Sensible,
  *               often right, and sometimes not.
  *
  * A rare word may need respelling (`bhaarat` for भारत) and the UI says so. The
@@ -44,6 +44,8 @@
  */
 
 import Sanscript from '@indic-transliteration/sanscript';
+import { splitProtected, decomposeNukta } from './deva.js';
+import { applyCommonWords } from './corrections.js';
 
 /** The schemes the UI offers. `hinglish` is ours; `itrans` is Sanscript's. */
 export const MODES = {
@@ -60,7 +62,7 @@ export const MODES = {
 };
 
 /**
- * The spelling tips printed under the boxes — ROMAN SIDE ONLY.
+ * The spelling tips printed under the boxes - ROMAN SIDE ONLY.
  *
  * The Devanagari half is deliberately absent. `tipsFor()` produces it by running
  * the engine, so a tip physically cannot claim something the engine does not do.
@@ -91,7 +93,7 @@ export function tipsFor(mode) {
 }
 
 // ---------------------------------------------------------------------------
-// The dictionary — where the answer is known instead of guessed
+// The dictionary - where the answer is known instead of guessed
 // ---------------------------------------------------------------------------
 //
 // Hinglish spelling -> ITRANS spelling. Kept as ITRANS rather than Devanagari so
@@ -144,7 +146,7 @@ const WORDS = {
   aurat: 'aurata', bachcha: 'bachchaa', bachche: 'bachche',
   // The nukta letters ड़ and ढ़ are `.D` and `.Dh` in ITRANS. People type them as
   // a plain `d`, so every one of these has to be listed or the word comes out
-  // with ड where ड़ belongs — लडका instead of लड़का.
+  // with ड where ड़ belongs - लडका instead of लड़का.
   ladka: 'la.Dakaa', ladki: 'la.Dakii', dost: 'dosta', pyar: 'pyaara',
   dil: 'dila', haath: 'haatha', paani: 'paanii', pani: 'paanii',
   khana: 'khaanaa', roti: 'roTii', chai: 'chaaya', doodh: 'duudha',
@@ -160,7 +162,7 @@ const WORDS = {
   // really do start with the vocalic r have to be named.
   rishi: 'R^iShi', ritu: 'R^itu', rin: 'R^iNa', rishabh: 'R^iShabha',
   chandni: 'chaa.Ndanii', jungle: 'ja.ngala', jangal: 'ja.ngala',
-  tayyar: 'taiyaara', taiyar: 'taiyaara', bachcha: 'bachchaa',
+  tayyar: 'taiyaara', taiyar: 'taiyaara',
   baccha: 'bachchaa', bacche: 'bachche',
 
   // -- Hindi, India, the words this site is about ---------------------------
@@ -215,10 +217,115 @@ const WORDS = {
   pass: 'paasa', paas: 'paasa', door: 'duura', dur: 'duura',
   sundar: 'su.ndara', mushkil: 'mushkila', aasan: 'aasaana',
   zaroori: 'zaruurii', jaruri: 'zaruurii', mehnat: 'mehanata',
+
+  // -- ड़ and ढ़, the nukta letters the rules can never reach -----------------
+  // `.D` and `.Dh` in ITRANS. People type them as a plain `d`, so each one has
+  // to be listed or बढ़िया comes out बधिया - which is the single most-reported
+  // wrong word on this page.
+  badhiya: 'ba.Dhiyaa', badiya: 'ba.Dhiyaa',
+  kadi: 'ka.Dii', ghadi: 'gha.Dii', khidki: 'khi.Dakii',
+  jod: 'jo.Da', tod: 'to.Da', chhod: 'chho.Da', mod: 'mo.Da',
+  daadhi: 'daa.Dhii', dadhi: 'daa.Dhii',
+  chadhna: 'cha.Dhanaa', padhna: 'pa.Dhanaa', badhna: 'ba.Dhanaa',
+  padhai: 'pa.Dhaaii', kooda: 'kuu.Daa', kuda: 'kuu.Daa',
+  daud: 'dau.Da', pahadi: 'pahaa.Dii', kapde: 'kapa.De',
+
+  // -- ज़ and फ़ ---------------------------------------------------------------
+  bazaar: 'baazaara', bazar: 'baazaara',
+  darwaza: 'daravaazaa', darvaza: 'daravaazaa',
+  kagaz: 'kaagaza', kaagaz: 'kaagaza', tez: 'teza',
+  cheez: 'chiiza', chiz: 'chiiza', awaz: 'aavaaza', aawaz: 'aavaaza',
+  namaz: 'namaaza', mez: 'meza', pyaz: 'pyaaza',
+  saaf: 'saafa', saf: 'saafa', sirf: 'sirfa',
+  fone: 'fona', phone: 'fona', maafi: 'maafii', mafi: 'maafii',
+
+  // -- retroflex ट ठ ड, which the rules give as dental त थ द -----------------
+  // The other half of the same problem: `t` is त far more often than it is ट,
+  // so the rules are right to guess त and wrong on every one of these.
+  gitaar: 'giTaara', guitar: 'giTaara', gitar: 'giTaara',
+  tamatar: 'TamaaTara', tikat: 'TikaTa', ticket: 'TikaTa',
+  computer: 'ka.mpyuuTara', motor: 'moTara', hotel: 'hoTala',
+  station: 'sTeshana', internet: 'i.nTaraneTa', mobile: 'mobaaila',
+  pet: 'peTa', thand: 'Tha.nDa', thanda: 'Tha.nDaa',
+  peeth: 'piiTha', pith: 'piiTha', mitha: 'miiThaa', mithai: 'miThaaii',
+  katna: 'kaaTanaa', mota: 'moTaa', beta: 'beTaa', beti: 'beTii',
+  aspatal: 'aspataala', police: 'pulisa',
+
+  // -- family and body -------------------------------------------------------
+  maa: 'maa.n', pitaji: 'pitaajii', bhai: 'bhaaii', behen: 'bahana',
+  dada: 'daadaa', dadi: 'daadii', nana: 'naanaa', nani: 'naanii',
+  chacha: 'chaachaa', mama: 'maamaa', parivar: 'parivaara',
+  ankh: 'aa.nkha', muh: 'mu.nha', dant: 'daa.nta',
+
+  // -- everyday verbs, where the schwa rule needs help -----------------------
+  pina: 'piinaa', uthna: 'uThanaa', baithna: 'baiThanaa',
+  chalna: 'chalanaa', bolna: 'bolanaa', sunna: 'sunanaa',
+  samajhna: 'samajhanaa', sikhna: 'siikhanaa', likhna: 'likhanaa',
+  banana: 'banaanaa', lana: 'laanaa', bhejna: 'bhejanaa',
+  milna: 'milanaa', kharidna: 'khariidanaa', bechna: 'bechanaa',
+  puchhna: 'puuchhanaa', rakhna: 'rakhanaa', lagna: 'laganaa',
+
+  // -- food, things, adjectives ---------------------------------------------
+  chawal: 'chaavala', chaval: 'chaavala', aloo: 'aaluu', alu: 'aaluu',
+  chini: 'chiinii', kamra: 'kamaraa', samudra: 'samudra',
+  garam: 'garma', naram: 'narma', bhari: 'bhaarii', patla: 'patalaa',
+  khali: 'khaalii', pura: 'puuraa',
+
+  // -- days, months and the calendar words a form asks for -------------------
+  somvar: 'somavaara', mangalvar: 'ma.ngalavaara', budhvar: 'budhavaara',
+  guruvar: 'guruvaara', shukravar: 'shukravaara', shanivar: 'shanivaara',
+  ravivar: 'ravivaara', janvari: 'janavarii', farvari: 'faravarii',
+  march: 'maarcha', april: 'apraila', mahina: 'mahiinaa',
+  hafta: 'haftaa', parso: 'paraso.n',
+
+  // -- greetings and occasions ----------------------------------------------
+  badhai: 'badhaaii', mehman: 'mehamaana', tyohar: 'tyohaara',
+  janmdin: 'janmadina',
+
+  // -- futures whose STEM the rules cannot spell -----------------------------
+  // futureTense() fixes the ENDING for every verb, so almost nothing needs
+  // listing here. These are the ones whose stem carries a nukta, a retroflex
+  // or a swallowed schwa - the same reason their infinitives are listed.
+  padhunga: 'pa.Dhuu.ngaa', padhungi: 'pa.Dhuu.ngii', padhunge: 'pa.Dhuu.nge',
+  chadhunga: 'cha.Dhuu.ngaa', badhunga: 'ba.Dhuu.ngaa',
+  baithunga: 'baiThuu.ngaa', baithungi: 'baiThuu.ngii',
+  uthunga: 'uThuu.ngaa', uthungi: 'uThuu.ngii',
+  samjhunga: 'samajhuu.ngaa', samjhungi: 'samajhuu.ngii',
+  pahunchunga: 'pahu.nchuu.ngaa', kaatunga: 'kaaTuu.ngaa',
+  katunga: 'kaaTuu.ngaa', lautunga: 'lauTuu.ngaa',
+  dhoondhunga: 'Dhuu.nDhuu.ngaa', dhundhunga: 'Dhuu.nDhuu.ngaa',
+
+  // -- the subjunctive -ऊं / -ूं ---------------------------------------------
+  // This half of the ending stays a list on purpose. A `-un` rule to match the
+  // `-unga` one would have to rewrite कौन, मौन and सौंफ, which are already
+  // right - see the note on futureTense() about where that rule stops.
+  jaun: 'jaauu.n', jaaun: 'jaauu.n', aaun: 'aauu.n',
+  khaun: 'khaauu.n', khaaun: 'khaauu.n', paun: 'paauu.n', paaun: 'paauu.n',
+  karun: 'karuu.n', dekhun: 'dekhuu.n', bolun: 'boluu.n',
+  sunun: 'sunuu.n', lun: 'luu.n', dun: 'duu.n',
+  aaao: 'aao',
+
+  // -- more everyday verbs ---------------------------------------------------
+  chhodna: 'chho.Danaa', pakadna: 'paka.Danaa', daudna: 'dau.Danaa',
+  jodna: 'jo.Danaa', todna: 'to.Danaa', todfod: 'to.Dapho.Da',
+  ghumna: 'ghuumanaa', dhundhna: 'Dhuu.nDhanaa', lautna: 'lauTanaa',
+  pahunchna: 'pahu.nchanaa', nikalna: 'nikalanaa', rukna: 'rukanaa',
+  girna: 'giranaa', hansna: 'ha.nsanaa', sochna: 'sochanaa',
+  batana: 'bataanaa', dikhana: 'dikhaanaa', sunana: 'sunaanaa',
+  sikhana: 'sikhaanaa', utarna: 'utaranaa', jagna: 'jaaganaa',
+  bhagna: 'bhaaganaa', nachna: 'naachanaa', gana: 'gaanaa',
+  mangna: 'maa.nganaa', bhoolna: 'bhuulanaa', bhulna: 'bhuulanaa',
+  jeetna: 'jiitanaa', jitna: 'jiitanaa', harna: 'haaranaa',
+
+  // -- more everyday words ---------------------------------------------------
+  wapas: 'vaapasa', vapas: 'vaapasa', zarurat: 'zaruurata',
+  jarurat: 'zaruurata', taiyari: 'taiyaarii', imtihan: 'imtihaana',
+  naukri: 'naukarii', chutti: 'chhuTTii', tabiyat: 'tabiiyata',
+  shayad: 'shaayada', dobara: 'dobaaraa', pehle: 'pahale', pahle: 'pahale',
 };
 
 // ---------------------------------------------------------------------------
-// The rules — for everything the dictionary does not know
+// The rules - for everything the dictionary does not know
 // ---------------------------------------------------------------------------
 
 /**
@@ -237,7 +344,7 @@ const FRAGMENTS = [
   // end of the table catches the first one as क and the word comes out बक्चा.
   ['cch', 'chch'], ['cc', 'chch'],
   // The vocalic ऋ. It cannot live on `ri`, because `ri` in Hinglish is री far
-  // more often than it is ऋ — रिश्ता, रिपोर्ट, तारीख. So `ri` keeps the common
+  // more often than it is ऋ - रिश्ता, रिपोर्ट, तारीख. So `ri` keeps the common
   // reading and the doubled `rri` is the way to ask for ऋ, which matches how
   // ITRANS spells it (`RRi`) and survives this mode's lowercasing.
   ['rri', 'R^i'],
@@ -261,35 +368,14 @@ const isVowelStart = (s) => VOWEL_LETTERS.includes(s[0]);
 /** ITRANS consonant letters, for the anusvara and schwa passes. */
 const ITRANS_CONSONANT = /[kgcjTDtdnpbmyrlvshSNq]/;
 
+/** The longer form of each ending vowel: -गा -गी -गे. */
+const FUTURE_TAIL = { a: 'aa', i: 'ii', e: 'e' };
+
 /**
- * Rewrite one Hinglish word as ITRANS.
- *
- * Four fixes, in order, each undoing one thing Hinglish leaves out:
- *   1. a final `i`/`u` is almost always the long vowel  (dilli -> dillii)
- *   2. a written final `a` is almost always आ            (ganga -> gangaa)
- *   3. `n` or `m` before a consonant is an anusvara     (hindii -> hi.ndii)
- *   4. a final consonant carries its inherent vowel     (ghar -> ghara)
- *
- * Rule 2 is the one that looks risky and is not. Nobody writes the schwa they
- * do not pronounce — घर is typed `ghar`, never `ghara` — so a final `a` that
- * someone actually typed is there because they heard one, and a heard final
- * vowel in Hindi is आ. Rules 2 and 4 are therefore the same fact from both
- * sides, which is why they cannot both fire on one word.
+ * A verb stem, converted the ordinary way, so `banaunga` keeps its `ban` and
+ * `likhunga` keeps its `likh`.
  */
-function ruleRewrite(word) {
-  let w = word;
-
-  // 1. Long final vowel. `dilli` is दिल्ली, not दिल्लि.
-  //    `rri` is exempt: it is the vocalic ऋ spelled as one unit, not a
-  //    consonant followed by a vowel, so lengthening it would produce ऋि.
-  if (/rri$/.test(w)) {
-    // leave it for the fragment pass
-  } else if (/[^aeiou]i$/.test(w)) w = w.slice(0, -1) + 'ii';
-  else if (/[^aeiou]u$/.test(w)) w = w.slice(0, -1) + 'uu';
-  // 2. Long final `a`, but not on a bare vowel like `a` or `aa` itself.
-  else if (/[^aeiou]a$/.test(w)) w = w.slice(0, -1) + 'aa';
-
-  // Fragment pass.
+function fragments(w) {
   let out = '';
   let i = 0;
   outer: while (i < w.length) {
@@ -303,6 +389,97 @@ function ruleRewrite(word) {
     out += w[i]; // unknown letter: let Sanscript decide
     i += 1;
   }
+  return out;
+}
+
+/**
+ * The first-person future: करूंगा, जाऊंगा, खाऊंगी, बोलूंगे.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY THIS NEEDS ITS OWN RULE RATHER THAN DICTIONARY ENTRIES
+ *
+ * Both halves of this ending are wrong without it, and both for the same
+ * reason - the vowel is LONG and Hinglish does not write it:
+ *
+ *   khaunga   the rules read `au` as औ and give खौंगा, not खाऊंगा
+ *   karunga   the rules read `u` as उ and give करुंगा, not करूंगा
+ *
+ * It is also open-ended. Hindi forms this on any verb at all - बनाऊंगा,
+ * सुनाऊंगा, दिखाऊंगा, समझूंगा, पहुंचूंगा - so a dictionary would be listing a
+ * suffix one verb at a time and would still miss the next one somebody typed.
+ * A rule catches every verb, including the ones nobody thought of.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY IT IS SAFE, WHICH IS ENTIRELY ABOUT WHERE IT STOPS
+ *
+ * The obvious wider rule - treat any final `-aun` as आऊं - is wrong, and the
+ * counterexamples are common words: मौन, सौंफ, कौन, चौंक all end in `-aun` and
+ * are already correct. So this matches ONLY `-unga`, `-ungi` and `-unge`, an
+ * ending that in Hindi is the future tense and nothing else. None of those
+ * words come near it.
+ *
+ * The `a`/`aa` before it is what separates a vowel stem from a consonant one:
+ * जा + ऊंगा against कर + ूंगा. Both end up with the same long ऊ, which is the
+ * bug, but they get there from different stems.
+ *
+ * A word in WORDS never reaches this, so any verb whose stem needs a nukta or
+ * a retroflex - पढ़ूंगा, बैठूंगा - is still listed there and still wins.
+ * ---------------------------------------------------------------------------
+ *
+ * @param {string} w lowercased Hinglish
+ * @returns {string|null} ITRANS, or null if this is not a future form
+ */
+function futureTense(w) {
+  // Vowel stem: jaa + uu.ngaa. `oo` because people write जाऊंगा as `jaoonga`
+  // about as often as `jaunga`.
+  //
+  // The stem is LAZY so that `a{1,2}` gets first refusal on the vowels in
+  // front of it. A greedy stem eats the first `a` of `khaaunga`, leaving one
+  // for the ending, and the spare `a` comes out as a separate आ.
+  let m = /^(.*?)a{1,2}(?:u|oo)ng([aei])$/.exec(w);
+  if (m) return fragments(m[1]) + 'aauu.ng' + FUTURE_TAIL[m[2]];
+
+  // Consonant stem: kar + uu.ngaa.
+  m = /^(.+?)(?:u|oo)ng([aei])$/.exec(w);
+  if (m) return fragments(m[1]) + 'uu.ng' + FUTURE_TAIL[m[2]];
+
+  return null;
+}
+
+/**
+ * Rewrite one Hinglish word as ITRANS.
+ *
+ * Four fixes, in order, each undoing one thing Hinglish leaves out:
+ *   1. a final `i`/`u` is almost always the long vowel  (dilli -> dillii)
+ *   2. a written final `a` is almost always आ            (ganga -> gangaa)
+ *   3. `n` or `m` before a consonant is an anusvara     (hindii -> hi.ndii)
+ *   4. a final consonant carries its inherent vowel     (ghar -> ghara)
+ *
+ * Rule 2 is the one that looks risky and is not. Nobody writes the schwa they
+ * do not pronounce - घर is typed `ghar`, never `ghara` - so a final `a` that
+ * someone actually typed is there because they heard one, and a heard final
+ * vowel in Hindi is आ. Rules 2 and 4 are therefore the same fact from both
+ * sides, which is why they cannot both fire on one word.
+ */
+function ruleRewrite(word) {
+  let w = word;
+
+  // 0. The future tense, which rule 1 cannot reach - see futureTense().
+  const future = futureTense(w);
+  if (future !== null) return future;
+
+  // 1. Long final vowel. `dilli` is दिल्ली, not दिल्लि.
+  //    `rri` is exempt: it is the vocalic ऋ spelled as one unit, not a
+  //    consonant followed by a vowel, so lengthening it would produce ऋि.
+  if (/rri$/.test(w)) {
+    // leave it for the fragment pass
+  } else if (/[^aeiou]i$/.test(w)) w = w.slice(0, -1) + 'ii';
+  else if (/[^aeiou]u$/.test(w)) w = w.slice(0, -1) + 'uu';
+  // 2. Long final `a`, but not on a bare vowel like `a` or `aa` itself.
+  else if (/[^aeiou]a$/.test(w)) w = w.slice(0, -1) + 'aa';
+
+  // Fragment pass.
+  let out = fragments(w);
 
   // 3. Nasal before a consonant becomes an anusvara, which is how modern Hindi
   //    spells it: हिंदी rather than हिन्दी. Both are correct; this one is what
@@ -318,6 +495,13 @@ function ruleRewrite(word) {
   return out;
 }
 
+/**
+ * Every Hinglish word the dictionary knows. The typing page treats these as
+ * Hindi even when they are also English words (`mere`, `log`, `jana`) - see
+ * englishWords.js.
+ */
+export const DICTIONARY_WORDS = Object.freeze(Object.keys(WORDS));
+
 /** One Hinglish word -> ITRANS. Dictionary first, rules second. */
 export function toItrans(word) {
   const key = word.toLowerCase();
@@ -329,65 +513,34 @@ export function toItrans(word) {
 // ---------------------------------------------------------------------------
 
 // Latin runs are the only thing we touch. Digits, punctuation, whitespace and
-// anything already in Devanagari pass through exactly as typed — same rule the
+// anything already in Devanagari pass through exactly as typed - same rule the
 // font converter follows, so a pasted phone number or date survives.
 const LATIN_RUN = /[A-Za-z]+(?:['’][A-Za-z]+)*/g;
 
 // ITRANS mode needs a wider token. Its notation spends ASCII punctuation on
-// meaning — `.n` is the anusvara, `.N` the chandrabindu, `~n` and `~N` the
+// meaning - `.n` is the anusvara, `.N` the chandrabindu, `~n` and `~N` the
 // nasals, `R^i` the vocalic r, `.D` the nukta forms. Tokenising on letters
 // alone splits `hi.ndii` into `hi` and `ndii` and drops the anusvara on the
 // floor, which is exactly the bug the exact mode exists to avoid.
-const ITRANS_RUN = /[A-Za-z][A-Za-z.~^]*/g;
+//
+// But it spends them ONLY in those sequences, so the run absorbs `.`, `~` and
+// `^` only where the letter behind actually makes one - which is what the
+// lookaheads say, read straight off Sanscript's own itrans scheme. Swallowing
+// them unconditionally cost a full stop and the letter after it every time one
+// landed between two letters, with no space to save it:
+//
+//   kya.hai   ->  क्याइ    the `.` AND the `h` gone
+//   kya~hai   ->  क्यऽहै   the `~` became an avagraha
+//   x.y.z     ->  क्ष्।य्।ज़्  a full stop became a danda
+//
+// A trailing `.`/`~`/`^` needed giving back by hand before, because the old
+// token could end in one. This one cannot: every branch below requires a
+// letter after the mark, and that letter is consumed on the next turn.
+const ITRANS_RUN = /[A-Za-z](?:[A-Za-z]|\.(?=[DNacmn])|~(?=[Nn])|\^(?=[iI]))*/g;
 
-// Never transliterate these, in either mode: they are structure, not words.
-const PROTECTED = new RegExp(
-  [
-    '(?:[Hh][Tt][Tt][Pp][Ss]?://|[Ww][Ww][Ww]\\.)[^\\s<>"\']+', // URLs
-    '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}', // emails
-  ].join('|'),
-  'g',
-);
-
-/**
- * Precomposed nukta letter -> consonant + combining nukta.
- *
- * Sanscript emits ड़ as the single codepoint U+095C. The font engine in
- * fontMaps.js builds it as ड followed by the combining nukta U+093C, because
- * that is what the Kruti Dev key `M+` actually is — a consonant and a mark.
- *
- * The two look identical and are not equal. Left alone, a word typed on the
- * transliteration page would not match the same word from the converter in a
- * search, a database key or a spell-check, and round-tripping it through Kruti
- * Dev would silently rewrite the bytes. Unicode also discourages these
- * precomposed forms, so the combining pair is the right target for both.
- *
- * NFD would do this, but it would also split ो into ा + े, which is a change
- * nobody asked for. So the substitution is explicit and covers only the nukta
- * block.
- */
-const NUKTA_FORMS = new Map([
-  ['ऩ', 'ऩ'], ['ऱ', 'ऱ'], ['ऴ', 'ऴ'],
-  ['क़', 'क़'], ['ख़', 'ख़'], ['ग़', 'ग़'],
-  ['ज़', 'ज़'], ['ड़', 'ड़'], ['ढ़', 'ढ़'],
-  ['फ़', 'फ़'], ['य़', 'य़'],
-]);
-
-const decomposeNukta = (s) =>
-  s.replace(/[ऩऱऴक़-य़]/g, (c) => NUKTA_FORMS.get(c));
-
-function splitProtected(text) {
-  const parts = [];
-  let last = 0;
-  for (const m of text.matchAll(PROTECTED)) {
-    if (m.index > last) parts.push({ skip: false, v: text.slice(last, m.index) });
-    parts.push({ skip: true, v: m[0] });
-    last = m.index + m[0].length;
-  }
-  if (last < text.length) parts.push({ skip: false, v: text.slice(last) });
-  return parts;
-}
-
+// URLs, emails and the nukta spelling live in deva.js, because the Google
+// engine in googleTranslit.js has to make exactly the same two decisions and
+// there must not be two answers to either. See the note at the top of that file.
 /**
  * Roman -> Devanagari.
  *
@@ -402,21 +555,26 @@ export function romanToUnicode(text, { mode = 'hinglish' } = {}) {
   const render = (itrans) =>
     decomposeNukta(Sanscript.t(itrans, 'itrans', 'devanagari'));
 
-  return splitProtected(text)
+  const out = splitProtected(text)
     .map(({ skip, v }) => {
       if (skip) return v;
       if (mode === 'itrans') {
         // Hand the run straight to Sanscript, which owns ITRANS. Word by word so
         // that spacing and punctuation between words are preserved untouched.
-        return v.replace(ITRANS_RUN, (w) => {
-          // A trailing `.` is a full stop, not the start of `.n`. Give it back.
-          const m = /[.~^]+$/.exec(w);
-          const tail = m ? m[0] : '';
-          const core = tail ? w.slice(0, -tail.length) : w;
-          return render(core) + tail;
-        });
+        // A full stop, a tilde or a caret that is not part of a sequence never
+        // enters the run in the first place - see ITRANS_RUN - so there is
+        // nothing left to hand back here.
+        return v.replace(ITRANS_RUN, render);
       }
       return v.replace(LATIN_RUN, (w) => render(toItrans(w)));
     })
     .join('');
+
+  // The nasal words, over the top - the same table googleTranslit.js applies to
+  // its own answer, so `waha` is वहाँ whether or not the network was up.
+  //
+  // NOT in itrans mode. That mode's entire promise is that nothing is inferred:
+  // `main` is मैन there because that is what the notation says, and a table
+  // that quietly made it मैं would be the one change that breaks it.
+  return mode === 'hinglish' ? applyCommonWords(text, out) : out;
 }

@@ -1,0 +1,295 @@
+---
+/**
+ * "Convert a document": upload a .docx or .txt, convert it, download it.
+ *
+ * Everything happens in the browser. The file is read with the File API,
+ * converted by src/lib/docConvert.js - which uses the same convert() as the
+ * text boxes above - and handed back as a download. There is no upload
+ * endpoint anywhere on this site.
+ */
+interface Props {
+  direction: 'to-unicode' | 'to-kruti';
+}
+
+const { direction } = Astro.props;
+const toUnicode = direction === 'to-unicode';
+const id = `doc-${direction}`;
+---
+
+<section
+  class="doc card mt-8"
+  data-doc-converter
+  data-direction={direction}
+  aria-labelledby={`${id}-title`}
+>
+  <div class="px-4 pt-5 pb-4 sm:px-6">
+    <h2 id={`${id}-title`} class="text-xl">Convert a document</h2>
+    <p class="mt-1 text-sm text-body">
+      {
+        toUnicode
+          ? 'Upload a Word (.docx) or text (.txt) file typed in Kruti Dev. Only the Kruti Dev text is converted; English, tables, images and formatting stay as they are.'
+          : 'Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted to Kruti Dev 010; English, tables, images and formatting stay as they are.'
+      }
+    </p>
+    <p class="mt-2 text-sm font-medium text-ink">
+      <span aria-hidden="true">🔒</span> Your file never leaves your computer.
+    </p>
+
+    {/*
+      The whole area is the label for the file input, so a tap anywhere on it
+      opens the picker - which is the only way on a phone, where there is
+      nothing to drag.
+    */}
+    <label
+      for={`${id}-input`}
+      data-role="drop"
+      class="doc-drop mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-(--radius-card) border-2 border-dashed border-hairline bg-inset px-4 py-8 text-center transition-colors"
+    >
+      <span class="text-sm text-body">
+        <span class="hidden sm:inline">Drag a file here, or </span>
+      </span>
+      <span class="btn btn-primary pointer-events-none">Choose file</span>
+      <span class="text-xs text-mute">.docx or .txt, up to 20 MB</span>
+      <input
+        id={`${id}-input`}
+        data-role="input"
+        type="file"
+        accept=".docx,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+        class="sr-only"
+      />
+    </label>
+
+    {
+      toUnicode && (
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <label for={`${id}-font`} class="text-body">
+            Hindi font in the converted file:
+          </label>
+          <select
+            id={`${id}-font`}
+            data-role="font"
+            class="rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5 text-ink"
+          >
+            <option value="Mangal" selected>Mangal</option>
+            <option value="Nirmala UI">Nirmala UI</option>
+          </select>
+        </div>
+      )
+    }
+
+    <div data-role="status" class="mt-4" hidden>
+      <p class="text-sm text-ink">
+        <span data-role="file-name" class="font-medium break-all"></span>
+        <span data-role="file-size" class="text-mute"></span>
+      </p>
+      <div
+        data-role="progress-wrap"
+        class="mt-2 h-2 overflow-hidden rounded-full bg-inset"
+        role="progressbar"
+        aria-label="Converting"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div data-role="progress" class="h-full w-0 bg-brick transition-[width]"></div>
+      </div>
+    </div>
+
+    <p data-role="error" role="alert" hidden class="mt-4 rounded-(--radius-chrome) border border-err/30 bg-err-bg px-3 py-2 text-sm text-err"></p>
+
+    <div data-role="result" hidden class="mt-4">
+      <p data-role="summary" class="text-sm font-medium text-ink"></p>
+      <p data-role="share" class="mt-1 text-sm text-body"></p>
+      <p data-role="warning" role="status" hidden class="mt-2 rounded-(--radius-chrome) border border-saffron/40 bg-warn-bg px-3 py-2 text-sm text-ink"></p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a data-role="download" class="btn btn-primary" href="#" download>Download converted file</a>
+        <a data-role="download-docx" class="btn btn-outline" href="#" download hidden>
+          Download as Word (.docx) with Kruti Dev 010
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  type Mod = typeof import('../lib/docConvert.js');
+  let mod: Promise<Mod> | null = null;
+  // A failed load is not cached, so the next upload tries again.
+  const load = () =>
+    (mod ??= import('../lib/docConvert.js').catch((err) => {
+      mod = null;
+      throw err;
+    }));
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-doc-converter]')) {
+    setup(root);
+  }
+
+  function setup(root: HTMLElement) {
+    const q = <T extends HTMLElement>(role: string) =>
+      root.querySelector<T>(`[data-role="${role}"]`)!;
+    const direction = root.dataset.direction as 'to-unicode' | 'to-kruti';
+
+    const drop = q<HTMLLabelElement>('drop');
+    const input = q<HTMLInputElement>('input');
+    const fontSelect = root.querySelector<HTMLSelectElement>('[data-role="font"]');
+    const status = q('status');
+    const fileName = q('file-name');
+    const fileSize = q('file-size');
+    const progressWrap = q('progress-wrap');
+    const progress = q('progress');
+    const error = q('error');
+    const result = q('result');
+    const summary = q('summary');
+    const share = q('share');
+    const warning = q('warning');
+    const download = q<HTMLAnchorElement>('download');
+    const downloadDocx = q<HTMLAnchorElement>('download-docx');
+
+    let current: File | null = null;
+    let urls: string[] = [];
+    let busy = 0;
+
+    const sizeLabel = (n: number) =>
+      n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
+
+    function setProgress(f: number) {
+      const pct = Math.round(f * 100);
+      progress.style.width = `${pct}%`;
+      progressWrap.setAttribute('aria-valuenow', String(pct));
+    }
+
+    function reset() {
+      for (const u of urls) URL.revokeObjectURL(u);
+      urls = [];
+      error.hidden = true;
+      result.hidden = true;
+      warning.hidden = true;
+      downloadDocx.hidden = true;
+    }
+
+    function fail(message: string) {
+      error.textContent = message;
+      error.hidden = false;
+      progressWrap.hidden = true;
+    }
+
+    function offer(a: HTMLAnchorElement, blob: Blob, name: string) {
+      const url = URL.createObjectURL(blob);
+      urls.push(url);
+      a.href = url;
+      a.download = name;
+    }
+
+    async function handle(file: File) {
+      current = file;
+      const run = ++busy;
+      reset();
+      status.hidden = false;
+      progressWrap.hidden = false;
+      fileName.textContent = file.name;
+      fileSize.textContent = ` · ${sizeLabel(file.size)}`;
+      setProgress(0);
+
+      let m: Mod | null = null;
+      try {
+        m = await load();
+        const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+        const checked = m.checkFile({ name: file.name, size: file.size, head });
+        if ('error' in checked) return fail(checked.error);
+
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        if (run !== busy) return;
+        let stats;
+
+        if (checked.kind === 'docx') {
+          const out = await m.convertDocx(bytes, {
+            direction,
+            unicodeFont: fontSelect?.value ?? 'Mangal',
+            onProgress: (f) => run === busy && setProgress(f),
+          });
+          if (run !== busy) return;
+          stats = out.stats;
+          offer(download, m.docxBlob(out.bytes), m.outputName(file.name, direction, 'docx'));
+        } else {
+          const { text } = m.decodeTextFile(bytes);
+          setProgress(0.4);
+          const out = m.convertTxt(text, direction);
+          stats = out.stats;
+          offer(
+            download,
+            new Blob([out.text], { type: 'text/plain;charset=utf-8' }),
+            m.outputName(file.name, direction, 'txt'),
+          );
+          // A .txt cannot carry a font, and Kruti Dev text without its font is
+          // unreadable - so a Word file with the font already set is offered too.
+          if (direction === 'to-kruti' && stats.convertedChars > 0) {
+            const { buildDocxBytes } = await import('../lib/docx.js');
+            const unicodeDocx = buildDocxBytes(text, { fontName: 'Mangal' });
+            const kruti = await m.convertDocx(unicodeDocx, { direction });
+            offer(downloadDocx, m.docxBlob(kruti.bytes), m.outputName(file.name, direction, 'docx'));
+            downloadDocx.hidden = false;
+          }
+        }
+        if (run !== busy) return;
+        setProgress(1);
+
+        const s = m.summarize(stats, direction);
+        summary.textContent = s.line;
+        share.textContent = s.share ?? '';
+        share.hidden = !s.share;
+        warning.textContent = s.warning ?? '';
+        warning.hidden = !s.warning;
+        // Nothing converted means the download would be the same file back.
+        download.hidden = !!s.warning;
+        result.hidden = false;
+      } catch (err) {
+        // Always log the real error (and its cause) - the message shown is for people.
+        console.error('[doc-converter]', err, (err as Error)?.cause ?? '');
+        if (run !== busy) return;
+        // If the converter itself failed to load there is no messageFor().
+        fail(m ? m.messageFor(err) : 'Something went wrong converting this file.');
+      }
+    }
+
+    input.addEventListener('change', () => {
+      const f = input.files?.[0];
+      if (f) void handle(f);
+      // Allow picking the same file again after a change of settings.
+      input.value = '';
+    });
+
+    // A different output font means a different file: convert again.
+    fontSelect?.addEventListener('change', () => {
+      if (current) void handle(current);
+    });
+
+    // Drag and drop. preventDefault on dragover is what makes this a drop
+    // target at all; without it the browser opens the file in the tab.
+    for (const ev of ['dragenter', 'dragover'] as const) {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.dataset.drag = 'true';
+      });
+    }
+    for (const ev of ['dragleave', 'drop'] as const) {
+      drop.addEventListener(ev, () => delete drop.dataset.drag);
+    }
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer?.files?.[0];
+      if (f) void handle(f);
+    });
+  }
+</script>
+
+<style>
+  .doc-drop[data-drag='true'] {
+    border-color: var(--color-brick);
+    background-color: var(--color-warn-bg);
+  }
+  .doc-drop:focus-within {
+    outline: 2px solid var(--color-brick);
+    outline-offset: 2px;
+  }
+</style>

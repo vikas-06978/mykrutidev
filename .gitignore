@@ -32,3 +32,7 @@ pnpm-debug.log*
 .agents/skills/tailwind-4-docs/references/docs/
 .agents/skills/tailwind-4-docs/references/docs-index.tsx
 node_modules
+vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf
+
+# Raw sources for public/data/english-words.json - scripts/build-english-words.mjs downloads them
+vendor/english/

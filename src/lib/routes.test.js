@@ -15,6 +15,7 @@ import {
   allGroups,
   reversePage,
   isIndexable,
+  assertKnownFonts,
   SITE,
 } from './routes.js';
 import { FONTS } from './fontMaps.js';
@@ -226,7 +227,9 @@ describe('navigation', () => {
   test('the nav groups are the source families that have a live page', () => {
     assert.deepEqual(
       navGroups().map((g) => g.name),
-      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys'],
+      // Chanakya appears because Abbasi Chanakya New is live under it; the
+      // generic Chanakya pages in that group are still "coming soon".
+      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys', 'Chanakya'],
     );
   });
 
@@ -304,7 +307,7 @@ describe('indexing', () => {
   });
 
   test('a live page that canonicalises elsewhere stays out of the index', () => {
-    // It is usable and crawlable — it just must not compete with the page that
+    // It is usable and crawlable - it just must not compete with the page that
     // owns the conversion, or the two split the ranking signal between them.
     const dupes = PAGES.filter((p) => p.canonical);
     assert.ok(dupes.length > 0, 'expected at least one canonicalised page');
@@ -323,5 +326,54 @@ describe('indexing', () => {
 
   test('an unknown URL is not indexable', () => {
     assert.equal(isIndexable(`${SITE}/no-such-page`), false);
+  });
+});
+
+/**
+ * The build-time font-key guard. Every entry in PAGES is correct, so the site
+ * itself never fires this - which is exactly why the throw path is tested
+ * directly rather than left to the one day somebody mistypes a key.
+ */
+describe('assertKnownFonts - the build-time guard', () => {
+  const fonts = { 'kruti-dev': {}, unicode: {} };
+
+  test('the real table passes, which is why importing routes.js works at all', () => {
+    assert.doesNotThrow(() => assertKnownFonts(PAGES, FONTS));
+  });
+
+  test('an unknown `from` is caught', () => {
+    assert.throws(
+      () => assertKnownFonts([{ path: '/x', from: 'krooti-dev', to: 'unicode' }], fonts),
+      /unknown font "krooti-dev"/,
+    );
+  });
+
+  test('an unknown `to` is caught as well as an unknown `from`', () => {
+    assert.throws(
+      () => assertKnownFonts([{ path: '/x', from: 'unicode', to: 'mangel' }], fonts),
+      /unknown font "mangel"/,
+    );
+  });
+
+  test('the message names the page, so the fix is obvious', () => {
+    assert.throws(
+      () => assertKnownFonts([{ path: '/devlys-to-mangal', from: 'nope' }], fonts),
+      /\/devlys-to-mangal/,
+    );
+  });
+
+  test('a page with no fonts at all is fine', () => {
+    // The tool pages - /hindi-keyboard, /hindi-typing-test - carry neither.
+    assert.doesNotThrow(() => assertKnownFonts([{ path: '/hindi-keyboard' }], fonts));
+  });
+
+  test('it checks every page, not just the first', () => {
+    assert.throws(
+      () => assertKnownFonts(
+        [{ path: '/ok', from: 'unicode' }, { path: '/bad', from: 'ghost' }],
+        fonts,
+      ),
+      /\/bad/,
+    );
   });
 });

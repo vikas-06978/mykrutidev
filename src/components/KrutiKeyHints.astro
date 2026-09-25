@@ -1,0 +1,82 @@
+---
+import { FONTS } from '../lib/fontMaps.js';
+import { keyHints } from '../lib/keyHints.js';
+
+interface Props {
+  /** Font key in FONTS. Any legacy font with a verified map works. */
+  font?: string;
+  /** Open on first paint. Off by default - it is a reference, not the task. */
+  open?: boolean;
+}
+
+const { font = 'kruti-dev', open = false } = Astro.props;
+
+const f = FONTS[font];
+if (!f?.map) throw new Error(`KrutiKeyHints: ${font} has no character map`);
+
+// Read out of the map at build time. See src/lib/keyHints.js: a hand-written
+// key chart is a promise that drifts, and this one cannot.
+const { singles, combos } = keyHints(f.map);
+---
+
+<details class="group card overflow-hidden" open={open}>
+  <summary
+    class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-medium text-ink marker:hidden hover:bg-inset sm:px-5"
+  >
+    Which key types which letter - {f.label} layout
+    <span
+      aria-hidden="true"
+      class="shrink-0 text-xl leading-none text-saffron transition-transform group-open:rotate-45"
+    >
+      +
+    </span>
+  </summary>
+
+  <div class="border-t border-hairline px-4 py-4 sm:px-5">
+    <p class="mb-4 text-xs leading-relaxed text-mute">
+      Every row below is generated from the conversion table this site uses, so
+      it says exactly what the converter does rather than what a chart once
+      claimed.
+    </p>
+
+    {
+      combos.length > 0 && (
+        <div class="kb-row">
+          <span class="kb-row-label">Two keys - no single key exists for these</span>
+          <div class="kb-hints">
+            {combos.map((h) => (
+              <div class="kb-hint">
+                <span class="kb-hint-deva" lang="hi">
+                  {h.label}
+                </span>
+                <span class="kb-hint-key">{h.key}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <div class="kb-row">
+      <span class="kb-row-label">One key</span>
+      <div class="kb-hints">
+        {
+          singles.map((h) => (
+            <div class="kb-hint">
+              <span class="kb-hint-deva" lang="hi">
+                {h.label}
+              </span>
+              <span class="kb-hint-key">{h.key}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="mt-4 text-xs leading-relaxed text-mute">
+      The letters shown on a dotted circle
+      (<span lang="hi" class="text-body">&#9676;&#2366;</span>) are vowel signs.
+      They have no shape of their own and attach to the consonant before them.
+    </p>
+  </div>
+</details>
