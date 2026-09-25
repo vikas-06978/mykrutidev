@@ -6,7 +6,7 @@
  * - System follows prefers-color-scheme, including a live change;
  * - the picker works by keyboard (arrows move, Enter picks, Esc closes) and
  *   from the phone menu;
- * - switching cross-fades for 200ms, and not at all with reduced motion;
+ * - a switch starts no CSS transitions, cross-fades once through a View\n *   Transition (instant with reduced motion), and survives rapid switching;
  * - axe finds no colour-contrast failure on the four busiest pages in any of
  *   the 6 themes x 5 accents, with menus open, text converted, messages shown
  *   and the tutor's correct/wrong letters and key feedback on screen; High
@@ -84,10 +84,11 @@ test.describe('applying and remembering the choice', () => {
     await withStored(page, 'light', 'terracotta');
     await page.goto('/');
     const terracotta = await brick();
+    // A switch lands on the next frame (inside a View Transition), so wait for it.
     await page.evaluate(() => window.mkdTheme.setAccent('blue'));
-    expect(await brick()).not.toBe(terracotta);
+    await expect.poll(brick).not.toBe(terracotta);
     await page.evaluate(() => window.mkdTheme.set('contrast'));
-    expect(await brick()).toBe('#ffd400');
+    await expect.poll(brick).toBe('#ffd400');
   });
 
   test('broken stored values fall back to System and terracotta', async ({ page }) => {
@@ -331,9 +332,15 @@ test.describe('the picker', () => {
     await expect(html(page)).not.toHaveAttribute('data-theme', 'reading'); // moving does not pick
     await page.keyboard.press('Enter');
     await expect(html(page)).toHaveAttribute('data-theme', 'reading');
-    await expect(cards.nth(3)).toHaveAttribute('aria-checked', 'true');
+    // The panel closes at once and focus goes back to the button.
+    await expect(panel).toBeHidden();
+    await expect(trigger).toBeFocused();
     await expect(trigger).toHaveAttribute('aria-label', 'थीम: पढ़ने वाला');
 
+    // Reopen: it opens on the choice just made.
+    await page.keyboard.press('ArrowDown');
+    await expect(cards.nth(3)).toBeFocused();
+    await expect(cards.nth(3)).toHaveAttribute('aria-checked', 'true');
     await page.keyboard.press('Tab'); // to the swatches, on the chosen one
     const swatches = panel.locator('[data-picker-group="accent"] [role="radio"]');
     await expect(swatches.nth(0)).toBeFocused();
@@ -342,7 +349,12 @@ test.describe('the picker', () => {
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press(' ');
     await expect(html(page)).toHaveAttribute('data-accent', 'green');
+    await expect(panel).toBeHidden();
+    await expect(trigger).toBeFocused();
 
+    // Esc closes it without choosing anything.
+    await page.keyboard.press('ArrowDown');
+    await expect(panel).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();
     await expect(trigger).toBeFocused();
@@ -373,6 +385,7 @@ test.describe('the picker', () => {
     const hint = page.locator('[data-theme-panel] .tp-hc-hint');
     await expect(hint).toBeHidden();
     await page.locator('[data-theme-panel] [data-value="contrast"]').click();
+    await page.locator('[data-theme-trigger]').click();
     await expect(hint).toBeVisible();
   });
 
@@ -393,24 +406,76 @@ test.describe('the picker', () => {
     await expect(page.locator('[data-mobile-nav] [data-value="purple"]')).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('switching cross-fades for 200ms, and not with reduced motion', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await withStored(page, 'light');
-    await page.goto('/');
-    const during = () =>
-      page.evaluate(() => {
-        window.mkdTheme.set(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-        return [document.documentElement.classList.contains('theme-fade'), getComputedStyle(document.body).transitionDuration];
-      });
-    const [fading, duration] = await during();
-    expect(fading).toBe(true);
-    expect(duration).toContain('0.2s');
-    await expect(html(page)).not.toHaveClass(/theme-fade/);
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    const [, reduced] = await during();
-    expect(reduced).not.toContain('0.2s');
+  test('switching starts no CSS transitions anywhere (theme or accent)', async ({ page }) => {
+    // The old global fade animated every key at once. Now nothing may
+    // transition on a switch: if a new element with a colour transition is
+    // missing from .theme-switching in themes.css, this catches it.
+    for (const path of ['/hindi-keyboard', '/hindi-typing-test', '/unicode-to-kruti-dev']) {
+      await withStored(page, 'light');
+      await page.goto(path);
+      for (const step of ["mkdTheme.set('dark')", "mkdTheme.setAccent('teal')", "mkdTheme.set('contrast')", "mkdTheme.set('reading')"]) {
+        const transitions = await page.evaluate(async (code) => {
+          new Function(`window.${code}`)();
+          // Two frames: the new colours are in and the class is back off.
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          return document.getAnimations().filter((a) => a instanceof CSSTransition).map((a) => `${a.effect.target?.className} ${a.transitionProperty}`);
+        }, step);
+        expect(transitions, `${path} ${step}`).toEqual([]);
+      }
+      await expect(html(page)).not.toHaveClass(/theme-switching/);
+    }
   });
 
+  test('a View Transition cross-fades the switch; reduced motion switches instantly', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__vt = 0;
+      const real = document.startViewTransition?.bind(document);
+      if (real) document.startViewTransition = (cb) => (window.__vt++, real(cb));
+    });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await withStored(page, 'light');
+    await page.goto('/hindi-keyboard');
+    await page.evaluate(() => window.mkdTheme.set('dark'));
+    await expect(html(page)).toHaveAttribute('data-theme', 'dark');
+    expect(await page.evaluate(() => window.__vt)).toBe(1);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const [vt, theme] = await page.evaluate(() => {
+      window.mkdTheme.set('light');
+      // Instant: already applied when set() returns.
+      return [window.__vt, document.documentElement.dataset.theme];
+    });
+    expect(vt).toBe(1);
+    expect(theme).toBe('light');
+  });
+
+  test('switching 10 times quickly on the Hindi Keyboard: no errors, ends on the last choice', async ({ page }, testInfo) => {
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    await withStored(page, 'light');
+    await page.goto('/hindi-keyboard');
+    const order = ['dark', 'white', 'reading', 'contrast', 'light', 'dark', 'reading', 'white', 'contrast', 'dark'];
+    if (isDesktop(testInfo)) {
+      // Through the real panel, as fast as the clicks go.
+      for (const t of order) {
+        await page.locator('[data-theme-trigger]').click();
+        await page.locator(`[data-theme-panel] [data-value="${t}"]`).click();
+      }
+    } else {
+      await page.locator('[data-burger]').click();
+      for (const t of order) await page.locator(`[data-mobile-nav] [data-theme-picker] [data-value="${t}"]`).click();
+    }
+    await expect(html(page)).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('body')).toHaveCSS('background-color', PAPER.dark);
+    await expect(html(page)).not.toHaveClass(/theme-switching/);
+    expect(await page.evaluate(() => localStorage.getItem('mkd-theme'))).toBe('dark');
+    // The keyboard still types.
+    if (!isDesktop(testInfo)) await page.locator('[data-burger]').click();
+    await page.locator('[data-keyboard] [data-layer-panel="base"] button[data-ins="क"]').first().click();
+    await expect(page.locator('[data-keyboard] textarea[data-role="text"]')).toHaveValue('क');
+    expect(errors).toEqual([]);
+  });
   test('print always uses Light', async ({ page }) => {
     await withStored(page, 'contrast', 'purple');
     await page.goto('/');

@@ -8,6 +8,7 @@ dist/
 test-results/
 playwright-report/
 screenshots/
+perf-traces/
 
 # dependencies
 node_modules/

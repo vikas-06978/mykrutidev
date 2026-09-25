@@ -128,20 +128,47 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
             new CustomEvent('mkd:theme', { detail: { pref: pref, theme: theme, accent: accent } }),
           );
         }
-        // A short cross-fade for a switch the visitor made (themes.css).
-        var fading;
-        function fade() {
-          root.classList.add('theme-fade');
-          clearTimeout(fading);
-          fading = setTimeout(function () {
-            root.classList.remove('theme-fade');
-          }, 260);
-        }
-        function onDevice() {
-          if (pref === 'system') {
-            fade();
+        // A visitor's switch: only the two attributes on <html> change - every
+        // colour is a CSS variable, so there is no loop over elements. While
+        // the new colours are applied, .theme-switching turns every transition
+        // off (themes.css), so the keys' own colour transitions do not all
+        // fire at once; it comes off two frames later, once the new colours
+        // are in. Where supported, the change runs in a View Transition - one
+        // ~150 ms cross-fade of the whole page on the GPU. Reduced motion, or
+        // no support: instant.
+        var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var noop = function () {};
+        var turn = 0;
+        function change(apply, after) {
+          var mine = ++turn;
+          // The class goes on with the new attributes, in the same style pass:
+          // added earlier, it would cost a restyle of its own while the View
+          // Transition captures the old page.
+          function update() {
+            root.classList.add('theme-switching');
             apply();
           }
+          function done() {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                if (mine === turn) root.classList.remove('theme-switching');
+              });
+            });
+            if (after) after();
+          }
+          if (document.startViewTransition && !still.matches && !document.hidden) {
+            var vt = document.startViewTransition(update);
+            // A quick second switch skips the first transition; that is fine.
+            vt.ready.catch(noop);
+            vt.finished.catch(noop);
+            vt.updateCallbackDone.then(done, done);
+          } else {
+            update();
+            done();
+          }
+        }
+        function onDevice() {
+          if (pref === 'system') change(apply);
         }
         if (dark.addEventListener) dark.addEventListener('change', onDevice);
         else if (dark.addListener) dark.addListener(onDevice);
@@ -155,16 +182,17 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
           set: function (p) {
             if (!PREFS.test(p) || p === pref) return;
             pref = p;
-            save('mkd-theme', p);
-            fade();
-            apply();
+            // Stored after the switch, off the path to the new colours.
+            change(apply, function () {
+              save('mkd-theme', p);
+            });
           },
           setAccent: function (a) {
             if (!ACCENTS.test(a) || a === accent) return;
             accent = a;
-            save('mkd-accent', a);
-            fade();
-            apply();
+            change(apply, function () {
+              save('mkd-accent', a);
+            });
           },
         };
         apply();

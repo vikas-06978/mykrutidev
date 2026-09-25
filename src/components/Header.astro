@@ -798,6 +798,9 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       for (const b of optionsOf(g)) {
         b.addEventListener('click', () => {
           const v = b.dataset.value!;
+          // The desktop panel closes at once, before the switch, so its own
+          // repaint is not part of it. (The phone menu stays open.)
+          if (themePanel?.contains(b)) closeTheme(true);
           if (isTheme) themeApi.set(v);
           else themeApi.setAccent(v);
         });

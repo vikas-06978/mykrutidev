@@ -119,11 +119,16 @@
     html {
       scroll-behavior: auto;
     }
+    /* transition-duration is 0s, not the usual 0.01ms: a non-zero duration
+       with the default `transition-property: all` made EVERY element start a
+       transition on EVERY property whenever the theme changed - a 0.7 s
+       style pass on the Typing Tutor at 4x CPU. 0s starts none. Nothing on
+       the site listens for transitionend. */
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
+      transition-duration: 0s !important;
     }
   }
 

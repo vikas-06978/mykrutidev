@@ -181,19 +181,39 @@
   }
 }
 
-/* A 200ms cross-fade while the theme or accent is being switched - only then,
-   so hover states and typing feedback keep their own timing. The script adds
-   the class for a moment; prefers-reduced-motion turns it off entirely. */
-@media (prefers-reduced-motion: no-preference) {
-  :root.theme-fade,
-  :root.theme-fade *,
-  :root.theme-fade *::before,
-  :root.theme-fade *::after {
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease,
-      color 200ms ease,
-      fill 200ms ease,
-      stroke 200ms ease !important;
-  }
+/* Switching theme or accent (the head script in Base.astro):
+   - For one frame every transition is off, so the keys' and buttons' own
+     colour transitions (hundreds of them on the keyboard pages) do not all
+     start at once. That was what made switching slow: 0.4-0.5 s of animating
+     elements and main-thread tasks up to 1.4 s on a slower CPU.
+   - Where the browser supports it, the change runs inside a View Transition:
+     one GPU cross-fade of a snapshot of the whole page, ~150 ms. Otherwise,
+     and with reduced motion, the switch is instant. */
+/* Every element that has a colour transition, and only those: the effect is
+   "transitions off everywhere", but when the class comes off again Chrome only
+   restyles these, not the whole page (with `*` that second pass cost as much
+   as the switch itself). A new transition elsewhere belongs in this list -
+   e2e/theme.spec.js fails if one is missing. */
+:root.theme-switching
+  :is(
+    .cv-field,
+    .btn,
+    .cv-seg button,
+    .hk-key,
+    .kb-key,
+    .kbd-cap,
+    .tt-c,
+    .tt-pause,
+    .tt-level,
+    .hand-palm,
+    .hand-finger,
+    .transition-colors
+  ) {
+  transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+  animation-timing-function: ease-out;
 }
