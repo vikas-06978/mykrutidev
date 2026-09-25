@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { SITE, PAGES, isLive, isIndexable } from '../src/lib/routes.js';
+import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
@@ -176,6 +176,87 @@ describe('links', () => {
     for (const html of pages.values()) {
       assert.doesNotMatch(html, /http-equiv="refresh"/i);
       assert.doesNotMatch(html, /location\.(href|replace|assign)\s*[=(]/);
+    }
+  });
+});
+
+describe('"Soon" badges come from the status flag, everywhere, in both languages', () => {
+  const BADGE = /<span\b[^>]*\bdata-soon-badge\b[^>]*>([^<]*)<\/span>/g;
+  const TEXT = { en: 'Soon', hi: 'जल्द' };
+  const langOf = (p) => (p === '/hi' || p.startsWith('/hi/') ? 'hi' : 'en');
+
+  /** Every listed route on a page: [{ route, html }], nav rows and cards alike. */
+  const rows = (html) =>
+    [...html.matchAll(/<li\b[^>]*\bdata-route="([^"]+)"[^>]*>([\s\S]*?)<\/li>/g)].map((m) => ({
+      route: m[1],
+      html: m[2],
+    }));
+  const section = (html, marker) => html.split(marker)[1]?.split('</nav>')[0] ?? '';
+
+  test('on every page, a listed route shows the badge exactly when its status is "soon"', () => {
+    let soon = 0;
+    let live = 0;
+    for (const [p, html] of pages) {
+      for (const r of rows(html)) {
+        const page = PAGES.find((x) => x.path === r.route);
+        assert.ok(page, `${p}: data-route="${r.route}" is not in routes.js`);
+        const badges = [...r.html.matchAll(BADGE)];
+        if (statusOf(page) === 'soon') {
+          soon++;
+          assert.equal(badges.length, 1, `${p}: ${r.route} is coming soon but has ${badges.length} badges`);
+          assert.equal(badges[0][1].trim(), TEXT[langOf(p)], `${p}: ${r.route} badge text`);
+        } else {
+          live++;
+          assert.equal(badges.length, 0, `${p}: live ${r.route} shows a Soon badge`);
+        }
+      }
+    }
+    assert.ok(soon > 100 && live > 100, `too few rows checked (${soon} soon, ${live} live)`);
+  });
+
+  test('no badge anywhere outside a listed route', () => {
+    for (const [p, html] of pages) {
+      const inRows = rows(html).reduce((n, r) => n + [...r.html.matchAll(BADGE)].length, 0);
+      assert.equal([...html.matchAll(BADGE)].length, inRows, p);
+    }
+  });
+
+  test('every coming-soon item in the nav has the badge, desktop and mobile, en and hi', () => {
+    const soonInNav = navGroups().flatMap((g) => g.pages).filter((x) => x.status === 'soon');
+    assert.ok(soonInNav.length > 0);
+    for (const home of ['/', '/hi']) {
+      const html = pages.get(home);
+      for (const marker of ['data-desktop-nav', 'data-mobile-nav']) {
+        const nav = rows(section(html, marker));
+        for (const s of soonInNav) {
+          const r = nav.find((x) => x.route === s.path);
+          assert.ok(r, `${home} ${marker}: ${s.path} missing`);
+          assert.match(r.html, /data-soon-badge/, `${home} ${marker}: ${s.path} has no badge`);
+          assert.match(r.html, /aria-disabled="true"/, `${home} ${marker}: ${s.path} must stay greyed, not a link`);
+        }
+      }
+    }
+  });
+
+  test('the All converters page lists every converter, with the badge on exactly the soon ones', () => {
+    for (const p of ['/all-converters', '/hi/all-converters']) {
+      const listed = new Map(rows(pages.get(p)).map((r) => [r.route, r.html]));
+      for (const page of PAGES.filter((x) => x.kind === 'converter')) {
+        assert.ok(listed.has(page.path), `${p}: ${page.path} missing`);
+        assert.equal(/data-soon-badge/.test(listed.get(page.path)), statusOf(page) === 'soon', `${p}: ${page.path}`);
+      }
+    }
+  });
+
+  test('both Abbasi Chanakya pages are live and never show the badge', () => {
+    for (const route of ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya']) {
+      assert.equal(statusOf(PAGES.find((x) => x.path === route)), 'live', route);
+      for (const [p, html] of pages) {
+        for (const r of rows(html).filter((x) => x.route === route)) {
+          assert.doesNotMatch(r.html, /data-soon-badge/, `${p}: ${route}`);
+          assert.match(r.html, /<a\b/, `${p}: ${route} must be a link`);
+        }
+      }
     }
   });
 });

@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **875 keys**, identical in both files (enforced by `npm test` and at build time).
+- **873 keys**, identical in both files (enforced by `npm test` and at build time).
 - **76 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -41,7 +41,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `nav.aria` | Converters | कन्वर्टर |  |
 | `nav.typingTools` | Typing tools | टाइपिंग टूल |  |
 | `nav.allConverters` | All converters | सभी कन्वर्टर |  |
-| `nav.soon` | soon | जल्द |  |
+| `nav.soon` | Soon | जल्द |  |
 | `nav.menu` | Menu | मेनू |  |
 | `groups.Kruti Dev` | Kruti Dev | कृतिदेव |  |
 | `groups.Unicode / Hindi` | Unicode / Hindi | यूनिकोड / हिंदी |  |
@@ -75,7 +75,6 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `page.pendingLinks` | &lt;a href="/" class="font-medium">Use the Kruti Dev to Unicode converter&lt;/a> in the meantime, or see &lt;a href="/all-converters">all converters and their status&lt;/a>. | तब तक &lt;a href="/" class="font-medium">कृतिदेव से यूनिकोड कन्वर्टर&lt;/a> इस्तेमाल करें, या &lt;a href="/all-converters">सभी कन्वर्टर और उनकी स्थिति&lt;/a> देखें। |  |
 | `page.relatedConverters` | Related converters | इनसे जुड़े कन्वर्टर |  |
 | `page.relatedTools` | Related tools | इनसे जुड़े टूल |  |
-| `page.comingSoonTag` | coming soon | जल्द आ रहा है |  |
 | `page.faqHeading` | Frequently asked questions | अक्सर पूछे जाने वाले सवाल |  |
 | `common.clear` | Clear | साफ़ करें |  |
 | `common.tryExample` | Try example | उदाहरण देखें |  |
@@ -303,7 +302,6 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `tutor.hands.right` | Right hand | दायाँ हाथ |  |
 | `allConverters.intro` | Every conversion on the site, grouped by source font. {live} of {total} are live; the rest are scaffolded and waiting on a verified character map. | साइट के सभी कन्वर्जन, मूल फ़ॉन्ट के हिसाब से। {total} में से {live} चालू हैं; बाकी तैयार किए जा रहे हैं और जाँचे हुए अक्षर-मैप का इंतज़ार कर रहे हैं। |  |
 | `allConverters.live` | Live | चालू |  |
-| `allConverters.comingSoon` | Coming soon | जल्द आ रहा है |  |
 | `allConverters.body.0` | &lt;h2>Why some of these are not switched on&lt;/h2> | &lt;h2>इनमें से कुछ अभी चालू क्यों नहीं हैं&lt;/h2> |  |
 | `allConverters.body.1` | &lt;p>A legacy Hindi font is not an encoding. It is a font whose glyphs happen to sit on ASCII codepoints, and every vendor arranged them differently. Converting one correctly means knowing exactly which key carried which letter, and that has to come from real documents. It cannot be inferred.&lt;/p> | &lt;p>पुराना हिंदी फ़ॉन्ट कोई एन्कोडिंग नहीं है। यह ऐसा फ़ॉन्ट है जिसके अक्षर ASCII कोड पर बैठे होते हैं, और हर कंपनी ने उन्हें अलग तरह से रखा। किसी फ़ॉन्ट को सही बदलने के लिए ठीक-ठीक पता होना चाहिए कि किस बटन पर कौन-सा अक्षर है, और यह असली डॉक्यूमेंट से ही पता चलता है। इसका अंदाज़ा नहीं लगाया जा सकता।&lt;/p> |  |
 | `allConverters.body.2` | &lt;p>So the pages above exist, with their titles and descriptions, but the ones marked &lt;strong>Coming soon&lt;/strong> deliberately have no converter on them. A converter built on a guessed map produces Hindi that looks plausible and is quietly wrong in ways you would only find out later, which is worse than no converter at all.&lt;/p> | &lt;p>इसलिए ऊपर के पेज अपने नाम और विवरण के साथ मौजूद हैं, पर जिन पर &lt;strong>जल्द आ रहा है&lt;/strong> लिखा है उन पर जान-बूझकर कोई कन्वर्टर नहीं है। अंदाज़े वाले मैप पर बना कन्वर्टर ऐसी हिंदी देता है जो सही दिखती है पर चुपचाप गलत होती है, और गलती बाद में पता चलती है। यह बिना कन्वर्टर के रहने से भी बुरा है।&lt;/p> |  |

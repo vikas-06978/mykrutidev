@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { allGroups } from '../lib/routes.js';
 import { langOf, useT } from '../i18n/index.js';
+import SoonBadge from './SoonBadge.astro';
 
 const { t, raw, render } = useT(langOf(Astro.url));
 const P = '/all-converters';
@@ -28,23 +29,19 @@ const body: string[] = raw('allConverters.body');
           <h2 class="text-xl" set:html={render(t(`groups.${g.name}`))} />
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             {g.pages.map((p) => (
-              <li>
+              <li data-route={p.path}>
                 <a
                   href={p.path}
                   class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron"
                 >
                   <span class="flex items-start justify-between gap-3">
                     <span class="font-medium text-ink" set:html={render(t(`pages.${p.path}.h1`))} />
-                    <span
-                      class:list={[
-                        'mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
-                        p.live
-                          ? 'bg-inset text-ok'
-                          : 'bg-warn-bg text-saffron',
-                      ]}
-                    >
-                      {p.live ? t('allConverters.live') : t('allConverters.comingSoon')}
-                    </span>
+                    {p.status === 'live' && (
+                      <span class="mt-0.5 shrink-0 rounded-full bg-inset px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ok">
+                        {t('allConverters.live')}
+                      </span>
+                    )}
+                    <SoonBadge status={p.status} class="mt-0.5" />
                   </span>
                   <span
                     class="mt-1.5 text-sm text-body"

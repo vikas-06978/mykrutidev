@@ -1,6 +1,7 @@
 ---
 import { navGroups, navTools, getPage, isLive } from '../lib/routes.js';
 import { LOCALES, LOCALE_META, splitLocale, localizePath, useT } from '../i18n/index.js';
+import SoonBadge from './SoonBadge.astro';
 
 // `path` is the route without any /hi prefix, so "is this the current page"
 // works the same in both languages. Every href below goes through `to()`.
@@ -98,7 +99,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               >
                 {g.pages.map((p) =>
                   p.live ? (
-                    <li>
+                    <li data-route={p.path}>
                       <a
                         href={to(p.path)}
                         aria-current={isCurrent(p.path) ? 'page' : undefined}
@@ -113,7 +114,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                       </a>
                     </li>
                   ) : (
-                    <li>
+                    <li data-route={p.path}>
                       {/* Not a link on purpose - the page exists but cannot convert yet. */}
                       <span
                         aria-disabled="true"
@@ -124,9 +125,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                         ]}
                       >
                         <span set:html={label(p)} />
-                        <span class="shrink-0 rounded-full bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-saffron">
-                          {t('nav.soon')}
-                        </span>
+                        <SoonBadge status={p.status} />
                       </span>
                     </li>
                   ),
@@ -336,7 +335,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               <ul class="pb-2">
                 {g.pages.map((p) =>
                   p.live ? (
-                    <li>
+                    <li data-route={p.path}>
                       <a
                         href={to(p.path)}
                         aria-current={isCurrent(p.path) ? 'page' : undefined}
@@ -351,7 +350,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                       </a>
                     </li>
                   ) : (
-                    <li>
+                    <li data-route={p.path}>
                       <span
                         aria-disabled="true"
                         aria-current={isCurrent(p.path) ? 'page' : undefined}
@@ -361,9 +360,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                         ]}
                       >
                         <span set:html={label(p)} />
-                        <span class="shrink-0 rounded-full bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-saffron">
-                          {t('nav.soon')}
-                        </span>
+                        <SoonBadge status={p.status} />
                       </span>
                     </li>
                   ),

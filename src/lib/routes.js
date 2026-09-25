@@ -424,18 +424,34 @@ export function isLive(page) {
   return isPairAccurate(page.from, page.to);
 }
 
+/**
+ * The one status flag every list on the site reads: 'live' or 'soon'.
+ *
+ * Derived from isLive(), never hand-set, so a page cannot show as live on an
+ * unverified mapping. Every "Soon" badge (header dropdowns, mobile menu,
+ * /all-converters, the related-converter cards) renders from this through
+ * SoonBadge.astro - none is placed by hand.
+ *
+ * @returns {'live' | 'soon'}
+ */
+export const statusOf = (page) => (isLive(page) ? 'live' : 'soon');
+
 export const livePages = () => PAGES.filter(isLive);
 export const pendingPages = () => PAGES.filter((p) => !isLive(p));
 export const liveConverters = () =>
   PAGES.filter((p) => isLive(p) && p.kind === 'converter');
 
-/** Every converter page, bucketed by its `group` and tagged with liveness. */
+/**
+ * Every converter page, bucketed by its `group` and tagged with its status.
+ * `live` is the same fact as a boolean, kept for the code that sorts on it.
+ */
 function groupConverters() {
   const groups = new Map();
   for (const p of PAGES) {
     if (p.kind !== 'converter') continue;
     if (!groups.has(p.group)) groups.set(p.group, []);
-    groups.get(p.group).push({ ...p, live: isLive(p) });
+    const status = statusOf(p);
+    groups.get(p.group).push({ ...p, status, live: status === 'live' });
   }
   return groups;
 }

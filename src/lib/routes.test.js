@@ -17,7 +17,31 @@ import {
   isIndexable,
   assertKnownFonts,
   SITE,
+  statusOf,
 } from './routes.js';
+
+describe('status: the one flag every "Soon" badge renders from', () => {
+  test('is "soon" exactly when a page is not live, for every route', () => {
+    for (const p of PAGES) assert.equal(statusOf(p), isLive(p) ? 'live' : 'soon', p.path);
+  });
+
+  test('nav and /all-converters items carry it, agreeing with `live`', () => {
+    for (const g of [...navGroups(), ...allGroups()]) {
+      for (const p of g.pages) {
+        assert.equal(p.status, statusOf(getPage(p.path)), p.path);
+        assert.equal(p.live, p.status === 'live', p.path);
+      }
+    }
+  });
+
+  test('both Abbasi Chanakya pages are live; the generic Chanakya ones are soon', () => {
+    assert.equal(statusOf(getPage('/abbasi-chanakya-to-unicode')), 'live');
+    assert.equal(statusOf(getPage('/unicode-to-abbasi-chanakya')), 'live');
+    for (const path of ['/chanakya-to-unicode', '/chanakya-to-kruti-dev', '/unicode-to-chanakya', '/kruti-dev-to-chanakya']) {
+      assert.equal(statusOf(getPage(path)), 'soon', path);
+    }
+  });
+});
 import { FONTS } from './fontMaps.js';
 
 const PAGES_DIR = fileURLToPath(new URL('../pages', import.meta.url));

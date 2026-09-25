@@ -12,7 +12,7 @@
     "aria": "Converters",
     "typingTools": "Typing tools",
     "allConverters": "All converters",
-    "soon": "soon",
+    "soon": "Soon",
     "menu": "Menu"
   },
   "groups": {
@@ -54,7 +54,6 @@
     "pendingLinks": "<a href=\"/\" class=\"font-medium\">Use the Kruti Dev to Unicode converter</a> in the meantime, or see <a href=\"/all-converters\">all converters and their status</a>.",
     "relatedConverters": "Related converters",
     "relatedTools": "Related tools",
-    "comingSoonTag": "coming soon",
     "faqHeading": "Frequently asked questions"
   },
   "common": {
@@ -332,7 +331,6 @@
   "allConverters": {
     "intro": "Every conversion on the site, grouped by source font. {live} of {total} are live; the rest are scaffolded and waiting on a verified character map.",
     "live": "Live",
-    "comingSoon": "Coming soon",
     "body": [
       "<h2>Why some of these are not switched on</h2>",
       "<p>A legacy Hindi font is not an encoding. It is a font whose glyphs happen to sit on ASCII codepoints, and every vendor arranged them differently. Converting one correctly means knowing exactly which key carried which letter, and that has to come from real documents. It cannot be inferred.</p>",

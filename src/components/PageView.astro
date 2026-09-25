@@ -7,7 +7,8 @@ import HindiKeyboard from './HindiKeyboard.astro';
 import TypingTutor from './TypingTutor.astro';
 import Faq from './Faq.astro';
 import AllConverters from './AllConverters.astro';
-import { getPage, isLive, reversePage } from '../lib/routes.js';
+import { getPage, isLive, reversePage, statusOf } from '../lib/routes.js';
+import SoonBadge from './SoonBadge.astro';
 import { FONTS } from '../lib/fontMaps.js';
 import { langOf, useT } from '../i18n/index.js';
 
@@ -161,18 +162,14 @@ const betaNote = maybe(`pages.${path}.betaNote`);
           </h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((r) => (
-              <li>
+              <li data-route={r.path}>
                 <a
                   href={r.path}
                   class="block h-full card p-4 no-underline transition-colors hover:border-saffron"
                 >
                   <span class="block font-medium text-ink">
                     <Fragment set:html={render(t(`pages.${r.path}.h1`))} />
-                    {!isLive(r) && (
-                      <span class="ml-2 align-middle text-xs font-normal text-mute">
-                        {t('page.comingSoonTag')}
-                      </span>
-                    )}
+                    <SoonBadge status={statusOf(r)} class="ml-2 inline-block align-middle" />
                   </span>
                   <span
                     class="mt-1 block text-sm text-body"

@@ -1,0 +1,33 @@
+---
+/**
+ * The one "Soon" / "जल्द" badge on the site.
+ *
+ * Pass the page's `status` (statusOf() in routes.js) and nothing else: the
+ * badge renders itself for 'soon' and renders nothing for 'live', so no caller
+ * decides by hand whether a page gets one. `data-soon-badge` is what
+ * tests/dist.test.js looks for.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  status: 'live' | 'soon';
+  class?: string;
+}
+
+const { status, class: extra } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+---
+
+{
+  status === 'soon' && (
+    <span
+      data-soon-badge
+      class:list={[
+        'shrink-0 rounded-full bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium whitespace-nowrap text-saffron',
+        extra,
+      ]}
+    >
+      {t('nav.soon')}
+    </span>
+  )
+}
