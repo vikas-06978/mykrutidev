@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **1639 keys**, identical in both files (enforced by `npm test` and at build time).
+- **1656 keys**, identical in both files (enforced by `npm test` and at build time).
 - **86 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -1672,3 +1672,20 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `modes.hint` | Converting a full document? &lt;a href="{href}">Upload the Word file&lt;/a>, formatting stays. | पूरा डॉक्यूमेंट बदलना है? &lt;a href="{href}">Word फ़ाइल अपलोड करें&lt;/a>, फ़ॉर्मेटिंग वैसी ही रहती है। |  |
 | `modes.back` | Have a full Word file? &lt;a href="{href}">Upload it here ↑&lt;/a> | पूरी Word फ़ाइल है? &lt;a href="{href}">यहाँ ऊपर अपलोड करें ↑&lt;/a> |  |
 | `modes.drop` | Drop your file to convert | कन्वर्ट करने के लिए फ़ाइल यहाँ छोड़ें |  |
+| `support.title` | Support MyKrutiDev | MyKrutiDev की मदद करें |  |
+| `support.description` | MyKrutiDev is free. If it saved you time, you can say thanks by UPI, or help by telling others about it. | MyKrutiDev मुफ़्त है। अगर इससे आपका समय बचा है, तो UPI से धन्यवाद कह सकते हैं, या दूसरों को इसके बारे में बताकर मदद कर सकते हैं। |  |
+| `support.h1` | Support MyKrutiDev | MyKrutiDev की मदद करें |  |
+| `support.lede` | MyKrutiDev is free, needs no sign-up, and will stay that way. If it has saved you time, you can say thanks with any amount by UPI. Nothing changes if you don't. | MyKrutiDev मुफ़्त है, इसमें कोई साइन-अप नहीं है, और यह ऐसा ही रहेगा। अगर इससे आपका समय बचा है, तो UPI से अपनी मर्ज़ी की कोई भी रकम भेजकर धन्यवाद कह सकते हैं। न भेजें, तो भी कुछ नहीं बदलता। |  |
+| `support.upiHeading` | Pay by UPI | UPI से भेजें |  |
+| `support.scan` | Scan with any UPI app: Google Pay, PhonePe, Paytm, BHIM or your bank's app. | किसी भी UPI ऐप से स्कैन करें: Google Pay, PhonePe, Paytm, BHIM या अपने बैंक का ऐप। |  |
+| `support.qrLabel` | UPI QR code to pay MyKrutiDev | MyKrutiDev को भुगतान के लिए UPI QR कोड |  |
+| `support.idLabel` | UPI ID | UPI ID |  |
+| `support.copy` | Copy | कॉपी करें |  |
+| `support.copied` | Copied | कॉपी हो गया |  |
+| `support.payButton` | Pay with a UPI app | UPI ऐप से भेजें |  |
+| `support.amount` | You choose the amount in your UPI app, and confirm it there with your own PIN. | रकम आप अपने UPI ऐप में खुद चुनते हैं, और वहीं अपने PIN से पक्की करते हैं। |  |
+| `support.name` | Before you pay, your UPI app shows the name of the account holder, which may differ from MyKrutiDev. | भेजने से पहले आपका UPI ऐप खाताधारक का नाम दिखाता है, जो MyKrutiDev से अलग हो सकता है। |  |
+| `support.private` | The payment goes straight from your UPI app to ours. This site never sees or stores any payment details. | भुगतान सीधे आपके UPI ऐप से हमारे खाते में जाता है। यह साइट भुगतान की कोई जानकारी न देखती है, न रखती है। |  |
+| `support.otherHeading` | Other ways to help | मदद के और तरीके |  |
+| `support.other` | &lt;ul>&lt;li>&lt;strong>Share it&lt;/strong> with someone who types Hindi or is preparing for a typing test.&lt;/li>&lt;li>&lt;strong>Tell us what to improve&lt;/strong> with the Feedback button at the bottom of any page.&lt;/li>&lt;li>&lt;strong>Link to it&lt;/strong> from your institute's, office's or blog's page of useful tools.&lt;/li>&lt;/ul> | &lt;ul>&lt;li>&lt;strong>इसे शेयर करें&lt;/strong> उन लोगों के साथ जो हिंदी टाइप करते हैं या टाइपिंग टेस्ट की तैयारी कर रहे हैं।&lt;/li>&lt;li>&lt;strong>बताएँ क्या बेहतर हो&lt;/strong>, किसी भी पेज के नीचे वाले सुझाव बटन से।&lt;/li>&lt;li>&lt;strong>इसका लिंक दें&lt;/strong> अपने इंस्टीट्यूट, दफ़्तर या ब्लॉग के उपयोगी टूल वाले पेज पर।&lt;/li>&lt;/ul> |  |
+| `support.footerLink` | Support MyKrutiDev | MyKrutiDev की मदद करें |  |

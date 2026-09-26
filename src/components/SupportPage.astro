@@ -1,0 +1,99 @@
+---
+/**
+ * /support and /hi/support: a quiet page for anyone who wants to say thanks.
+ * Linked only from the footer, and only when a UPI ID is configured; never
+ * indexed (a page asking for money is nobody's search result).
+ *
+ * The UPI ID comes from the PUBLIC_UPI_ID build setting (see src/lib/support.build.js),
+ * so it is not in the repository. Without it, the page shows only the other
+ * ways to help.
+ */
+import Base from '../layouts/Base.astro';
+import { readUpiId, upiLink, qrModules, qrSvg } from '../lib/support.build.js';
+import { langOf, useT } from '../i18n/index.js';
+
+const { t, render } = useT(langOf(Astro.url));
+const upiId = readUpiId(import.meta.env.PUBLIC_UPI_ID);
+const link = upiId ? upiLink(upiId) : null;
+const qr = link ? qrSvg(qrModules(link), t('support.qrLabel')) : null;
+---
+
+<Base title={t('support.title')} description={t('support.description')} noindex crumb={t('support.h1')}>
+  <div class="wrap py-8 sm:py-12" data-support>
+    <h1 class="text-3xl sm:text-4xl" set:html={render(t('support.h1'))} />
+    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(t('support.lede'))} />
+
+    {
+      upiId && (
+        <section class="mt-8 card max-w-2xl p-5 sm:p-6" aria-labelledby="sp-upi" data-support-upi>
+          <h2 id="sp-upi" class="text-xl">{t('support.upiHeading')}</h2>
+          <div class="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start">
+            <div class="sp-qr shrink-0" set:html={qr} />
+            <div class="min-w-0 text-sm text-body">
+              <p set:html={render(t('support.scan'))} />
+              <p class="mt-4 text-xs font-semibold tracking-wide text-mute uppercase">{t('support.idLabel')}</p>
+              <p class="mt-1 flex flex-wrap items-center gap-2">
+                <code class="text-base text-ink break-all" translate="no" data-upi-id>{upiId}</code>
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  data-copy={upiId}
+                  data-label={t('support.copy')}
+                  data-done={t('support.copied')}
+                >
+                  {t('support.copy')}
+                </button>
+              </p>
+              <a class="btn btn-primary sp-pay mt-4" href={link} data-upi-pay>{t('support.payButton')}</a>
+              <ul class="mt-4 space-y-2 text-sm">
+                <li set:html={render(t('support.amount'))} />
+                <li set:html={render(t('support.name'))} />
+                <li set:html={render(t('support.private'))} />
+              </ul>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <section class="mt-10 max-w-2xl" aria-labelledby="sp-other">
+      <h2 id="sp-other" class="text-xl">{t('support.otherHeading')}</h2>
+      <div class="prose-page mt-3 text-body" set:html={render(t('support.other'))} />
+    </section>
+  </div>
+</Base>
+
+<style>
+  .sp-qr {
+    width: 11rem;
+    padding: 0.25rem;
+    border-radius: var(--radius-chrome);
+    background: #fff;
+  }
+  .sp-qr :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* The UPI app button only helps where a UPI app can open: a phone. */
+  @media (hover: hover) and (pointer: fine) {
+    .sp-pay {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Copy the UPI ID, for someone paying from a UPI app on another device.
+  for (const b of document.querySelectorAll<HTMLButtonElement>('[data-support-upi] [data-copy]')) {
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy ?? '');
+        b.textContent = b.dataset.done ?? '';
+        setTimeout(() => (b.textContent = b.dataset.label ?? ''), 2000);
+      } catch {
+        // Clipboard refused (no permission): the ID is on screen to copy by hand.
+      }
+    });
+  }
+</script>

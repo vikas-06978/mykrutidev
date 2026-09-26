@@ -2443,5 +2443,24 @@
     "hint": "Converting a full document? <a href=\"{href}\">Upload the Word file</a>, formatting stays.",
     "back": "Have a full Word file? <a href=\"{href}\">Upload it here ↑</a>",
     "drop": "Drop your file to convert"
+  },
+  "support": {
+    "title": "Support MyKrutiDev",
+    "description": "MyKrutiDev is free. If it saved you time, you can say thanks by UPI, or help by telling others about it.",
+    "h1": "Support MyKrutiDev",
+    "lede": "MyKrutiDev is free, needs no sign-up, and will stay that way. If it has saved you time, you can say thanks with any amount by UPI. Nothing changes if you don't.",
+    "upiHeading": "Pay by UPI",
+    "scan": "Scan with any UPI app: Google Pay, PhonePe, Paytm, BHIM or your bank's app.",
+    "qrLabel": "UPI QR code to pay MyKrutiDev",
+    "idLabel": "UPI ID",
+    "copy": "Copy",
+    "copied": "Copied",
+    "payButton": "Pay with a UPI app",
+    "amount": "You choose the amount in your UPI app, and confirm it there with your own PIN.",
+    "name": "Before you pay, your UPI app shows the name of the account holder, which may differ from MyKrutiDev.",
+    "private": "The payment goes straight from your UPI app to ours. This site never sees or stores any payment details.",
+    "otherHeading": "Other ways to help",
+    "other": "<ul><li><strong>Share it</strong> with someone who types Hindi or is preparing for a typing test.</li><li><strong>Tell us what to improve</strong> with the Feedback button at the bottom of any page.</li><li><strong>Link to it</strong> from your institute's, office's or blog's page of useful tools.</li></ul>",
+    "footerLink": "Support MyKrutiDev"
   }
 }

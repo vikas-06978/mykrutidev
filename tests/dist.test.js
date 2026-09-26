@@ -20,6 +20,8 @@ import { PRINTABLES, chartRows, practiceSheets, matraRows, pdfFile, pdfHref } fr
 import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
+import jsQR from 'jsqr';
+import { readUpiId, upiLink, QUIET_ZONE } from '../src/lib/support.build.js';
 
 const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
 
@@ -709,6 +711,60 @@ describe('security headers (dist/_headers)', () => {
     for (const html of allHtml()) {
       assert.doesNotMatch(html, /<[a-z][^>]*\son[a-z]+\s*=/i);
       assert.doesNotMatch(html, /href\s*=\s*["']?\s*javascript:/i);
+    }
+  });
+});
+
+describe('the support option (PUBLIC_UPI_ID)', () => {
+  // The same setting the build read: set in CI with a test ID and on
+  // Cloudflare with the real one, usually unset on a laptop.
+  const upiId = readUpiId(process.env.PUBLIC_UPI_ID);
+  const support = () => ({ en: pages.get('/support'), hi: pages.get('/hi/support') });
+
+  /** Read the QR on the page back as a phone would, from the SVG the build drew. */
+  const scanPage = (html) => {
+    const svg = html.match(/<div class="sp-qr[^"]*"[^>]*>(<svg[\s\S]*?<\/svg>)/)?.[1];
+    assert.ok(svg, 'no QR code on the page');
+    const size = Number(svg.match(/viewBox="0 0 (\d+) \d+"/)[1]);
+    const scale = 6;
+    const px = size * scale;
+    const data = new Uint8ClampedArray(px * px * 4).fill(255);
+    for (const [, x, y, run] of svg.matchAll(/M(\d+) (\d+)h(\d+)v1h-\3z/g)) {
+      for (let dx = 0; dx < Number(run) * scale; dx++) {
+        for (let dy = 0; dy < scale; dy++) {
+          const i = ((Number(y) * scale + dy) * px + Number(x) * scale + dx) * 4;
+          data[i] = data[i + 1] = data[i + 2] = 0;
+        }
+      }
+    }
+    assert.ok(size > QUIET_ZONE * 2);
+    return jsQR(data, px, px)?.data ?? null;
+  };
+
+  test('the page exists in both languages and is never indexed', () => {
+    for (const html of Object.values(support())) {
+      assert.ok(html, 'missing /support page');
+      assert.match(html, /<meta name="robots" content="noindex/);
+    }
+  });
+
+  test('with a UPI ID: the link and the QR pay exactly that ID, and every footer links to the page', { skip: !upiId && 'PUBLIC_UPI_ID not set' }, () => {
+    const link = upiLink(upiId);
+    for (const html of Object.values(support())) {
+      assert.ok(html.includes(`href="${link.replaceAll('&', '&amp;')}"`), 'Pay button does not carry the exact link');
+      assert.equal(scanPage(html), link);
+      assert.ok(html.includes(`>${upiId}</code>`), 'UPI ID not shown');
+    }
+    for (const [path, html] of pages) {
+      const href = path === '/hi' || path.startsWith('/hi/') ? '/hi/support/' : '/support/';
+      assert.ok(html.includes(`href="${href}"`) && html.includes('data-support-link'), `${path}: no footer link to ${href}`);
+    }
+  });
+
+  test('without a UPI ID: no payment anywhere, and no footer link', { skip: !!upiId && 'PUBLIC_UPI_ID is set' }, () => {
+    for (const html of [...pages.values(), notFound]) {
+      assert.doesNotMatch(html, /upi:\/\//);
+      assert.doesNotMatch(html, /<[^>]+\sdata-support-(link|upi)[\s>=]/);
     }
   });
 });

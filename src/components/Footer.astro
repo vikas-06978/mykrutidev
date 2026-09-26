@@ -1,6 +1,7 @@
 ---
 import { liveConverters, getPage, isLive } from '../lib/routes.js';
 import { GUIDES, GUIDES_PATH, guidePath } from '../lib/guides.js';
+import { readUpiId } from '../lib/support.build.js';
 import { langOf, useT } from '../i18n/index.js';
 
 const { t, render, listTitle, path: to } = useT(langOf(Astro.url));
@@ -21,6 +22,8 @@ const typing = live([
   '/kruti-dev-keyboard',
 ]);
 const site = live(['/about', '/contact', '/privacy-policy', '/terms']);
+// Only once a UPI ID is configured (PUBLIC_UPI_ID, see src/lib/support.build.js).
+const support = readUpiId(import.meta.env.PUBLIC_UPI_ID) !== null;
 const linkClass = 'text-body no-underline hover:underline';
 ---
 
@@ -89,6 +92,16 @@ const linkClass = 'text-body no-underline hover:underline';
                 <a href={to(p!.path)} class={linkClass}>{t(`pages.${p!.path}.nav`)}</a>
               </li>
             ))
+          }
+          {
+            support && (
+              <li>
+                <a href={to('/support')} class={linkClass} data-support-link>
+                  <span aria-hidden="true">☕ </span>
+                  <Fragment set:html={render(t('support.footerLink'))} />
+                </a>
+              </li>
+            )
           }
         </ul>
       </nav>
