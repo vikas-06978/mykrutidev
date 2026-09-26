@@ -131,3 +131,51 @@ test.describe('the Content-Security-Policy', () => {
     expect(h1 ?? 0).toBe(0);
   });
 });
+
+test.describe('Google Analytics under the policy', () => {
+  const GA = /^https:\/\/[^/]+\.(google-analytics\.com|analytics\.google\.com|googletagmanager\.com)\//;
+
+  test('off everywhere but the live site: nothing is sent from here', async ({ page }) => {
+    const sent = [];
+    page.on('request', (r) => GA.test(r.url()) && sent.push(r.url()));
+    await page.goto('/');
+    await page.goto('/hi/kruti-dev-to-unicode/');
+    await page.waitForTimeout(500);
+    expect(sent).toEqual([]);
+  });
+
+  test('on the live site, the tag loads and reports without a violation', async ({ page, baseURL }) => {
+    const found = await watch(page);
+    // The built site, with its real headers, answering for the live address,
+    // so the tag sees the live hostname.
+    await page.route(/^https:\/\/mykrutidev\.com\//, async (route) => {
+      const url = new URL(route.request().url());
+      await route.fulfill({ response: await route.fetch({ url: new URL(url.pathname + url.search, baseURL).href }) });
+    });
+    // Google, stood in for: gtag.js is replaced by a script that sends the
+    // kinds of request the real one does (fetch, beacon, pixel, to each
+    // address Google uses), and each request is answered here.
+    const hits = [];
+    await page.route(GA, (route) => {
+      const url = route.request().url();
+      hits.push(new URL(url).host);
+      if (!url.includes('/gtag/js')) return route.fulfill({ status: 204 });
+      return route.fulfill({
+        contentType: 'text/javascript',
+        body: `
+          fetch('https://region1.google-analytics.com/g/collect?v=2', { method: 'POST', keepalive: true });
+          fetch('https://region1.analytics.google.com/g/collect?v=2', { method: 'POST' });
+          navigator.sendBeacon('https://www.google-analytics.com/g/collect?v=2');
+          new Image().src = 'https://www.googletagmanager.com/td?id=stub';
+        `,
+      });
+    });
+
+    await page.goto('https://mykrutidev.com/');
+    await expect
+      .poll(() => [...new Set(hits)].sort())
+      .toEqual(['region1.analytics.google.com', 'region1.google-analytics.com', 'www.google-analytics.com', 'www.googletagmanager.com']);
+    expect(await page.evaluate(() => window.dataLayer.map((args) => args[0]))).toEqual(['js', 'config']);
+    expect(found).toEqual([]);
+  });
+});

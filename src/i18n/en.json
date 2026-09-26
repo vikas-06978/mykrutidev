@@ -1840,8 +1840,8 @@
       "nav": "Privacy policy",
       "h1": "Privacy Policy",
       "title": "Privacy Policy | MyKrutiDev - Your Files Never Leave Your Browser",
-      "description": "MyKrutiDev converts text and files in your browser: nothing you paste or upload is sent to us. What the site stores on your device, and the one feature that uses Google.",
-      "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts, no advertising and no tracking cookies.",
+      "description": "MyKrutiDev converts text and files in your browser: nothing you paste or upload is sent to us. What the site stores on your device, and what Google Analytics counts.",
+      "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
       "body": [
         "<h2>Your text and your files</h2>",
         "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only thing our server accepts is the short feedback form, and only when you press Send. You can load a page, disconnect from the internet and keep converting.</p>",
@@ -1849,7 +1849,11 @@
         "<p>On <a href=\"/english-to-hindi-typing\">English to Hindi typing</a>, the Hinglish mode sends each word you type to Google's public input-tools service to get its best Hindi spelling. Only the words being transliterated are sent, not the rest of the page, and web and email addresses are never sent. If you do not want that, switch Typing to <strong>Exact (ITRANS)</strong>, which works entirely offline. Google's handling of those requests is covered by Google's own privacy policy.</p>",
         "<h2>What is stored on your device</h2>",
         "<ul><li>Your theme and colour choice, and your language choice.</li><li>In the converters: the text in the input box, so it is still there after a refresh, and the last 10 texts you converted with each tool, under <strong>Recent</strong> (each up to 50,000 characters). Clearing the box removes its draft, and <strong>Delete all</strong> empties Recent.</li><li>In the typing tutor: which lessons you have cleared, your best speed, your daily practice streak, badges, and your last 30 practice sessions.</li><li>A few interface preferences, such as whether key sounds are on.</li><li>The date you last sent feedback, so the feedback form does not ask again for 30 days.</li></ul>",
-        "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. We use no advertising or analytics cookies.</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
+        "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. The only cookies are Google Analytics' own, described below.</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
+        "<h2>Visit statistics (Google Analytics)</h2>",
+        "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself.</p>",
+        "<p>It sets two cookies, <code>_ga</code> and <code>_ga_VZZRXNT8TQ</code>, so that a returning visitor is not counted as a new one. They last up to two years. It never receives the text you convert, your files or anything you type in the tools, because those never leave your device. We have switched off Google signals and ad personalisation, so this data is not used for advertising, and the reports do not tell us who you are.</p>",
+        "<p>To opt out, block cookies for this site in your browser settings, use a tracker blocker, or install Google's <a href=\"https://tools.google.com/dlpage/gaoptout\">Analytics opt-out add-on</a>. The site works the same either way. Google's handling of this data is covered by <a href=\"https://policies.google.com/privacy\">Google's privacy policy</a>.</p>",
         "<h2>Feedback</h2>",
         "<p>The <strong>Feedback</strong> button at the bottom of each page opens a short form, and only when you click it. If you press Send, we store:</p>",
         "<ul><li>your rating (😞 😐 🙂 😍) and the options you ticked</li><li>what you wrote in the form's own text boxes, and an email address only if you chose to give one</li><li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example \"Chrome\") and the date</li></ul>",
@@ -1861,7 +1865,7 @@
         "<h2>Children</h2>",
         "<p>The site asks no one for personal information, children included. The only place you can give any is the optional email box in the feedback form.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 26 September 2026.</p>"
+        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 27 September 2026.</p>"
       ]
     },
     "/terms": {

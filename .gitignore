@@ -46,3 +46,7 @@ vendor/english/
 # Cloudflare: local D1 state (`npm run preview:cf`) and local secrets
 .wrangler/
 .dev.vars
+
+# Skills that other coding tools copy into the project (the Tailwind docs among
+# them, which must stay local - see above)
+.agents/
