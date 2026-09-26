@@ -13,7 +13,7 @@ import { langOf, useT } from '../i18n/index.js';
 interface Props {
   /** CSS font stack for the saved texts - a legacy font shows its own letters. */
   font?: string;
-  /** Show Ctrl+Shift+C: only where "Copy as Unicode" is its own button. */
+  /** Show Alt+Shift+C: only where "Copy as Unicode" is its own button. */
   unicodeCopy?: boolean;
 }
 
@@ -46,7 +46,7 @@ const L = {
   <p class="cv-keys">
     <span>{t('workspace.shortcuts')}</span>
     <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> {t('workspace.scCopy')}</span>
-    {unicodeCopy && <span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> {t('workspace.scUnicode')}</span>}
+    {unicodeCopy && <span><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> {t('workspace.scUnicode')}</span>}
     <span><kbd>Esc</kbd> {t('workspace.scClear')}</span>
   </p>
 </div>

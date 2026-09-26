@@ -1,0 +1,28 @@
+# Every push and pull request: unit tests, the build (with its PDF, image and
+# service-worker steps), the checks on the built site - including the feedback
+# API through `wrangler pages dev`, which may NOT be skipped here (CI=true, see
+# tests/feedback-pages.test.js) - and the browser tests.
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Chromium draws the PDFs and social images during the build, and runs
+      # the browser tests.
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:dist
+      - run: npx playwright test

@@ -2,41 +2,73 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { precached, urlOf } from '../pwa/integration.mjs';
+import { precachePlan, urlOf } from '../pwa/integration.mjs';
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
 
-describe('what the service worker keeps offline', () => {
-  test('pages in both languages, scripts, fonts, the word list, manifests and icons', () => {
-    for (const p of [
-      'index.html',
-      'unicode-to-kruti-dev/index.html',
-      'hi/hindi-typing-test/index.html',
-      '404.html',
-      '_astro/Converter.astro_astro_type_script_index_0_lang.7VDaagLt.js',
-      '_astro/noto-sans-devanagari-devanagari-400-normal.BlDd6KY1.woff2',
-      'fonts/KRDEV010.woff',
-      'data/english-words.json',
-      'manifest.json',
-      'hi/manifest.json',
-      'icons/icon-192.png',
-      'favicon.svg',
-    ]) {
-      assert.ok(precached(p), p);
+// A miniature build: two converter pages (en + hi), the home page, the tutor
+// and a guide, with the chunks and fonts they reference.
+const FACES =
+  '@font-face{font-family:Noto Sans Devanagari;src:url(/_astro/deva.woff2)format("woff2"),url(/_astro/deva.woff)format("woff")}' +
+  '@font-face{font-family:"MKD Kruti Dev 010";src:local("Kruti Dev 010"),url(/fonts/KRDEV010.woff)format("woff")}' +
+  '@font-face{font-family:"MKD DevLys 010";src:url(/fonts/devlys-010.woff)format("woff")}';
+const page = (body, scripts = []) =>
+  `<html><head><style>${FACES}</style>${scripts.map((s) => `<script type="module" src="/_astro/${s}"></script>`).join('')}</head><body>${body}</body></html>`;
+const CONVERTER = page('<div data-converter style="--cv-preview:&quot;MKD Kruti Dev 010&quot;, monospace"></div>', ['Header.js', 'Converter.js']);
+const BUILD = {
+  'index.html': CONVERTER,
+  'hi/index.html': CONVERTER,
+  '404.html': page('', ['Header.js']),
+  'unicode-to-kruti-dev/index.html': CONVERTER,
+  'hi/unicode-to-kruti-dev/index.html': CONVERTER,
+  'hi/english-to-hindi-typing/index.html': page('<div data-translit></div>', ['Header.js', 'Transliterator.js']),
+  'hindi-typing-test/index.html': page('<div data-tutor></div>', ['Header.js', 'TypingTutor.js']),
+  'guides/x/index.html': page('<article></article>', ['Header.js']),
+  '_astro/Header.js': 'import"./app.js";',
+  '_astro/app.js': '',
+  '_astro/Converter.js': 'import{a}from"./fontMaps.js";const d=()=>import("./docx.js");',
+  '_astro/fontMaps.js': '',
+  '_astro/docx.js': '',
+  '_astro/Transliterator.js': 'const m=["_astro/translit.js"];',
+  '_astro/translit.js': '',
+  '_astro/TypingTutor.js': '',
+  '_astro/deva.woff2': 'x',
+  '_astro/deva.woff': 'x',
+  'fonts/KRDEV010.woff': 'x',
+  'fonts/devlys-010.woff': 'x',
+  'data/english-words.json': '[]',
+  'downloads/chart.pdf': 'x',
+  'og/en/home.png': 'x',
+  'manifest.json': '{}',
+  'hi/manifest.json': '{}',
+  'icons/icon-192.png': 'x',
+  'favicon.svg': 'x',
+};
+const plan = precachePlan(Object.keys(BUILD), (p) => BUILD[p] ?? null);
+
+describe('what the first visit downloads', () => {
+  test('the shell and every converter page, in both languages', () => {
+    for (const p of ['index.html', 'hi/index.html', '404.html', 'unicode-to-kruti-dev/index.html', 'hi/unicode-to-kruti-dev/index.html', 'hi/english-to-hindi-typing/index.html', 'manifest.json', 'hi/manifest.json', 'icons/icon-192.png', 'favicon.svg']) {
+      assert.ok(plan.includes(p), p);
     }
   });
 
-  test('not social images, PDFs, sitemaps, notes or duplicate .woff web fonts', () => {
-    for (const p of [
-      'og/en/home.png',
-      'downloads/mykrutidev-hindi-typing-finger-chart.pdf',
-      'sitemap-0.xml',
-      'robots.txt',
-      'fonts/README.md',
-      'sw.js',
-      '_astro/noto-sans-devanagari-devanagari-400-normal.CdOJmQ4E.woff',
-    ]) {
-      assert.ok(!precached(p), p);
+  test('their scripts, followed through static, dynamic and preloaded imports', () => {
+    for (const p of ['_astro/Header.js', '_astro/app.js', '_astro/Converter.js', '_astro/fontMaps.js', '_astro/docx.js', '_astro/Transliterator.js', '_astro/translit.js']) {
+      assert.ok(plan.includes(p), p);
+    }
+  });
+
+  test('only the fonts those pages use, as woff2 where there is one', () => {
+    assert.ok(plan.includes('_astro/deva.woff2'));
+    assert.ok(plan.includes('fonts/KRDEV010.woff'));
+    assert.ok(!plan.includes('_astro/deva.woff'));
+    assert.ok(!plan.includes('fonts/devlys-010.woff'), 'no page here previews DevLys');
+  });
+
+  test('everything else waits for a visit: tutor, guides, PDFs, images, word list', () => {
+    for (const p of ['hindi-typing-test/index.html', '_astro/TypingTutor.js', 'guides/x/index.html', 'downloads/chart.pdf', 'og/en/home.png', 'data/english-words.json']) {
+      assert.ok(!plan.includes(p), p);
     }
   });
 

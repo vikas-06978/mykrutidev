@@ -6,12 +6,12 @@
  * `astro dev` - the page script unregisters any worker it finds there.
  *
  * Strategy:
- *  - Install: download everything in PRECACHE (pages in both languages, the
- *    hashed /_astro/ scripts and fonts, the legacy preview fonts, the English
- *    word list, icons). A file whose revision did not change since the last
- *    deploy is copied from the old cache instead of downloaded again. With
- *    Save-Data on, only the scripts and fonts are fetched up front; pages are
- *    still kept as they are visited.
+ *  - Install: download PRECACHE - the app shell, every converter page in both
+ *    languages, their scripts and the fonts they use (the list and its size
+ *    are decided in integration.mjs). A file whose revision did not change
+ *    since the last deploy is copied from the old cache instead of downloaded
+ *    again. With Save-Data on, only the scripts and fonts are fetched up
+ *    front. Every other page and file is kept the first time it is visited.
  *  - Pages: network first, so a deploy shows up at once; the cached copy when
  *    the network is down or takes longer than NETWORK_TIMEOUT_MS.
  *  - /_astro/ (content-hashed, never changes under one name): cache first.

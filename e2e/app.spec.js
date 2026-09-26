@@ -87,7 +87,7 @@ test.describe('converter: saves time', () => {
     await expect(recent.locator('[data-recent-count]')).toHaveText('0');
   });
 
-  test('shortcuts: Ctrl+Enter copies the output, Ctrl+Shift+C the Unicode, Esc clears', async ({ page, context, browserName }) => {
+  test('shortcuts: Ctrl+Enter copies the output, Alt+Shift+C the Unicode, Esc clears', async ({ page, context, browserName }) => {
     test.skip(browserName !== 'chromium', 'clipboard permissions');
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await page.goto('/unicode-to-kruti-dev');
@@ -98,10 +98,30 @@ test.describe('converter: saves time', () => {
 
     await input(page).press('Control+Enter');
     await expect.poll(clip).toBe(raw);
-    await input(page).press('Control+Shift+C');
+    await input(page).press('Alt+Shift+C');
     await expect.poll(clip).toBe('कमल');
     await input(page).press('Escape');
     await expect(input(page)).toHaveValue('');
+
+    // Ctrl+Shift+C is Chrome's DevTools inspector: the page leaves it alone.
+    await input(page).fill('कमल');
+    await page.evaluate(() => navigator.clipboard.writeText('unchanged'));
+    await input(page).press('Control+Shift+C');
+    expect(await clip()).toBe('unchanged');
+  });
+
+  test('the shortcut tip names Alt+Shift+C, in English and in Hindi', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the tip is for keyboards; hidden on touch screens');
+    for (const [path, words] of [
+      ['/unicode-to-kruti-dev', 'copy as Unicode'],
+      ['/hi/unicode-to-kruti-dev', 'यूनिकोड में कॉपी'],
+    ]) {
+      await page.goto(path);
+      const tip = page.locator('[data-converter] .cv-keys');
+      await expect(tip).toBeVisible();
+      await expect(tip).toContainText(`Alt+Shift+C ${words}`);
+      await expect(tip).not.toContainText('Ctrl+Shift');
+    }
   });
 
   test('English to Hindi Typing keeps its text too, in Hindi', async ({ page }) => {
@@ -133,7 +153,7 @@ test.describe('installable app', () => {
     }
   });
 
-  test('after one visit, every tool works offline', async ({ page, context }) => {
+  test('after one visit, every converter works offline; other pages once visited', async ({ page, context }) => {
     test.setTimeout(90_000);
     await page.goto('/');
     // The worker registers a couple of seconds after load, then downloads
@@ -153,6 +173,18 @@ test.describe('installable app', () => {
       )
       .toBe(true);
 
+    // Not in the first download: the tutor is kept when it is first visited.
+    const cached = (path) =>
+      page.evaluate(async (p) => {
+        for (const name of await caches.keys()) if (await (await caches.open(name)).match(p)) return true;
+        return false;
+      }, path);
+    expect(await cached('/hindi-typing-test')).toBe(false);
+    expect(await cached('/unicode-to-kruti-dev')).toBe(true);
+    await page.goto('/hindi-typing-test');
+    await expect(page.locator('[data-tutor] .tt-c').first()).toBeVisible();
+    await expect.poll(() => cached('/hindi-typing-test')).toBe(true);
+
     await context.setOffline(true);
     try {
       await page.goto('/unicode-to-kruti-dev');
@@ -171,8 +203,8 @@ test.describe('installable app', () => {
       await expect(page.locator('[data-translit] [data-role="output"]')).toHaveValue(/भारत/);
 
       // The published form with a trailing slash is the same page.
-      await page.goto('/hindi-keyboard/');
-      await expect(page.locator('h1')).toBeVisible();
+      await page.goto('/devlys-to-unicode/');
+      await expect(page.locator('[data-converter]')).toBeVisible();
     } finally {
       await context.setOffline(false);
     }

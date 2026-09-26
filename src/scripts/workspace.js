@@ -4,7 +4,7 @@
  *  - the input survives a refresh (a draft per tool, saved as you type);
  *  - "Recent": the last 10 texts converted with this tool, one click to bring
  *    one back, "Delete all" to forget them;
- *  - keyboard shortcuts: Ctrl+Enter copies the output, Ctrl+Shift+C copies it
+ *  - keyboard shortcuts: Ctrl+Enter copies the output, Alt+Shift+C copies it
  *    as Unicode, Esc (in the text box) clears.
  *
  * Everything is kept in this browser's localStorage and nowhere else, and
@@ -194,7 +194,10 @@ export function workspace(root, tool, roles) {
     const mod = e.ctrlKey || e.metaKey;
     if (mod && !e.shiftKey && !e.altKey && e.key === 'Enter') {
       if (press(roles.copy)) e.preventDefault();
-    } else if (mod && e.shiftKey && !e.altKey && (e.key === 'C' || e.key === 'c')) {
+    } else if (e.altKey && e.shiftKey && !mod && e.code === 'KeyC') {
+      // Alt+Shift+C, not Ctrl+Shift+C: that one is Chrome's DevTools
+      // inspector. By key position (e.code), because on a Mac Option+Shift+C
+      // types "Ç" and e.key would never be "C".
       if (press(roles.unicode ?? roles.copy)) e.preventDefault();
     } else if (e.key === 'Escape' && active === input && input.value) {
       e.preventDefault();

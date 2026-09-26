@@ -22,6 +22,29 @@ const DIST = join(ROOT, 'dist');
 const PORT = 4431;
 const BASE = `http://localhost:${PORT}`;
 const ADMIN_KEY = 'dist-test-admin-key-0123456789';
+const WRANGLER = join(ROOT, 'node_modules/wrangler/bin/wrangler.js');
+/** In CI these tests must run: a missing wrangler there is a failure, not a skip. */
+const CI = !!process.env.CI;
+
+/**
+ * Can wrangler run here at all? It ships a native runtime (workerd) that
+ * exists only for some platforms, so a machine can have the package and
+ * still be unable to start it. Asked once, quickly, before the 90 s wait.
+ * @returns {Promise<string | null>} why not, or null if it runs
+ */
+async function wranglerUnavailable() {
+  if (!existsSync(WRANGLER)) return `wrangler is not installed (${WRANGLER}) - run npm install`;
+  return new Promise((done) => {
+    const p = spawn(process.execPath, [WRANGLER, '--version'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    p.stdout.on('data', (d) => (out += d));
+    p.stderr.on('data', (d) => (out += d));
+    p.on('error', (e) => done(`wrangler could not be started: ${e.message}`));
+    p.on('close', (code) => done(code === 0 ? null : `wrangler --version exited ${code}: ${out.trim().slice(0, 300)}`));
+  });
+}
+const unavailable = await wranglerUnavailable();
+if (unavailable && CI) throw new Error(`CI must run the wrangler tests, but ${unavailable}`);
 
 const walk = (d) =>
   readdirSync(d).flatMap((f) => {
@@ -69,16 +92,22 @@ describe('in the built pages', () => {
   });
 });
 
-describe('through wrangler pages dev (local D1)', () => {
+// Skipped only when wrangler itself cannot run on this machine - never in CI
+// (see above) - and the reason is printed, so a skip is never silent.
+if (unavailable) console.warn(`\n  SKIPPING the wrangler pages dev tests: ${unavailable}\n`);
+describe('through wrangler pages dev (local D1)', { skip: unavailable ?? false }, () => {
   let server;
   let state;
   let log = '';
 
   before(async () => {
     state = mkdtempSync(join(tmpdir(), 'mkd-d1-'));
+    // wrangler's own JS entry point, run by this Node: node_modules/.bin/
+    // holds a shell script that Windows cannot spawn (ENOENT) next to a .cmd.
     server = spawn(
-      join(ROOT, 'node_modules/.bin/wrangler'),
+      process.execPath,
       [
+        WRANGLER,
         'pages', 'dev', 'dist',
         '--port', String(PORT),
         '--d1', 'DB',
@@ -103,9 +132,22 @@ describe('through wrangler pages dev (local D1)', () => {
     }
   });
 
-  after(() => {
-    server?.kill();
-    if (state) rmSync(state, { recursive: true, force: true });
+  after(async () => {
+    // Wait for wrangler (and its workerd child) to exit before deleting the
+    // database folder: on Windows the files are locked until then (EPERM).
+    if (server && server.exitCode === null) {
+      const exited = new Promise((r) => server.once('exit', r));
+      server.kill();
+      await Promise.race([exited, new Promise((r) => setTimeout(r, 5000))]);
+    }
+    if (state) {
+      try {
+        rmSync(state, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+      } catch (e) {
+        // A temp folder left behind is not a test failure.
+        console.warn(`could not remove ${state}: ${e.message}`);
+      }
+    }
   });
 
   const ctx = { page: '/', lang: 'en', theme: 'light', device: 'desktop', width: 1366, browser: 'Chrome' };
