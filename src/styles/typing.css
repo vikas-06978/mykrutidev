@@ -133,7 +133,7 @@
   @apply flex flex-wrap gap-1.5;
 }
 
-/* 44px in both directions, per DESIGN.md, and that is a floor rather than a
+/* 44px in both directions, per docs/DESIGN.md, and that is a floor rather than a
    target: these are the only controls on the site a user presses hundreds of
    times in a row. */
 .kb-key {

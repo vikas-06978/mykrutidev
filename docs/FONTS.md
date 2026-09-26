@@ -1,15 +1,18 @@
-# Legacy font files
+# Legacy font files (`public/fonts/`)
 
-These power the **output preview** on the legacy-font converter pages. They are
+The files in `public/fonts/` power the **output preview** on the legacy-font converter pages. They are
 presentation only: the character maps in `src/lib/fontMaps.js` decide what the
 converter produces, and neither copy button nor either `.docx` download is
-affected by which preview font is selected or whether a file here exists.
+affected by which preview font is selected or whether a file there exists.
 
-Kruti Dev, Chanakya and Preeti are commercial fonts. Keep them here only under a
-licence that permits web embedding. Nothing is hotlinked from a CDN, per
-DESIGN.md.
+Kruti Dev, Chanakya and Preeti are commercial fonts. Keep them in `public/fonts/` only under
+a licence that permits web embedding. Nothing is hotlinked from a CDN, per
+[DESIGN.md](DESIGN.md).
 
-## What is here now
+This note used to sit next to the fonts, but everything in `public/` is
+published with the site, so it lives here instead.
+
+## What is in `public/fonts/` now
 
 | File                 | Font family     | Container         | Used by |
 | -------------------- | --------------- | ----------------- | ------- |

@@ -694,7 +694,7 @@
   color: var(--color-mute);
 }
 
-/* Flat shapes defined by a hairline, per DESIGN.md. No shading, no gradients:
+/* Flat shapes defined by a hairline, per docs/DESIGN.md. No shading, no gradients:
    this is a diagram answering "which one of these do I move". */
 .hand-palm,
 .hand-finger {
