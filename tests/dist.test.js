@@ -440,8 +440,10 @@ describe('SEO basics', () => {
   const pageOf = (p) => PAGES.find((x) => x.path === routeOf(p));
   const jsonLd = (html) =>
     [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+  // Same rule as Base.astro. tests/seo.test.js checks it against the tools
+  // actually found on each built page.
   const isTool = (page) =>
-    !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!(page.from && page.to));
+    !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!page.app || !!(page.from && page.to));
 
   test('every page has exactly one <h1>', () => {
     for (const [p, html] of pages) {
