@@ -26,7 +26,12 @@ const en = langs[0];
             <h2 id={`nf-${lang}`} class="text-2xl">{t('notFound.h1')}</h2>
           )}
           <p class="mt-3 max-w-2xl text-body" set:html={render(t('notFound.lede'))} />
-          <h3 class="mt-6 text-lg">{t('notFound.toolsHeading')}</h3>
+          {/* One level under this section's own heading: h1 > h2, then h2 > h3. */}
+          {i === 0 ? (
+            <h2 class="mt-6 text-lg">{t('notFound.toolsHeading')}</h2>
+          ) : (
+            <h3 class="mt-6 text-lg">{t('notFound.toolsHeading')}</h3>
+          )}
           <ul class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {tools.map((p) => (
               <li>

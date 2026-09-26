@@ -168,6 +168,17 @@ describe('sitemap, canonical and hreflang', () => {
     assert.match(robots, new RegExp(`Sitemap: ${abs('/sitemap-index.xml')}`));
   });
 
+  test('robots.txt blocks no page, so every noindex can be read; only /api/ is closed', () => {
+    // A crawler reads <meta name="robots" content="noindex"> only on a page it
+    // may fetch. A page blocked here can be indexed by its URL alone.
+    const robots = readFileSync(join(DIST, 'robots.txt'), 'utf8');
+    const rules = [...robots.matchAll(/^Disallow:\s*(\S+)/gm)].map((m) => m[1]);
+    assert.deepEqual(rules, ['/api/']);
+    for (const u of pages.keys()) for (const r of rules) assert.ok(!u.startsWith(r), `robots.txt blocks ${u}`);
+    // ...and the unfinished pages really do say noindex for themselves.
+    assert.ok(pages.size > indexable.length, 'no noindex pages found');
+  });
+
   test('every indexable page is in the sitemap, and the sitemap lists only indexable pages', () => {
     const want = indexable.filter((u) => {
       const canonical = attr(linkRel(pages.get(u), 'canonical')[0] ?? '', 'href');
@@ -267,6 +278,25 @@ describe('sharing previews and structured data', () => {
         assert.ok(article.author?.name && article.headline && article.image, `${u}: Article fields`);
       }
     }
+  });
+
+  test('WebApplication on every page with a working tool, and on no other page', () => {
+    // The tools mark their own root element: a converter, English to Hindi
+    // typing, the Hindi keyboard, the typing tutor. Read from the built page,
+    // so a tool embedded on a new page cannot go without it.
+    const TOOL = /<[a-z]+\b[^>]*\sdata-(?:converter|translit|keyboard|tutor)(?=[\s>=])/;
+    let n = 0;
+    for (const [u, html] of pages) {
+      const hasTool = TOOL.test(html);
+      const app = jsonLd(html).find((d) => d['@type'] === 'WebApplication');
+      assert.equal(!!app, hasTool, `${u}: ${hasTool ? 'has a tool but no WebApplication' : 'WebApplication without a tool'}`);
+      if (app) {
+        n++;
+        assert.equal(app.url, abs(u), `${u}: WebApplication url`);
+        assert.ok(app.name && app.offers?.price === '0', `${u}: WebApplication fields`);
+      }
+    }
+    assert.ok(n >= 20, `only ${n} pages with WebApplication`);
   });
 
   test('visible breadcrumbs on every page but the home pages and the 404', () => {

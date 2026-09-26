@@ -1,13 +1,15 @@
 /**
  * Single source of truth for the page cluster.
  *
- * Six things read this array and nothing else:
+ * Five things read this array and nothing else:
  *   1. the sitemap `filter()` in astro.config.mjs   (only live pages)
  *   2. Header.astro's nav                           (only live pages, grouped)
  *   3. the interlink block in ConverterPage.astro   (`related`)
  *   4. each page's `noindex` flag                   (everything not live)
- *   5. robots.txt                                   (disallow everything not live)
- *   6. /all-converters                              (the whole table, with status)
+ *   5. /all-converters                              (the whole table, with status)
+ *
+ * robots.txt deliberately does NOT: a noindex page must stay crawlable, or
+ * the crawler never reads its noindex (see src/pages/robots.txt.ts).
  *
  * Adding a page = one entry here + one .astro file + its text in
  * src/i18n/en.json and hi.json (under `pages`).
@@ -57,6 +59,8 @@ export const SITE = 'https://mykrutidev.com';
  * @property {boolean} [beta]    live, but shows a Beta badge beside the h1
  * @property {string}  [betaNote] one line under the badge saying what it is for
  * @property {boolean} [documents] offer "Convert a document" under the boxes
+ * @property {boolean} [app]  a content page that embeds a tool (PageView's TOOLS)
+ *   without being a menubar `tool` itself: it still gets WebApplication data
  */
 
 /** @type {Page[]} */
@@ -415,6 +419,8 @@ export const PAGES = [
     kind: 'content',
     from: null,
     to: null,
+    // English to Hindi typing sits at the top of this page (PageView's TOOLS).
+    app: true,
     group: 'More',
     related: ['/english-to-hindi-typing', '/unicode-to-kruti-dev', '/hindi-keyboard'],
   },

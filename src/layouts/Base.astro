@@ -120,9 +120,10 @@ const ogImage = abs(ogImagePath(path, lang));
 const ogAlt = plain(h1);
 
 // WebApplication only where there is an application: a live page with a tool
-// (a converter, a typing tool, or the hub that converts). Lists, articles and
-// coming-soon pages carry the breadcrumb alone.
-const isTool = !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!(page.from && page.to));
+// (a converter, a typing tool, a page that embeds one, or the hub that
+// converts). Lists, articles and coming-soon pages carry the breadcrumb alone.
+const isTool =
+  !!page && isLive(page) && (page.kind === 'converter' || !!page.tool || !!page.app || !!(page.from && page.to));
 const app = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
