@@ -6,7 +6,7 @@
  * a guide that silently stops guiding for one column of keys. hands.test.js
  * asserts the two agree.
  *
- * DESIGN.md has no illustration system and wants flat shapes defined by a
+ * docs/DESIGN.md has no illustration system and wants flat shapes defined by a
  * hairline, so the hand is exactly that - a palm and five rounded bars. It is
  * not anatomy. It only has to answer "which one of these do I move", and a
  * recognisable diagram does that better than a drawing with knuckles in it.

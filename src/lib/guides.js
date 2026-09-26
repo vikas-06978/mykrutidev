@@ -3,7 +3,7 @@
  *
  * Structure only. Every word of an article - title, description, body - is in
  * src/i18n/{en,hi}.json under `articles.<slug>`, so the two languages hold the
- * same keys (i18n.test.js) and TRANSLATIONS-REVIEW.md lists them side by side.
+ * same keys (i18n.test.js) and docs/TRANSLATIONS-REVIEW.md lists them side by side.
  *
  * A body item of the form "{{diagram:name}}" is drawn by GuideDiagram.astro
  * (an inline SVG whose labels are in `diagrams.<name>`), so the diagrams are

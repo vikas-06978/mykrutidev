@@ -6,7 +6,7 @@
    the English-to-Hindi typing page arrived, because that page is a different
    engine wearing the same shell: two panels, a header row with a count, a
    segmented toggle, the same button ladder. Duplicating 120 lines of CSS to say
-   so would have let the two drift apart, which DESIGN.md exists to prevent.
+   so would have let the two drift apart, which docs/DESIGN.md exists to prevent.
 
    Scoped styles were the right call while there was one consumer and are the
    wrong one now. The class names are specific enough (`cv-`, `btn-`) that going
@@ -58,7 +58,7 @@
 .cv-field:focus-within {
   border-color: var(--color-brick);
   /* A soft ring rather than a hard outline. Still a 2px brick indicator, so
-     it stays as visible as the global :focus-visible rule DESIGN.md requires,
+     it stays as visible as the global :focus-visible rule docs/DESIGN.md requires,
      but it follows the radius and sits inside the panel. */
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brick) 14%, transparent);
 }

@@ -1,5 +1,5 @@
 /* source(none) + an explicit @source: automatic detection otherwise crawls
-   sibling tooling directories (.claude/, .agents/) and pulls thousands of
+   sibling tooling directories (such as .claude/) and pulls thousands of
    phantom class names out of vendored documentation. */
 @import 'tailwindcss' source(none);
 @source '../**/*.{astro,html,js,jsx,ts,tsx,md,mdx}';
@@ -80,7 +80,7 @@
 @import './app.css';
 
 /* ===========================================================================
-   Design tokens - see DESIGN.md
+   Design tokens - see docs/DESIGN.md
    Deep navy ink on warm paper, muted brick accent. Trustworthy, not flashy.
    =========================================================================== */
 @theme {

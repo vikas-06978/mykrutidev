@@ -1,4 +1,4 @@
-// Regenerate TRANSLATIONS-REVIEW.md from src/i18n/en.json and hi.json:
+// Regenerate docs/TRANSLATIONS-REVIEW.md from src/i18n/en.json and hi.json:
 //   npm run i18n:review
 //
 // One row per key: key | English | Hindi | flag. The flags below are the
@@ -111,5 +111,5 @@ These are data, not website text, and stay the same on English and Hindi pages:
 ${rows.join('\n')}
 `;
 
-writeFileSync(`${root}TRANSLATIONS-REVIEW.md`, md);
-console.log(`TRANSLATIONS-REVIEW.md: ${rows.length} keys, ${flagged} flagged`);
+writeFileSync(`${root}docs/TRANSLATIONS-REVIEW.md`, md);
+console.log(`docs/TRANSLATIONS-REVIEW.md: ${rows.length} keys, ${flagged} flagged`);

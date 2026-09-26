@@ -37,8 +37,6 @@ pnpm-debug.log*
 #   python .claude/skills/tailwind-4-docs/scripts/sync_tailwind_docs.py --accept-docs-license
 .claude/skills/tailwind-4-docs/references/docs/
 .claude/skills/tailwind-4-docs/references/docs-index.tsx
-.agents/skills/tailwind-4-docs/references/docs/
-.agents/skills/tailwind-4-docs/references/docs-index.tsx
 node_modules
 vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf
 
