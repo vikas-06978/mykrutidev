@@ -35,6 +35,14 @@ export const MAX_LINE = 2000;
 const TURNSTILE = 'https://challenges.cloudflare.com';
 /** English to Hindi Typing's Hinglish mode asks Google how to spell each word. */
 const INPUT_TOOLS = 'https://inputtools.google.com';
+/**
+ * Google Analytics on the live site (src/lib/analytics.js): the gtag.js file,
+ * and where it sends its hits. These are the addresses Google lists for GA4
+ * under a Content-Security-Policy.
+ */
+const GA_SCRIPT = 'https://*.googletagmanager.com';
+const GA_HITS = ['https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://*.googletagmanager.com'];
+const GA_PIXELS = ['https://*.google-analytics.com', 'https://*.googletagmanager.com'];
 
 /** Script types a browser does not run, so CSP does not apply to them. */
 const DATA_TYPES = /^(application\/(ld\+)?json|importmap|text\/plain)$/i;
@@ -63,11 +71,11 @@ export function inlineScriptHashes(htmls) {
 export function contentSecurityPolicy(scriptHashes) {
   return [
     "default-src 'self'",
-    `script-src 'self' ${[...scriptHashes, TURNSTILE].join(' ')}`,
+    `script-src 'self' ${[...scriptHashes, TURNSTILE, GA_SCRIPT].join(' ')}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self'",
+    `img-src 'self' ${GA_PIXELS.join(' ')}`,
     "font-src 'self'",
-    `connect-src 'self' ${INPUT_TOOLS}`,
+    `connect-src 'self' ${[INPUT_TOOLS, ...GA_HITS].join(' ')}`,
     `frame-src ${TURNSTILE}`,
     "worker-src 'self'",
     "manifest-src 'self'",

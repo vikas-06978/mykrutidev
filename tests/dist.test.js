@@ -22,6 +22,7 @@ import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs'
 import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
 import { readUpiId, upiLink, QUIET_ZONE } from '../src/lib/support.build.js';
+import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
 
 const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
 
@@ -711,6 +712,29 @@ describe('security headers (dist/_headers)', () => {
     for (const html of allHtml()) {
       assert.doesNotMatch(html, /<[a-z][^>]*\son[a-z]+\s*=/i);
       assert.doesNotMatch(html, /href\s*=\s*["']?\s*javascript:/i);
+    }
+  });
+});
+
+describe('Google Analytics', () => {
+  test('every page, the 404 included, has the tag once, at the top of <head>', () => {
+    const tag = `<script>${analyticsScript()}</script>`;
+    for (const [p, html] of [...pages, ['404', notFound]]) {
+      assert.equal(html.split(tag).length - 1, 1, `${p}: the analytics tag is missing or repeated`);
+      const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
+      assert.ok(head.includes(tag), `${p}: the analytics tag is not in <head>`);
+      assert.equal(head.search(/<script\b/), head.indexOf(tag), `${p}: another script runs before the analytics tag`);
+      assert.equal(html.match(/googletagmanager\.com\/gtag\/js/g)?.length, 1, `${p}: Google's own tag pasted in as well`);
+    }
+  });
+
+  test('the privacy policy names its cookies, in both languages', () => {
+    for (const p of ['/privacy-policy', '/hi/privacy-policy']) {
+      const html = pages.get(p);
+      for (const cookie of ['_ga', `_ga_${GA_ID.replace(/^G-/, '')}`]) {
+        assert.match(html, new RegExp(`<code[^>]*>${cookie}</code>`), `${p} does not name the ${cookie} cookie`);
+      }
+      assert.doesNotMatch(html, /no (advertising or )?analytics cookies|no tracking cookies/i, p);
     }
   });
 });

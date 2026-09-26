@@ -28,7 +28,9 @@ engines.
 not uploaded, and the converters work offline once visited. The one exception
 is Hinglish typing, which asks Google's input service how to spell each word.
 The feedback form sends what the person writes in it, plus the basic page and
-device details listed in the site's privacy policy.
+device details listed in the site's privacy policy. Google Analytics counts
+visits on the live site only (`src/lib/analytics.js`), and never sees the text or
+files.
 
 ## Getting started
 

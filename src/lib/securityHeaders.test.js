@@ -27,8 +27,11 @@ describe('the policy', () => {
   const csp = contentSecurityPolicy(["'sha256-abc'"]);
   const directive = (name) => csp.split('; ').find((d) => d.startsWith(`${name} `)) ?? '';
 
-  test('scripts: this site, the listed hashes and Turnstile, never unsafe-inline or eval', () => {
-    assert.equal(directive('script-src'), "script-src 'self' 'sha256-abc' https://challenges.cloudflare.com");
+  test('scripts: this site, the listed hashes, Turnstile and Google Analytics, never unsafe-inline or eval', () => {
+    assert.equal(
+      directive('script-src'),
+      "script-src 'self' 'sha256-abc' https://challenges.cloudflare.com https://*.googletagmanager.com",
+    );
     assert.doesNotMatch(directive('script-src'), /unsafe/);
   });
 
@@ -38,8 +41,12 @@ describe('the policy', () => {
     assert.equal(directive('base-uri'), "base-uri 'self'");
   });
 
-  test('the only outside connections are the ones features need', () => {
-    assert.equal(directive('connect-src'), "connect-src 'self' https://inputtools.google.com");
+  test('the only outside connections are the ones features need, and Google Analytics', () => {
+    assert.equal(
+      directive('connect-src'),
+      "connect-src 'self' https://inputtools.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+    );
+    assert.equal(directive('img-src'), "img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com");
     assert.equal(directive('frame-src'), 'frame-src https://challenges.cloudflare.com');
   });
 });

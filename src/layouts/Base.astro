@@ -9,6 +9,7 @@ import LangBanner from '../components/LangBanner.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Feedback from '../components/Feedback.astro';
 import { SITE, CONTACT_EMAIL, getPage, isLive } from '../lib/routes.js';
+import { analyticsScript } from '../lib/analytics.js';
 import { ogImagePath, OG_SIZE } from '../lib/og.js';
 import {
   LOCALES,
@@ -148,6 +149,8 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Google Analytics, on the live site only (src/lib/analytics.js). */}
+    <script is:inline set:html={analyticsScript()} />
     <meta name="theme-color" content="#faf7f2" />
     <link rel="preload" href={devanagari400} as="font" type="font/woff2" crossorigin />
 
