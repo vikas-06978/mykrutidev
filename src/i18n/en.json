@@ -69,7 +69,7 @@
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. Everything runs in your browser. Your text is never uploaded.",
     "converters": "Converters",
-    "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners; this site is not affiliated with them.",
+    "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners. This site is not affiliated with them.",
     "typing": "Typing & fonts",
     "guides": "Guides",
     "site": "About the site"
@@ -138,8 +138,8 @@
   },
   "doc": {
     "title": "Convert a document",
-    "introToUnicode": "Upload a Word (.docx) or text (.txt) file typed in Kruti Dev. Only the Kruti Dev text is converted; English, tables, images and formatting stay as they are.",
-    "introToKruti": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted to Kruti Dev 010; English, tables, images and formatting stay as they are.",
+    "introToUnicode": "Upload a Word (.docx) or text (.txt) file typed in Kruti Dev. Only the Kruti Dev text is converted. English, tables, images and formatting stay as they are.",
+    "introToKruti": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted to Kruti Dev 010. English, tables, images and formatting stay as they are.",
     "private": "Your file never leaves your computer.",
     "drag": "Drag a file here, or ",
     "choose": "Choose file",
@@ -280,7 +280,7 @@
     "newBest": "A new best on this device. Your previous best was {best} WPM.",
     "savedBest": "Saved as your best on this device.",
     "submittedShort": "Submitted after {time}. Short runs are not saved as a best speed",
-    "submittedShortBest": "; yours on this device is {best} WPM.",
+    "submittedShortBest": ". Your best on this device is {best} WPM.",
     "submittedShortEnd": ".",
     "yourBest": "Your best on this device is {best} WPM.",
     "levelComplete": "{title} complete",
@@ -290,7 +290,7 @@
     "stoppedEarly": "Lesson stopped early",
     "partial": "{acc}% accurate over the {through}% of the drill you typed. Type all of it to clear this lesson.",
     "notQuite": "Not quite",
-    "needs": "{acc}% accurate - this lesson needs {threshold}%. Slow down until the mistakes stop; the speed comes on its own.",
+    "needs": "{acc}% accurate - this lesson needs {threshold}%. Slow down until the mistakes stop. The speed comes on its own.",
     "keyboardAria": "Remington Hindi keyboard layout",
     "today": "Today's practice",
     "exam": "Exam (10 min)",
@@ -404,7 +404,7 @@
     }
   },
   "allConverters": {
-    "intro": "Every conversion on the site, grouped by source font. {live} of {total} are live; the rest are scaffolded and waiting on a verified character map.",
+    "intro": "Every conversion on the site, grouped by source font. {live} of {total} are live. The rest are scaffolded and waiting on a verified character map.",
     "live": "Live",
     "body": [
       "<h2>Why some of these are not switched on</h2>",
@@ -508,11 +508,11 @@
         },
         {
           "q": "Can I type Hindi directly into the box instead of pasting?",
-          "a": "Yes. Switch your keyboard to Hindi and type into the left box, which is set up for Devanagari input. Typing Hindi <em>phonetically</em> in English letters (\"namaste\" for नमस्ते) is not supported yet; that is a separate feature called transliteration."
+          "a": "Yes. Switch your keyboard to Hindi and type into the left box, which is set up for Devanagari input. Typing Hindi <em>phonetically</em> in English letters (\"namaste\" for नमस्ते) is not supported yet. That is a separate feature called transliteration."
         },
         {
           "q": "Why would I convert Unicode back to Kruti Dev?",
-          "a": "Three common reasons: a printing press or DTP operator still works in Kruti Dev and needs the file in that font; a typing test or stenography exam is conducted in Kruti Dev and you want practice material; or an old template has to stay consistent with documents typed years ago."
+          "a": "There are three common reasons. First, a printing press or DTP operator still works in Kruti Dev and needs the file in that font. Second, a typing test or stenography exam is conducted in Kruti Dev and you want practice material. Third, an old template has to stay consistent with documents typed years ago."
         },
         {
           "q": "Will the result be identical to text originally typed in Kruti Dev?",
@@ -526,7 +526,7 @@
       "howTo": {
         "steps": [
           "Type or paste Hindi into the <strong>Unicode / Hindi</strong> box - from a website, WhatsApp or your phone's Hindi keypad.",
-          "Press <strong>Copy Kruti code</strong>. The result looks like English letters; that is the Kruti Dev code.",
+          "Press <strong>Copy Kruti code</strong>. The result looks like English letters. That is the Kruti Dev code.",
           "Paste it into MS Word and set the font to <strong>Kruti Dev 010</strong> - or press <strong>Download .docx</strong>, which sets it for you."
         ],
         "tip": "Still seeing letters like <code>fgUnh</code> in Word? The font is not applied yet: select the text and choose Kruti Dev 010."
@@ -542,7 +542,7 @@
         },
         {
           "problem": "Keys differ from the original Kruti Dev file",
-          "fix": "Kruti Dev often has two ways to key a letter, and the converter always uses one standard sequence. It prints the same Hindi; only the keys behind it differ."
+          "fix": "Kruti Dev often has two ways to key a letter, and the converter always uses one standard sequence. It prints the same Hindi. Only the keys behind it differ."
         },
         {
           "problem": "English words turn into Hindi letters",
@@ -598,7 +598,7 @@
       "howTo": {
         "steps": [
           "Copy the Hindi out of your Kruti Dev document.",
-          "Paste it into the <strong>Kruti Dev</strong> box; the Mangal (Unicode) text appears alongside.",
+          "Paste it into the <strong>Kruti Dev</strong> box and the Mangal (Unicode) text appears alongside.",
           "Press <strong>Copy text</strong>, then paste the Mangal text into the government form or document that asked for it."
         ],
         "tip": "In Word, select the pasted text and set the font to Mangal - or use <strong>Download .docx</strong>, which already has it."
@@ -688,7 +688,7 @@
         "<p>Most people who need to write a line of Hindi do not have a Hindi keyboard set up, and do not want to install one for a single WhatsApp message or form field. This page solves that: you type <code>namaste</code> and get <strong lang=\"hi\">नमस्ते</strong>, you type <code>mera naam ram hai</code> and get <strong lang=\"hi\">मेरा नाम राम है</strong>. The English letters are read as sounds and written back out in Devanagari.</p>",
         "<p>The output is ordinary Unicode Hindi, so it works everywhere - WhatsApp, email, Word, government portals, social media, search. If you need the legacy Kruti Dev font instead, paste the result into the <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev converter</a>.</p>",
         "<h2>Transliteration is not translation</h2>",
-        "<p>This is the one thing worth being clear about before you use it. The page changes the <em>script</em>, not the <em>language</em>. Type <code>computer</code> and you get <strong lang=\"hi\">कंप्यूटर</strong> - the English word written in Devanagari - not the Hindi word for a computer. That is almost always what people want when they are typing a message, because the sentence they have in their head is already Hindi; they just cannot type the letters.</p>",
+        "<p>This is the one thing worth being clear about before you use it. The page changes the <em>script</em>, not the <em>language</em>. Type <code>computer</code> and you get <strong lang=\"hi\">कंप्यूटर</strong> - the English word written in Devanagari - not the Hindi word for a computer. That is almost always what people want when they are typing a message, because the sentence they have in their head is already Hindi. They just cannot type the letters.</p>",
         "<h2>Spelling rules worth knowing</h2>",
         "<p>You do not need to learn a system. Type the word as it sounds and it will usually be right. These few patterns cover the letters English has no spelling for:</p>",
         "<ul><li><strong>Aspirated consonants add an h.</strong> <code>kh</code> <span lang=\"hi\">ख</span>, <code>gh</code> <span lang=\"hi\">घ</span>, <code>ch</code> <span lang=\"hi\">च</span>, <code>chh</code> <span lang=\"hi\">छ</span>, <code>th</code> <span lang=\"hi\">थ</span>, <code>dh</code> <span lang=\"hi\">ध</span>, <code>ph</code> <span lang=\"hi\">फ</span>, <code>bh</code> <span lang=\"hi\">भ</span>, <code>sh</code> <span lang=\"hi\">श</span>.</li><li><strong>Long vowels double.</strong> <code>aa</code> <span lang=\"hi\">आ</span>, <code>ee</code> or <code>ii</code> <span lang=\"hi\">ई</span>, <code>oo</code> or <code>uu</code> <span lang=\"hi\">ऊ</span>. So <code>kitab</code> and <code>kitaab</code> both give <strong lang=\"hi\">किताब</strong>, but doubling is the way to be sure.</li><li><strong>Conjuncts have short spellings.</strong> <code>ksh</code> <span lang=\"hi\">क्ष</span>, <code>tra</code> <span lang=\"hi\">त्र</span>, <code>gya</code> <span lang=\"hi\">ज्ञ</span>, <code>shr</code> <span lang=\"hi\">श्र</span>, and <code>ri</code> for <span lang=\"hi\">ऋ</span>.</li><li><strong>Nasals look after themselves.</strong> An <code>n</code> or <code>m</code> before another consonant becomes the anusvara, so <code>hindi</code> gives <strong lang=\"hi\">हिंदी</strong> and <code>mandir</code> gives <strong lang=\"hi\">मंदिर</strong>.</li></ul>"
@@ -743,7 +743,7 @@
         },
         {
           "problem": "Words are spelled worse without internet",
-          "fix": "Offline, spellings come from the built-in dictionary and rules instead of Google's input service. It still works; rare words just need correcting more often."
+          "fix": "Offline, spellings come from the built-in dictionary and rules instead of Google's input service. It still works, but rare words just need correcting more often."
         },
         {
           "problem": "I need the Hindi in Kruti Dev",
@@ -760,7 +760,7 @@
       "lede": "Learn Hindi typing on the Kruti Dev Remington layout that many Hindi typing exams use. An on-screen keyboard shows the next key, the hand guide shows which finger presses it, and eleven lessons take you from the home row to full paragraphs. Practice tests run from 1 minute to 2 hours, you can pause the clock, and you can submit at any point to see your result. Free, unlimited, and nothing is uploaded.",
       "body": [
         "<h2>A tutor, not just a test</h2>",
-        "<p>Most Hindi typing pages hand you a paragraph and a clock. That measures where you are; it does not move you. This one teaches the layout: the key you need next is lit on the keyboard, the finger that should press it is coloured on the hands, and the passage marks every akshara green or red as you go. When a letter needs Shift, it also shows which little finger should be holding it.</p>",
+        "<p>Most Hindi typing pages hand you a paragraph and a clock. That measures where you are, but it does not move you. This one teaches the layout: the key you need next is lit on the keyboard, the finger that should press it is coloured on the hands, and the passage marks every akshara green or red as you go. When a letter needs Shift, it also shows which little finger should be holding it.</p>",
         "<p>The passage is ordinary Unicode Hindi, so it renders on any machine with nothing installed. What the tutor checks underneath is the Kruti Dev keystrokes that produce it, worked out by the same conversion engine that powers the converters on this site - so what you read and what you press are guaranteed to be the same sentence.</p>",
         "<h2>The lessons</h2>",
         "<p>Eleven levels. The first five each open one more row. Level 1 is the home row alone - <span lang=\"hi\">क</span>, <span lang=\"hi\">स</span>, <span lang=\"hi\">र</span>, <span lang=\"hi\">ह</span>, <span lang=\"hi\">य</span> and four matras, all typed without moving a finger off its resting key. Then the top row, the bottom row, numbers, and Shift.</p>",
@@ -830,7 +830,7 @@
         "<p>The output is ordinary Unicode Devanagari, which is what every modern system expects - government portals, email, Word, search, social media, databases. If you specifically need the legacy font instead, paste it into the <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev converter</a>.</p>",
         "<h2>How the letters are arranged</h2>",
         "<p>In <span lang=\"hi\">वर्णमाला</span> order, the order every Hindi speaker learned at school: the vowels, then the consonants in their five groups (with the halant, anusvara, chandrabindu and visarga beside them), then the everyday conjuncts, then digits. Space, Backspace, Enter and the full stop <span lang=\"hi\">।</span> are on the bottom row.</p>",
-        "<p>This is deliberately <em>not</em> an InScript picture. InScript scatters Devanagari across the QWERTY key positions, which is exactly right if you have learned the layout and are looking for the physical key - and exactly wrong if you are finding each letter by eye, because the letters end up in no order at all. Anyone who does know InScript has it installed already and can simply type; this page is for everyone else.</p>",
+        "<p>This is deliberately <em>not</em> an InScript picture. InScript scatters Devanagari across the QWERTY key positions, which is exactly right if you have learned the layout and are looking for the physical key - and exactly wrong if you are finding each letter by eye, because the letters end up in no order at all. Anyone who does know InScript has it installed already and can simply type. This page is for everyone else.</p>",
         "<h2>Matras, half letters and conjuncts</h2>",
         "<p>Three things cover almost everything people get stuck on:</p>",
         "<ul><li><strong>Vowels turn into matras after a consonant.</strong> Click <span lang=\"hi\">क</span>, then <span lang=\"hi\">इ</span>, and you get <strong lang=\"hi\">कि</strong> - even though the sign is drawn to the left of the letter. The vowel keys show the matra they will type, so there is no separate matra row to hunt through.</li><li><strong>The halant makes a half letter.</strong> <span lang=\"hi\">◌्</span> after a consonant silences its vowel, so <span lang=\"hi\">क</span> + <span lang=\"hi\">्</span> + <span lang=\"hi\">य</span> is <strong lang=\"hi\">क्य</strong>. That is how every conjunct is built.</li><li><strong>The common conjuncts have their own keys.</strong> <span lang=\"hi\">क्ष</span>, <span lang=\"hi\">त्र</span>, <span lang=\"hi\">ज्ञ</span> and <span lang=\"hi\">श्र</span> turn up constantly, so they are one click rather than three.</li></ul>",
@@ -853,7 +853,7 @@
         },
         {
           "q": "How do I type a matra like ि or ी?",
-          "a": "Tap the consonant, then the vowel. After a consonant the vowel keys turn into matras by themselves - they show <span lang=\"hi\">◌ि ◌ी ◌ा</span> so you can see what you will get - so <span lang=\"hi\">क</span> then <span lang=\"hi\">इ</span> gives <span lang=\"hi\">कि</span>, and <span lang=\"hi\">क</span> then <span lang=\"hi\">आ</span> gives <span lang=\"hi\">का</span>. At the start of a word the same keys type the full vowel. The dotted circle only shows where the sign attaches; it is never inserted."
+          "a": "Tap the consonant, then the vowel. After a consonant the vowel keys turn into matras by themselves - they show <span lang=\"hi\">◌ि ◌ी ◌ा</span> so you can see what you will get - so <span lang=\"hi\">क</span> then <span lang=\"hi\">इ</span> gives <span lang=\"hi\">कि</span>, and <span lang=\"hi\">क</span> then <span lang=\"hi\">आ</span> gives <span lang=\"hi\">का</span>. At the start of a word the same keys type the full vowel. The dotted circle only shows where the sign attaches. It is never inserted."
         },
         {
           "q": "How do I type a half letter or a conjunct?",
@@ -869,7 +869,7 @@
         },
         {
           "q": "Does it work on a phone?",
-          "a": "Yes. On a phone or tablet the keys dock to the bottom of the screen like a phone keyboard, and the text box stays at the top, so you can see both while you type. Your phone's own keyboard stays closed while the Hindi keys are open; press <strong>Use my keyboard</strong> to switch back to it."
+          "a": "Yes. On a phone or tablet the keys dock to the bottom of the screen like a phone keyboard, and the text box stays at the top, so you can see both while you type. Your phone's own keyboard stays closed while the Hindi keys are open. Press <strong>Use my keyboard</strong> to switch back to it."
         },
         {
           "q": "Is my text uploaded anywhere?",
@@ -965,7 +965,7 @@
         "<p>This is the direction you need when a document has to go <em>back</em> into a legacy workflow: a press file, a school register, a form that was laid out in DevLys years ago and still has to match. You type Hindi the modern way - phone keypad, Windows Hindi keyboard, or pasted from anywhere on the web - and get DevLys keystrokes out.</p>",
         "<p>The output will look like nonsense Latin text, and that is correct. DevLys stores Hindi as ASCII and relies on the font to draw the letters. Paste it into Word, select it, apply DevLys 010, and it reads as Hindi.</p>",
         "<h2>The reordering, in reverse</h2>",
-        "<p>Going this way the engine has to undo everything the forward direction does. Unicode keeps Hindi in <em>logical</em> order; DevLys keeps it in <em>visual</em> order. So:</p>",
+        "<p>Going this way the engine has to undo everything the forward direction does. Unicode keeps Hindi in <em>logical</em> order, while DevLys keeps it in <em>visual</em> order. So:</p>",
         "<ul><li>The short-i matra moves back <strong>in front of</strong> its consonant - <strong lang=\"hi\">कि</strong> becomes <code>fd</code>, not <code>df</code>.</li><li>The reph moves back <strong>after</strong> the cluster it crowns, so <strong lang=\"hi\">कर्म</strong> becomes <code>deZ</code>.</li><li>Composed vowel signs are split again: <strong lang=\"hi\">को</strong> becomes an aa-matra plus an e-matra, because that is how the font draws it.</li></ul>",
         "<p>Get any of those wrong and the text still <em>looks</em> like Hindi in the DevLys font while being subtly misspelt. Both directions are covered by the same test suite, and text converted to DevLys and back arrives unchanged.</p>",
         "<h2>Why this page is live now</h2>",
@@ -975,7 +975,7 @@
       "faq": [
         {
           "q": "Why are there two copy buttons?",
-          "a": "Because what you see is not one copyable string. The output box shows Hindi only because the DevLys font is drawing ASCII keys. <strong>Copy DevLys code</strong> gives you the raw keys to paste into Word with the DevLys font applied; <strong>Copy as Hindi (Unicode)</strong> gives you the Unicode, for WhatsApp, email or anything on the web. Picking the wrong one is the single most common mistake on this kind of page, so both are generated and labelled rather than left to chance."
+          "a": "Because what you see is not one copyable string. The output box shows Hindi only because the DevLys font is drawing ASCII keys. <strong>Copy DevLys code</strong> gives you the raw keys to paste into Word with the DevLys font applied. <strong>Copy as Hindi (Unicode)</strong> gives you the Unicode, for WhatsApp, email or anything on the web. Picking the wrong one is the single most common mistake on this kind of page, so both are generated and labelled rather than left to chance."
         },
         {
           "q": "The output looks like English letters. Is that broken?",
@@ -983,7 +983,7 @@
         },
         {
           "q": "Do I need the DevLys font installed?",
-          "a": "To <em>use</em> the output in Word, yes - install DevLys 010 and apply it to the pasted text, or use Download .docx, which writes the font name into the file for you. To see the preview on this page you need nothing; the font is served by the site."
+          "a": "To <em>use</em> the output in Word, yes - install DevLys 010 and apply it to the pasted text, or use Download .docx, which writes the font name into the file for you. To see the preview on this page you need nothing, because the font is served by the site."
         },
         {
           "q": "Can I type Hindi straight from my phone keypad?",
@@ -1020,7 +1020,7 @@
         "<h2>Why departments ask for Mangal</h2>",
         "<p>Because it is the safe choice. Mangal is present on every Windows install, so a department can be confident the Hindi will look the same on the typist's machine, the reviewing officer's, and the portal that receives the file. Nothing about the text requires Mangal specifically - any Unicode Devanagari font shows the same characters - but a form that says \"Mangal\" is asking for Unicode, and this page is how you give it to them.</p>",
         "<h2>What the conversion has to get right</h2>",
-        "<ul><li><strong>The short-i matra.</strong> DevLys types ि before its consonant because that is where it is drawn; Unicode puts it after. <code>fd</code> becomes <strong lang=\"hi\">कि</strong>.</li><li><strong>The reph.</strong> The र् above a letter is typed after its syllable, so <code>deZ</code> has to become <strong lang=\"hi\">कर्म</strong>.</li><li><strong>Split vowel signs.</strong> <code>dks</code> is an aa-matra plus an e-matra and has to be recomposed into <strong lang=\"hi\">को</strong>.</li></ul>",
+        "<ul><li><strong>The short-i matra.</strong> DevLys types ि before its consonant because that is where it is drawn. Unicode puts it after. <code>fd</code> becomes <strong lang=\"hi\">कि</strong>.</li><li><strong>The reph.</strong> The र् above a letter is typed after its syllable, so <code>deZ</code> has to become <strong lang=\"hi\">कर्म</strong>.</li><li><strong>Split vowel signs.</strong> <code>dks</code> is an aa-matra plus an e-matra and has to be recomposed into <strong lang=\"hi\">को</strong>.</li></ul>",
         "<p>Skip any of those and the text will still look like Hindi while failing search, sorting and spell-check inside the portal you are submitting to - which is the failure that costs you a resubmission.</p>",
         "<p>Going the other way, <a href=\"/mangal-to-devlys\">Mangal to DevLys</a> turns Unicode back into DevLys keystrokes. If your source file is Kruti Dev rather than DevLys, use <a href=\"/kruti-dev-to-mangal\">Kruti Dev to Mangal</a>.</p>"
       ],
@@ -1053,7 +1053,7 @@
       "howTo": {
         "steps": [
           "Copy the Hindi out of your DevLys document.",
-          "Paste it into the <strong>DevLys</strong> box; Mangal-ready Unicode appears on the other side.",
+          "Paste it into the <strong>DevLys</strong> box and Mangal-ready Unicode appears on the other side.",
           "Press <strong>Copy text</strong> and paste the result where Mangal is required - an online form, a portal or Word."
         ],
         "tip": "Word keeps the old font on pasted text: select it and set the font to Mangal, or use <strong>Download .docx</strong> instead."
@@ -1084,11 +1084,11 @@
         },
         {
           "q": "Why are there two copy buttons?",
-          "a": "Because the output box is showing you one thing and holding another. It reads as Hindi only because the DevLys font is drawing ASCII keys. <strong>Copy DevLys code</strong> gives the raw keys for Word; <strong>Copy as Hindi (Unicode)</strong> gives the Unicode back. Both are generated so you never have to guess which one the clipboard took."
+          "a": "Because the output box is showing you one thing and holding another. It reads as Hindi only because the DevLys font is drawing ASCII keys. <strong>Copy DevLys code</strong> gives the raw keys for Word. <strong>Copy as Hindi (Unicode)</strong> gives the Unicode back. Both are generated so you never have to guess which one the clipboard took."
         },
         {
           "q": "The output looks like Latin gibberish. Is it broken?",
-          "a": "No - that is what DevLys is. The font turns <code>Hkkjr</code> into <strong lang=\"hi\">भारत</strong>. Use the Preview / Raw toggle above the output to switch how it is displayed; the toggle is purely visual and never changes what gets copied."
+          "a": "No - that is what DevLys is. The font turns <code>Hkkjr</code> into <strong lang=\"hi\">भारत</strong>. Use the Preview / Raw toggle above the output to switch how it is displayed. The toggle is purely visual and never changes what gets copied."
         },
         {
           "q": "Do I need the DevLys font installed?",
@@ -1100,7 +1100,7 @@
         },
         {
           "q": "Does my text get uploaded anywhere?",
-          "a": "No. Everything runs in your browser; nothing is sent to a server, and the page keeps working offline once loaded."
+          "a": "No. Everything runs in your browser. Nothing is sent to a server, and the page keeps working offline once loaded."
         }
       ],
       "howTo": {
@@ -1205,7 +1205,7 @@
           "Press <strong>Copy Abbasi Chanakya code</strong>.",
           "Paste into Word and set the font to <strong>Abbasi Chanakya New</strong> - or press <strong>Download .docx</strong>."
         ],
-        "tip": "This is for Abbasi Chanakya New only; other Chanakya fonts use different keys and will show the wrong letters."
+        "tip": "This is for Abbasi Chanakya New only. Other Chanakya fonts use different keys and will show the wrong letters."
       }
     },
     "/chanakya-to-unicode": {
@@ -1349,7 +1349,7 @@
       "body": [
         "<h2>Planned, not started</h2>",
         "<p>Bamini is the Tamil equivalent of Kruti Dev: the legacy font that a great deal of older Tamil typing was done in, still sitting inside documents that now need to go into Unicode systems.</p>",
-        "<p>Tamil script works differently from Devanagari. It has its own vowel-sign behaviour and its own rules about which signs move where, so this needs its own engine work rather than a new lookup table. The route is scaffolded; it will be built only after a keyword check and a mapping tested against real Tamil documents.</p>"
+        "<p>Tamil script works differently from Devanagari. It has its own vowel-sign behaviour and its own rules about which signs move where, so this needs its own engine work rather than a new lookup table. The route is scaffolded. It will be built only after a keyword check and a mapping tested against real Tamil documents.</p>"
       ]
     },
     "/bengali-font-converter": {
@@ -1362,7 +1362,7 @@
       "body": [
         "<h2>Planned, not started</h2>",
         "<p>Bijoy is the legacy Bengali font most older documents were typed in, and the conversion problem is the same shape as the Hindi one: glyphs stored on ASCII codepoints, in visual rather than logical order.</p>",
-        "<p>The script is not. Bengali has its own character set and a more elaborate conjunct system than Devanagari, so it needs its own map and its own test documents. The route is scaffolded so the work has somewhere to go; it will be switched on only after a keyword check and a tested mapping.</p>"
+        "<p>The script is not. Bengali has its own character set and a more elaborate conjunct system than Devanagari, so it needs its own map and its own test documents. The route is scaffolded so the work has somewhere to go. It will be switched on only after a keyword check and a tested mapping.</p>"
       ]
     },
     "/punjabi-font-converter": {
@@ -1375,7 +1375,7 @@
       "body": [
         "<h2>Planned, not started</h2>",
         "<p>AnmolLipi and Asees are the legacy Gurmukhi fonts behind most older Punjabi documents. As with Kruti Dev, the text inside the file is ASCII and only becomes Punjabi when the right font is installed.</p>",
-        "<p>Gurmukhi is a separate script from Devanagari with its own letters, vowel signs and subjoined forms, so nothing in the current engine transfers. The route exists so the work has a home; it will be switched on only after a keyword check and a mapping built from real AnmolLipi and Asees documents.</p>"
+        "<p>Gurmukhi is a separate script from Devanagari with its own letters, vowel signs and subjoined forms, so nothing in the current engine transfers. The route exists so the work has a home. It will be switched on only after a keyword check and a mapping built from real AnmolLipi and Asees documents.</p>"
       ]
     },
     "/hindi-font-converter": {
@@ -1446,12 +1446,12 @@
         "<h2>Who this chart is for</h2>",
         "<p>Beginners learning Hindi typing from scratch, and anyone preparing for a typing test in <strong>SSC, CPCT, court or state recruitment</strong> exams that use the Remington (Kruti Dev) layout. The chart is drawn from the same data as the <a href=\"/hindi-typing-test\">Hindi typing tutor</a>, so what you see here is exactly what the tutor asks you to press.</p>",
         "<h2>How to use it</h2>",
-        "<p>Learn the home row first - the shaded keys - and keep your fingers resting there. Look at the chart, not at your hands. Letters with no key of their own, like भ or श, are typed as two keys; the <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a> lists those sequences.</p>"
+        "<p>Learn the home row first - the shaded keys - and keep your fingers resting there. Look at the chart, not at your hands. Letters with no key of their own, like भ or श, are typed as two keys. The <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a> lists those sequences.</p>"
       ],
       "faq": [
         {
           "q": "Is Kruti Dev the same as the Remington layout?",
-          "a": "Kruti Dev is a font; Remington is the keyboard layout it follows. Typing in Kruti Dev 010 means typing on the Remington layout - the same key positions the old Hindi typewriters used - which is why exams call the test \"Remington\" or \"Kruti Dev\" interchangeably."
+          "a": "Kruti Dev is a font. Remington is the keyboard layout it follows. Typing in Kruti Dev 010 means typing on the Remington layout - the same key positions the old Hindi typewriters used - which is why exams call the test \"Remington\" or \"Kruti Dev\" interchangeably."
         },
         {
           "q": "Why do some keys show a dash?",
@@ -1471,11 +1471,11 @@
       "lede": "MyKrutiDev is a small, independent site that converts Hindi between legacy fonts and Unicode and teaches Hindi typing - accurately, for free, and without uploading anything.",
       "body": [
         "<h2>What we make</h2>",
-        "<p>Converters between Kruti Dev, DevLys, Mangal and Unicode; a Hindi typing tutor and timed tests on the Remington layout; an on-screen Hindi keyboard; English to Hindi typing; printable charts; and <a href=\"/guides\">guides</a> to the problems people bring us. Everything is free and needs no account.</p>",
+        "<p>We make converters between Kruti Dev, DevLys, Mangal and Unicode, a Hindi typing tutor with timed tests on the Remington layout, an on-screen Hindi keyboard, English to Hindi typing, printable charts and <a href=\"/guides\">guides</a> to the problems people bring us. Everything is free and needs no account.</p>",
         "<h2>How we check it</h2>",
         "<p>Hindi conversion goes wrong in small, costly ways: the short-i matra on the wrong side of its consonant, a reph on the wrong syllable, a conjunct split in two. So every rule in the converters is tested against real documents and against the fonts themselves. The Kruti Dev keyboard chart is read out of the Kruti Dev 010 font file, key by key, and more than a thousand automated tests run before any change goes live. A font pair that has not been verified is marked as coming soon rather than guessed at.</p>",
         "<h2>Your text stays on your computer</h2>",
-        "<p>The converters and the typing tutor run entirely in your browser. What you paste or type is not uploaded, logged or stored by us. The one feature that uses an outside service is English to Hindi typing in Hinglish mode, which asks Google's input service how to spell each word; the <a href=\"/privacy-policy\">privacy policy</a> sets out exactly what that means.</p>",
+        "<p>The converters and the typing tutor run entirely in your browser. What you paste or type is not uploaded, logged or stored by us. The one feature that uses an outside service is English to Hindi typing in Hinglish mode, which asks Google's input service how to spell each word. The <a href=\"/privacy-policy\">privacy policy</a> sets out exactly what that means.</p>",
         "<h2>Who we are</h2>",
         "<p>The MyKrutiDev team is a small group of developers and Hindi typists who have spent years moving office documents between Kruti Dev and Unicode. We are not affiliated with the makers of Kruti Dev, DevLys, Chanakya or Mangal, or with any exam body. To report a wrong conversion or suggest a feature, <a href=\"/contact\">contact us</a>.</p>"
       ]
@@ -1488,7 +1488,7 @@
       "lede": "Which finger presses which key on the Remington (Kruti Dev) layout. Each key carries a short finger code, so the chart reads just as well printed in black and white.",
       "body": [
         "<h2>Why fingers matter</h2>",
-        "<p>Speed in a typing test comes from never looking down, and that only works if every key always belongs to the same finger. Beginners who type with two fingers plateau early; learners preparing for <strong>SSC, CPCT or court typing tests</strong> should fix the finger for each key before chasing speed.</p>",
+        "<p>Speed in a typing test comes from never looking down, and that only works if every key always belongs to the same finger. Beginners who type with two fingers plateau early. Learners preparing for <strong>SSC, CPCT or court typing tests</strong> should fix the finger for each key before chasing speed.</p>",
         "<p>The <a href=\"/hindi-typing-test\">typing tutor</a> shows the same assignment live, lighting up the finger for each key as you type.</p>"
       ],
       "faq": [
@@ -1512,7 +1512,7 @@
         "<h2>Who these sheets are for</h2>",
         "<p>Beginners who want to practise away from the screen, teachers running a typing class, and learners preparing for <strong>SSC, CPCT, court and state typing tests</strong>. The lines are the tutor's own drills, and the keys under each line are exactly the keystrokes the tutor checks.</p>",
         "<h2>How to use them</h2>",
-        "<p>Work through the sheets in order; each lesson only uses keys the earlier ones taught. Type each line on paper-in-front, eyes-on-sheet, then check your speed and accuracy in the <a href=\"/hindi-typing-test\">online tutor</a> and write it in the <a href=\"/hindi-typing-progress-log\">progress log</a>.</p>"
+        "<p>Work through the sheets in order, because each lesson only uses keys the earlier ones taught. Type each line on paper-in-front, eyes-on-sheet, then check your speed and accuracy in the <a href=\"/hindi-typing-test\">online tutor</a> and write it in the <a href=\"/hindi-typing-progress-log\">progress log</a>.</p>"
       ],
       "faq": [
         {
@@ -1602,7 +1602,7 @@
         },
         {
           "problem": "It will not work on a phone or in Google Docs",
-          "fix": "Neither lets you add a font, so Kruti Dev shows as English letters there. Convert to Unicode on this page; Unicode Hindi displays on every phone."
+          "fix": "Neither lets you add a font, so Kruti Dev shows as English letters there. Convert to Unicode on this page. Unicode Hindi displays on every phone."
         }
       ],
       "faq": [
@@ -1626,7 +1626,7 @@
       "body": [
         "<h2>What Kruti Dev 010 is</h2>",
         "<p>Kruti Dev 010 is a Hindi font from before Unicode. Instead of storing Devanagari letters, it reuses the codes of the English keyboard: press <code>d</code> and the file stores the letter d, but the font draws <span lang=\"hi\">क</span>. Its layout is the Remington typewriter keyboard, which is why typists, offices, courts and typing exams across the Hindi-speaking states still ask for it.</p>",
-        "<p>The catch is that the Hindi exists only while the font is present. Open the same file where Kruti Dev 010 is not installed and you see the raw keys - <code>Hkkjr</code> instead of <span lang=\"hi\">भारत</span>. The text is not damaged; it is being drawn by a font that treats it as English.</p>",
+        "<p>The catch is that the Hindi exists only while the font is present. Open the same file where Kruti Dev 010 is not installed and you see the raw keys - <code>Hkkjr</code> instead of <span lang=\"hi\">भारत</span>. The text is not damaged. It is being drawn by a font that treats it as English.</p>",
         "<h2>How to install it on Windows</h2>",
         "<ol><li>Get the font file, usually <code>Kruti_Dev_010.ttf</code> or <code>K010.TTF</code>, from a source you trust. If it came as a .zip, extract it first - Windows cannot install a font from inside a zip.</li><li>Right-click the .ttf and choose <strong>Install for all users</strong>, or <strong>Install</strong> if you do not have administrator rights.</li><li>Close Word completely, open it again, and pick <strong>Kruti Dev 010</strong> from the font list.</li></ol>",
         "<p>On a Mac, double-click the file and choose <strong>Install Font</strong> in Font Book. The <a href=\"/guides/install-kruti-dev-010-font-windows\">installation guide</a> covers the errors people run into most.</p>",
@@ -1644,7 +1644,7 @@
       "howTo": {
         "steps": [
           "Choose <strong>Practice test</strong> and the length of your exam - 10 min for an SSC CHSL-style test, 15 or 30 min to build stamina.",
-          "Type the passage without looking down. Wrong keys turn red; correct them only if your exam allows backspace.",
+          "Type the passage without looking down. Wrong keys turn red. Correct them only if your exam allows backspace.",
           "Read <strong>Net WPM</strong> and accuracy on the result, and write them in the <a href=\"/hindi-typing-progress-log\">progress log</a> to compare week by week."
         ],
         "tip": "Exams score speed and accuracy together. A clean 28 WPM usually beats a careless 35, so get accuracy above 95% first."
@@ -1660,7 +1660,7 @@
         },
         {
           "problem": "The exam keyboard layout was not the one I practised",
-          "fix": "Remington and InScript are different keyboards. The notification names the layout or the font (Kruti Dev means Remington; Mangal usually means InScript). Practise only that one."
+          "fix": "Remington and InScript are different keyboards. The notification names the layout or the font (Kruti Dev means Remington and Mangal usually means InScript). Practise only that one."
         },
         {
           "problem": "Conjuncts and half letters slow me down",
@@ -1674,7 +1674,7 @@
         },
         {
           "q": "Is backspace allowed in the exam?",
-          "a": "It depends on the exam. Some allow corrections and score what is left; others disable backspace or count every error. Practise both: correct as you go in some tests, and in others do not correct anything."
+          "a": "It depends on the exam. Some allow corrections and score what is left. Others disable backspace or count every error. Practise both: correct as you go in some tests, and in others do not correct anything."
         },
         {
           "q": "How many words per minute do I need?",
@@ -1688,7 +1688,7 @@
       "body": [
         "<h2>Which exams test Hindi typing</h2>",
         "<p>Hindi typing is a qualifying skill test in many recruitments: the SSC CHSL typing test for LDC and JSA posts, CPCT in Madhya Pradesh, High Court and district court exams for typists, stenographers and clerks, and state clerical exams in Rajasthan, Uttar Pradesh, Bihar, Chhattisgarh and elsewhere. The rules change from one notification to the next, so treat the figures below as typical and check yours for the final word.</p>",
-        "<ul><li><strong>SSC CHSL typing test:</strong> 10 minutes on a computer. Hindi candidates need about 30 words per minute (9,000 key depressions an hour).</li><li><strong>CPCT (Madhya Pradesh):</strong> a timed Hindi typing section in which you choose InScript or a Remington layout. Many posts ask for 20 WPM in Hindi; some ask for more.</li><li><strong>High Court and district courts:</strong> commonly 25-30 WPM in Hindi, often on Kruti Dev with the Remington layout, sometimes with a separate limit on errors.</li></ul>",
+        "<ul><li><strong>SSC CHSL typing test:</strong> 10 minutes on a computer. Hindi candidates need about 30 words per minute (9,000 key depressions an hour).</li><li><strong>CPCT (Madhya Pradesh):</strong> a timed Hindi typing section in which you choose InScript or a Remington layout. Many posts ask for 20 WPM in Hindi, and some ask for more.</li><li><strong>High Court and district courts:</strong> commonly 25-30 WPM in Hindi, often on Kruti Dev with the Remington layout, sometimes with a separate limit on errors.</li></ul>",
         "<h2>How your speed is counted</h2>",
         "<p>Exams count key depressions: every keystroke counts, and five keystrokes make one word. In Kruti Dev one Hindi letter can take two or three keys - <span lang=\"hi\">भ</span> is <code>Hk</code>, <span lang=\"hi\">क्ष</span> is <code>{k</code> - so 30 WPM in Hindi means fewer Hindi words than it sounds. The test on this page counts the same way, and its headline figure is net WPM: correct keystrokes only.</p>",
         "<h2>Practise the way the test is taken</h2>",
@@ -1705,7 +1705,7 @@
         "steps": [
           "Click the Kruti Dev box and type with the Remington layout: <code>d</code> for <span lang=\"hi\">क</span>, <code>k</code> for the <span lang=\"hi\">ा</span> sign, <code>Hkkjr</code> for <span lang=\"hi\">भारत</span>.",
           "The other box shows your words as Unicode Hindi as you type, with the <span lang=\"hi\">ि</span> sign and the reph already where Unicode needs them.",
-          "Copy the Unicode into WhatsApp, email, Word or a form. It shows in any Hindi font; the person reading it needs no Kruti Dev."
+          "Copy the Unicode into WhatsApp, email, Word or a form. It shows in any Hindi font, so the person reading it needs no Kruti Dev."
         ],
         "tip": "Looking for a letter? Find it in the chart below: the top of each key is its Shift character, the bottom is what it types on its own."
       },
@@ -1790,11 +1790,11 @@
       "faq": [
         {
           "q": "What is the best Hindi font for MS Word?",
-          "a": "For everyday documents, Nirmala UI (clean on screen) or Mangal (the traditional official choice); Kokila reads well in print. All are Unicode and come with Windows. Use Kruti Dev 010 only when a form or an office requires it."
+          "a": "For everyday documents, Nirmala UI (clean on screen) or Mangal (the traditional official choice), and Kokila reads well in print. All are Unicode and come with Windows. Use Kruti Dev 010 only when a form or an office requires it."
         },
         {
           "q": "How do I switch on the Hindi keyboard in Windows?",
-          "a": "Open <strong>Settings → Time &amp; language → Language &amp; region</strong>, choose <strong>Add a language</strong> and add Hindi. Switch between English and Hindi with <strong>Windows key + Space</strong>. The standard Hindi keyboard is InScript; Windows also offers a phonetic one in the language options."
+          "a": "Open <strong>Settings → Time &amp; language → Language &amp; region</strong>, choose <strong>Add a language</strong> and add Hindi. Switch between English and Hindi with <strong>Windows key + Space</strong>. The standard Hindi keyboard is InScript, and Windows also offers a phonetic one in the language options."
         },
         {
           "q": "Can I type Hindi in Word on a Mac?",
@@ -1810,11 +1810,11 @@
         "<h3>1. Type in English letters, paste into Word</h3>",
         "<p>The box above turns English spelling into Hindi: <code>bharat</code> becomes <span lang=\"hi\">भारत</span>. Nothing to install and nothing to learn, which makes it right for a letter, a form or a few paragraphs. For long documents a real keyboard layout is faster.</p>",
         "<h3>2. The Windows Hindi keyboard</h3>",
-        "<p>Windows includes Hindi keyboards. Add Hindi as a language in Settings, then press <strong>Windows key + Space</strong> to switch while Word is open. InScript is the standard layout; the phonetic keyboard works like typing in English letters. Either way the result is Unicode, as in option 1.</p>",
+        "<p>Windows includes Hindi keyboards. Add Hindi as a language in Settings, then press <strong>Windows key + Space</strong> to switch while Word is open. InScript is the standard layout. The phonetic keyboard works like typing in English letters. Either way the result is Unicode, as in option 1.</p>",
         "<h3>3. Kruti Dev and the Remington layout</h3>",
         "<p>If you trained on a typewriter or for a typing exam, you may already know Remington. Install <a href=\"/kruti-dev-010-font\">Kruti Dev 010</a>, choose it in Word and type. It is fast for trained typists, but the result is legacy text that shows as English letters wherever the font is missing, so keep a Unicode copy of anything you send out.</p>",
         "<h2>Making Word behave with Hindi</h2>",
-        "<ul><li><strong>Set Hindi as the proofing language</strong> so Word stops underlining every word; with Hindi proofing tools installed it will spell-check Hindi too.</li><li><strong>Use the Complex scripts font</strong> (Ctrl+D) to set the Hindi font for a whole document or style at once.</li><li><strong>Give matras room.</strong> Signs like ि and ु reach above and below the line. If they touch the next line, use line spacing of 1.15 or more instead of \"Exactly\".</li></ul>",
+        "<ul><li><strong>Set Hindi as the proofing language</strong> so Word stops underlining every word. With Hindi proofing tools installed it will spell-check Hindi too.</li><li><strong>Use the Complex scripts font</strong> (Ctrl+D) to set the Hindi font for a whole document or style at once.</li><li><strong>Give matras room.</strong> Signs like ि and ु reach above and below the line. If they touch the next line, use line spacing of 1.15 or more instead of \"Exactly\".</li></ul>",
         "<h2>Moving between Kruti Dev and Unicode</h2>",
         "<p>Office files often mix both. Convert rather than retype: <a href=\"/?mode=file\">Kruti Dev to Unicode</a> for old documents, <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> when a template needs Kruti Dev. Both convert whole .docx files and keep tables and formatting.</p>"
       ]
@@ -1851,8 +1851,8 @@
         "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. We use no advertising or analytics cookies.</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
         "<h2>Feedback</h2>",
         "<p>The <strong>Feedback</strong> button at the bottom of each page opens a short form, and only when you click it. If you press Send, we store:</p>",
-        "<ul><li>your rating (😞 😐 🙂 😍) and the options you ticked;</li><li>what you wrote in the form's own text boxes, and an email address only if you chose to give one;</li><li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example \"Chrome\") and the date.</li></ul>",
-        "<p>We do <strong>not</strong> store your IP address, your browser's full identification string, or anything you typed, pasted or converted in the tools. Feedback is used only to decide what to fix and build next, and is kept in a Cloudflare D1 database that only the site's owner can read. An email address is used only to reply to you; it is never shared or used for marketing. To have your feedback deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
+        "<ul><li>your rating (😞 😐 🙂 😍) and the options you ticked</li><li>what you wrote in the form's own text boxes, and an email address only if you chose to give one</li><li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example \"Chrome\") and the date</li></ul>",
+        "<p>We do <strong>not</strong> store your IP address, your browser's full identification string, or anything you typed, pasted or converted in the tools. Feedback is used only to decide what to fix and build next, and is kept in a Cloudflare D1 database that only the site's owner can read. An email address is used only to reply to you. It is never shared or used for marketing. To have your feedback deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
         "<h2>Spam protection</h2>",
         "<p>To keep robots out, the feedback form uses Cloudflare Turnstile, an invisible check that runs only after you open the form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
         "<h2>Server logs</h2>",
@@ -1875,13 +1875,13 @@
         "<h2>Check important documents</h2>",
         "<p>We test the converters carefully, but legacy fonts are ambiguous and no converter is perfect. Before you file, print or send a converted document that matters - a legal notice, a court filing, an official order, an exam form - read it against the original, especially names, numbers and dates. The tools are provided \"as is\", without any warranty, and MyKrutiDev is not liable for loss caused by relying on a conversion or a test result.</p>",
         "<h2>Exams</h2>",
-        "<p>The typing tests are practice. Speeds and rules described on this site are typical figures, not official ones. Exam bodies set and change their own rules; always follow the current official notification.</p>",
+        "<p>The typing tests are practice. Speeds and rules described on this site are typical figures, not official ones. Exam bodies set and change their own rules, so always follow the current official notification.</p>",
         "<h2>Fonts and trademarks</h2>",
         "<p>Kruti Dev, DevLys, Chanakya, Mangal, Nirmala UI and other font names belong to their owners. MyKrutiDev is not affiliated with them and does not distribute their font files. Names are used only to describe what the tools convert.</p>",
         "<h2>Fair use of the site</h2>",
         "<p>Do not try to disrupt the site, copy it wholesale, or present its pages as your own. Linking to any page is welcome.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>We may update these terms; the version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 25 September 2026.</p>"
+        "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 25 September 2026.</p>"
       ]
     }
   },
@@ -1921,7 +1921,7 @@
       },
       "document": {
         "title": "Convert Word file (.docx)",
-        "benefit": "Convert a whole .docx; tables and formatting stay as they are."
+        "benefit": "Convert a whole .docx and keep its tables and formatting as they are."
       },
       "printables": {
         "title": "Printable charts (PDF)",
@@ -1952,7 +1952,7 @@
     },
     "fingers": {
       "legend": "Which finger presses which key",
-      "tags": "The code on each key: L = left hand, R = right hand; 2 = index, 3 = middle, 4 = ring, 5 = little finger. The thumbs press Space.",
+      "tags": "The code on each key: L = left hand, R = right hand. The number is the finger: 2 = index, 3 = middle, 4 = ring, 5 = little finger. The thumbs press Space.",
       "shift": "Shift is held with the little finger of the OTHER hand."
     },
     "sheets": {
@@ -2049,7 +2049,7 @@
       ]
     },
     "stored-vs-shown": {
-      "caption": "The same file, with and without the font. Kruti Dev keeps English letters and relies on the font; Unicode keeps the Hindi letters themselves.",
+      "caption": "The same file, with and without the font. Kruti Dev keeps English letters and relies on the font, while Unicode keeps the Hindi letters themselves.",
       "krutiTitle": "Kruti Dev file",
       "unicodeTitle": "Unicode file",
       "stored": "What the file stores",
@@ -2070,7 +2070,7 @@
       "steps": [
         "Open the <strong>Upload Word file</strong> tab on Kruti Dev to Unicode.",
         "Drop in the .docx (or .txt). It is read in your browser, not uploaded.",
-        "Kruti Dev runs are converted; English, tables, images and formatting are kept.",
+        "Kruti Dev runs are converted. English, tables, images and formatting are kept.",
         "Download the converted copy and check names and figures against the original."
       ]
     },
@@ -2079,7 +2079,7 @@
       "weeks": [
         {
           "title": "Week 1: accuracy",
-          "text": "Lessons 1-6 until each clears; no timed tests yet. Target 95%+ accuracy at any speed."
+          "text": "Lessons 1-6 until each clears. No timed tests yet. Target 95%+ accuracy at any speed."
         },
         {
           "title": "Week 2: the hard keys",
@@ -2116,7 +2116,7 @@
           "sample": "????",
           "see": "Question marks or odd accented letters (à¤­)",
           "cause": "the Hindi was saved or read in the wrong text encoding, and the letters were lost or mangled.",
-          "fix": "go back to the original and save it as UTF-8; question marks cannot be turned back into Hindi."
+          "fix": "go back to the original and save it as UTF-8. Question marks cannot be turned back into Hindi."
         },
         {
           "sample": "Hkkjr",
@@ -2149,17 +2149,17 @@
       "lede": "Installing a font takes a minute. The trouble usually comes after: Word not listing it, text still showing English letters, or a different Kruti Dev turning up. This guide covers the install and all three.",
       "body": [
         "<h2>Before you start</h2>",
-        "<p>You need the font file for Kruti Dev 010, usually named <code>Kruti_Dev_010.ttf</code>, <code>KRDEV010.TTF</code> or <code>K010.TTF</code>. MyKrutiDev does not distribute it, because we cannot confirm its licence terms; your office IT section, your typing institute or a reputable font library are the usual sources. Be wary of \"font packs\" that come as an .exe - a font is a .ttf or .otf file and never needs a program to install it.</p>",
+        "<p>You need the font file for Kruti Dev 010, usually named <code>Kruti_Dev_010.ttf</code>, <code>KRDEV010.TTF</code> or <code>K010.TTF</code>. MyKrutiDev does not distribute it, because we cannot confirm its licence terms, so ask your office IT section or your typing institute for it, or get it from a reputable font library. Be wary of \"font packs\" that come as an .exe - a font is a .ttf or .otf file and never needs a program to install it.</p>",
         "<p>Make sure it is the right one. The file name or its preview window should say <strong>Kruti Dev 010</strong> - not 011, 016, 055 or a \"Condensed\" version. The family shares most keys but not all, and a near miss is behind many \"a few letters come out wrong\" complaints.</p>",
         "{{diagram:install-steps}}",
         "<h2>Install it</h2>",
-        "<ol><li><strong>Unzip it first.</strong> Right-click the .zip and choose <strong>Extract All</strong>. Windows lets you open a zip like a folder, but it will not install a font from inside one.</li><li><strong>Install for all users.</strong> Right-click the .ttf and choose <strong>Install for all users</strong>; on Windows 11 it may be under <strong>Show more options</strong>. Without administrator rights, choose <strong>Install</strong> and the font will work for your account only.</li><li><strong>Or drag it in.</strong> Open <strong>Settings → Personalisation → Fonts</strong> and drop the file on the \"Drag and drop to install\" area. It does the same thing.</li><li><strong>Restart the programs that need it.</strong> Word, Excel, PageMaker and CorelDRAW read the font list when they start, so close every window of them and open them again.</li></ol>",
+        "<ol><li><strong>Unzip it first.</strong> Right-click the .zip and choose <strong>Extract All</strong>. Windows lets you open a zip like a folder, but it will not install a font from inside one.</li><li><strong>Install for all users.</strong> Right-click the .ttf and choose <strong>Install for all users</strong>. On Windows 11 it may be under <strong>Show more options</strong>. Without administrator rights, choose <strong>Install</strong> and the font will work for your account only.</li><li><strong>Or drag it in.</strong> Open <strong>Settings → Personalisation → Fonts</strong> and drop the file on the \"Drag and drop to install\" area. It does the same thing.</li><li><strong>Restart the programs that need it.</strong> Word, Excel, PageMaker and CorelDRAW read the font list when they start, so close every window of them and open them again.</li></ol>",
         "<h2>Check that it works</h2>",
         "<p>Open Word, choose <strong>Kruti Dev 010</strong> from the font list and type <code>Hkkjr</code>. If you see <span lang=\"hi\">भारत</span>, the font is installed and working. Now type <code>fganh</code>: you should get <span lang=\"hi\">हिंदी</span>. Notice that the <span lang=\"hi\">ि</span> sign is typed <em>before</em> its letter in Kruti Dev - that is how the typewriter did it.</p>",
         "<h2>When it does not appear or does not work</h2>",
         "<ul><li><strong>Not in the font list:</strong> Word was open during the install. Close all its windows, including any minimised to the taskbar, and reopen. Still missing? Open <code>C:\\Windows\\Fonts</code> and search for \"Kruti\". If nothing is there, the install never happened.</li><li><strong>\"Not a valid font file\":</strong> the download is damaged, or it is not a font at all. Get the file again from another source.</li><li><strong>Still English letters:</strong> the text is set in a font with another name - often a variant from the typist's computer. Select all, choose Kruti Dev 010 again, and compare.</li><li><strong>A few letters wrong:</strong> you have another member of the family. Remove it from the Fonts folder and install 010.</li></ul>",
         "<h2>On a Mac</h2>",
-        "<p>Double-click the .ttf. Font Book opens with a preview; press <strong>Install</strong>. If Font Book reports a problem with the file, it is usually a damaged download - the font itself installs normally on current macOS. Restart Word or Pages afterwards. Keynote and Pages treat Kruti Dev like any other font, but the text is still legacy text: a Mac without the font shows English letters, exactly as Windows does.</p>",
+        "<p>Double-click the .ttf. Font Book opens with a preview. Press <strong>Install</strong>. If Font Book reports a problem with the file, it is usually a damaged download - the font itself installs normally on current macOS. Restart Word or Pages afterwards. Keynote and Pages treat Kruti Dev like any other font, but the text is still legacy text: a Mac without the font shows English letters, exactly as Windows does.</p>",
         "<h2>Removing a wrong or old version</h2>",
         "<p>Two fonts with the same name confuse Word, and a wrong member of the family stays in use until it is removed. Open <code>C:\\Windows\\Fonts</code>, type \"Kruti\" in the search box, and look at what is there. Right-click anything that is not Kruti Dev 010 and you no longer need, and choose <strong>Delete</strong>. Then install 010 again and restart Word. If Windows says the font is in use, close all your programs first, or restart the computer and delete it before opening anything.</p>",
         "<h2>Sending Kruti Dev files to others</h2>",
@@ -2193,7 +2193,7 @@
         "<h2>Documents that mix English and Kruti Dev</h2>",
         "<p>Office letters often have English headings and Kruti Dev body text in the same file. The <a href=\"/?mode=file\">Word file converter</a> on this site changes only the text set in Kruti Dev and leaves everything in English fonts alone, so a mixed document comes out right without any sorting by hand. See <a href=\"/guides/convert-word-file-from-kruti-dev\">how to convert a whole Word file</a>.</p>",
         "<h2>Recognising Kruti Dev</h2>",
-        "<p>Once you know it, Kruti Dev is easy to spot: lots of <code>k</code> (the <span lang=\"hi\">ा</span> sign), <code>f</code> before consonants (the <span lang=\"hi\">ि</span> sign), and patterns like <code>dk</code> (<span lang=\"hi\">का</span>), <code>gS</code> (<span lang=\"hi\">है</span>) and <code>vkSj</code> (<span lang=\"hi\">और</span>). If you see boxes or question marks instead, that is a different problem - see <a href=\"/guides/hindi-text-shows-boxes-or-question-marks\">why Hindi shows boxes or question marks</a>. If it converts but many letters are wrong, the file may be in another legacy font such as Chanakya, which uses different keys; the <a href=\"/all-converters\">list of converters</a> shows what is supported.</p>",
+        "<p>Once you know it, Kruti Dev is easy to spot: lots of <code>k</code> (the <span lang=\"hi\">ा</span> sign), <code>f</code> before consonants (the <span lang=\"hi\">ि</span> sign), and patterns like <code>dk</code> (<span lang=\"hi\">का</span>), <code>gS</code> (<span lang=\"hi\">है</span>) and <code>vkSj</code> (<span lang=\"hi\">और</span>). If you see boxes or question marks instead, that is a different problem - see <a href=\"/guides/hindi-text-shows-boxes-or-question-marks\">why Hindi shows boxes or question marks</a>. If it converts but many letters are wrong, the file may be in another legacy font such as Chanakya, which uses different keys. The <a href=\"/all-converters\">list of converters</a> shows what is supported.</p>",
         "<h2>Stopping it happening again</h2>",
         "<ul><li>Send a PDF when the other person only needs to read the document.</li><li>Keep a Unicode copy of anything that will be emailed, uploaded or published.</li><li>When a Kruti Dev file must go out, tell the recipient the font: \"Kruti Dev 010\".</li></ul>"
       ]
@@ -2210,7 +2210,7 @@
         "{{diagram:storage-compare}}",
         "<p>Kruti Dev stores English key codes and relies on its font to draw them as Hindi. Unicode stores the Devanagari letters themselves, so any Hindi font - Mangal, Nirmala UI, Kokila, Noto Sans Devanagari - can show them, and any program can search, sort or spell-check them.</p>",
         "<h2>Side by side</h2>",
-        "<ul><li><strong>Opens correctly everywhere:</strong> Unicode does. Kruti Dev only where the font is installed.</li><li><strong>Phones, WhatsApp, email, Google Docs:</strong> Unicode works; Kruti Dev shows English letters.</li><li><strong>Search:</strong> searching a Unicode file for <span lang=\"hi\">भारत</span> finds it. In a Kruti Dev file you would have to search for <code>Hkkjr</code>.</li><li><strong>Websites, portals and e-Office:</strong> expect Unicode.</li><li><strong>Many typing exams, courts and district offices:</strong> still use Kruti Dev on the Remington layout.</li><li><strong>Printing:</strong> both print the same.</li></ul>",
+        "<ul><li><strong>Opens correctly everywhere:</strong> Unicode does. Kruti Dev only where the font is installed.</li><li><strong>Phones, WhatsApp, email, Google Docs:</strong> Unicode works, but Kruti Dev shows English letters.</li><li><strong>Search:</strong> searching a Unicode file for <span lang=\"hi\">भारत</span> finds it. In a Kruti Dev file you would have to search for <code>Hkkjr</code>.</li><li><strong>Websites, portals and e-Office:</strong> expect Unicode.</li><li><strong>Many typing exams, courts and district offices:</strong> still use Kruti Dev on the Remington layout.</li><li><strong>Printing:</strong> both print the same.</li></ul>",
         "<h2>What official guidance says</h2>",
         "<p>For years the central government's Department of Official Language has encouraged offices to use Unicode for Hindi, and national systems such as NIC's e-Office expect Unicode text. In practice adoption is uneven: many state departments, courts and tehsil offices still work from Kruti Dev templates, and many recruitment typing tests still ask for it. If your department has issued an instruction, follow it. If not, the rule below works.</p>",
         "<h2>A practical rule</h2>",
@@ -2220,7 +2220,7 @@
         "<h2>Moving an office to Unicode: a checklist</h2>",
         "<ol><li>List the templates that must stay Kruti Dev (a court format, an exam form) and leave those alone.</li><li>Convert the rest as they come up, and file the Unicode copy next to the original.</li><li>Check every converted document's names, figures and dates before it goes out.</li><li>Set Mangal or Nirmala UI as the Hindi font in Word's Normal template so new files start in Unicode.</li><li>Keep PDFs of anything that must look exactly as signed.</li></ol>",
         "<h2>Moving between them without damage</h2>",
-        "<p>Conversion is not a letter-for-letter swap. Kruti Dev types the <span lang=\"hi\">ि</span> sign before its consonant and the reph (<span lang=\"hi\">र्</span>) after its syllable; Unicode stores both the other way round. Split vowel signs and conjuncts such as <span lang=\"hi\">क्ष</span>, <span lang=\"hi\">त्र</span> and <span lang=\"hi\">द्ध</span> need care too. A careless converter produces text that looks nearly right and is wrong in exactly the words that matter: names and legal terms.</p>",
+        "<p>Conversion is not a letter-for-letter swap. Kruti Dev types the <span lang=\"hi\">ि</span> sign before its consonant and the reph (<span lang=\"hi\">र्</span>) after its syllable. Unicode stores both the other way round. Split vowel signs and conjuncts such as <span lang=\"hi\">क्ष</span>, <span lang=\"hi\">त्र</span> and <span lang=\"hi\">द्ध</span> need care too. A careless converter produces text that looks nearly right and is wrong in exactly the words that matter: names and legal terms.</p>",
         "<p>The converters on this site do this reordering and are tested on real documents: <a href=\"/\">Kruti Dev to Unicode</a>, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> and <a href=\"/kruti-dev-to-mangal\">Kruti Dev to Mangal</a>. They run in your browser, so draft orders and personal records are never uploaded.</p>"
       ]
     },
@@ -2235,14 +2235,14 @@
         "<p>A Word file in <strong>.docx</strong> format (or a plain .txt) typed in Kruti Dev, up to 20 MB. You do not need Kruti Dev installed, and nothing is uploaded: the file is opened and converted by your browser.</p>",
         "{{diagram:docx-flow}}",
         "<h2>Step by step</h2>",
-        "<ol><li>Open <a href=\"/?mode=file\">Kruti Dev to Unicode</a> and choose the <strong>Upload Word file</strong> tab above the text boxes.</li><li>Drag your .docx onto the box, or press <strong>Choose file</strong>.</li><li>Choose the Hindi font the converted file should use.</li><li>Press <strong>Download converted file</strong>. You get a new .docx; your original is not changed.</li></ol>",
+        "<ol><li>Open <a href=\"/?mode=file\">Kruti Dev to Unicode</a> and choose the <strong>Upload Word file</strong> tab above the text boxes.</li><li>Drag your .docx onto the box, or press <strong>Choose file</strong>.</li><li>Choose the Hindi font the converted file should use.</li><li>Press <strong>Download converted file</strong>. You get a new .docx and your original is not changed.</li></ol>",
         "<p>The summary tells you how many paragraphs and tables were converted. If part of the file was already Unicode, it says so and leaves that part as it is.</p>",
         "<h2>What is kept and what changes</h2>",
         "<ul><li><strong>Changes:</strong> text in Kruti Dev becomes Unicode Hindi, with the matras and reph put in Unicode order.</li><li><strong>Kept:</strong> English text, numbers, tables, images, headers and footers, bold, italic, sizes, alignment and page layout.</li><li><strong>Font:</strong> converted text gets the Unicode font you chose, so it shows correctly on any computer.</li></ul>",
         "<h2>Old .doc files, PDFs and scans</h2>",
-        "<ul><li><strong>.doc (Word 97-2003):</strong> open it in Word and use <strong>File → Save As → Word Document (.docx)</strong>, then convert the .docx. The same goes for password-protected files: remove the password first.</li><li><strong>PDF:</strong> text copied from a PDF typed in Kruti Dev is usually still Kruti Dev keys, so it can be pasted into the converter - but PDFs often break lines and spacing. If you have the original .docx, use that instead.</li><li><strong>Scanned pages:</strong> a scan is a picture, not text. It needs Hindi OCR first; a converter cannot read it.</li></ul>",
+        "<ul><li><strong>.doc (Word 97-2003):</strong> open it in Word and use <strong>File → Save As → Word Document (.docx)</strong>, then convert the .docx. The same goes for password-protected files: remove the password first.</li><li><strong>PDF:</strong> text copied from a PDF typed in Kruti Dev is usually still Kruti Dev keys, so it can be pasted into the converter - but PDFs often break lines and spacing. If you have the original .docx, use that instead.</li><li><strong>Scanned pages:</strong> a scan is a picture, not text. It needs Hindi OCR first. A converter cannot read it.</li></ul>",
         "<h2>Check before you rely on it</h2>",
-        "<p>Read the converted file against the original, and give names, figures and dates special attention. Two things are worth knowing. English detection is a best guess - Kruti Dev stores Hindi as English letters, so an unusual English name can be converted by mistake. And a file typed in another font (Chanakya, or a Kruti Dev variant other than 010) will convert with some letters wrong; check the font name in Word before you start.</p>",
+        "<p>Read the converted file against the original, and give names, figures and dates special attention. Two things are worth knowing. English detection is a best guess - Kruti Dev stores Hindi as English letters, so an unusual English name can be converted by mistake. And a file typed in another font (Chanakya, or a Kruti Dev variant other than 010) will convert with some letters wrong, so check the font name in Word before you start.</p>",
         "<h2>A five-minute check of the result</h2>",
         "<ol><li><strong>Page count.</strong> The converted file should have about the same number of pages. A big difference usually means a font substitution, not lost text.</li><li><strong>First lines of each page.</strong> Read them against the original.</li><li><strong>Anything left unconverted.</strong> Kruti Dev text that was not converted still reads as English letters. Use Word's Find (Ctrl+F) for common Kruti Dev words such as <code>dk</code>, <code>gS</code> and <code>vkSj</code>: in a converted file they should not appear.</li><li><strong>Names, numbers and dates,</strong> one by one.</li></ol>",
         "<h2>Converting many files</h2>",
@@ -2268,13 +2268,13 @@
         "<p>A 10-minute test is a different skill from a 1-minute burst. Typists who are comfortable for one minute are often finished by minute eight. In the last weeks, sit at least one test a day at your exam's full length - the tests here run from 1 minute to 2 hours, and the clock can be paused if you are interrupted.</p>",
         "{{diagram:practice-plan}}",
         "<h2>5. Little and often</h2>",
-        "<p>Thirty minutes every day beats four hours on a Sunday. Muscle memory settles between sessions, not during them, so daily practice compounds in a way that weekend marathons do not. Log each result in the <a href=\"/hindi-typing-progress-log\">progress log</a>; seeing the line rise is what keeps most people going.</p>",
+        "<p>Thirty minutes every day beats four hours on a Sunday. Muscle memory settles between sessions, not during them, so daily practice compounds in a way that weekend marathons do not. Log each result in the <a href=\"/hindi-typing-progress-log\">progress log</a>. Seeing the line rise is what keeps most people going.</p>",
         "<h2>6. Rehearse exam conditions</h2>",
-        "<ul><li>Use the same layout as the exam. Check the notification: Kruti Dev means Remington; Mangal usually means InScript.</li><li>Practise with and without correcting errors, since exams differ on backspace.</li><li>Sit on a chair and at a desk like the exam centre's, with feet flat, wrists level and the screen at eye height.</li><li>On the day, read the first line before starting the clock, then keep going: a missed word costs less than a stopped rhythm.</li></ul>",
+        "<ul><li>Use the same layout as the exam. Check the notification: Kruti Dev means Remington and Mangal usually means InScript.</li><li>Practise with and without correcting errors, since exams differ on backspace.</li><li>Sit on a chair and at a desk like the exam centre's, with feet flat, wrists level and the screen at eye height.</li><li>On the day, read the first line before starting the clock, then keep going: a missed word costs less than a stopped rhythm.</li></ul>",
         "<h2>7. Set up your desk once</h2>",
         "<p>Speed depends on comfort more than people expect. Sit so your elbows are at the height of the keyboard and bent at a right angle, keep your wrists level rather than resting on the edge of the desk, and put the screen at eye height so you are not looking down all session. Rest your fingers lightly on the home row - <code>a s d f</code> and <code>j k l ;</code> - and let them return there after every key. Take a short break every 20-30 minutes of practice.</p>",
         "<h2>Myths that cost candidates time</h2>",
-        "<ul><li><strong>\"Type fast from day one.\"</strong> Speed practised with errors turns the errors into habits.</li><li><strong>\"Only long passages matter.\"</strong> Short, focused drills on your weak keys raise speed faster; long tests build stamina. You need both.</li><li><strong>\"The keyboard layout does not matter.\"</strong> It is the one thing you cannot change on the day. Learn the one your exam names.</li><li><strong>\"Hindi WPM is just English WPM.\"</strong> In Kruti Dev many letters take two or three keys, so the same WPM means fewer Hindi words. Judge your progress by net WPM on Hindi passages.</li></ul>",
+        "<ul><li><strong>\"Type fast from day one.\"</strong> Speed practised with errors turns the errors into habits.</li><li><strong>\"Only long passages matter.\"</strong> Short, focused drills on your weak keys raise speed faster, while long tests build stamina. You need both.</li><li><strong>\"The keyboard layout does not matter.\"</strong> It is the one thing you cannot change on the day. Learn the one your exam names.</li><li><strong>\"Hindi WPM is just English WPM.\"</strong> In Kruti Dev many letters take two or three keys, so the same WPM means fewer Hindi words. Judge your progress by net WPM on Hindi passages.</li></ul>",
         "<p>When you are ready, time yourself on the <a href=\"/hindi-typing-test-for-exams\">exam typing test</a>, which explains how SSC, CPCT and court exams count speed.</p>"
       ]
     },
@@ -2283,21 +2283,21 @@
       "h1": "Remington vs InScript: Which Hindi Keyboard Layout Should You Learn?",
       "title": "Remington vs InScript Hindi Keyboard | Differences and Which to Learn",
       "description": "Remington (Kruti Dev) and InScript (Unicode) put Hindi letters on different keys. How they differ, which exams and offices use each, and which one to learn.",
-      "lede": "Hindi has two main keyboard layouts, and practising the wrong one wastes months. Remington is the typewriter layout behind Kruti Dev; InScript is the standard layout built into Windows, Android and every Unicode system.",
+      "lede": "Hindi has two main keyboard layouts, and practising the wrong one wastes months. Remington is the typewriter layout behind Kruti Dev. InScript is the standard layout built into Windows, Android and every Unicode system.",
       "body": [
         "<h2>Where they came from</h2>",
         "<p><strong>Remington</strong> is the layout of the Hindi typewriter. When offices moved to computers, fonts such as Kruti Dev 010 and DevLys kept the same keys, so typists did not have to relearn anything. <strong>InScript</strong> was designed later by the Government of India for computers. It arranges letters logically - vowels on the left, consonants on the right - and it types real Unicode Hindi, with any Hindi font.</p>",
         "{{diagram:home-row-compare}}",
         "<h2>How they differ in practice</h2>",
-        "<ul><li><strong>Letter positions:</strong> most letters are on different keys. On InScript <code>k</code> is <span lang=\"hi\">क</span>; on Remington it is the <span lang=\"hi\">ा</span> sign.</li><li><strong>The <span lang=\"hi\">ि</span> sign:</strong> on Remington you type it <em>before</em> the consonant, as it is drawn; on InScript you type it <em>after</em>, as it is pronounced.</li><li><strong>What you get:</strong> classic Remington with Kruti Dev produces legacy text that needs the font; InScript produces Unicode. Unicode versions of the Remington layout also exist, and some exams offer one.</li><li><strong>Learning curve:</strong> InScript's logical grouping is easier for a beginner; Remington is what typing institutes and older typists know.</li></ul>",
+        "<ul><li><strong>Letter positions:</strong> most letters are on different keys. On InScript <code>k</code> is <span lang=\"hi\">क</span>, but on Remington it is the <span lang=\"hi\">ा</span> sign.</li><li><strong>The <span lang=\"hi\">ि</span> sign:</strong> on Remington you type it <em>before</em> the consonant, as it is drawn. On InScript you type it <em>after</em>, as it is pronounced.</li><li><strong>What you get:</strong> classic Remington with Kruti Dev produces legacy text that needs the font. InScript produces Unicode. Unicode versions of the Remington layout also exist, and some exams offer one.</li><li><strong>Learning curve:</strong> InScript's logical grouping is easier for a beginner, but Remington is what typing institutes and older typists know.</li></ul>",
         "<h2>Which exams and offices use which</h2>",
-        "<p>Many court, district and state clerical typing tests still set Hindi typing in Kruti Dev on Remington. SSC and CPCT let candidates choose, and name the options in the notification. Central government offices, e-Office and anything online work in Unicode, where InScript is native. Your notification or your office manual is the final word; read it before you start practising.</p>",
+        "<p>Many court, district and state clerical typing tests still set Hindi typing in Kruti Dev on Remington. SSC and CPCT let candidates choose, and name the options in the notification. Central government offices, e-Office and anything online work in Unicode, where InScript is native. Your notification or your office manual is the final word, so read it before you start practising.</p>",
         "<h2>Which one should you learn?</h2>",
         "<ul><li><strong>Preparing for an exam</strong> that names Kruti Dev or Remington: learn Remington. The <a href=\"/hindi-typing-test\">typing tutor</a> teaches it lesson by lesson.</li><li><strong>Starting from scratch for office or everyday work:</strong> InScript is the better long-term choice, because it is built into every modern system and produces Unicode directly.</li><li><strong>Already fast on Remington:</strong> stay with it. Type on the <a href=\"/remington-hindi-keyboard\">Remington Hindi keyboard</a> page to get Unicode output, or convert your Kruti Dev text with <a href=\"/\">Kruti Dev to Unicode</a>.</li></ul>",
         "<h2>Switching from one to the other</h2>",
         "<p>Expect a few weeks of slow typing. Fingers trained on one layout keep reaching for the old keys, especially under time pressure, and speed drops before it recovers. Three things help:</p><ul><li><strong>Switch completely.</strong> Using both layouts during the same weeks slows learning on each.</li><li><strong>Start with the home row</strong> and build outwards, exactly as you did the first time - the tutor's lesson order works for relearning too.</li><li><strong>Keep a chart beside the screen</strong> rather than looking at the keyboard, so the new positions go into memory instead of your eyes.</li></ul>",
         "<h2>Remington that types Unicode</h2>",
-        "<p>Some exam software and input tools offer a Unicode version of the Remington layout; CPCT, for example, lists a Remington option next to InScript. The main letters sit where a Kruti Dev typist expects them, but a few symbols and conjuncts can differ between versions, so check the exam's own key chart for the keys you use most. Practising on Kruti Dev still trains the right muscle memory for the letters themselves.</p>",
+        "<p>Some exam software and input tools offer a Unicode version of the Remington layout. CPCT, for example, lists a Remington option next to InScript. The main letters sit where a Kruti Dev typist expects them, but a few symbols and conjuncts can differ between versions, so check the exam's own key chart for the keys you use most. Practising on Kruti Dev still trains the right muscle memory for the letters themselves.</p>",
         "<h2>Trying both</h2>",
         "<p>To try InScript, add Hindi in Windows <strong>Settings → Time &amp; language → Language &amp; region</strong> and switch with <strong>Windows key + Space</strong>. To see the whole Remington layout, print the one-page <a href=\"/kruti-dev-keyboard\">Kruti Dev keyboard chart</a>. And if you only need a few words of Hindi, neither layout is necessary: <a href=\"/english-to-hindi-typing\">English to Hindi typing</a> or the <a href=\"/hindi-keyboard\">on-screen Hindi keyboard</a> will do.</p>"
       ]
@@ -2314,17 +2314,17 @@
         "<p>Boxes (sometimes called \"tofu\") mean the text is fine - it is real Unicode Hindi - but the font on it has no Devanagari letters. Arial, Calibri and Times New Roman are common culprits. Select the text and choose a Hindi font: Mangal, Nirmala UI, Kokila or Aparajita on Windows, Noto Sans Devanagari anywhere. In Word, set it under <strong>Complex scripts</strong> in the Font dialog (Ctrl+D) to change a whole document at once.</p>",
         "<p>On very old systems, such as Windows XP without Indic support, Hindi can show as boxes whatever the font. The fix there is to enable complex script support, or to use a newer device.</p>",
         "<h2>Question marks: the letters were lost</h2>",
-        "<p>Question marks mean the Hindi was saved or sent through something that could not hold it - a text file saved in \"ANSI\" instead of UTF-8, an old database, or a form that strips non-English characters. The Hindi was replaced by <code>?</code> at that point, and <strong>it cannot be recovered from the question marks</strong>. Go back to the source, and save or export it as <strong>UTF-8</strong>: in Notepad, <strong>File → Save As → Encoding: UTF-8</strong>; in Excel, <strong>CSV UTF-8</strong>.</p>",
+        "<p>Question marks mean the Hindi was saved or sent through something that could not hold it - a text file saved in \"ANSI\" instead of UTF-8, an old database, or a form that strips non-English characters. The Hindi was replaced by <code>?</code> at that point, and <strong>it cannot be recovered from the question marks</strong>. Go back to the source, and save or export it as <strong>UTF-8</strong>: in Notepad, <strong>File → Save As → Encoding: UTF-8</strong>. In Excel, choose <strong>CSV UTF-8</strong>.</p>",
         "<h2>Strange accented letters: the right bytes read the wrong way</h2>",
-        "<p>Text like <code>à¤­à¤¾à¤°à¤¤</code> is UTF-8 Hindi being read as a Western encoding. Nothing is lost. Open the file again and choose UTF-8: in Excel, use <strong>Data → From Text/CSV</strong> and pick <strong>65001: Unicode (UTF-8)</strong>; in a browser or email program, set the text encoding to UTF-8.</p>",
+        "<p>Text like <code>à¤­à¤¾à¤°à¤¤</code> is UTF-8 Hindi being read as a Western encoding. Nothing is lost. Open the file again and choose UTF-8: in Excel, use <strong>Data → From Text/CSV</strong> and pick <strong>65001: Unicode (UTF-8)</strong>. In a browser or email program, set the text encoding to UTF-8.</p>",
         "<h2>English letters: it is Kruti Dev</h2>",
         "<p>Letters like <code>Hkkjr</code> or <code>fgUnh</code> are not an encoding problem at all. The text was typed in the Kruti Dev font, which stores Hindi as English key codes, and the font is missing. Install <a href=\"/kruti-dev-010-font\">Kruti Dev 010</a>, or convert the text to Unicode with <a href=\"/\">Kruti Dev to Unicode</a>. <a href=\"/guides/kruti-dev-text-shows-english-letters\">Why Kruti Dev shows English letters</a> explains it in full.</p>",
         "<h2>In Excel and CSV files</h2>",
         "<p>Double-clicking a CSV file makes Excel guess its encoding, and it often guesses wrong for Hindi, giving accented nonsense. Open Excel first, then use <strong>Data → From Text/CSV</strong>, choose <strong>65001: Unicode (UTF-8)</strong> as the file origin, and load. When saving a sheet with Hindi as CSV, choose <strong>CSV UTF-8 (Comma delimited)</strong>, not plain CSV, or the Hindi will become question marks.</p>",
         "<h2>For website and form owners</h2>",
-        "<p>If Hindi entered in your own website or form comes back as question marks, the page or the database is not using UTF-8. The page needs <code>&lt;meta charset=\"utf-8\"&gt;</code>, and a MySQL database needs the <code>utf8mb4</code> character set on its tables and connection. Data already saved as question marks cannot be repaired; fix the setting and collect it again.</p>",
+        "<p>If Hindi entered in your own website or form comes back as question marks, the page or the database is not using UTF-8. The page needs <code>&lt;meta charset=\"utf-8\"&gt;</code>, and a MySQL database needs the <code>utf8mb4</code> character set on its tables and connection. Data already saved as question marks cannot be repaired. Fix the setting and collect it again.</p>",
         "<h2>On phones and in apps</h2>",
-        "<p>Modern Android and iPhone devices show Unicode Hindi out of the box. If Hindi shows as boxes in one app only, that app is using its own font; update it. If Kruti Dev text reaches a phone, it will always show as English letters, because phones cannot install Kruti Dev - send Unicode instead.</p>",
+        "<p>Modern Android and iPhone devices show Unicode Hindi out of the box. If Hindi shows as boxes in one app only, that app is using its own font, so update it. If Kruti Dev text reaches a phone, it will always show as English letters, because phones cannot install Kruti Dev - send Unicode instead.</p>",
         "<h2>Preventing it</h2>",
         "<ul><li>Type new Hindi in Unicode, with a Unicode font, as described in <a href=\"/how-to-type-hindi-in-ms-word\">how to type Hindi in MS Word</a>.</li><li>Save text and CSV files as UTF-8.</li><li>Before a document goes out, open it on another computer or phone and check that the Hindi reads correctly.</li></ul>"
       ]
@@ -2350,9 +2350,9 @@
         "<h2>Signs worth learning early</h2>",
         "<ul><li><strong>Nukta</strong> (the dot under <span lang=\"hi\">ड़</span>, <span lang=\"hi\">ज़</span>, <span lang=\"hi\">फ़</span>) is <code>+</code>, typed after the letter: <span lang=\"hi\">ड़</span> is <code>M+</code>.</li><li><strong>Anusvara</strong> (<span lang=\"hi\">ं</span>) is <code>a</code>, typed after the syllable: <span lang=\"hi\">गंगा</span> is <code>xaxk</code>.</li><li><strong>Visarga</strong> (<span lang=\"hi\">ः</span>) is <code>%</code>: <span lang=\"hi\">दुःख</span> is <code>nq%[k</code>.</li><li><strong>The full stop</strong> <span lang=\"hi\">।</span> is <code>A</code> (Shift + a).</li><li><strong>Chandrabindu</strong> (<span lang=\"hi\">ँ</span>) has no key on a normal keyboard. Hold Alt and type <code>0161</code> on the number pad: <span lang=\"hi\">चाँद</span> is <code>pk¡n</code>.</li></ul>",
         "<h2>Mistakes almost everyone makes</h2>",
-        "<ul><li>Typing <span lang=\"hi\">ि</span> after the consonant, the way it is spoken. The sign then lands on the next letter.</li><li>Typing the reph before the syllable. In Kruti Dev it always comes last: <span lang=\"hi\">कार्य</span> is <code>dk;Z</code>.</li><li>Using the halant key where a half-letter key exists. <code>D</code> gives a proper half <span lang=\"hi\">क्</span>; <code>d~</code> gives <span lang=\"hi\">क</span> with a visible halant, which looks wrong in print.</li><li>Leaving Caps Lock on. Every capital is a different Hindi letter.</li></ul>",
+        "<ul><li>Typing <span lang=\"hi\">ि</span> after the consonant, the way it is spoken. The sign then lands on the next letter.</li><li>Typing the reph before the syllable. In Kruti Dev it always comes last: <span lang=\"hi\">कार्य</span> is <code>dk;Z</code>.</li><li>Using the halant key where a half-letter key exists. <code>D</code> gives a proper half <span lang=\"hi\">क्</span>, while <code>d~</code> gives <span lang=\"hi\">क</span> with a visible halant, which looks wrong in print.</li><li>Leaving Caps Lock on. Every capital is a different Hindi letter.</li></ul>",
         "<h2>Why these rules matter when converting</h2>",
-        "<p>Unicode stores Hindi in the order it is spoken: consonant, then vowel sign; the reph as a र with a halant before its syllable. A Kruti Dev to Unicode converter has to move every ि and every reph to its Unicode position, and rebuild each two-key letter as one character. The converters on this site do exactly that, and the typing tutor uses the same rules to check your keystrokes - so what the tutor teaches and what the converters read are the same thing.</p>",
+        "<p>Unicode stores Hindi in the order it is spoken: consonant, then vowel sign, and the reph as a र with a halant before its syllable. A Kruti Dev to Unicode converter has to move every ि and every reph to its Unicode position, and rebuild each two-key letter as one character. The converters on this site do exactly that, and the typing tutor uses the same rules to check your keystrokes - so what the tutor teaches and what the converters read are the same thing.</p>",
         "<h2>Practising them</h2>",
         "<p>The <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a> lists twenty signs and conjuncts with their exact keys, and prints on one page. The <a href=\"/hindi-typing-test\">typing tutor</a> drills them in lessons 6 to 8. And the <a href=\"/remington-hindi-keyboard\">Remington Hindi keyboard</a> lets you type any word and see its Unicode immediately.</p>"
       ]

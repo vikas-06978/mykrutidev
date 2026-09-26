@@ -209,6 +209,19 @@ describe('code examples and Unicode output survive translation untouched', () =>
     assert.equal(hi.groups.Chanakya, 'चाणक्य');
   });
 
+  test('no semicolons in the prose, in either language', () => {
+    // The copy uses full stops, commas and "and"/"but" instead. A ; inside
+    // <code> is a Kruti Dev key (dk;Z), and the home-row lesson lists the ; key.
+    const KEYS = new Set(['tutor.levels.home.focus']);
+    const prose = (s) => s.replace(/<code[^>]*>[\s\S]*?<\/code>|&[a-z#0-9]+;|<[^>]+>/gi, '');
+    for (const lang of LOCALES) {
+      for (const key of flatKeys(DICTS[lang])) {
+        if (KEYS.has(key)) continue;
+        assert.doesNotMatch(prose(raw(lang, key)), /;/, `${lang}: ${key} has a semicolon`);
+      }
+    }
+  });
+
   test('the brand and file types are never translated', () => {
     for (const key of flatKeys(en)) {
       for (const name of ['MyKrutiDev', '.docx', '.txt']) {
