@@ -43,6 +43,10 @@
    of the file for why it is not scoped to either. */
 @import './converter.css';
 
+/* "Paste text" / "Upload Word file" tabs above the Kruti Dev <-> Unicode
+   converters (ConvertModes.astro). */
+@import './convert-modes.css';
+
 /* The typing test and the on-screen keyboard. Reuses the converter's buttons
    and segmented toggle; adds only the highlighted passage, the stat row and
    the key caps. */

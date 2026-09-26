@@ -11,9 +11,11 @@ import { langOf, useT, raw } from '../i18n/index.js';
 
 interface Props {
   direction: 'to-unicode' | 'to-kruti';
+  /** Inside ConvertModes' "Upload Word file" tab: no top margin of its own. */
+  embedded?: boolean;
 }
 
-const { direction } = Astro.props;
+const { direction, embedded = false } = Astro.props;
 const lang = langOf(Astro.url);
 const { t, render } = useT(lang);
 // Every doc.* string, for the script: errors and the result summary are
@@ -25,7 +27,7 @@ const id = `doc-${direction}`;
 
 <section
   id="convert-document"
-  class="doc card mt-8 scroll-mt-4"
+  class:list={['doc card scroll-mt-4', !embedded && 'mt-8']}
   data-doc-converter
   data-direction={direction}
   data-i18n={JSON.stringify(strings)}
@@ -289,6 +291,13 @@ const id = `doc-${direction}`;
     drop.addEventListener('drop', (e) => {
       e.preventDefault();
       const f = e.dataTransfer?.files?.[0];
+      if (f) void handle(f);
+    });
+
+    // A file dropped anywhere on the page (ConvertModes' page-wide drop)
+    // arrives here, and goes through exactly the same checks and conversion.
+    root.addEventListener('mkd:doc-file', (e) => {
+      const f = (e as CustomEvent<File>).detail;
       if (f) void handle(f);
     });
   }

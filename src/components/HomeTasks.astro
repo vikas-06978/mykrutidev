@@ -9,15 +9,17 @@ import { langOf, useT } from '../i18n/index.js';
 
 const { t, raw, render, path: to } = useT(langOf(Astro.url));
 
-// Where each card goes. The first and last are on this page (the converter
-// at the top, the document converter below it).
+// Where each card goes. The first two are the two tabs of the converter at
+// the top of this page (ConvertModes.astro switches the tab in place for a
+// ?mode= link to the page you are on); Word files come second because a whole
+// document is what many visitors actually have.
 const TASKS = [
-  ['krutiToUnicode', '#tool'],
+  ['krutiToUnicode', '/', 'text'],
+  ['document', '/', 'file'],
   ['unicodeToKruti', '/unicode-to-kruti-dev'],
   ['englishTyping', '/english-to-hindi-typing'],
   ['keyboard', '/hindi-keyboard'],
   ['tutor', '/hindi-typing-test'],
-  ['document', '#convert-document'],
   ['printables', '/kruti-dev-keyboard'],
 ] as const;
 const why: string[] = raw('home.why');
@@ -27,10 +29,10 @@ const why: string[] = raw('home.why');
   <h2 id="tasks-heading" class="text-xl">{t('guide.tasksHeading')}</h2>
   <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     {
-      TASKS.map(([key, href]) => (
+      TASKS.map(([key, href, mode]: readonly string[]) => (
         <li>
           <a
-            href={href.startsWith('#') ? href : to(href)}
+            href={mode ? `${to(href)}?mode=${mode}` : to(href)}
             class="block h-full card p-4 no-underline transition-colors hover:border-brick"
           >
             <span class="block font-semibold text-ink" set:html={render(t(`home.tasks.${key}.title`))} />

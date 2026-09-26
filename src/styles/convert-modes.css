@@ -1,0 +1,139 @@
+/* "Paste text" / "Upload Word file" tabs above the converter
+   (ConvertModes.astro).
+
+   Which tab shows is read from <html data-cv-mode>, set by an inline script
+   before the tabs are drawn - never from aria-selected, which the module
+   script only syncs later. So an Upload-mode page paints as Upload from the
+   first frame and nothing jumps. No attribute (no script) means Paste text.
+
+   The tab row is 40px plus an 8px gap: 48px above the text boxes. No
+   transitions here, so a theme switch starts none (themes.css). */
+
+.cm-tabs {
+  display: flex;
+  gap: 0.375rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cm-tab {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-chrome);
+  background: var(--color-inset);
+  color: var(--color-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cm-tab:hover {
+  border-color: var(--color-hairline);
+  color: var(--color-ink);
+}
+.cm-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cm-icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The chosen tab: a card-coloured tab with the accent under it. */
+html:not([data-cv-mode='file']) .cm-tab[data-mode='text'],
+html[data-cv-mode='file'] .cm-tab[data-mode='file'] {
+  border-color: var(--color-hairline);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: inset 0 -2px 0 var(--color-brick);
+}
+
+.cm-new {
+  flex-shrink: 0;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: 999px;
+  background: var(--color-brick);
+  color: var(--color-on-brick);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Only one panel is ever in the page's layout. */
+html[data-cv-mode='file'] .cm-panel[data-mode-panel='text'],
+html:not([data-cv-mode='file']) .cm-panel[data-mode-panel='file'] {
+  display: none;
+}
+
+.cm-hint {
+  margin-top: 0.5rem;
+  color: var(--color-mute);
+  font-size: 0.8125rem;
+}
+
+/* A file dragged over the page. */
+.cm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: none;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  /* The page underneath keeps getting the drag events, so the drop zone
+     itself still works and leaving the window is seen. */
+  pointer-events: none;
+}
+.cm-overlay[data-on='true'] {
+  display: grid;
+}
+.cm-overlay-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(28rem, 100%);
+  padding: 2.5rem 1.5rem;
+  border: 2px dashed var(--color-brick);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-align: center;
+}
+.cm-overlay-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-brick);
+}
+.cm-overlay-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.cm-overlay-sub {
+  color: var(--color-body);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 400px) {
+  .cm-tab {
+    gap: 0.3125rem;
+    padding: 0 0.625rem;
+  }
+}
+
+@media print {
+  .cm-tabs,
+  .cm-hint,
+  .cm-overlay {
+    display: none !important;
+  }
+}

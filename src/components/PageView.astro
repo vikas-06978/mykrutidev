@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Converter from './Converter.astro';
-import DocumentConverter from './DocumentConverter.astro';
+import ConvertModes from './ConvertModes.astro';
 import Transliterator from './Transliterator.astro';
 import HindiKeyboard from './HindiKeyboard.astro';
 import TypingTutor from './TypingTutor.astro';
@@ -40,7 +40,7 @@ const page = getPage(path);
 if (!page) throw new Error(`No routes.js entry for ${path}`);
 
 const lang = langOf(Astro.url);
-const { t, maybe, render } = useT(lang);
+const { t, maybe, render, path: to } = useT(lang);
 const text = (field: string) => t(`pages.${path}.${field}`);
 
 const live = isLive(page);
@@ -135,7 +135,14 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {
       live && page.from && page.to && (
         <div class="mt-6 scroll-mt-4" id="tool">
-          <Converter from={page.from} to={page.to} reverse={reverse} />
+          {page.documents && docDirection ? (
+            // Paste text / Upload Word file, as tabs in the same place.
+            <ConvertModes direction={docDirection} path={path}>
+              <Converter from={page.from} to={page.to} reverse={reverse} />
+            </ConvertModes>
+          ) : (
+            <Converter from={page.from} to={page.to} reverse={reverse} />
+          )}
         </div>
       )
     }
@@ -162,7 +169,13 @@ const betaNote = maybe(`pages.${path}.betaNote`);
 
     {live && (path === '/hindi-typing-test' || path === '/hindi-keyboard') && <PrintablesList />}
 
-    {live && page.documents && docDirection && <DocumentConverter direction={docDirection} />}
+    {/* The document converter now lives in the Upload tab at the top; here, where
+        it used to be, a link back up to it. */}
+    {
+      live && page.documents && docDirection && (
+        <p class="mt-8 text-sm text-body" set:html={render(t('modes.back', { href: `${to(path)}?mode=file` }))} />
+      )
+    }
 
     {path === '/' && <HomeTasks />}
 

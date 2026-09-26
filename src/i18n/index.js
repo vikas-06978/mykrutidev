@@ -127,10 +127,12 @@ export function localizeHtml(html, lang) {
   return html.replace(/<a\b[^>]*>/g, (tag) =>
     tag.replace(/(\shref=")(\/[^"]*)"/, (m, pre, href) => {
       if (href.startsWith('//') || NOT_A_PAGE.test(href)) return m;
-      const [p, hash = ''] = href.split('#');
+      // A ?query (like ?mode=file) and a #hash ride along after the path.
+      const [beforeHash, hash = ''] = href.split('#');
+      const [p, query = ''] = beforeHash.split('?');
       const target = splitLocale(p);
       const to = /\sdata-lang-switch\b/.test(tag) || target.lang !== DEFAULT_LOCALE ? target.lang : lang;
-      return `${pre}${localizePath(target.path, to)}${hash ? `#${hash}` : ''}"`;
+      return `${pre}${localizePath(target.path, to)}${query ? `?${query}` : ''}${hash ? `#${hash}` : ''}"`;
     }),
   );
 }

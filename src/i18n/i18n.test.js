@@ -379,6 +379,15 @@ describe('paths', () => {
     }
   });
 
+  test('localizeHtml keeps a ?query (and a #hash) after the localized, slashed path', () => {
+    assert.equal(localizeHtml('<a href="/?mode=file">a</a>', 'hi'), '<a href="/hi/?mode=file">a</a>');
+    assert.equal(localizeHtml('<a href="/?mode=file">a</a>', 'en'), '<a href="/?mode=file">a</a>');
+    assert.equal(
+      localizeHtml('<a href="/unicode-to-kruti-dev?mode=file#tool">a</a>', 'hi'),
+      '<a href="/hi/unicode-to-kruti-dev/?mode=file#tool">a</a>',
+    );
+  });
+
   test('localizeHtml moves page links to /hi, adds the trailing slash, and leaves files alone', () => {
     const html =
       '<a href="/">a</a> <a href="/x#faq">b</a> <a href="/hi/y">c</a> <a href="https://e.com/">d</a>' +
