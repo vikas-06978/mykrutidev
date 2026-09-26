@@ -149,6 +149,7 @@
     "download": "Download converted file",
     "downloadKrutiDocx": "Download as Word (.docx) with Kruti Dev 010",
     "saveAs": "Please open it in Word and Save As → Word Document (.docx).",
+    "pdf": "PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.",
     "passwordHint": "If the document is password-protected, remove the password first.",
     "tooLarge": "This file is larger than 20 MB. Please split it into smaller files and convert them one at a time.",
     "onlyTypes": "Only .docx (Word) and .txt files can be converted here.",

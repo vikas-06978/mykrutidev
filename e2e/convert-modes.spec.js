@@ -280,8 +280,23 @@ test.describe('drag a file anywhere', () => {
     await expect(error).toHaveText('Only .docx (Word) and .txt files can be converted here.');
     // A PDF gets the more useful advice checkFile() gives it.
     await dragFileOnto(page, 'main', { name: 'scan.pdf', type: 'application/pdf', base64: btoa('%PDF-1.4 x') });
-    await expect(error).toHaveText('Please open it in Word and Save As → Word Document (.docx).');
+    await expect(error).toHaveText(
+      'PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.',
+    );
     await expect(page.locator('[data-doc-converter] [data-role="result"]')).toBeHidden();
+  });
+
+  test('on a Hindi page a PDF gets the same steps in Hindi', async ({ page }) => {
+    await page.goto('/hi/kruti-dev-to-mangal/');
+    await dragFileOnto(
+      page,
+      'main',
+      { name: 'notice.pdf', type: 'application/pdf', base64: btoa('%PDF-1.4 x') },
+      'कन्वर्ट करने के लिए फ़ाइल यहाँ छोड़ें',
+    );
+    await expect(page.locator('[data-doc-converter] [data-role="error"]')).toHaveText(
+      'PDF सीधे नहीं बदली जा सकती। PDF को Word में खोलें (File → Open), Word उसे डॉक्यूमेंट में बदल देगा। फिर Save As → Word Document (.docx) चुनें और वह फ़ाइल यहाँ अपलोड करें।',
+    );
   });
 
   test('dragging text inside the page shows no overlay', async ({ page }) => {
