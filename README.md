@@ -95,6 +95,7 @@ GitHub runs the same steps on every push and pull request
 | `npm run admin-labels` | Regenerate `server/adminLabels.js` after changing the feedback labels in `en.json` |
 | `npx playwright test` | Browser tests on the built site |
 | `npm run pdfs` / `npm run og` | Redraw the printable PDFs / the share images |
+| `npm run favicon` | Redraw the browser-tab icon (`public/favicon.svg` and `.ico`) |
 | `npm run i18n:review` | Regenerate `docs/TRANSLATIONS-REVIEW.md` (every string in both languages, side by side) |
 | `npm run preview:cf` | Build and run on Cloudflare's local runtime, with the feedback API |
 | `npm run lighthouse` | Lighthouse scores per page type |
