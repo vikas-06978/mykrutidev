@@ -2,7 +2,7 @@
   "id": "/",
   "name": "MyKrutiDev",
   "short_name": "कृतिदेव",
-  "description": "Kruti Dev and Unicode converters, Hindi typing tutor and Hindi keyboard. Free, works offline, nothing leaves your device.",
+  "description": "Kruti Dev and Unicode converters, Hindi typing tutor and Hindi keyboard. Free, and the converters work offline.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",

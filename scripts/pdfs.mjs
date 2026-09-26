@@ -9,6 +9,14 @@ import { fileURLToPath } from 'node:url';
 
 import { buildPdfs } from './build-pdfs.mjs';
 
+// Cloudflare Pages builds have no Chromium to draw with, so there the files
+// already committed in public/ are used as they are (CF_PAGES is set only in
+// Cloudflare's build). CI and local builds still redraw them.
+if (process.env.CF_PAGES) {
+  console.log('pdfs: skipped on Cloudflare Pages, using the committed files in public/downloads/');
+  process.exit(0);
+}
+
 const root = new URL('../', import.meta.url);
 const scratch = fileURLToPath(new URL('.pdf-build/', root));
 const out = fileURLToPath(new URL('public/downloads/', root));
