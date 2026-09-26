@@ -3,9 +3,9 @@
 // background process and exits when one is already running. Behaves like a
 // static host - case-sensitive paths, a real 404, gzip for text (as Netlify,
 // Cloudflare Pages, Vercel and GitHub Pages all do; without it Lighthouse
-// measured 150-175 KB pages instead of ~25 KB) - and sends the headers in
-// dist/_headers the way Cloudflare Pages does, so every test runs under the
-// real Content-Security-Policy.
+// measured 150-175 KB pages instead of ~25 KB) - and applies dist/_headers and
+// dist/_redirects the way Cloudflare Pages does, so every test runs under the
+// real Content-Security-Policy and redirects.
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
@@ -48,6 +48,24 @@ export function parseHeaders(text) {
   return rules;
 }
 
+/**
+ * Parse a Cloudflare Pages _redirects file: `from to [status]` per line, `#`
+ * comments. Only exact paths, which is all this site uses.
+ * @param {string} text
+ * @returns {Map<string, { to: string, status: number }>}
+ */
+export function parseRedirects(text) {
+  const rules = new Map();
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const [from, to, status = '302'] = line.split(/\s+/);
+    if (from.includes('*') || from.includes(':')) throw new Error(`_redirects: "${from}" - only exact paths are supported here`);
+    rules.set(from, { to, status: Number(status) });
+  }
+  return rules;
+}
+
 /** Every matching rule applies; a name set twice is joined with commas, as Cloudflare does. */
 export function headersFor(rules, pathname) {
   const out = {};
@@ -71,6 +89,12 @@ export function serveDist(root, port) {
   } catch {
     // An older build without _headers: serve without them.
   }
+  let redirects = new Map();
+  try {
+    redirects = parseRedirects(readFileSync(join(root, '_redirects'), 'utf8'));
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
 
   async function resolve(urlPath) {
     const safe = normalize(decodeURIComponent(urlPath)).replace(/^([/\\])+/, '');
@@ -89,6 +113,11 @@ export function serveDist(root, port) {
   const server = createServer(async (req, res) => {
     const pathname = new URL(req.url, 'http://x').pathname;
     const extra = headersFor(rules, pathname);
+    const redirect = redirects.get(pathname);
+    if (redirect) {
+      res.writeHead(redirect.status, { ...extra, location: redirect.to }).end();
+      return;
+    }
     const file = await resolve(pathname);
     if (!file) {
       // As static hosts do: the site's own 404.html, with a 404 status.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 
 import { inlineScriptHashes, contentSecurityPolicy, headersFile, MAX_LINE } from '../security/integration.mjs';
-import { parseHeaders, headersFor } from '../../scripts/serve-dist.mjs';
+import { parseHeaders, headersFor, parseRedirects } from '../../scripts/serve-dist.mjs';
 
 const sha = (s) => `'sha256-${createHash('sha256').update(s, 'utf8').digest('base64')}'`;
 
@@ -81,5 +81,19 @@ describe('the _headers file', () => {
 
   test('the service worker is always revalidated', () => {
     assert.equal(headersFor(rules, '/sw.js')['cache-control'], 'no-cache');
+  });
+});
+
+describe('the _redirects file (as the test server reads it)', () => {
+  test('exact paths, a status per line, comments and blank lines ignored', () => {
+    const rules = parseRedirects('# note\n\n/sitemap.xml /sitemap-index.xml 301\n/old /new\n');
+    assert.deepEqual([...rules], [
+      ['/sitemap.xml', { to: '/sitemap-index.xml', status: 301 }],
+      ['/old', { to: '/new', status: 302 }],
+    ]);
+  });
+
+  test('a pattern it cannot apply fails loudly instead of being skipped', () => {
+    assert.throws(() => parseRedirects('/blog/* /guides/:splat 301'), /only exact paths/);
   });
 });

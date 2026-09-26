@@ -91,3 +91,13 @@ test('the Remington page: typing Remington keys gives Unicode Hindi, and the ful
   await expect(boxes.nth(1)).toHaveValue('भारत');
   await expect(page.locator('[data-cap-key]')).toHaveCount(47);
 });
+
+test('/sitemap.xml sends people and crawlers to the sitemap index', async ({ request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'the same on every device');
+  const hop = await request.get('/sitemap.xml', { maxRedirects: 0 });
+  expect(hop.status()).toBe(301);
+  expect(hop.headers().location).toBe('/sitemap-index.xml');
+  const index = await request.get('/sitemap.xml');
+  expect(index.status()).toBe(200);
+  expect(await index.text()).toMatch(/<sitemapindex[\s\S]*\/sitemap-0\.xml<\/loc>/);
+});

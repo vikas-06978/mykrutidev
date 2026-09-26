@@ -21,6 +21,7 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { SITE } from '../src/lib/routes.js';
+import { parseRedirects } from '../scripts/serve-dist.mjs';
 import { GUIDES, guidePath } from '../src/lib/guides.js';
 import en from '../src/i18n/en.json' with { type: 'json' };
 import hi from '../src/i18n/hi.json' with { type: 'json' };
@@ -166,6 +167,14 @@ describe('sitemap, canonical and hreflang', () => {
   test('robots.txt points at the sitemap index', () => {
     const robots = readFileSync(join(DIST, 'robots.txt'), 'utf8');
     assert.match(robots, new RegExp(`Sitemap: ${abs('/sitemap-index.xml')}`));
+  });
+
+  test('/sitemap.xml is a permanent redirect to the sitemap index, and nothing shadows it', () => {
+    const rules = parseRedirects(readFileSync(join(DIST, '_redirects'), 'utf8'));
+    assert.deepEqual(rules.get('/sitemap.xml'), { to: '/sitemap-index.xml', status: 301 });
+    assert.ok(existsSync(join(DIST, 'sitemap-index.xml')), 'the redirect target was not built');
+    // A real file would be served instead of the redirect, and could go stale.
+    assert.ok(!existsSync(join(DIST, 'sitemap.xml')), 'dist/sitemap.xml exists');
   });
 
   test('robots.txt blocks no page, so every noindex can be read; only /api/ is closed', () => {
