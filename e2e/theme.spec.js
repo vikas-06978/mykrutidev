@@ -413,6 +413,17 @@ test.describe('the picker', () => {
     for (const path of ['/hindi-keyboard', '/hindi-typing-test', '/unicode-to-kruti-dev']) {
       await withStored(page, 'light');
       await page.goto(path);
+      // The page's own start-up transitions (the tutor lights the first key)
+      // must be over first, or a slow machine (CI) counts them as the
+      // switch's. What is measured below is only what switching starts.
+      await page.evaluate(() =>
+        Promise.all(
+          document
+            .getAnimations()
+            .filter((a) => a instanceof CSSTransition)
+            .map((a) => a.finished.catch(() => {})),
+        ),
+      );
       for (const step of ["mkdTheme.set('dark')", "mkdTheme.setAccent('teal')", "mkdTheme.set('contrast')", "mkdTheme.set('reading')"]) {
         const transitions = await page.evaluate(async (code) => {
           new Function(`window.${code}`)();

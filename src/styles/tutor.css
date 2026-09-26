@@ -234,7 +234,9 @@
 
 .tt-progress-fill {
   display: block;
-  width: 0;
+  /* 0%, not 0: the script writes widths as percentages, and 0 -> 0% counts
+     as a change, so every page load started a (no-op) width transition. */
+  width: 0%;
   height: 100%;
   background-color: var(--color-brick);
   /* Follows the caret rather than racing it. Long enough to read as movement,
