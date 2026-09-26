@@ -12,6 +12,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      # A test UPI ID, so the support page is built and checked the way it
+      # goes live. The real ID is set only in Cloudflare Pages, never here.
+      PUBLIC_UPI_ID: mykrutidev.test@upi
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -27,6 +31,11 @@ jobs:
       - run: npm run build
       - run: npm run test:dist
       - run: npx playwright test
+      # And without a UPI ID, as on a laptop: no payment anywhere, no footer link.
+      - name: Build and check with the support option off
+        env:
+          PUBLIC_UPI_ID: ''
+        run: npx astro build && npm run test:dist
       # On failure, the traces and screenshots, to open with npx playwright show-trace.
       - uses: actions/upload-artifact@v4
         if: failure()

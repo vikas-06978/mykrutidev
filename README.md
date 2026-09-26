@@ -109,6 +109,15 @@ after changing a chart or a page title.
 The feedback form needs a D1 database, Turnstile and an admin key. See
 [docs/FEEDBACK.md](docs/FEEDBACK.md).
 
+**Support by UPI (optional).** To switch on the "Support MyKrutiDev" page and
+its footer link, add an environment variable in the Pages project
+(**Settings**, then **Environment variables**, for Production):
+`PUBLIC_UPI_ID` = your UPI ID, for example `12345678@upi`. Then redeploy.
+The ID is never in this repository. Without it, `/support` shows only the other
+ways to help and nothing links to it. A value that is not a UPI ID stops the
+build, so a typo can never go live. After switching it on, pay yourself ₹1 with
+both the QR code and the phone button to check.
+
 **Before launch:** if the domain is not `mykrutidev.com`, change `SITE` and
 `CONTACT_EMAIL` in `src/lib/routes.js` (canonical links, sitemap, share
 previews and the contact address all come from there).
