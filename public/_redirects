@@ -1,0 +1,8 @@
+# Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/
+# (scripts/serve-dist.mjs applies this file the same way for the tests).
+#
+# @astrojs/sitemap always writes the sitemap as /sitemap-index.xml (listing
+# /sitemap-0.xml); its filenameBase option can rename the "sitemap" part but
+# never produce /sitemap.xml. That is the address people and SEO tools try
+# first, so it sends them to the real one. robots.txt names /sitemap-index.xml.
+/sitemap.xml /sitemap-index.xml 301
