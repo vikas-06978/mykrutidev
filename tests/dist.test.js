@@ -11,6 +11,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
@@ -678,6 +679,36 @@ describe('translate="no" and code examples', () => {
     const codes = (html) => [...html.matchAll(/<code\b[^>]*>([\s\S]*?)<\/code>/g)].map((m) => m[1]).sort();
     for (const p of english()) {
       assert.deepEqual(codes(pages.get(hindiOf(p))), codes(pages.get(p)), p);
+    }
+  });
+});
+
+describe('security headers (dist/_headers)', () => {
+  const headers = () => readFileSync(join(DIST, '_headers'), 'utf8');
+  const csp = () => headers().match(/^\s+Content-Security-Policy: (.+)$/m)?.[1] ?? '';
+  const allHtml = () => [...pages.values(), notFound];
+
+  test('the build wrote them, with a policy for every page', () => {
+    assert.ok(existsSync(join(DIST, '_headers')), 'dist/_headers is missing');
+    assert.match(headers(), /^\/\*$/m);
+    assert.match(csp(), /frame-ancestors 'none'/);
+  });
+
+  test('every inline script on every page is allowed by its hash, so none is blocked', () => {
+    const policy = csp();
+    for (const html of allHtml()) {
+      for (const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+        if (/\bsrc\s*=/i.test(m[1]) || /application\/(ld\+)?json/i.test(m[1])) continue;
+        const hash = `'sha256-${createHash('sha256').update(m[2], 'utf8').digest('base64')}'`;
+        assert.ok(policy.includes(hash), `inline script not in the CSP: ${m[2].slice(0, 80)}`);
+      }
+    }
+  });
+
+  test('no inline event handlers or javascript: links, which the policy would block', () => {
+    for (const html of allHtml()) {
+      assert.doesNotMatch(html, /<[a-z][^>]*\son[a-z]+\s*=/i);
+      assert.doesNotMatch(html, /href\s*=\s*["']?\s*javascript:/i);
     }
   });
 });
