@@ -1,6 +1,7 @@
 /**
  * "Paste text" / "Upload Word file" tabs above the converter
- * (ConvertModes.astro) on Kruti Dev -> Unicode (home) and Unicode -> Kruti Dev.
+ * (ConvertModes.astro) on Kruti Dev -> Unicode (home), Unicode -> Kruti Dev,
+ * and their Mangal twins (Mangal is Unicode, so the same engine).
  *
  * - Both tabs, and the tool under them, are on screen on first load - phone
  *   and desktop, English and Hindi - and the tabs add 48px at most.
@@ -9,12 +10,15 @@
  *   readable in every theme.
  * - A .docx dropped ANYWHERE on the page is converted and offered for download;
  *   an unsupported file gets the converter's own message.
+ * - On the Mangal pages the converted file is exactly what the Kruti Dev <->
+ *   Unicode pages give for the same file.
  *
  * Paste-mode conversion itself is covered, unchanged, by tools.spec.js.
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
+import { unzipSync, strFromU8 } from 'fflate';
 
 // Run once (in the desktop project); viewports are set per test.
 test.beforeEach(({}, testInfo) => {
@@ -23,8 +27,19 @@ test.beforeEach(({}, testInfo) => {
 
 const PHONE = { width: 390, height: 844 };
 const DESKTOP = { width: 1366, height: 768 };
-const PAGES = ['/', '/unicode-to-kruti-dev/', '/hi/', '/hi/unicode-to-kruti-dev/'];
-const DOCX = readFileSync(new URL('../src/lib/__fixtures__/kruti-test.docx', import.meta.url)).toString('base64');
+const PAGES = [
+  '/',
+  '/unicode-to-kruti-dev/',
+  '/kruti-dev-to-mangal/',
+  '/mangal-to-kruti-dev/',
+  '/hi/',
+  '/hi/unicode-to-kruti-dev/',
+  '/hi/kruti-dev-to-mangal/',
+  '/hi/mangal-to-kruti-dev/',
+];
+const fixture = (name) => readFileSync(new URL(`../src/lib/__fixtures__/${name}`, import.meta.url)).toString('base64');
+const DOCX = fixture('kruti-test.docx');
+const UNICODE_DOCX = fixture('unicode-test.docx');
 
 const tab = (page, mode) => page.locator(`[role="tab"][data-mode="${mode}"]`);
 const textBox = (page) => page.locator('#tool textarea[data-role="input"]');
@@ -278,4 +293,31 @@ test.describe('drag a file anywhere', () => {
     });
     await expect(page.locator('[data-drop-overlay]')).toBeHidden();
   });
+});
+
+test.describe('the Mangal pages convert files exactly like the Kruti Dev <-> Unicode pages', () => {
+  const DOCX_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+  /** Drop a fixture on `path` and return the text of the converted file's document.xml. */
+  async function convertedXml(page, path, name, base64) {
+    await page.goto(path);
+    await dragFileOnto(page, 'h1', { name, type: DOCX_TYPE, base64 });
+    const link = page.locator('[data-doc-converter] [data-role="result"] [data-role="download"]');
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    const [download] = await Promise.all([page.waitForEvent('download'), link.click()]);
+    const files = unzipSync(new Uint8Array(readFileSync(await download.path())));
+    return strFromU8(files['word/document.xml']);
+  }
+
+  for (const [path, twin, name, base64, font] of [
+    ['/kruti-dev-to-mangal/', '/', 'kruti-test.docx', DOCX, 'Mangal'],
+    ['/mangal-to-kruti-dev/', '/unicode-to-kruti-dev/', 'unicode-test.docx', UNICODE_DOCX, 'Kruti Dev 010'],
+  ]) {
+    test(`${path} gives the same file as ${twin}`, async ({ page }) => {
+      await page.setViewportSize(DESKTOP);
+      const here = await convertedXml(page, path, name, base64);
+      expect(here).toContain(`w:ascii="${font}"`);
+      expect(here).toBe(await convertedXml(page, twin, name, base64));
+    });
+  }
 });

@@ -96,6 +96,7 @@ export const PAGES = [
     to: 'mangal',
     group: 'Kruti Dev',
     related: ['/', '/mangal-to-kruti-dev', '/unicode-to-kruti-dev'],
+    documents: true,
   },
   {
     path: '/mangal-to-kruti-dev',
@@ -105,6 +106,7 @@ export const PAGES = [
     to: 'kruti-dev',
     group: 'Mangal',
     related: ['/kruti-dev-to-mangal', '/unicode-to-kruti-dev', '/'],
+    documents: true,
   },
   {
     path: '/english-to-hindi-typing',

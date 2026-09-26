@@ -66,11 +66,13 @@ const fontName = (k: string) => t(`fontBox.${k}`);
 const fromName = page.from ? fontName(page.from) : null;
 const toName = page.to ? fontName(page.to) : null;
 
-// Document conversion exists for the two Kruti Dev <-> Unicode directions only.
+// Document conversion exists for Kruti Dev <-> Unicode only. Mangal is Unicode
+// (the same text, drawn in another font), so its two pages get the same engine.
+const isUnicode = (k: string | null | undefined) => !!k && FONTS[k]?.kind === 'unicode';
 const docDirection =
-  page.from === 'kruti-dev' && page.to === 'unicode'
+  page.from === 'kruti-dev' && isUnicode(page.to)
     ? 'to-unicode'
-    : page.from === 'unicode' && page.to === 'kruti-dev'
+    : isUnicode(page.from) && page.to === 'kruti-dev'
       ? 'to-kruti'
       : null;
 
