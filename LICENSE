@@ -1,0 +1,15 @@
+Copyright (c) 2026 MyKrutiDev. All rights reserved.
+
+This repository and the website built from it (the source code, the
+character maps and conversion rules, the text, guides, charts, printable
+sheets, diagrams and design) are the work of MyKrutiDev and are protected by
+copyright.
+
+No licence is granted to copy, modify, publish, distribute, sublicense or sell
+any part of it, or to run it as another website or service, without written
+permission from MyKrutiDev.
+
+Third-party parts keep their own licences and are not covered by this notice:
+the npm packages in package.json and package-lock.json, the Noto Sans
+Devanagari font (SIL Open Font License), and the font files in public/fonts
+and vendor/fonts, which belong to their respective owners.

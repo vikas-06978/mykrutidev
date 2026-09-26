@@ -3,8 +3,11 @@
 // background process and exits when one is already running. Behaves like a
 // static host - case-sensitive paths, a real 404, gzip for text (as Netlify,
 // Cloudflare Pages, Vercel and GitHub Pages all do; without it Lighthouse
-// measured 150-175 KB pages instead of ~25 KB).
+// measured 150-175 KB pages instead of ~25 KB) - and sends the headers in
+// dist/_headers the way Cloudflare Pages does, so every test runs under the
+// real Content-Security-Policy.
 import { createServer } from 'node:http';
+import { readFileSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -25,12 +28,49 @@ const TYPES = {
 const COMPRESS = /^(text\/|application\/(json|xml)|image\/svg)/;
 
 /**
+ * Parse a Cloudflare Pages _headers file: a path pattern on its own line
+ * (`*` matches anything), then indented `Name: value` lines.
+ * @param {string} text
+ * @returns {{ test: RegExp, headers: [string, string][] }[]}
+ */
+export function parseHeaders(text) {
+  const rules = [];
+  for (const line of text.split('\n')) {
+    if (!line.trim() || line.trimStart().startsWith('#')) continue;
+    if (!/^\s/.test(line)) {
+      const pattern = line.trim().replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+      rules.push({ test: new RegExp(`^${pattern}$`), headers: [] });
+    } else if (rules.length) {
+      const i = line.indexOf(':');
+      rules.at(-1).headers.push([line.slice(0, i).trim().toLowerCase(), line.slice(i + 1).trim()]);
+    }
+  }
+  return rules;
+}
+
+/** Every matching rule applies; a name set twice is joined with commas, as Cloudflare does. */
+export function headersFor(rules, pathname) {
+  const out = {};
+  for (const r of rules) {
+    if (!r.test.test(pathname)) continue;
+    for (const [name, value] of r.headers) out[name] = out[name] ? `${out[name]}, ${value}` : value;
+  }
+  return out;
+}
+
+/**
  * @param {string} root absolute path of the built site, ending in a separator
  * @param {number} port
  * @returns {Promise<{ close: () => Promise<void> }>}
  */
 export function serveDist(root, port) {
   const gzipped = new Map();
+  let rules = [];
+  try {
+    rules = parseHeaders(readFileSync(join(root, '_headers'), 'utf8'));
+  } catch {
+    // An older build without _headers: serve without them.
+  }
 
   async function resolve(urlPath) {
     const safe = normalize(decodeURIComponent(urlPath)).replace(/^([/\\])+/, '');
@@ -47,11 +87,13 @@ export function serveDist(root, port) {
   }
 
   const server = createServer(async (req, res) => {
-    const file = await resolve(new URL(req.url, 'http://x').pathname);
+    const pathname = new URL(req.url, 'http://x').pathname;
+    const extra = headersFor(rules, pathname);
+    const file = await resolve(pathname);
     if (!file) {
       // As static hosts do: the site's own 404.html, with a 404 status.
       const page = await readFile(join(root, '404.html')).catch(() => null);
-      if (page) res.writeHead(404, { 'content-type': TYPES['.html'] }).end(page);
+      if (page) res.writeHead(404, { ...extra, 'content-type': TYPES['.html'] }).end(page);
       else res.writeHead(404, { 'content-type': 'text/plain' }).end('404');
       return;
     }
@@ -59,11 +101,11 @@ export function serveDist(root, port) {
     const body = await readFile(file);
     if (COMPRESS.test(type) && /\bgzip\b/.test(req.headers['accept-encoding'] ?? '')) {
       if (!gzipped.has(file)) gzipped.set(file, gzipSync(body, { level: 9 }));
-      res.writeHead(200, { 'content-type': type, 'content-encoding': 'gzip', vary: 'accept-encoding' });
+      res.writeHead(200, { ...extra, 'content-type': type, 'content-encoding': 'gzip', vary: 'accept-encoding' });
       res.end(gzipped.get(file));
       return;
     }
-    res.writeHead(200, { 'content-type': type });
+    res.writeHead(200, { ...extra, 'content-type': type });
     res.end(body);
   });
 

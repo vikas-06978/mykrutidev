@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 import { SITE, isIndexable } from './src/lib/routes.js';
 import pwa from './src/pwa/integration.mjs';
+import securityHeaders from './src/security/integration.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -34,6 +35,9 @@ export default defineConfig({
     // Installable app: writes dist/sw.js, which keeps every page, font and
     // script available offline. See src/pwa/.
     pwa(),
+    // Writes dist/_headers: security headers (CSP with the hashes of the
+    // inline scripts just built) and caching. See src/security/.
+    securityHeaders(),
   ],
   // `npm run pdfs` builds the site into a scratch folder to print the PDFs
   // from (scripts/pdfs.mjs); the PDFs themselves land in public/downloads/.
