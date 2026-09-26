@@ -320,6 +320,7 @@ describe('document messages', () => {
     const junk = new Uint8Array([1, 2, 3, 4]);
     const outcomes = [
       docConvert.checkFile({ name: 'a.doc', size: 10 }),
+      docConvert.checkFile({ name: 'a.pdf', size: 10 }),
       docConvert.checkFile({ name: 'a.docx', size: 10, head: pdf }),
       docConvert.checkFile({ name: 'a.docx', size: 10, head: ole }),
       docConvert.checkFile({ name: 'a.docx', size: 10, head: junk }),

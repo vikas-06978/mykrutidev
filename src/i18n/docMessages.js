@@ -29,12 +29,13 @@ export const ONLY_TYPES_EN = 'Only .docx (Word) and .txt files can be converted 
 
 /**
  * @param {string} msg  what checkFile() / messageFor() returned
- * @param {{ SAVE_AS_MESSAGE: string, DAMAGED_MESSAGE: string, GENERIC_MESSAGE: string }} m
+ * @param {{ SAVE_AS_MESSAGE: string, PDF_MESSAGE: string, DAMAGED_MESSAGE: string, GENERIC_MESSAGE: string }} m
  *   the loaded docConvert module, or null if it failed to load
  * @param {Record<string, string>} L  the page's `doc` strings
  */
 export function localizeDocMessage(msg, m, L) {
   if (!m) return L.generic;
+  if (msg === m.PDF_MESSAGE) return L.pdf;
   if (msg === m.SAVE_AS_MESSAGE) return L.saveAs;
   if (msg.startsWith(m.SAVE_AS_MESSAGE)) return `${L.saveAs} ${L.passwordHint}`;
   if (msg === m.DAMAGED_MESSAGE) return L.damaged;

@@ -54,6 +54,10 @@ export const UNICODE_FONTS = ['Mangal', 'Nirmala UI'];
 
 // Only for files that are NOT .docx - a .docx user is never told to save as .docx.
 export const SAVE_AS_MESSAGE = 'Please open it in Word and Save As → Word Document (.docx).';
+// A PDF has no paragraphs or fonts to convert in place, but Word (2013 and
+// later) opens one as an editable document, which then converts here.
+export const PDF_MESSAGE =
+  'PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.';
 export const DAMAGED_MESSAGE = 'This file seems damaged. Open it in Word and save it again.';
 export const GENERIC_MESSAGE = 'Something went wrong converting this file.';
 
@@ -86,7 +90,8 @@ export function checkFile({ name, size, head }) {
   const isOle = b[0] === 0xd0 && b[1] === 0xcf && b[2] === 0x11 && b[3] === 0xe0;
   const isPdf = b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46; // %PDF
 
-  if (['doc', 'pdf', 'rtf', 'odt', 'wps'].includes(ext) || isPdf) {
+  if (ext === 'pdf' || isPdf) return { error: PDF_MESSAGE };
+  if (['doc', 'rtf', 'odt', 'wps'].includes(ext)) {
     return { error: SAVE_AS_MESSAGE };
   }
   if (size > MAX_BYTES) {

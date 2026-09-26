@@ -19,6 +19,7 @@ import {
   splitsSyllable,
   summarize,
   SAVE_AS_MESSAGE,
+  PDF_MESSAGE,
   DAMAGED_MESSAGE,
   GENERIC_MESSAGE,
   UserError,
@@ -367,16 +368,19 @@ describe('rewriteRPr', () => {
 // ---------------------------------------------------------------------------
 
 describe('checking the file', () => {
-  test('7. .doc and .pdf get the Save As message', () => {
-    assert.deepEqual(checkFile({ name: 'order.doc', size: 1000 }), { error: SAVE_AS_MESSAGE });
-    assert.deepEqual(checkFile({ name: 'order.PDF', size: 1000 }), { error: SAVE_AS_MESSAGE });
+  test('7. .doc gets the Save As message, .pdf the open-it-in-Word steps', () => {
+    for (const name of ['order.doc', 'order.rtf', 'order.odt', 'order.wps']) {
+      assert.deepEqual(checkFile({ name, size: 1000 }), { error: SAVE_AS_MESSAGE }, name);
+    }
+    assert.deepEqual(checkFile({ name: 'order.PDF', size: 1000 }), { error: PDF_MESSAGE });
+    assert.match(PDF_MESSAGE, /Open the PDF in Word/);
   });
 
   test('a .doc or .pdf renamed to .docx is caught by its first bytes', () => {
     const ole = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1]);
     assert.match(checkFile({ name: 'a.docx', size: 10, head: ole }).error, /Save As/);
     const pdf = strToU8('%PDF-1.7');
-    assert.deepEqual(checkFile({ name: 'a.docx', size: 10, head: pdf }), { error: SAVE_AS_MESSAGE });
+    assert.deepEqual(checkFile({ name: 'a.docx', size: 10, head: pdf }), { error: PDF_MESSAGE });
   });
 
   test('a .docx that is not a zip is "damaged", never "save as .docx"', () => {

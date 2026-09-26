@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **1638 keys**, identical in both files (enforced by `npm test` and at build time).
+- **1639 keys**, identical in both files (enforced by `npm test` and at build time).
 - **86 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -160,6 +160,7 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `doc.download` | Download converted file | बदली हुई फ़ाइल डाउनलोड करें |  |
 | `doc.downloadKrutiDocx` | Download as Word (.docx) with Kruti Dev 010 | Kruti Dev 010 के साथ Word (.docx) डाउनलोड करें |  |
 | `doc.saveAs` | Please open it in Word and Save As → Word Document (.docx). | कृपया इसे Word में खोलें और Save As → Word Document (.docx) करें। | ⚠️ Kept Word's menu names in English ("Save As → Word Document") because that is what Word shows on most office PCs. Change if your users have Hindi Office. |
+| `doc.pdf` | PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here. | PDF सीधे नहीं बदली जा सकती। PDF को Word में खोलें (File → Open), Word उसे डॉक्यूमेंट में बदल देगा। फिर Save As → Word Document (.docx) चुनें और वह फ़ाइल यहाँ अपलोड करें। |  |
 | `doc.passwordHint` | If the document is password-protected, remove the password first. | अगर डॉक्यूमेंट पर पासवर्ड लगा है, तो पहले पासवर्ड हटाएँ। |  |
 | `doc.tooLarge` | This file is larger than 20 MB. Please split it into smaller files and convert them one at a time. | यह फ़ाइल 20 MB से बड़ी है। कृपया इसे छोटी फ़ाइलों में बाँटें और एक-एक करके कन्वर्ट करें। |  |
 | `doc.onlyTypes` | Only .docx (Word) and .txt files can be converted here. | यहाँ सिर्फ़ .docx (Word) और .txt फ़ाइलें कन्वर्ट हो सकती हैं। |  |
