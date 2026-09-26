@@ -136,7 +136,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                 aria-labelledby={`navtrigger-${i}`}
                 hidden
                 data-menu
-                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu"
+                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu before:absolute before:inset-x-0 before:bottom-full before:h-1"
               >
                 {g.pages.map((p) =>
                   p.live ? (
@@ -226,7 +226,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                 aria-labelledby="navtrigger-tools"
                 hidden
                 data-menu
-                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu"
+                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu before:absolute before:inset-x-0 before:bottom-full before:h-1"
               >
                 {tools.map((tool) => (
                   <li>
@@ -636,6 +636,9 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
 
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  type Point = { x: number; y: number };
+  /** The last point the pointer was over the open menu (button or list); see Hover below. */
+  let aimFrom: Point | null = null;
   /** When each menu was last opened by hover (see the trigger's click). */
   const hoverOpenedAt = new Map<Group, number>();
 
@@ -665,6 +668,9 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
 
   function open(g: Group, focusItem?: 'first' | 'last') {
     clearTimeout(closeTimer);
+    closeTimer = undefined;
+    // Set again by hoverOpen(), or once the pointer is over this menu.
+    aimFrom = null;
     // One menu at a time: a dropdown opening closes the theme panel too.
     closeTheme();
     for (const other of groups) if (other !== g) close(other);
@@ -728,20 +734,109 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       }
     });
 
-    // Listeners are always attached and the check happens inside, so a hybrid
-    // laptop that gains or loses a mouse behaves correctly without a reload.
-    g.root.addEventListener('mouseenter', () => {
-      if (!canHover.matches || isOpen(g)) return;
-      open(g);
-      hoverOpenedAt.set(g, Date.now());
-    });
-    g.root.addEventListener('mouseleave', () => {
-      if (!canHover.matches) return;
-      // Small grace period so a diagonal cursor path does not snap it shut.
-      clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => close(g), 180);
-    });
   }
+
+  // ---- Hover (a mouse on a desktop). One mousemove listener decides it all,
+  // so a slow hand behaves exactly like a quick one:
+  //  - Each list has an invisible strip above it (the `before:` classes) that
+  //    fills the gap to its button, so crossing the gap never counts as leaving.
+  //  - Pointing back at the open menu always cancels a pending close.
+  //  - Heading for the open list across a neighbouring button does not switch
+  //    menus ("menu aim"): while the pointer stays inside the triangle from the
+  //    last point it was on the menu to the list's top corners, the menu stays.
+  //    Resting on that neighbour for a moment opens it as usual.
+  // It is always attached and checks canHover inside, so a hybrid laptop that
+  // gains or loses a mouse behaves correctly without a reload.
+  const byRoot = new Map(groups.map((g) => [g.root, g]));
+  let restTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The group under the pointer on the previous move: hover opens on entering one. */
+  let lastOver: Group | null = null;
+
+  const cancelClose = () => {
+    clearTimeout(closeTimer);
+    closeTimer = undefined;
+  };
+  const scheduleClose = (g: Group) => {
+    if (closeTimer !== undefined) return;
+    closeTimer = setTimeout(() => {
+      closeTimer = undefined;
+      close(g);
+    }, 300);
+  };
+
+  function hoverOpen(g: Group, at: Point) {
+    open(g);
+    hoverOpenedAt.set(g, Date.now());
+    aimFrom = at;
+  }
+
+  /** Twice the signed area of triangle abc: which side of ab the point c is on. */
+  const side = (a: Point, b: Point, c: Point) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+
+  /** Is the pointer on its way from `from` into g's list? */
+  function aiming(g: Group, from: Point, p: Point) {
+    const r = g.menu.getBoundingClientRect();
+    const left = { x: r.left - 8, y: r.top };
+    const right = { x: r.right + 8, y: r.top };
+    const s1 = side(from, left, p);
+    const s2 = side(left, right, p);
+    const s3 = side(right, from, p);
+    return (s1 >= 0 && s2 >= 0 && s3 >= 0) || (s1 <= 0 && s2 <= 0 && s3 <= 0);
+  }
+
+  /** The pointer is off the open menu and not heading for it: act on where it is. */
+  function settle(over: Group | null, at: Point) {
+    const current = groups.find(isOpen);
+    if (over && over !== current) hoverOpen(over, at);
+    else if (!over && current) scheduleClose(current);
+  }
+
+  document.addEventListener(
+    'mousemove',
+    (e) => {
+      if (!canHover.matches) return;
+      const p = { x: e.clientX, y: e.clientY };
+      const root = (e.target as Element | null)?.closest?.<HTMLElement>('[data-group]');
+      const over = (root && byRoot.get(root)) ?? null;
+      // Only on the way in, so a menu just closed with a click or Escape does
+      // not spring open again under a pointer that is still on its button.
+      const entered = over !== lastOver ? over : null;
+      lastOver = over;
+      const current = groups.find(isOpen);
+      clearTimeout(restTimer);
+      if (!current) {
+        if (entered) hoverOpen(entered, p);
+        return;
+      }
+      if (over === current) {
+        cancelClose();
+        aimFrom = p;
+        return;
+      }
+      if (!aimFrom) {
+        // Opened from the keyboard or by a click, and the pointer has not been
+        // over it since: it stays open until pointed at or dismissed.
+        if (entered) hoverOpen(entered, p);
+        return;
+      }
+      if (aiming(current, aimFrom, p)) {
+        cancelClose();
+        // A pointer that stops here meant this spot, not the list.
+        restTimer = setTimeout(() => settle(over, p), 250);
+        return;
+      }
+      settle(over, p);
+    },
+    { passive: true },
+  );
+  // Leaving the window altogether closes a hover menu too.
+  document.documentElement.addEventListener('mouseleave', () => {
+    if (!canHover.matches) return;
+    clearTimeout(restTimer);
+    lastOver = null;
+    const current = groups.find(isOpen);
+    if (current) scheduleClose(current);
+  });
 
   // Click outside closes. Pointerdown, so it fires before focus moves.
   document.addEventListener('pointerdown', (e) => {
