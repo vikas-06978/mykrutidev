@@ -28,6 +28,10 @@ jobs:
       # the browser tests.
       - run: npx playwright install --with-deps chromium
       - run: npm test
+      # The Pages Functions bundled the way Cloudflare bundles them: with
+      # wrangler 3 (esbuild 0.17, the version that rejected import attributes
+      # on Cloudflare) and with the current wrangler.
+      - run: npm run test:functions
       - run: npm run build
       - run: npm run test:dist
       - run: npx playwright test

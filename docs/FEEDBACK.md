@@ -97,6 +97,11 @@ Run from the repository root. `wrangler` is a dev dependency (`npm ci`).
 
 - `npm test` — validation and CSV (`src/lib/feedback.test.js`), and the API and
   admin page against a local D1 (`server/feedback.test.js`).
+- `npm run test:functions` — bundles `functions/` the way Cloudflare Pages does
+  (wrangler 3, esbuild 0.17) and with the current wrangler. That bundler cannot
+  parse import attributes (`with { type: 'json' }`), so Functions code never
+  imports JSON: the admin page's labels are generated into `server/adminLabels.js`
+  by `npm run admin-labels`, and `server/functions-bundle.test.js` checks both.
 - `npm run test:dist` (after a build) — markup on every page, sitemap, and the
   whole stack through `wrangler pages dev` (`tests/feedback-pages.test.js`).
 - `npx playwright test e2e/feedback.spec.js` (after a build) — opens only on

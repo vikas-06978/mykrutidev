@@ -24,6 +24,8 @@
     "lighthouse": "astro build && node e2e/lighthouse.mjs",
     "perf:theme": "astro build && node e2e/perf-theme.mjs keyboard /hindi-keyboard light dark && node e2e/perf-theme.mjs tutor /hindi-typing-test light dark",
     "i18n:review": "node scripts/translations-review.mjs",
+    "admin-labels": "node scripts/admin-labels.mjs",
+    "test:functions": "wrangler pages functions build --outdir node_modules/.cache/functions-build && npx --yes wrangler@3.114.17 pages functions build --outdir node_modules/.cache/functions-build-v3",
     "astro": "astro"
   },
   "dependencies": {
