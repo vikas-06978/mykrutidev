@@ -345,6 +345,57 @@ describe('content length', () => {
     }
   });
 
+  test('landing pages and guides are each their own text, not a template', () => {
+    // A page written for one search must not reuse another page's sentences.
+    // Two checks, per language, over the help text of the landing pages and
+    // the guides: no sentence of 8+ words appears on two pages, and no two
+    // pages share more than 10% of their five-word phrases. (Today the most
+    // any pair shares is ~3% in English and ~4% in Hindi: the two pages that
+    // output Kruti Dev both tell you to paste into Word and set the font.)
+    // Words keep their combining marks (\p{M}): without them every Devanagari
+    // matra split a word in two.
+    const clean = (s) => s.replace(/<[^>]+>/g, ' ').replace(/\{\{[^}]+\}\}/g, ' ');
+    const norm = (s) => s.toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+    const helpOf = (p) => [
+      ...(p.howTo ? [...p.howTo.steps, p.howTo.tip] : []),
+      ...(p.problems ?? []).flatMap((x) => [x.problem, x.fix]),
+      ...(p.faq ?? []).flatMap((f) => [f.q, f.a]),
+      ...(p.body ?? []),
+    ];
+    const grams = (text) => {
+      const w = norm(text).split(' ').filter(Boolean);
+      const g = new Set();
+      for (let i = 0; i + 5 <= w.length; i++) g.add(w.slice(i, i + 5).join(' '));
+      return g;
+    };
+    for (const [lang, d] of [['en', en], ['hi', hi]]) {
+      const texts = new Map([
+        ...LANDING.map((p) => [p, helpOf(d.pages[p]).map(clean).join(' ')]),
+        ...GUIDES.map((g) => [`guide ${g.slug}`, helpOf(d.articles[g.slug]).map(clean).join(' ')]),
+      ]);
+      const seen = new Map();
+      for (const [src, text] of texts) {
+        for (const s of text.split(/(?<=[.!?।])\s+/)) {
+          const n = norm(s);
+          if (n.split(' ').length < 8) continue;
+          assert.ok(!seen.has(n) || seen.get(n) === src, `${lang}: "${s.trim().slice(0, 90)}" is on ${seen.get(n)} and ${src}`);
+          seen.set(n, src);
+        }
+      }
+      const keys = [...texts.keys()];
+      const G = new Map(keys.map((k) => [k, grams(texts.get(k))]));
+      for (let i = 0; i < keys.length; i++) {
+        for (let j = i + 1; j < keys.length; j++) {
+          const [a, b] = [G.get(keys[i]), G.get(keys[j])];
+          let shared = 0;
+          for (const x of a) if (b.has(x)) shared++;
+          const pct = (shared / Math.min(a.size, b.size)) * 100;
+          assert.ok(pct <= 10, `${lang}: ${keys[i]} and ${keys[j]} share ${pct.toFixed(1)}% of their phrases`);
+        }
+      }
+    }
+  });
+
   test('guides: at least 550 words of article each, in both languages', () => {
     for (const [lang, d] of [['en', en], ['hi', hi]]) {
       for (const g of GUIDES) assert.ok(below(d.articles[g.slug]) >= 550, `${lang} ${g.slug}: ${below(d.articles[g.slug])}`);
