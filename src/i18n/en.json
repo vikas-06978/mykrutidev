@@ -460,12 +460,12 @@
           "Paste it into the <strong>Kruti Dev</strong> box. Unicode Hindi appears in the other box as you paste.",
           "Press <strong>Copy text</strong> to paste the Hindi anywhere, or <strong>Download .docx</strong> for a ready Word file."
         ],
-        "tip": "A whole Word file? Use <strong>Convert a document</strong> below: it changes only the Kruti Dev text and keeps tables and formatting."
+        "tip": "A whole Word file? Choose the <a href=\"/?mode=file\">Upload Word file</a> tab above the boxes: it changes only the Kruti Dev text and keeps tables and formatting."
       },
       "problems": [
         {
           "problem": "Tables and formatting are lost when I paste",
-          "fix": "Pasting carries plain text only. To keep tables, bold and layout, use <strong>Convert a document</strong> below and drop in the .docx instead."
+          "fix": "Pasting carries plain text only. To keep tables, bold and layout, switch to the <a href=\"/?mode=file\">Upload Word file</a> tab and drop in the .docx instead."
         },
         {
           "problem": "A few words come out wrong",
@@ -1816,7 +1816,7 @@
         "<h2>Making Word behave with Hindi</h2>",
         "<ul><li><strong>Set Hindi as the proofing language</strong> so Word stops underlining every word; with Hindi proofing tools installed it will spell-check Hindi too.</li><li><strong>Use the Complex scripts font</strong> (Ctrl+D) to set the Hindi font for a whole document or style at once.</li><li><strong>Give matras room.</strong> Signs like ि and ु reach above and below the line. If they touch the next line, use line spacing of 1.15 or more instead of \"Exactly\".</li></ul>",
         "<h2>Moving between Kruti Dev and Unicode</h2>",
-        "<p>Office files often mix both. Convert rather than retype: <a href=\"/\">Kruti Dev to Unicode</a> for old documents, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> when a template needs Kruti Dev. Both convert whole .docx files and keep tables and formatting.</p>"
+        "<p>Office files often mix both. Convert rather than retype: <a href=\"/?mode=file\">Kruti Dev to Unicode</a> for old documents, <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> when a template needs Kruti Dev. Both convert whole .docx files and keep tables and formatting.</p>"
       ]
     },
     "/contact": {
@@ -1920,7 +1920,7 @@
         "benefit": "Learn Remington (Kruti Dev) typing for CPCT, SSC and court exams."
       },
       "document": {
-        "title": "Convert a Word file",
+        "title": "Convert Word file (.docx)",
         "benefit": "Convert a whole .docx; tables and formatting stay as they are."
       },
       "printables": {
@@ -2068,7 +2068,7 @@
     "docx-flow": {
       "caption": "Converting a whole Word file: only the Kruti Dev text changes.",
       "steps": [
-        "Open <strong>Convert a document</strong> under the Kruti Dev to Unicode converter.",
+        "Open the <strong>Upload Word file</strong> tab on Kruti Dev to Unicode.",
         "Drop in the .docx (or .txt). It is read in your browser, not uploaded.",
         "Kruti Dev runs are converted; English, tables, images and formatting are kept.",
         "Download the converted copy and check names and figures against the original."
@@ -2185,13 +2185,13 @@
         "<h3>2. Put the font back on the text</h3>",
         "<p>Sometimes the font is installed but the text is not using it. That happens after pasting with \"Keep Text Only\", after changing a template, or when a file typed in a variant (\"Kruti Dev 011\", \"Kruti Dev 010 Condensed\") is opened where only 010 exists. Select the text and choose Kruti Dev 010.</p>",
         "<h3>3. Convert it to Unicode</h3>",
-        "<p>If the text has to read correctly everywhere - on phones, in email, in Google Docs, on a website, in a search box - convert it to Unicode Hindi. Paste it into the <a href=\"/\">Kruti Dev to Unicode converter</a>, or drop in the whole .docx. The result is real Devanagari that any Hindi font can show.</p>",
+        "<p>If the text has to read correctly everywhere - on phones, in email, in Google Docs, on a website, in a search box - convert it to Unicode Hindi. Paste it into the <a href=\"/\">Kruti Dev to Unicode converter</a>, or <a href=\"/?mode=file\">upload the whole .docx</a>. The result is real Devanagari that any Hindi font can show.</p>",
         "<h2>Which font is the text really in?</h2>",
         "<p>Before fixing anything, click inside the English-looking text and read the font box on Word's Home tab.</p>",
         "<ul><li><strong>It says Kruti Dev 010</strong>, but you still see English letters: the font is not installed on this computer. Install it, or convert.</li><li><strong>It says Calibri, Arial or another English font:</strong> the text lost its font. Select it and choose Kruti Dev 010 (fix 2 above).</li><li><strong>The box is empty</strong> when you select a paragraph: the paragraph mixes fonts. Select a single word at a time to find the Kruti Dev parts.</li></ul>",
         "<p>Excel and PowerPoint behave the same way: the font belongs to each cell or text box, so a sheet can show Hindi in one column and English letters in the next. Select the column and set Kruti Dev 010, or convert the cells.</p>",
         "<h2>Documents that mix English and Kruti Dev</h2>",
-        "<p>Office letters often have English headings and Kruti Dev body text in the same file. The Word file converter on this site changes only the text set in Kruti Dev and leaves everything in English fonts alone, so a mixed document comes out right without any sorting by hand. See <a href=\"/guides/convert-word-file-from-kruti-dev\">how to convert a whole Word file</a>.</p>",
+        "<p>Office letters often have English headings and Kruti Dev body text in the same file. The <a href=\"/?mode=file\">Word file converter</a> on this site changes only the text set in Kruti Dev and leaves everything in English fonts alone, so a mixed document comes out right without any sorting by hand. See <a href=\"/guides/convert-word-file-from-kruti-dev\">how to convert a whole Word file</a>.</p>",
         "<h2>Recognising Kruti Dev</h2>",
         "<p>Once you know it, Kruti Dev is easy to spot: lots of <code>k</code> (the <span lang=\"hi\">ा</span> sign), <code>f</code> before consonants (the <span lang=\"hi\">ि</span> sign), and patterns like <code>dk</code> (<span lang=\"hi\">का</span>), <code>gS</code> (<span lang=\"hi\">है</span>) and <code>vkSj</code> (<span lang=\"hi\">और</span>). If you see boxes or question marks instead, that is a different problem - see <a href=\"/guides/hindi-text-shows-boxes-or-question-marks\">why Hindi shows boxes or question marks</a>. If it converts but many letters are wrong, the file may be in another legacy font such as Chanakya, which uses different keys; the <a href=\"/all-converters\">list of converters</a> shows what is supported.</p>",
         "<h2>Stopping it happening again</h2>",
@@ -2235,7 +2235,7 @@
         "<p>A Word file in <strong>.docx</strong> format (or a plain .txt) typed in Kruti Dev, up to 20 MB. You do not need Kruti Dev installed, and nothing is uploaded: the file is opened and converted by your browser.</p>",
         "{{diagram:docx-flow}}",
         "<h2>Step by step</h2>",
-        "<ol><li>Open <a href=\"/\">Kruti Dev to Unicode</a> and scroll to <strong>Convert a document</strong>, just under the converter.</li><li>Drag your .docx onto the box, or press <strong>Choose file</strong>.</li><li>Choose the Hindi font the converted file should use.</li><li>Press <strong>Download converted file</strong>. You get a new .docx; your original is not changed.</li></ol>",
+        "<ol><li>Open <a href=\"/?mode=file\">Kruti Dev to Unicode</a> and choose the <strong>Upload Word file</strong> tab above the text boxes.</li><li>Drag your .docx onto the box, or press <strong>Choose file</strong>.</li><li>Choose the Hindi font the converted file should use.</li><li>Press <strong>Download converted file</strong>. You get a new .docx; your original is not changed.</li></ol>",
         "<p>The summary tells you how many paragraphs and tables were converted. If part of the file was already Unicode, it says so and leaves that part as it is.</p>",
         "<h2>What is kept and what changes</h2>",
         "<ul><li><strong>Changes:</strong> text in Kruti Dev becomes Unicode Hindi, with the matras and reph put in Unicode order.</li><li><strong>Kept:</strong> English text, numbers, tables, images, headers and footers, bold, italic, sizes, alignment and page layout.</li><li><strong>Font:</strong> converted text gets the Unicode font you chose, so it shows correctly on any computer.</li></ul>",
@@ -2248,7 +2248,7 @@
         "<h2>Converting many files</h2>",
         "<p>The converter takes one file at a time, and each takes a few seconds. For a folder of documents, keep the originals in one folder and save each converted copy into another with the same name, so nothing is overwritten and you can always go back. If a file is too large, split it into parts in Word and convert each part.</p>",
         "<h2>Going the other way</h2>",
-        "<p>If an office template needs Kruti Dev, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> converts a Unicode .docx the same way and sets Kruti Dev 010 on every converted paragraph. And if you just need the text in Mangal, <a href=\"/kruti-dev-to-mangal\">Kruti Dev to Mangal</a> does the conversion for pasted text.</p>"
+        "<p>If an office template needs Kruti Dev, <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> converts a Unicode .docx the same way and sets Kruti Dev 010 on every converted paragraph. And if you just need the text in Mangal, <a href=\"/kruti-dev-to-mangal\">Kruti Dev to Mangal</a> does the conversion for pasted text.</p>"
       ]
     },
     "hindi-typing-speed-tips-for-exams": {
@@ -2433,5 +2433,14 @@
     "errorEmail": "That email address does not look right. Leave it empty if you do not want a reply.",
     "errorRate": "Too many messages from here just now. Please try again in an hour.",
     "errorGeneric": "That did not go through. Please try again in a moment."
+  },
+  "modes": {
+    "label": "Convert text or a file",
+    "text": "Paste text",
+    "file": "Upload Word file",
+    "new": "New",
+    "hint": "Converting a full document? <a href=\"{href}\">Upload the Word file</a>, formatting stays.",
+    "back": "Have a full Word file? <a href=\"{href}\">Upload it here ↑</a>",
+    "drop": "Drop your file to convert"
   }
 }

@@ -1,0 +1,238 @@
+---
+/**
+ * Two ways to convert, as tabs directly above the tool, on the pages that can
+ * do both (Kruti Dev -> Unicode and Unicode -> Kruti Dev):
+ *
+ *   "Paste text"        the two text boxes (the slot: Converter.astro), default
+ *   "Upload Word file"  the document converter (DocumentConverter.astro)
+ *
+ * Both are the existing components, unchanged in what they do; this only
+ * decides which one is on screen, in the same place, so neither needs a scroll.
+ *
+ * Which tab: ?mode=file|text in the URL, else the last one chosen on this
+ * device (localStorage), else Paste text. It is decided by the inline script
+ * below, BEFORE the tabs are drawn - as an attribute on <html> that the CSS in
+ * convert-modes.css reads - so an Upload-mode page never paints as Paste and
+ * then jumps (CLS 0). The module script only keeps the ARIA state in step,
+ * handles clicks, arrow keys, ?mode links on this page, and a file dragged
+ * anywhere onto the page.
+ */
+import DocumentConverter from './DocumentConverter.astro';
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  direction: 'to-unicode' | 'to-kruti';
+  /** Route path of this page, for the ?mode=file links. */
+  path: string;
+}
+
+const { direction, path } = Astro.props;
+const { t, render, path: to } = useT(langOf(Astro.url));
+const fileHref = `${to(path)}?mode=file`;
+---
+
+<div class="cm" data-convert-modes>
+  <script is:inline>
+    (function () {
+      var m = null;
+      try {
+        var q = new URLSearchParams(location.search).get('mode');
+        if (q === 'file' || q === 'text') m = q;
+        else if (location.hash === '#convert-document') m = 'file';
+        else {
+          var s = localStorage.getItem('mkd-convert-mode');
+          if (s === 'file' || s === 'text') m = s;
+        }
+      } catch (e) {}
+      document.documentElement.setAttribute('data-cv-mode', m || 'text');
+    })();
+  </script>
+
+  <div class="cm-tabs" role="tablist" aria-label={t('modes.label')}>
+    <button
+      type="button"
+      role="tab"
+      id="cm-tab-text"
+      class="cm-tab"
+      data-mode="text"
+      aria-controls="cm-panel-text"
+      aria-selected="true"
+      tabindex="0"
+    >
+      <svg aria-hidden="true" viewBox="0 0 16 16" class="cm-icon">
+        <path d="M3 4h10M3 8h10M3 12h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      </svg>
+      <span class="cm-label">{t('modes.text')}</span>
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id="cm-tab-file"
+      class="cm-tab"
+      data-mode="file"
+      aria-controls="cm-panel-file"
+      aria-selected="false"
+      tabindex="-1"
+    >
+      <svg aria-hidden="true" viewBox="0 0 16 16" class="cm-icon">
+        <path
+          d="M4 1.75h5l3.25 3.25v9.25H4z M9 1.75V5h3.25"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span class="cm-label">{t('modes.file')}</span>
+      <span class="cm-new">{t('modes.new')}</span>
+    </button>
+  </div>
+
+  <div role="tabpanel" id="cm-panel-text" aria-labelledby="cm-tab-text" class="cm-panel" data-mode-panel="text">
+    <slot />
+    <p class="cm-hint" set:html={render(t('modes.hint', { href: fileHref }))} />
+  </div>
+
+  <div role="tabpanel" id="cm-panel-file" aria-labelledby="cm-tab-file" class="cm-panel" data-mode-panel="file">
+    <DocumentConverter direction={direction} embedded />
+  </div>
+
+  {/* Shown only while a file is dragged over the page. Fixed, so it moves nothing. */}
+  <div class="cm-overlay" data-drop-overlay aria-hidden="true">
+    <div class="cm-overlay-box">
+      <svg viewBox="0 0 24 24" class="cm-overlay-icon">
+        <path
+          d="M6 2.5h8l4.5 4.5v14.5H6z M14 2.5V7h4.5 M12 11v6 M9.5 14.5 12 17l2.5-2.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
+      </svg>
+      <p class="cm-overlay-title">{t('modes.drop')}</p>
+      <p class="cm-overlay-sub" set:html={render(t('doc.limits'))} />
+    </div>
+  </div>
+</div>
+
+<script>
+  type Mode = 'text' | 'file';
+  const KEY = 'mkd-convert-mode';
+
+  const root = document.querySelector<HTMLElement>('[data-convert-modes]');
+  if (root) {
+    const html = document.documentElement;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const docRoot = root.querySelector<HTMLElement>('[data-doc-converter]');
+    const overlay = root.querySelector<HTMLElement>('[data-drop-overlay]')!;
+    const still = matchMedia('(prefers-reduced-motion: reduce)');
+
+    const current = (): Mode => (html.dataset.cvMode === 'file' ? 'file' : 'text');
+
+    /** Show a tab. A visitor's own choice is remembered and put in the URL. */
+    function setMode(mode: Mode, { chosen = true, focus = false } = {}) {
+      html.dataset.cvMode = mode;
+      for (const tab of tabs) {
+        const on = tab.dataset.mode === mode;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        if (on && focus) tab.focus({ preventScroll: true });
+      }
+      if (!chosen) return;
+      try {
+        localStorage.setItem(KEY, mode);
+      } catch {
+        // Not remembered; the tab still switches.
+      }
+      const url = new URL(location.href);
+      if (mode === 'file') url.searchParams.set('mode', 'file');
+      else url.searchParams.delete('mode');
+      if (url.hash === '#convert-document') url.hash = '';
+      history.replaceState(history.state, '', url);
+    }
+
+    /** Bring the tabs back on screen if the visitor has scrolled past them. */
+    function reveal() {
+      if (root!.getBoundingClientRect().top < 0) {
+        root!.scrollIntoView({ block: 'start', behavior: still.matches ? 'auto' : 'smooth' });
+      }
+    }
+
+    // The inline script chose the tab; put the ARIA state in step with it.
+    setMode(current(), { chosen: false });
+
+    for (const tab of tabs) tab.addEventListener('click', () => setMode(tab.dataset.mode as Mode));
+
+    // Arrow keys move between the tabs (and show the one focused), Home/End jump.
+    root.querySelector('[role="tablist"]')!.addEventListener('keydown', (e) => {
+      const ev = e as KeyboardEvent;
+      const i = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      const next =
+        ev.key === 'ArrowRight' ? (i + 1) % tabs.length
+        : ev.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length
+        : ev.key === 'Home' ? 0
+        : ev.key === 'End' ? tabs.length - 1
+        : -1;
+      if (next < 0) return;
+      ev.preventDefault();
+      setMode(tabs[next].dataset.mode as Mode, { focus: true });
+    });
+
+    // A ?mode= link to THIS page (the hint, the link lower down, a home card)
+    // switches the tab in place instead of reloading.
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a) return;
+      const url = new URL(a.href, location.href);
+      const mode = url.searchParams.get('mode');
+      if (url.origin !== location.origin || url.pathname !== location.pathname) return;
+      if (mode !== 'file' && mode !== 'text') return;
+      e.preventDefault();
+      setMode(mode, { focus: true });
+      reveal();
+    });
+
+    // A file dragged anywhere onto the page: an overlay, and on drop the
+    // Upload tab takes it - through the document converter's own checks, so
+    // an unsupported file gets its usual message. Text dragged inside the
+    // page (no "Files") is left alone.
+    const hasFiles = (e: DragEvent) => !!e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+    let depth = 0;
+    const hide = () => {
+      depth = 0;
+      delete overlay.dataset.on;
+    };
+    addEventListener('dragenter', (e) => {
+      if (!hasFiles(e)) return;
+      depth++;
+      overlay.dataset.on = 'true';
+    });
+    addEventListener('dragover', (e) => {
+      if (!hasFiles(e)) return;
+      // Without this the browser opens the file in the tab instead.
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+      overlay.dataset.on = 'true';
+    });
+    addEventListener('dragleave', (e) => {
+      if (!hasFiles(e)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0 || e.relatedTarget === null) hide();
+    });
+    addEventListener('dragend', hide);
+    addEventListener('drop', (e) => {
+      hide();
+      // The Upload tab's own drop zone already took it.
+      if (e.defaultPrevented || !hasFiles(e)) return;
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0];
+      if (!file || !docRoot) return;
+      setMode('file');
+      reveal();
+      docRoot.dispatchEvent(new CustomEvent('mkd:doc-file', { detail: file }));
+    });
+  }
+</script>
