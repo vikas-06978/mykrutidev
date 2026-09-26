@@ -73,6 +73,7 @@ Edit it, then run `npm run pdfs` and commit the new files in `public/downloads/`
 ```sh
 npx playwright install chromium # once: the browser the build and the browser tests use
 npm test                        # unit tests: converters, typing, translations, feedback API
+npm run test:functions          # bundle the Pages Functions the way Cloudflare does
 npm run build                   # the real build, then the SEO checks
 npm run test:dist               # checks on the built site
 npx playwright test             # browser tests on phone and desktop
@@ -88,6 +89,8 @@ GitHub runs the same steps on every push and pull request
 | `npm run build` | Build the site into `dist/`. Draws the PDFs and share images first and runs the SEO checks after. |
 | `npm test` | Unit tests |
 | `npm run test:dist` | Checks on the built site in `dist/` |
+| `npm run test:functions` | Bundle the Pages Functions (`functions/`) with wrangler 3, as Cloudflare does, and with the current wrangler |
+| `npm run admin-labels` | Regenerate `server/adminLabels.js` after changing the feedback labels in `en.json` |
 | `npx playwright test` | Browser tests on the built site |
 | `npm run pdfs` / `npm run og` | Redraw the printable PDFs / the share images |
 | `npm run i18n:review` | Regenerate `docs/TRANSLATIONS-REVIEW.md` (every string in both languages, side by side) |

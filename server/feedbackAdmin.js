@@ -16,7 +16,8 @@
  */
 import { COLUMNS, RATING_EMOJI, RATINGS, USED, WANTS, toCsv } from '../src/lib/feedback.js';
 import { clientIp, countHit, ensureSchema } from './feedbackApi.js';
-import en from '../src/i18n/en.json' with { type: 'json' };
+// Not en.json itself: see scripts/admin-labels.mjs for why this is a generated module.
+import { LABELS } from './adminLabels.js';
 
 const COOKIE = 'mkd_admin';
 const SESSION_SECONDS = 8 * 3600;
@@ -76,8 +77,8 @@ export async function isAuthorized(request, key) {
 // Pages
 // ---------------------------------------------------------------------------
 
-const label = (group, id) => en.feedback[group]?.[id] ?? id;
-const ratingName = (r) => `${RATING_EMOJI[r] ?? ''} ${en.feedback.ratings[r] ?? r}`;
+const label = (group, id) => LABELS[group]?.[id] ?? id;
+const ratingName = (r) => `${RATING_EMOJI[r] ?? ''} ${LABELS.ratings[r] ?? r}`;
 
 function page(title, body, status = 200, extra = {}) {
   const html = `<!doctype html>
