@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
 import { SITE, isIndexable } from './src/lib/routes.js';
+import pwa from './src/pwa/integration.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -30,6 +31,9 @@ export default defineConfig({
       // Each entry lists its other-language twin (hreflang en / hi).
       i18n: { defaultLocale: 'en', locales: { en: 'en', hi: 'hi' } },
     }),
+    // Installable app: writes dist/sw.js, which keeps every page, font and
+    // script available offline. See src/pwa/.
+    pwa(),
   ],
   // `npm run pdfs` builds the site into a scratch folder to print the PDFs
   // from (scripts/pdfs.mjs); the PDFs themselves land in public/downloads/.

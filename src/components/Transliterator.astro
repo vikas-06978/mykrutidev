@@ -2,6 +2,7 @@
 import { FONTS } from '../lib/fontMaps.js';
 import { MODES, tipsFor } from '../lib/translit.js';
 import { langOf, useT } from '../i18n/index.js';
+import RecentStrip from './RecentStrip.astro';
 
 const { t, render } = useT(langOf(Astro.url));
 
@@ -44,6 +45,7 @@ const strings = {
   nothingToDownload: t('common.nothingToDownload'),
   downloaded: t('common.downloaded'),
   downloadFailed: t('common.downloadFailed'),
+  copiedToast: t('workspace.copiedToast'),
 };
 ---
 
@@ -176,6 +178,8 @@ const strings = {
     {t('translit.engineFailed')}
   </p>
 
+  <RecentStrip />
+
   {/* ------------------------- Spelling tips ------------------------- */}
   <div class="cv-strip bg-inset">
     {
@@ -252,6 +256,8 @@ const strings = {
 <script>
   import type { Typed } from '../lib/romanTyping.js';
   import { fill } from '../i18n/fill.js';
+  import { workspace } from '../scripts/workspace.js';
+  import { toast } from '../scripts/toast.js';
 
   /** The local engine is cheap, so it runs between keystrokes. */
   const DEBOUNCE_MS = 80;
@@ -648,6 +654,7 @@ const strings = {
       copyLabel.textContent = L.copied;
       copyBtn.dataset.copied = 'true';
       say(L.copiedToClipboard);
+      toast(L.copiedToast);
       clearTimeout(reset);
       reset = setTimeout(() => {
         copyLabel.textContent = copyOriginal;
@@ -691,6 +698,10 @@ const strings = {
       void flush();
       input.focus();
     });
+
+    // Draft, Recent and shortcuts - the output here is already Unicode, so
+    // both copy shortcuts press the one Copy button.
+    workspace(root, 'english-to-hindi', { copy: 'copy' });
 
     tick();
   }

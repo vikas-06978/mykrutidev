@@ -55,13 +55,42 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
 */}
 <header class="relative z-50 border-b border-hairline bg-paper">
   <div class="wrap flex items-center justify-between gap-4 py-3">
-    <a
-      href={to('/')}
-      class="shrink-0 text-lg font-semibold tracking-tight text-ink no-underline"
-      translate="no"
-    >
-      My<span class="text-brick">Kruti</span>Dev
-    </a>
+    {/*
+      "Install app" sits right after the logo, never among the controls on the
+      right: those are right-aligned, so anything appearing among them would
+      push them sideways (a layout shift). Here nothing is to its right but
+      free space. Phones get the same offer at the top of the menu panel.
+      Hidden until the browser says the site is installable (src/scripts/app.js).
+    */}
+    <div class="flex shrink-0 items-center gap-3">
+      <a
+        href={to('/')}
+        class="shrink-0 text-lg font-semibold tracking-tight text-ink no-underline"
+        translate="no"
+      >
+        My<span class="text-brick">Kruti</span>Dev
+      </a>
+      <span class="mkd-install mkd-install-bar" data-install hidden>
+        <button type="button" data-install-go class="mkd-install-go" title={t('app.installTitle')}>
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="size-4 shrink-0">
+            <path
+              d="M10 3v9m0 0-3.5-3.5M10 12l3.5-3.5M4 14.5V16h12v-1.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="mkd-install-label">{t('app.install')}</span>
+        </button>
+        <button type="button" data-install-dismiss class="mkd-install-x" aria-label={t('app.dismiss')} title={t('app.dismiss')}>
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="size-3.5">
+            <path d="M5 5l10 10M15 5 5 15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+        </button>
+      </span>
+    </div>
 
     <div class="flex min-w-0 items-center gap-2 lg:gap-3">
 
@@ -379,6 +408,27 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
     class="border-t border-hairline bg-surface md:hidden"
   >
     <ul class="wrap divide-y divide-hairline-soft py-1">
+      {/* The same offer as the desktop bar's, where a phone has room for it. */}
+      <li class="mkd-install mkd-install-panel" data-install hidden>
+        <button type="button" data-install-go class="btn btn-outline flex-1 gap-2">
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="size-4 shrink-0">
+            <path
+              d="M10 3v9m0 0-3.5-3.5M10 12l3.5-3.5M4 14.5V16h12v-1.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          {t('app.install')}
+        </button>
+        <button type="button" data-install-dismiss class="mkd-install-x size-11" aria-label={t('app.dismiss')} title={t('app.dismiss')}>
+          <svg aria-hidden="true" viewBox="0 0 20 20" class="size-4">
+            <path d="M5 5l10 10M15 5 5 15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+        </button>
+      </li>
       {
         groups.map((g) => (
           <li>
@@ -556,6 +606,10 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
 </style>
 
 <script>
+  // The service worker and the "Install app" button. Here because the header
+  // is on every page and so is this script.
+  import '../scripts/app.js';
+
   // Progressive enhancement. With JS off the desktop menus stay closed, so the
   // mobile accordion (native <details>) and /all-converters remain the way in.
   const nav = document.querySelector<HTMLElement>('[data-desktop-nav]');

@@ -208,6 +208,9 @@
     .hand-palm,
     .hand-finger,
     .fb-btn,
+    .tt-reset,
+    .mkd-install-go,
+    .cv-recent-item,
     .transition-colors
   ) {
   transition: none !important;

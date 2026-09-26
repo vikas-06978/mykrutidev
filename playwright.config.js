@@ -17,6 +17,10 @@ export default defineConfig({
   use: {
     baseURL: external ?? `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
+    // The built site registers a service worker, which would answer requests
+    // before page.route() sees them. Only e2e/app.spec.js, which tests the
+    // worker itself, lets it run.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },

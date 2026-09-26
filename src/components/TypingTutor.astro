@@ -3,6 +3,7 @@ import { PASSAGES, DURATIONS } from '../lib/passages.js';
 import { LEVELS, levelText } from '../lib/lessons.js';
 import { buildVerifiedUnits } from '../lib/tutor.build.js';
 import { FINGERS } from '../lib/remington.js';
+import { BADGES } from '../lib/habit.js';
 import RemingtonKeyboard from './RemingtonKeyboard.astro';
 import HandGuide from './HandGuide.astro';
 import { langOf, useT, raw } from '../i18n/index.js';
@@ -72,6 +73,8 @@ const strings = raw(lang, 'tutor');
         <span id="tt-mode" class="cv-seg-label">{t('tutor.mode')}</span>
         <button type="button" data-mode="lesson" aria-pressed="true">{t('tutor.lessons')}</button>
         <button type="button" data-mode="practice" aria-pressed="false">{t('tutor.practice')}</button>
+        <button type="button" data-mode="daily" aria-pressed="false">{t('tutor.today')}</button>
+        <button type="button" data-mode="exam" aria-pressed="false">{t('tutor.exam')}</button>
       </div>
 
       {/* Practice only: a lesson ends when the drill does, not on a clock. */}
@@ -92,6 +95,8 @@ const strings = raw(lang, 'tutor');
         }
       </div>
     </div>
+    {/* What Today's practice and the Exam are, shown in those modes only. */}
+    <p data-role="mode-note" class="tt-mode-note" hidden></p>
     <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <p class="text-xs text-mute">{t('tutor.layoutNote')}</p>
 
@@ -116,9 +121,6 @@ const strings = raw(lang, 'tutor');
   <div data-role="levels-wrap" class="tt-levels-wrap">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
       <span class="cv-eyebrow">{t('tutor.lessons')}</span>
-      <button type="button" data-role="reset-progress" class="tt-reset">
-        {t('tutor.resetProgress')}
-      </button>
     </div>
 
     <div data-role="levels" class="tt-levels" role="group" aria-label={t('tutor.lessons')}>
@@ -225,7 +227,12 @@ const strings = raw(lang, 'tutor');
     <div class="tt-passage" data-role="passage" translate="no">
       {/* Filled by the client: the passage is chosen at random per visit, so
           rendering one here would give every visitor the same paragraph. */}
-      <p data-role="line" class="tt-line"></p>
+      <p data-role="line" class="tt-line">
+        {/* Placeholder lines until the passage is drawn - never an empty box. */}
+        <span class="mkd-skel tt-skel" aria-hidden="true"></span>
+        <span class="mkd-skel tt-skel" aria-hidden="true"></span>
+        <span class="mkd-skel tt-skel tt-skel-short" aria-hidden="true"></span>
+      </p>
     </div>
 
     {/*
@@ -320,6 +327,21 @@ const strings = raw(lang, 'tutor');
       <p class="text-xs font-semibold tracking-wide text-mute uppercase">{t('tutor.missedMost')}</p>
       <div data-role="missed" class="kb-hints mt-2" translate="no"></div>
     </div>
+
+    {/* An image of the result, shared through the phone's own share sheet
+        (WhatsApp is one tap away there) or downloaded where there is none. */}
+    <button type="button" data-role="share" class="btn btn-outline mt-4 gap-2" hidden>
+      <svg aria-hidden="true" viewBox="0 0 20 20" class="size-4 shrink-0">
+        <path
+          d="M14 6.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5zM6 12.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5zM14 18a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5zM8 11.1l4 2.3M12 5.6 8 7.9"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </svg>
+      {t('tutor.share')}
+    </button>
   </div>
 
   <p class="cv-strip bg-surface text-xs leading-relaxed text-mute">
@@ -327,6 +349,70 @@ const strings = raw(lang, 'tutor');
     {t('tutor.privacyBody')}
   </p>
 </div>
+
+{/* ---------------------------- Your progress ---------------------------- */}
+{/*
+  Rendered whole with placeholder values ("–") and a fixed-height chart box,
+  then filled from this device's storage: the panel is the same size before
+  and after the script runs, so nothing below it moves (CLS 0).
+*/}
+<section class="tt-me card" data-tutor-progress aria-labelledby="tt-me-h">
+  <div class="tt-me-head">
+    <h2 id="tt-me-h" class="text-lg">{t('tutor.pTitle')}</h2>
+    <p class="text-xs text-mute">{t('tutor.pDevice')}</p>
+  </div>
+
+  <div class="tt-me-streak">
+    <span class="tt-me-flame" aria-hidden="true">
+      <svg viewBox="0 0 20 20" class="size-6">
+        <path
+          d="M10 18c3.3 0 5.5-2.3 5.5-5.4 0-3.3-2.6-5.2-3.4-8.6-.2-.8-1.1-1.1-1.6-.4C9 5.6 9.4 8 8.6 8.6c-.6.4-1.3-.4-1.4-1.3-.1-.7-.9-1-1.4-.4-.8 1.2-1.3 2.9-1.3 4.6C4.5 15.7 6.7 18 10 18z"
+          fill="currentColor"
+        />
+      </svg>
+    </span>
+    <span>
+      <span class="tt-me-streak-n"><span data-p="streak" class="mkd-skel-text">–</span> <span class="text-sm font-normal text-body">{t('tutor.pStreak')}</span></span>
+      <span data-p="streak-note" class="block text-xs text-mute">{t('tutor.pStreakStart')}</span>
+    </span>
+  </div>
+
+  <dl class="tt-me-stats">
+    <div class="tt-me-stat"><dt>{t('tutor.pBest')}</dt><dd data-p="best">–</dd></div>
+    <div class="tt-me-stat"><dt>{t('tutor.pAcc')}</dt><dd data-p="acc">–</dd></div>
+    <div class="tt-me-stat"><dt>{t('tutor.pLessons')}</dt><dd data-p="lessons">–</dd></div>
+    <div class="tt-me-stat"><dt>{t('tutor.pMinutes')}</dt><dd data-p="minutes">–</dd></div>
+  </dl>
+
+  <figure class="tt-chart">
+    <figcaption class="cv-eyebrow" data-p="chart-title">{t('tutor.pChartTitle', { n: 30 })}</figcaption>
+    <div class="tt-chart-box" data-p="chart">
+      <p data-p="chart-empty" class="tt-chart-empty">{t('tutor.pChartEmpty')}</p>
+    </div>
+  </figure>
+
+  <div class="tt-me-badges">
+    <span class="cv-eyebrow">{t('tutor.pBadges')}</span>
+    <ul class="tt-badges">
+      {
+        BADGES.map(({ id }) => (
+          <li class="tt-badge" data-badge={id} data-earned="false" title={t('tutor.badgeLocked')}>
+            <span class="tt-badge-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" class="size-4">
+                <path d="M10 2.5l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 7.8l5-.7z" fill="currentColor" />
+              </svg>
+            </span>
+            <span>{t(`tutor.badges.${id}`)}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="tt-me-foot">
+    <button type="button" data-role="reset-progress" class="tt-reset">{t('tutor.resetProgress')}</button>
+  </div>
+</section>
 
 <script
   type="application/json"
@@ -349,6 +435,8 @@ const strings = raw(lang, 'tutor');
   import { locate } from '../lib/remington.js';
   import { planPassages, JOINER, DURATIONS } from '../lib/passages.js';
   import { fill } from '../i18n/fill.js';
+  import { dailyIndex, dayKey } from '../lib/habit.js';
+  import { progressPanel, shareResult } from '../scripts/progress.js';
 
   type Unit = { deva: string; keys: string };
   type Passage = { id: string; title: string; units: Unit[] };
@@ -361,7 +449,13 @@ const strings = raw(lang, 'tutor');
     threshold: number;
     units: Unit[];
   };
-  type Mode = 'lesson' | 'practice';
+  /**
+   * lesson: the ladder. practice: a timed test of the chosen length.
+   * daily: "Today's practice", one passage per date, the same for everyone.
+   * exam: a fixed 10-minute test with no pause, scored like SSC / CPCT.
+   */
+  type Mode = 'lesson' | 'practice' | 'daily' | 'exam';
+  const EXAM_SECONDS = 600;
 
   /** Live stats tick. Fast enough to feel continuous, cheap enough to be free. */
   const TICK_MS = 200;
@@ -472,6 +566,7 @@ const strings = raw(lang, 'tutor');
     const newBtn = q<HTMLButtonElement>('new');
     const submitBtn = q<HTMLButtonElement>('submit');
     const durationGroup = q<HTMLElement>('duration');
+    const modeNote = q<HTMLElement>('mode-note');
 
     const levelChips = new Map<string, HTMLButtonElement>();
     for (const chip of root.querySelectorAll<HTMLButtonElement>('[data-level]')) {
@@ -481,6 +576,9 @@ const strings = raw(lang, 'tutor');
     let mode: Mode = 'lesson';
     let levelId = LEVELS[0].id;
     let seconds = DURATIONS[0].value;
+    /** The two modes that run on a clock and end when it runs out. */
+    const timed = () => mode === 'practice' || mode === 'exam';
+    const testSeconds = () => (mode === 'exam' ? EXAM_SECONDS : seconds);
 
     /** The lesson: aksharas to read, keystrokes to press. */
     let units: Unit[] = [];
@@ -577,6 +675,16 @@ const strings = raw(lang, 'tutor');
 
     let progress = readProgress();
 
+    // "Your progress": streak, minutes, chart, badges (src/scripts/progress.js).
+    const me = progressPanel(document.querySelector<HTMLElement>('[data-tutor-progress]'), L);
+    const ctx = () => ({
+      lessonsDone: progress.done.length,
+      lessonsTotal: LEVELS.length,
+      legacyBest: Math.max(readBest(), ...Object.values(progress.best).map(Math.round)),
+    });
+    const shareBtn = q<HTMLButtonElement>('share');
+    let lastResult = { wpm: 0, acc: 0 };
+
     /** The first level is always open; each other needs the one before it. */
     function unlocked(id: string) {
       const i = LEVELS.findIndex((l) => l.id === id);
@@ -596,11 +704,17 @@ const strings = raw(lang, 'tutor');
         units = level.units;
         titleEl.textContent = level.title;
         levelFocus.textContent = level.focus;
+      } else if (mode === 'daily') {
+        // By the visitor's own calendar date: everyone typing on the 26th
+        // gets the same passage, and it changes at their midnight.
+        const p = PASSAGES[dailyIndex(dayKey(), PASSAGES.length)];
+        units = p.units;
+        titleEl.textContent = fill(L.todayTitle, { title: p.title });
       } else {
         // Sized in KEYSTROKES, not aksharas. They are not the same count - भा
         // is one akshara and three keys - and the clock is spent on keystrokes.
         const order = planPassages(
-          seconds,
+          testSeconds(),
           PASSAGES.map((p) => p.units.reduce((n, u) => n + u.keys.length, 0)),
         );
 
@@ -962,7 +1076,8 @@ const strings = raw(lang, 'tutor');
       // is the one moment a tutor should not make you use the mouse.
       if (e.key === 'Escape') {
         e.preventDefault();
-        pause();
+        // An exam, like the real one, cannot be paused.
+        if (mode !== 'exam') pause();
         return;
       }
       if (e.key === 'Enter') e.preventDefault();
@@ -986,7 +1101,7 @@ const strings = raw(lang, 'tutor');
     // ----------------------------------------------------------------------
 
     const elapsed = () => accumulated + (running ? Date.now() - segmentStart : 0);
-    const remaining = () => Math.max(0, seconds * 1000 - elapsed());
+    const remaining = () => Math.max(0, testSeconds() * 1000 - elapsed());
 
     function start() {
       if (running || done) return;
@@ -994,7 +1109,7 @@ const strings = raw(lang, 'tutor');
       paused = false;
       segmentStart = Date.now();
       root.dataset.state = 'running';
-      pauseBtn.hidden = false;
+      pauseBtn.hidden = mode === 'exam';
       pauseBtn.textContent = L.pause;
       ticker = setInterval(tick, TICK_MS);
     }
@@ -1032,7 +1147,7 @@ const strings = raw(lang, 'tutor');
     function tick() {
       updateStats();
       // A lesson has no clock to run out: it ends when the drill is typed.
-      if (mode === 'practice' && remaining() <= 0) finish('time');
+      if (timed() && remaining() <= 0) finish('time');
     }
 
     /**
@@ -1066,10 +1181,8 @@ const strings = raw(lang, 'tutor');
 
       // Practice counts down to a deadline; a lesson counts up, because there
       // is no deadline and a falling number would invent one.
-      timeEl.textContent = formatClock(mode === 'practice' ? remaining() : elapsed());
-      statTime.dataset.low = String(
-        mode === 'practice' && running && remaining() <= 10_000,
-      );
+      timeEl.textContent = formatClock(timed() ? remaining() : elapsed());
+      statTime.dataset.low = String(timed() && running && remaining() <= 10_000);
       wpmEl.textContent = String(Math.round(s.net));
       accEl.textContent = `${Math.round(s.accuracy)}%`;
       errEl.textContent = String(s.wrong);
@@ -1133,36 +1246,56 @@ const strings = raw(lang, 'tutor');
       const note = q('result-note');
       nextLevelBtn.hidden = true;
 
+      // A best speed is only meaningful over a run that went the distance.
+      // Submitting after four words would otherwise post a flattering number
+      // that no full-length attempt could ever beat.
+      const ranks = mode === 'lesson' || mode === 'daily' ? s.complete : reason !== 'submitted' || s.complete;
+      const acc = Math.round(s.accuracy);
+
       if (mode === 'lesson') {
         recordLesson(s, net, note, reason);
+      } else if (mode === 'daily') {
+        q('result-title').textContent = s.complete ? L.passageFinished : L.yourResult;
+        note.textContent = s.complete ? L.todayDone : fill(L.partial, { acc, through: Math.round((s.typed / expected.length) * 100) });
       } else {
         const best = readBest();
         q('result-title').textContent =
-          reason === 'passage'
-            ? L.passageFinished
-            : reason === 'submitted'
-              ? L.yourResult
-              : L.timesUp;
+          mode === 'exam'
+            ? L.examResult
+            : reason === 'passage'
+              ? L.passageFinished
+              : reason === 'submitted'
+                ? L.yourResult
+                : L.timesUp;
 
-        // A best speed is only meaningful over a run that went the distance.
-        // Submitting after four words would otherwise post a flattering number
-        // that no full-length attempt could ever beat.
-        const ranks = reason !== 'submitted' || s.complete;
-
-        if (ranks && net > best) {
-          writeBest(net);
-          note.textContent =
-            best > 0 ? fill(L.newBest, { best }) : L.savedBest;
-        } else if (!ranks) {
-          note.textContent =
-            fill(L.submittedShort, { time: formatClock(elapsed()) }) +
-            (best > 0 ? fill(L.submittedShortBest, { best }) : L.submittedShortEnd);
-        } else if (best > 0) {
-          note.textContent = fill(L.yourBest, { best });
+        if (mode === 'exam') {
+          // The exam's score line comes first; the best-speed note follows.
+          note.textContent = fill(L.examScore, { wpm: net, acc }) + ' ';
         } else {
           note.textContent = '';
         }
+        const append = (text: string) => (note.textContent += text);
+
+        if (ranks && net > best) {
+          writeBest(net);
+          append(best > 0 ? fill(L.newBest, { best }) : L.savedBest);
+        } else if (!ranks) {
+          append(
+            fill(L.submittedShort, { time: formatClock(elapsed()) }) +
+              (best > 0 ? fill(L.submittedShortBest, { best }) : L.submittedShortEnd),
+          );
+        } else if (best > 0) {
+          append(fill(L.yourBest, { best }));
+        }
       }
+
+      // Into the long-term record: streak, minutes, chart, badges.
+      me.record(
+        { mode, wpm: net, acc, ms: elapsed(), typed: s.typed, ranked: ranks, complete: s.complete },
+        ctx(),
+      );
+      lastResult = { wpm: net, acc };
+      shareBtn.hidden = net <= 0;
 
       result.hidden = false;
       result.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -1241,6 +1374,7 @@ const strings = raw(lang, 'tutor');
       capture.value = '';
       result.hidden = true;
       nextLevelBtn.hidden = true;
+      shareBtn.hidden = true;
       pauseBtn.hidden = true;
       pauseBtn.textContent = L.pause;
       veilText.textContent = L.veil;
@@ -1264,11 +1398,20 @@ const strings = raw(lang, 'tutor');
 
       const lesson = next === 'lesson';
       levelsWrap.hidden = !lesson;
-      durationGroup.hidden = lesson;
-      timeLabel.textContent = lesson ? L.time : L.timeLeft;
+      // The exam's length is the exam's; only a practice test picks one.
+      durationGroup.hidden = next !== 'practice';
+      timeLabel.textContent = timed() ? L.timeLeft : L.time;
       // "New passage" makes no sense on a fixed drill - a lesson is the same
-      // text every time, which is the point of practising it.
-      newBtn.hidden = lesson;
+      // text every time, which is the point of practising it - nor on
+      // today's passage, which is the one for today.
+      newBtn.hidden = lesson || next === 'daily';
+      modeNote.hidden = next !== 'daily' && next !== 'exam';
+      modeNote.textContent =
+        next === 'exam'
+          ? L.examNote
+          : next === 'daily'
+            ? L.todayNote + (me.habit.dailyDone === dayKey() ? ` ${L.todayDone}` : '')
+            : '';
 
       renderLevels();
       reset({ newPassage: true });
@@ -1373,7 +1516,10 @@ const strings = raw(lang, 'tutor');
      * with a button rather than confirm(), which blocks the page and reads as
      * a browser error to anyone who did not expect it.
      */
-    const resetBtn = q<HTMLButtonElement>('reset-progress');
+    // In the "Your progress" panel, below the tutor card.
+    const resetBtn = document.querySelector<HTMLButtonElement>(
+      '[data-tutor-progress] [data-role="reset-progress"]',
+    )!;
     let armed = false;
     let disarm: ReturnType<typeof setTimeout> | undefined;
 
@@ -1396,13 +1542,39 @@ const strings = raw(lang, 'tutor');
       resetBtn.textContent = L.resetProgress;
       delete resetBtn.dataset.armed;
 
+      // Everything this device remembers about the typist: the ladder, the
+      // best speed, and the streak / minutes / chart / badges. Not the sound
+      // setting - that is a preference, not progress.
       progress = { done: [], best: {} };
-      writeProgress(progress);
+      try {
+        localStorage.removeItem(PROGRESS_KEY);
+        localStorage.removeItem(BEST_KEY);
+      } catch {
+        // Storage blocked: there was nothing stored to erase.
+      }
       levelId = LEVELS[0].id;
-      renderLevels();
-      reset({ newPassage: true });
+      me.reset(ctx());
+      if (mode === 'lesson') {
+        renderLevels();
+        reset({ newPassage: true });
+      } else {
+        setMode('lesson');
+      }
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      if (lastResult.wpm <= 0) return;
+      shareBtn.disabled = true;
+      try {
+        await shareResult({ ...lastResult, L });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        shareBtn.disabled = false;
+      }
     });
 
     setMode('lesson');
+    me.render(ctx());
   }
 </script>

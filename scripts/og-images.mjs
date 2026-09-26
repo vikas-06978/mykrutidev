@@ -63,6 +63,18 @@ html, body { width: 512px; height: 512px; background: #a8442a; }
 .w { position: absolute; left: 0; right: 0; bottom: 46px; text-align: center; font: 700 50px/1 Latin; color: #faf7f2; }
 </style><body><div class="l">क</div><div class="w">MyKrutiDev</div></body>`;
 
+const APP_ICONS = [
+  { file: 'icon-192.png', size: 192, glyph: 0.66 },
+  { file: 'icon-512.png', size: 512, glyph: 0.66 },
+  { file: 'icon-maskable-512.png', size: 512, glyph: 0.5 },
+  { file: 'apple-touch-icon.png', size: 180, glyph: 0.62 },
+];
+
+const appIcon = ({ size, glyph }) => `<!doctype html><meta charset="utf-8"><style>${STYLE}
+html, body { width: ${size}px; height: ${size}px; background: #a8442a; }
+.l { position: absolute; inset: 0; display: grid; place-items: center; font: 700 ${Math.round(size * glyph)}px/1 Deva; color: #faf7f2; padding-bottom: ${Math.round(size * 0.04)}px; }
+</style><body><div class="l">क</div></body>`;
+
 const browser = await chromium.launch();
 const written = [];
 let same = 0;
@@ -108,6 +120,18 @@ try {
   await tab.goto('http://og.local/');
   await tab.evaluate(() => document.fonts.ready);
   save('logo.png', await tab.screenshot({ type: 'png' }));
+
+  // The installed app's icons (public/manifest.json). No wordmark: the name is
+  // printed under the icon by the phone, and at 48px it would be a smudge.
+  // The maskable one keeps the letter inside the central 80% circle that every
+  // launcher shape is guaranteed to show.
+  for (const icon of APP_ICONS) {
+    await tab.setViewportSize({ width: icon.size, height: icon.size });
+    html = appIcon(icon);
+    await tab.goto('http://og.local/');
+    await tab.evaluate(() => document.fonts.ready);
+    save(join('..', 'icons', icon.file), await tab.screenshot({ type: 'png' }));
+  }
 
   // Images for pages that no longer exist.
   const want = new Set([...entries.map((e) => e.file.replace(/\\/g, '/')), 'logo.png']);

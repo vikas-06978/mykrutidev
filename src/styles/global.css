@@ -71,6 +71,10 @@
 @import './themes.css';
 @import './accents.css';
 
+/* Install button, toast, converter Recent strip, the tutor's progress panel
+   and the shared press/focus feedback. Last, so its small overrides win. */
+@import './app.css';
+
 /* ===========================================================================
    Design tokens - see DESIGN.md
    Deep navy ink on warm paper, muted brick accent. Trustworthy, not flashy.

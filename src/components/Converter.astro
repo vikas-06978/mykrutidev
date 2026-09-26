@@ -2,6 +2,7 @@
 import { FONTS, boxLabel, codeLabel } from '../lib/fontMaps.js';
 import { previewFontFor } from '../lib/legacyFonts.js';
 import { langOf, useT } from '../i18n/index.js';
+import RecentStrip from './RecentStrip.astro';
 
 interface Props {
   from: string;
@@ -49,6 +50,7 @@ const strings = {
   downloadFailed: t('common.downloadFailed'),
   nothingToShare: t('common.nothingToShare'),
   sharingFirst: t('converter.sharingFirst'),
+  copiedToast: t('workspace.copiedToast'),
 };
 
 // Derived from the props rather than a counter, so ids stay stable across
@@ -272,6 +274,8 @@ const previewStack = previewFont?.stack ?? toFont.css;
   */}
   <p data-role="hint" hidden class="cv-hint"></p>
 
+  <RecentStrip font={fromFont.css} unicodeCopy={outputIsLegacy} />
+
   <div class="cv-strip bg-inset">
     <label class="flex items-start gap-2.5 text-body">
       <input
@@ -311,6 +315,8 @@ const previewStack = previewFont?.stack ?? toFont.css;
   import { convert, FONTS, describeMismatch, unmappedChars } from '../lib/fontMaps.js';
   import { previewFontFor } from '../lib/legacyFonts.js';
   import { fill } from '../i18n/fill.js';
+  import { workspace } from '../scripts/workspace.js';
+  import { toast } from '../scripts/toast.js';
 
   const WHATSAPP_LIMIT = 2000;
 
@@ -562,6 +568,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
         label.textContent = L.copied;
         btn.dataset.copied = 'true';
         say(L.copiedToClipboard);
+        toast(L.copiedToast);
         clearTimeout(reset);
         reset = setTimeout(() => {
           label.textContent = original;
@@ -634,6 +641,13 @@ const previewStack = previewFont?.stack ?? toFont.css;
       input.value = (e.currentTarget as HTMLElement).dataset.sample || '';
       countIn.textContent = String(input.value.length);
       flush();
+    });
+
+    // Draft, Recent and shortcuts. Before the first conversion, so a text
+    // kept from the last visit is converted like one just typed.
+    workspace(root, `${from}-${to}`, {
+      copy: 'copy-raw',
+      unicode: outputIsLegacy ? 'copy-unicode' : undefined,
     });
 
     tick();

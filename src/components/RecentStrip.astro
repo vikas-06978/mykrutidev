@@ -1,0 +1,52 @@
+---
+import { langOf, useT } from '../i18n/index.js';
+
+/**
+ * "Recent" (the last 10 texts converted here, on this device only) and the
+ * keyboard-shortcut tip, as one strip inside a converter card. The behaviour
+ * is src/scripts/workspace.js; this is only the markup.
+ *
+ * Rendered whole and collapsed, with its count filled in later, so the strip
+ * is the same height before and after the script runs (CLS 0). The shortcut
+ * tip is for keyboards only: hidden by CSS on touch screens.
+ */
+interface Props {
+  /** CSS font stack for the saved texts - a legacy font shows its own letters. */
+  font?: string;
+  /** Show Ctrl+Shift+C: only where "Copy as Unicode" is its own button. */
+  unicodeCopy?: boolean;
+}
+
+const { font, unicodeCopy = false } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+const L = {
+  restore: t('workspace.restore'),
+  restored: t('workspace.restored'),
+  deleted: t('workspace.deleted'),
+};
+---
+
+<div class="cv-strip cv-tools">
+  <details class="cv-recent" data-recent data-i18n={JSON.stringify(L)} style={font ? `--recent-font:${font}` : undefined}>
+    <summary class="cv-recent-sum">
+      <svg aria-hidden="true" viewBox="0 0 10 6" class="cv-recent-chev">
+        <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="font-medium text-ink">{t('workspace.recent')}</span>
+      <span data-recent-count class="cv-count">0</span>
+      <span class="cv-recent-note">· {t('workspace.deviceOnly')}</span>
+    </summary>
+    <div class="cv-recent-body">
+      <p data-recent-empty class="text-xs text-mute">{t('workspace.empty')}</p>
+      <ul data-recent-list class="cv-recent-list" hidden></ul>
+      <button type="button" data-recent-clear class="tt-reset mt-2" hidden>{t('workspace.deleteAll')}</button>
+    </div>
+  </details>
+
+  <p class="cv-keys">
+    <span>{t('workspace.shortcuts')}</span>
+    <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> {t('workspace.scCopy')}</span>
+    {unicodeCopy && <span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> {t('workspace.scUnicode')}</span>}
+    <span><kbd>Esc</kbd> {t('workspace.scClear')}</span>
+  </p>
+</div>

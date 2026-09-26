@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MyKrutiDev",
+  "short_name": "कृतिदेव",
+  "description": "कृतिदेव और यूनिकोड कन्वर्टर, हिंदी टाइपिंग ट्यूटर और हिंदी कीबोर्ड। मुफ़्त, बिना इंटरनेट भी चलता है, कुछ भी आपके डिवाइस से बाहर नहीं जाता।",
+  "lang": "hi",
+  "dir": "ltr",
+  "start_url": "/hi",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
