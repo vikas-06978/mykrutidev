@@ -3,51 +3,115 @@
 Free Hindi font converters and typing tools, in English and Hindi, at
 [mykrutidev.com](https://mykrutidev.com).
 
-- **Converters** between Kruti Dev, DevLys, Mangal, Unicode and Abbasi
-  Chanakya, with the matra order, reph and conjuncts handled correctly.
-- **Word file conversion** (.docx and .txt) that changes only the Hindi and
-  keeps English, tables and formatting as they were.
-- **Typing tools**: a Remington typing tutor and timed tests, an on-screen
-  Hindi keyboard, English to Hindi (Hinglish) typing, and printable charts
-  and practice sheets.
-- **Guides** to the problems people bring: fonts showing as English letters,
-  boxes or question marks, Word files, exam typing.
+Many Indian offices, typing exams and DTP shops still use old "legacy" Hindi
+fonts such as Kruti Dev, where Hindi is stored as English letters
+(`Hkkjr` for भारत). Phones, email and government portals need Unicode Hindi.
+This site converts between the two correctly (matra order, reph, half letters
+and conjuncts), including whole Word files, and teaches Hindi typing on the
+Remington layout that exams use.
 
-Everything runs in the browser, and the converters keep working offline once a
-page has loaded. Text and files are not uploaded. The one exception is
-Hinglish typing, which asks Google's input service how to spell each word, as
-the privacy policy explains.
+## What is on the site
 
-## Tech
+| | Pages |
+| :-- | :-- |
+| **Converters** | Kruti Dev ↔ Unicode (the home page) · Kruti Dev ↔ Mangal · DevLys ↔ Unicode · DevLys ↔ Mangal · Abbasi Chanakya ↔ Unicode (beta) |
+| **Word files** | Upload a `.docx` or `.txt` on the Kruti Dev ↔ Unicode and Kruti Dev ↔ Mangal pages. Only the Hindi changes, and English, tables and formatting stay as they were. |
+| **Typing** | Typing tutor and timed tests, Hindi typing test for exams, on-screen Hindi keyboard, Remington keyboard, English to Hindi (Hinglish) typing |
+| **Printables** | Keyboard chart, finger chart, matra and conjunct chart, practice sheets, progress log (free PDFs) |
+| **Help** | 8 guides (font not installed, boxes or question marks, Word files, exam tips...) and pages on Kruti Dev 010, typing Hindi in MS Word and more |
 
-[Astro](https://astro.build) (static output) and Tailwind CSS v4, hosted on
-Cloudflare Pages. The feedback form is the only server part: a Pages Function
-with a D1 database and Turnstile.
+Every page exists in English at `/page` and in Hindi at `/hi/page`. Converters
+that are not verified yet are listed as "coming soon" and hidden from search
+engines.
+
+**Privacy:** conversion happens in the visitor's browser, so text and files are
+not uploaded, and the converters work offline once visited. The one exception
+is Hinglish typing, which asks Google's input service how to spell each word.
+The feedback form sends what the person writes in it, plus the basic page and
+device details listed in the site's privacy policy.
 
 ## Getting started
 
-Needs Node 24 (see `.nvmrc`).
+You need [Node.js 24](https://nodejs.org) (the version is in `.nvmrc`).
 
 ```sh
-npm install
-npm run dev          # http://localhost:4321
+npm ci               # install everything (first time, or after package.json changes)
+npm run dev          # start the site at http://localhost:4321
 ```
 
-## Commands
+The page reloads as you edit. Stop the server with <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+If it says another dev server is already running, run `npx astro dev stop`.
+
+## How do I...
+
+**Change the words on a page?**
+Every word on the site is in two files: `src/i18n/en.json` (English) and
+`src/i18n/hi.json` (Hindi), under the same key. A page's text is under
+`pages["/its-path"]`. Change both files, then run `npm test`. It fails if a key
+is missing in one language, or if a link, code example or `{placeholder}`
+differs between them.
+
+**Add a new page?**
+1. Add it to `PAGES` in `src/lib/routes.js` (its path, kind and related pages).
+2. Add its text under `pages["/new-path"]` in both `en.json` and `hi.json`.
+3. Copy a small page file, such as `src/pages/kruti-dev-to-mangal.astro`, to
+   `src/pages/new-path.astro` and change the path in it.
+4. Run `npm run build` and commit the new share images it draws in `public/og/`.
+
+The Hindi page and the sitemap entry follow automatically.
+
+**Write a new guide?**
+Add its slug, date and three related tools to `GUIDES` in `src/lib/guides.js`,
+and its title, description and body under `articles["the-slug"]` in both JSON
+files. Then run `npm run build` (it checks each guide has at least 550 words in
+both languages) and commit the new share images in `public/og/`.
+
+**Change a printable chart?**
+Edit it, then run `npm run pdfs` and commit the new files in `public/downloads/`.
+
+**Check everything before pushing?**
+```sh
+npx playwright install chromium # once: the browser the build and the browser tests use
+npm test                        # unit tests: converters, typing, translations, feedback API
+npm run build                   # the real build, then the SEO checks
+npm run test:dist               # checks on the built site
+npx playwright test             # browser tests on phone and desktop
+```
+GitHub runs the same steps on every push and pull request
+(`.github/workflows/test.yml`), so a broken change shows up as a red check.
+
+## All commands
 
 | Command | What it does |
 | :-- | :-- |
 | `npm run dev` | Local dev server |
-| `npm run build` | Production build to `dist/`: also draws the PDFs and share images first, and runs the SEO checks after |
-| `npm test` | Unit tests: converters, typing, translations, feedback API |
+| `npm run build` | Build the site into `dist/`. Draws the PDFs and share images first and runs the SEO checks after. |
+| `npm test` | Unit tests |
 | `npm run test:dist` | Checks on the built site in `dist/` |
-| `npx playwright test` | Browser tests on the built site (phone and desktop) |
-| `npm run i18n:review` | Regenerates `docs/TRANSLATIONS-REVIEW.md` |
-| `npm run preview:cf` | Build and run locally on Cloudflare's runtime, with the feedback API |
+| `npx playwright test` | Browser tests on the built site |
+| `npm run pdfs` / `npm run og` | Redraw the printable PDFs / the share images |
+| `npm run i18n:review` | Regenerate `docs/TRANSLATIONS-REVIEW.md` (every string in both languages, side by side) |
+| `npm run preview:cf` | Build and run on Cloudflare's local runtime, with the feedback API |
 | `npm run lighthouse` | Lighthouse scores per page type |
 
-CI (`.github/workflows/test.yml`) runs `npm test`, `npm run build`,
-`npm run test:dist` and the browser tests on every push and pull request.
+## Deploying (Cloudflare Pages)
+
+1. In Cloudflare, go to **Workers & Pages**, then **Create**, then **Pages**, and connect this repository.
+2. Build settings: build command `npm run build`, output directory `dist`.
+   Node comes from `.nvmrc`.
+3. Deploy. The build also writes `dist/_headers` (security and caching
+   headers), which Cloudflare applies by itself.
+
+On Cloudflare the PDFs and share images are not redrawn (there is no browser
+to draw them). The copies committed in `public/` are used, so commit them
+after changing a chart or a page title.
+
+The feedback form needs a D1 database, Turnstile and an admin key. See
+[docs/FEEDBACK.md](docs/FEEDBACK.md).
+
+**Before launch:** if the domain is not `mykrutidev.com`, change `SITE` and
+`CONTACT_EMAIL` in `src/lib/routes.js` (canonical links, sitemap, share
+previews and the contact address all come from there).
 
 ## Project structure
 

@@ -16,6 +16,14 @@ import { fileURLToPath } from 'node:url';
 
 import { ogEntries, OG_SIZE } from '../src/lib/og.js';
 
+// Cloudflare Pages builds have no Chromium to draw with, so there the files
+// already committed in public/ are used as they are (CF_PAGES is set only in
+// Cloudflare's build). CI and local builds still redraw them.
+if (process.env.CF_PAGES) {
+  console.log('og-images: skipped on Cloudflare Pages, using the committed files in public/og/');
+  process.exit(0);
+}
+
 const root = fileURLToPath(new URL('../', import.meta.url));
 const OUT = join(root, 'public', 'og');
 const FONT = (pkg, file) => join(root, 'node_modules', '@fontsource', pkg, 'files', file);

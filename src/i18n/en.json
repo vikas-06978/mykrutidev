@@ -67,7 +67,7 @@
     "preeti": "Preeti"
   },
   "footer": {
-    "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. Everything runs in your browser. Your text is never uploaded.",
+    "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
     "converters": "Converters",
     "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners. This site is not affiliated with them.",
     "typing": "Typing & fonts",
@@ -682,7 +682,7 @@
       "navSub": "Roman to Hindi",
       "h1": "English to Hindi Typing (Roman to Hindi)",
       "title": "English to Hindi Typing - Type Hindi in Roman (Free)",
-      "description": "Free English to Hindi typing tool. Type Hindi in Roman letters - namaste becomes नमस्ते - and get Unicode Hindi or Kruti Dev instantly. Nothing is uploaded.",
+      "description": "Free English to Hindi typing tool. Type Hindi in Roman letters - namaste becomes नमस्ते - and get Unicode Hindi or Kruti Dev instantly. Works offline too.",
       "lede": "Type Hindi using the English keyboard you already have. Write it the way it sounds and the Devanagari appears as you type - no Hindi keypad, no install, no sign-up.",
       "body": [
         "<h2>Type Hindi without a Hindi keyboard</h2>",
