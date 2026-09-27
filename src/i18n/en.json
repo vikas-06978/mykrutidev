@@ -1116,7 +1116,7 @@
     "/abbasi-chanakya-to-unicode": {
       "nav": "Abbasi Chanakya → Unicode",
       "h1": "Abbasi Chanakya New to Unicode Converter",
-      "title": "Abbasi Chanakya New to Unicode Converter | Chanakya Font to Hindi Unicode",
+      "title": "Abbasi Chanakya New to Unicode Converter | Chanakya Font to Hindi",
       "description": "Convert Hindi typed in the Abbasi Chanakya New font to Unicode, with the i-matra and reph in the right order. Free, instant, nothing uploaded.",
       "betaNote": "For text typed in the Abbasi Chanakya New font.",
       "lede": "Paste Abbasi Chanakya New text on the left and get Unicode Hindi on the right, with the i-matra and reph in the right order. Nothing is uploaded.",
@@ -1506,7 +1506,7 @@
     "/hindi-typing-practice-sheets": {
       "nav": "Practice sheets",
       "h1": "Hindi Typing Practice Sheets - Free PDF",
-      "title": "Hindi Typing Practice Sheet PDF | 11 Kruti Dev Lessons with Keys (Free)",
+      "title": "Hindi Typing Practice Sheet PDF | 11 Kruti Dev Lessons (Free)",
       "description": "Free Hindi typing practice sheets PDF: one A4 sheet per lesson, home row to paragraphs, each line with the Kruti Dev keys to press. Remington layout.",
       "lede": "Eleven A4 sheets, one for every lesson in the typing tutor - from the home row to full paragraphs. Every line shows the keys to press on the Remington (Kruti Dev) layout.",
       "body": [
@@ -1577,7 +1577,7 @@
     "/kruti-dev-010-font": {
       "nav": "Kruti Dev 010 font",
       "h1": "Kruti Dev 010 Font: Install It, Check It, Read It Without It",
-      "title": "Kruti Dev 010 Font | Install on Windows, Check It Works, Read Without It",
+      "title": "Kruti Dev 010 Font | Install on Windows and Check It Works",
       "description": "What the Kruti Dev 010 Hindi font is, how to install it on Windows and Mac, how to check it works, and how to read Kruti Dev text with no font installed.",
       "lede": "Kruti Dev 010 is the Hindi typewriter font many government offices, courts and typing exams still use. If a file shows English letters like <code>Hkkjr</code> instead of Hindi, paste them below and read them now - then install the font so the file shows properly in Word.",
       "howTo": {
@@ -1639,7 +1639,7 @@
       "nav": "Typing test for exams",
       "navSub": "SSC, CPCT and court exam practice",
       "h1": "Hindi Typing Test for SSC, CPCT and Court Exams",
-      "title": "Hindi Typing Test for SSC, CPCT & Court Exams | Free Kruti Dev Practice",
+      "title": "Hindi Typing Test for SSC, CPCT & Court Exams | Free Practice",
       "description": "Practise the Hindi typing skill test for SSC, CPCT, High Court and district court exams in Kruti Dev (Remington), timed, with net WPM and accuracy.",
       "lede": "Practise the Hindi typing skill test the way it is set: Kruti Dev on the Remington layout, a timed passage, and a result in net words per minute with accuracy. Choose the length your exam uses and sit it in full.",
       "howTo": {
@@ -1699,7 +1699,7 @@
     "/remington-hindi-keyboard": {
       "nav": "Remington Hindi keyboard",
       "h1": "Remington Hindi Keyboard Online",
-      "title": "Remington Hindi Keyboard Online | Type in Kruti Dev Layout, Get Unicode",
+      "title": "Remington Hindi Keyboard Online | Kruti Dev Layout to Unicode",
       "description": "Type Hindi online on the Remington (Kruti Dev) typewriter layout with your normal keyboard, see every key and its Shift character, copy as Unicode.",
       "lede": "Type Hindi on your ordinary keyboard with the Remington typewriter layout - the one Kruti Dev typists and exam candidates learn. Type in the Kruti Dev box and the Hindi appears beside it in Unicode, ready to paste anywhere. The full key chart is below.",
       "howTo": {
@@ -2176,7 +2176,7 @@
     "kruti-dev-text-shows-english-letters": {
       "crumb": "Kruti Dev shows English letters",
       "h1": "Why Kruti Dev Text Shows English Letters (and How to Fix It)",
-      "title": "Kruti Dev Showing English Letters like Hkkjr? Why It Happens and the Fix",
+      "title": "Kruti Dev Showing English Letters like Hkkjr? Why and How to Fix",
       "description": "Why a Hindi file typed in Kruti Dev turns into letters like Hkkjr and fgUnh, and three ways to fix it: install the font, re-apply it, or convert to Unicode.",
       "lede": "You open a Hindi document and it reads <code>Hkkjr ljdkj</code> instead of <span lang=\"hi\">भारत सरकार</span>. Nothing is corrupted. The text was typed in Kruti Dev, and the computer showing it does not have that font.",
       "body": [
@@ -2232,7 +2232,7 @@
     "convert-word-file-from-kruti-dev": {
       "crumb": "Convert a Word file",
       "h1": "How to Convert a Whole Word File from Kruti Dev to Unicode",
-      "title": "Convert a Kruti Dev Word File (.docx) to Unicode | Keep Tables & Formatting",
+      "title": "Convert a Kruti Dev Word File (.docx) to Unicode | Keep Formatting",
       "description": "Convert a whole Kruti Dev .docx to Unicode Hindi in your browser, keeping tables, bold and layout - and what to do with .doc files and PDFs.",
       "lede": "Copying a long document into a converter page by page loses its tables and formatting and takes an afternoon. You can convert the whole .docx at once instead, with the layout intact and without uploading it anywhere.",
       "body": [
