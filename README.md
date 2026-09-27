@@ -116,13 +116,22 @@ The feedback form needs a D1 database, Turnstile and an admin key. See
 [docs/FEEDBACK.md](docs/FEEDBACK.md).
 
 **Support by UPI (optional).** To switch on the "Support MyKrutiDev" page and
-its footer link, add an environment variable in the Pages project
-(**Settings**, then **Environment variables**, for Production):
-`PUBLIC_UPI_ID` = your UPI ID, for example `12345678@upi`. Then redeploy.
-The ID is never in this repository. Without it, `/support` shows only the other
-ways to help and nothing links to it. A value that is not a UPI ID stops the
-build, so a typo can never go live. After switching it on, pay yourself ₹1 with
-both the QR code and the phone button to check.
+its footer link, add one environment variable in the Pages project
+(**Settings**, then **Variables and Secrets**, for Production, type Text), then
+redeploy:
+
+- `PUBLIC_UPI_QR`: the text inside the official QR code your UPI app made
+  (scan it with Google Lens or any QR reader: it starts with `upi://pay?pa=`).
+  Use this for a **business (merchant) ID**. Its QR carries a merchant code
+  and a signature, and PhonePe refuses a merchant QR without them.
+- or `PUBLIC_UPI_ID`: just the ID, for example `12345678@upi`. Enough for a
+  personal ID.
+
+Neither is ever in this repository. Without them, `/support` shows only the
+other ways to help and nothing links to it. A value that is not a UPI QR or ID
+stops the build, so a typo can never go live. After switching it on, pay
+yourself ₹1 from another person's phone, with both the QR code and the phone
+button, to check.
 
 **Before launch:** if the domain is not `mykrutidev.com`, change `SITE` and
 `CONTACT_EMAIL` in `src/lib/routes.js` (canonical links, sitemap, share

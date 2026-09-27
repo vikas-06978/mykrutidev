@@ -35,6 +35,13 @@ jobs:
       - run: npm run build
       - run: npm run test:dist
       - run: npx playwright test
+      # With an official business QR (PUBLIC_UPI_QR), as a merchant ID needs:
+      # the page shows exactly that QR text. Invented test values.
+      - name: Build and check with an official UPI QR
+        env:
+          PUBLIC_UPI_ID: ''
+          PUBLIC_UPI_QR: upi://pay?pa=Q000000000@ybl&pn=MyKrutiDev&mc=0000&mode=02&purpose=00
+        run: npx astro build && npm run test:dist
       # And without a UPI ID, as on a laptop: no payment anywhere, no footer link.
       - name: Build and check with the support option off
         env:

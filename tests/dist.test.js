@@ -21,7 +21,7 @@ import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
-import { readUpiId, upiLink, QUIET_ZONE } from '../src/lib/support.build.js';
+import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
 
 const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
@@ -739,10 +739,11 @@ describe('Google Analytics', () => {
   });
 });
 
-describe('the support option (PUBLIC_UPI_ID)', () => {
-  // The same setting the build read: set in CI with a test ID and on
+describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
+  // The same settings the build read: set in CI with test values and on
   // Cloudflare with the real one, usually unset on a laptop.
-  const upiId = readUpiId(process.env.PUBLIC_UPI_ID);
+  const pay = readSupport(process.env);
+  const upiId = pay?.upiId;
   const support = () => ({ en: pages.get('/support'), hi: pages.get('/hi/support') });
 
   /** Read the QR on the page back as a phone would, from the SVG the build drew. */
@@ -772,8 +773,8 @@ describe('the support option (PUBLIC_UPI_ID)', () => {
     }
   });
 
-  test('with a UPI ID: the link and the QR pay exactly that ID, and every footer links to the page', { skip: !upiId && 'PUBLIC_UPI_ID not set' }, () => {
-    const link = upiLink(upiId);
+  test('with a UPI ID: the link and the QR pay exactly that ID, and every footer links to the page', { skip: !upiId && 'no UPI setting' }, () => {
+    const { link } = pay;
     for (const html of Object.values(support())) {
       assert.ok(html.includes(`href="${link.replaceAll('&', '&amp;')}"`), 'Pay button does not carry the exact link');
       assert.equal(scanPage(html), link);
@@ -785,7 +786,7 @@ describe('the support option (PUBLIC_UPI_ID)', () => {
     }
   });
 
-  test('without a UPI ID: no payment anywhere, and no footer link', { skip: !!upiId && 'PUBLIC_UPI_ID is set' }, () => {
+  test('without a UPI ID: no payment anywhere, and no footer link', { skip: !!upiId && 'a UPI setting is set' }, () => {
     for (const html of [...pages.values(), notFound]) {
       assert.doesNotMatch(html, /upi:\/\//);
       assert.doesNotMatch(html, /<[^>]+\sdata-support-(link|upi)[\s>=]/);

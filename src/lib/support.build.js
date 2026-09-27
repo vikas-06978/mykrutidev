@@ -6,9 +6,19 @@
  * from the footer only when a UPI ID has been configured.
  *
  * The UPI ID is never written in this repository. Cloudflare Pages passes it
- * to the build as the environment variable PUBLIC_UPI_ID (Settings ->
- * Environment variables). Without it, the build still works: /support shows
- * only the other ways to help, and the footer has no support link.
+ * to the build as an environment variable (Settings -> Variables and Secrets),
+ * one of:
+ *
+ *  - PUBLIC_UPI_QR: the exact text inside the official QR code the UPI app
+ *    made for the account (upi://pay?pa=...). A business (merchant) ID needs
+ *    this: its QR carries a merchant code, the registered name and a
+ *    signature, and PhonePe refuses a merchant QR without them. The site
+ *    redraws that same text, so the QR on the page is the app's own QR.
+ *  - PUBLIC_UPI_ID: just the ID. The site builds the link itself, which is
+ *    enough for a personal ID.
+ *
+ * Without either, the build still works: /support shows only the other ways
+ * to help, and the footer has no support link.
  *
  * Everything is decided at build time. The QR code is drawn here as an SVG,
  * with no QR service or script involved, so nothing on the page can change
@@ -44,6 +54,49 @@ export function readUpiId(raw) {
     throw new Error(`PUBLIC_UPI_ID is set to "${value}", which is not a UPI ID (name@bank, e.g. 12345678@upi).`);
   }
   return value;
+}
+
+/**
+ * The text of an official UPI QR code, checked, or null when none is set.
+ * Returned exactly as given (a signed QR stops working if anything in it
+ * changes), with the ID it pays.
+ *
+ * @param {string | undefined} raw  import.meta.env.PUBLIC_UPI_QR
+ * @returns {{ link: string, upiId: string } | null}
+ */
+export function readUpiQr(raw) {
+  const value = (raw ?? '').trim();
+  if (!value) return null;
+  const fail = (why) => {
+    throw new Error(`PUBLIC_UPI_QR is not the text of a UPI QR code: ${why}. It should start with upi://pay?pa=`);
+  };
+  if (!/^upi:\/\/pay\?/i.test(value)) fail('it does not start with upi://pay?');
+  if (/\s/.test(value)) fail('it contains spaces or line breaks');
+  if (value.length > 1000) fail('it is longer than a UPI QR code can be');
+  const params = new URLSearchParams(value.slice(value.indexOf('?') + 1));
+  const upiId = params.get('pa') ?? '';
+  if (!UPI_ID_RE.test(upiId)) fail(`its pa= (the UPI ID) is "${upiId}", which is not a UPI ID`);
+  // The page promises the visitor chooses the amount.
+  if (params.has('am')) fail('it has a fixed amount (am=); use the QR without an amount');
+  return { link: value, upiId };
+}
+
+/**
+ * What the support option pays, from the build's environment, or null when
+ * it is off. PUBLIC_UPI_QR wins; if PUBLIC_UPI_ID is set too, it must name the
+ * same ID, so the page never shows one ID and pays another.
+ *
+ * @param {Record<string, string | undefined>} env  import.meta.env or process.env
+ * @returns {{ link: string, upiId: string } | null}
+ */
+export function readSupport(env) {
+  const qr = readUpiQr(env.PUBLIC_UPI_QR);
+  const id = readUpiId(env.PUBLIC_UPI_ID);
+  if (qr && id && id.toLowerCase() !== qr.upiId.toLowerCase()) {
+    throw new Error(`PUBLIC_UPI_ID (${id}) and the UPI ID inside PUBLIC_UPI_QR (${qr.upiId}) differ. Keep one of them.`);
+  }
+  if (qr) return qr;
+  return id ? { link: upiLink(id), upiId: id } : null;
 }
 
 /**
