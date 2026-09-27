@@ -3,6 +3,7 @@
  * would ship any of these problems fails:
  *
  *   - duplicate <title> or meta description between indexable pages
+ *   - a meta description longer than search engines show (160 characters)
  *   - a page without exactly one <h1>
  *   - an <img> without alt text
  *   - an internal link to a page or file that was not built
@@ -92,6 +93,15 @@ describe('titles, headings and images', () => {
         assert.ok(!seen.has(v), `${u} has the same ${field} as ${seen.get(v)}: "${v}"`);
         seen.set(v, u);
       }
+    }
+  });
+
+  test('every indexable page has a meta description search engines show in full', () => {
+    // Google and Bing cut a snippet off at about 160 characters, and Bing
+    // Webmaster Tools reports anything longer (or under 25) as an error.
+    for (const u of indexable) {
+      const d = meta(pages.get(u), 'name', 'description') ?? '';
+      assert.ok(d.length >= 50 && d.length <= 160, `${u}: description is ${d.length} characters: "${d}"`);
     }
   });
 
