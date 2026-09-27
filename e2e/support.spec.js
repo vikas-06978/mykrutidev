@@ -1,6 +1,6 @@
 /**
- * The support page with a UPI ID configured (PUBLIC_UPI_ID at build time; CI
- * builds with a test ID). Without one, tests/dist.test.js checks that no
+ * The support page with UPI configured (PUBLIC_UPI_QR or PUBLIC_UPI_ID at build
+ * time; CI builds with test values). Without one, tests/dist.test.js checks that no
  * payment appears anywhere, and these are skipped.
  *
  * - the footer link opens the page, in both languages;
@@ -12,10 +12,11 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-import { readUpiId, upiLink } from '../src/lib/support.build.js';
+import { readSupport } from '../src/lib/support.build.js';
 
-const upiId = readUpiId(process.env.PUBLIC_UPI_ID);
-test.skip(!upiId, 'PUBLIC_UPI_ID not set: the support option is off in this build');
+const pay = readSupport(process.env);
+const upiId = pay?.upiId;
+test.skip(!upiId, 'no UPI setting: the support option is off in this build');
 
 test('the footer link opens the support page, in English and Hindi', async ({ page }) => {
   for (const [home, path, h1] of [
@@ -45,7 +46,7 @@ test('QR, UPI ID and Copy', async ({ page, context, browserName }, testInfo) => 
 test('the UPI app button carries the exact link, and shows only on a phone', async ({ page }, testInfo) => {
   await page.goto('/support/');
   const pay = page.locator('[data-upi-pay]');
-  await expect(pay).toHaveAttribute('href', upiLink(upiId));
+  await expect(pay).toHaveAttribute('href', pay.link);
   if (testInfo.project.name === 'mobile') await expect(pay).toBeVisible();
   else await expect(pay).toBeHidden();
 });

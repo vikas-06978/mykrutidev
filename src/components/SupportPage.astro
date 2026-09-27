@@ -4,17 +4,18 @@
  * Linked only from the footer, and only when a UPI ID is configured; never
  * indexed (a page asking for money is nobody's search result).
  *
- * The UPI ID comes from the PUBLIC_UPI_ID build setting (see src/lib/support.build.js),
- * so it is not in the repository. Without it, the page shows only the other
+ * The UPI ID comes from the PUBLIC_UPI_QR or PUBLIC_UPI_ID build setting (see
+ * src/lib/support.build.js), so it is not in the repository. Without it, the page shows only the other
  * ways to help.
  */
 import Base from '../layouts/Base.astro';
-import { readUpiId, upiLink, qrModules, qrSvg } from '../lib/support.build.js';
+import { readSupport, qrModules, qrSvg } from '../lib/support.build.js';
 import { langOf, useT } from '../i18n/index.js';
 
 const { t, render } = useT(langOf(Astro.url));
-const upiId = readUpiId(import.meta.env.PUBLIC_UPI_ID);
-const link = upiId ? upiLink(upiId) : null;
+const pay = readSupport(import.meta.env);
+const upiId = pay?.upiId ?? null;
+const link = pay?.link ?? null;
 const qr = link ? qrSvg(qrModules(link), t('support.qrLabel')) : null;
 ---
 

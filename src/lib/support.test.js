@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import jsQR from 'jsqr';
 
-import { readUpiId, upiLink, qrModules, qrSvg, QUIET_ZONE, UPI_PAYEE_NAME } from './support.build.js';
+import { readUpiId, readUpiQr, readSupport, upiLink, qrModules, qrSvg, QUIET_ZONE, UPI_PAYEE_NAME } from './support.build.js';
 
 /** Read a QR the way a phone does: as pixels, with an independent decoder. */
 function scan(modules, scale = 6) {
@@ -58,6 +58,44 @@ describe('the payment link', () => {
     assert.equal(UPI_PAYEE_NAME, 'MyKrutiDev');
     assert.equal(upiLink('47291836@upi'), 'upi://pay?pa=47291836@upi&pn=MyKrutiDev&cu=INR');
     assert.doesNotMatch(upiLink('47291836@upi'), /[?&]am=/);
+  });
+});
+
+describe('an official QR (PUBLIC_UPI_QR)', () => {
+  // The shape of a business QR from a UPI app: merchant code, mode, purpose
+  // and a signature. Invented values.
+  const official =
+    'upi://pay?pa=Q123456789@ybl&pn=MyKrutiDev&mc=0000&mode=02&purpose=00&sign=MEUCIQDk+x/9abc=';
+
+  test('is kept exactly as given, with the ID it pays', () => {
+    assert.deepEqual(readUpiQr(`  ${official}\n`), { link: official, upiId: 'Q123456789@ybl' });
+    assert.deepEqual(readUpiQr('upi://pay?pa=abc%40okaxis&pn=A'), { link: 'upi://pay?pa=abc%40okaxis&pn=A', upiId: 'abc@okaxis' });
+    for (const v of [undefined, '', '  ']) assert.equal(readUpiQr(v), null);
+  });
+
+  test('anything that is not a UPI QR, or fixes the amount, fails the build', () => {
+    for (const [v, why] of [
+      ['https://phon.pe/abc', /does not start with upi:\/\/pay/],
+      ['upi://pay?pn=MyKrutiDev', /not a UPI ID/],
+      ['upi://pay?pa=9876543210&pn=A', /not a UPI ID/],
+      ['upi://pay?pa=a@ybl&pn=My KrutiDev', /spaces/],
+      ['upi://pay?pa=a1@ybl&am=100', /fixed amount/],
+    ]) {
+      assert.throws(() => readUpiQr(v), why, v);
+    }
+  });
+
+  test('the QR wins; an ID set as well must be the same one', () => {
+    assert.deepEqual(readSupport({ PUBLIC_UPI_QR: official }), { link: official, upiId: 'Q123456789@ybl' });
+    assert.deepEqual(readSupport({ PUBLIC_UPI_QR: official, PUBLIC_UPI_ID: 'q123456789@ybl' }).link, official);
+    assert.throws(() => readSupport({ PUBLIC_UPI_QR: official, PUBLIC_UPI_ID: 'other@ybl' }), /differ/);
+    assert.deepEqual(readSupport({ PUBLIC_UPI_ID: '47291836@upi' }), { link: upiLink('47291836@upi'), upiId: '47291836@upi' });
+    assert.equal(readSupport({}), null);
+  });
+
+  test('a signed QR still scans back to exactly the same text', () => {
+    const long = `${official}${'A'.repeat(120)}`;
+    assert.equal(scan(modulesOf(qrSvg(qrModules(long), 'x'))), long);
   });
 });
 
