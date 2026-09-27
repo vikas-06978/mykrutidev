@@ -14,6 +14,9 @@
  *    front. Every other page and file is kept the first time it is visited.
  *  - Pages: network first, so a deploy shows up at once; the cached copy when
  *    the network is down or takes longer than NETWORK_TIMEOUT_MS.
+ *  - A file opened directly (the sitemap, robots.txt, a PDF): the network,
+ *    else a cached copy, else the browser's own error - never the 404 page,
+ *    which would claim a file that exists is missing.
  *  - /_astro/ (content-hashed, never changes under one name): cache first.
  *  - Other same-origin files: cache, refreshed in the background.
  *  - Never touched: other origins (Google's input tools), /api/, /admin.
@@ -129,6 +132,15 @@ async function page(event) {
   }
 }
 
+/** A file opened in the tab, not a page: the network, else a cached copy, else a plain error. */
+async function file(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    return (await (await caches.open(CACHE)).match(keyOf(request.url))) ?? Response.error();
+  }
+}
+
 async function hashed(request) {
   const cache = await caches.open(CACHE);
   const key = keyOf(request.url);
@@ -162,7 +174,7 @@ self.addEventListener('fetch', (event) => {
   // Range requests (media) are not cached whole; leave them to the network.
   if (request.headers.has('range')) return;
 
-  if (request.mode === 'navigate') return event.respondWith(page(event));
+  if (request.mode === 'navigate') return event.respondWith(isPage(request.url) ? page(event) : file(request));
   if (url.pathname.startsWith('/_astro/')) return event.respondWith(hashed(request));
   event.respondWith(staleWhileRevalidate(event));
 });
