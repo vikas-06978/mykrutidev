@@ -1,7 +1,8 @@
 /**
- * ToolMitra: the name the tools are promoted under on social media. Its
- * landing page is /links (src/components/LinksPage.astro), the link in the
- * Instagram bio. The site itself stays MyKrutiDev.
+ * ToolMitra: the name the apps (MyKrutiDev, MemeBox, and whatever comes next)
+ * are promoted under on social media. Its landing page is /links
+ * (src/components/LinksPage.astro), the link in the Instagram bio. The site
+ * itself stays MyKrutiDev.
  */
 
 /**
@@ -11,7 +12,22 @@
 export const INSTAGRAM = '';
 
 /**
- * The tools listed on /links, in order. Route paths as in routes.js; each
+ * ToolMitra's apps, the first thing on /links. Each card's words are
+ * links.apps.<id> in the JSON files. `href` is a page of this site (a route
+ * path) or a full https:// address; empty means not out yet, and the card
+ * says "Coming soon" instead of linking anywhere.
+ */
+export const APPS = [
+  { id: 'mykrutidev', href: '/' },
+  // The Chrome Web Store address, once MemeBox is published there.
+  { id: 'memebox', href: '' },
+];
+
+/** An app's link as the page uses it: a site path, an https:// address, or null (not out yet). */
+export const appHref = (href) => (href.startsWith('/') || /^https:\/\/[^\s"<>]+$/.test(href) ? href : null);
+
+/**
+ * MyKrutiDev's tools listed on /links under the apps, in order. Route paths as in routes.js; each
  * card's name is that page's nav label, its line is links.tools.<path>.
  */
 export const LINKED_TOOLS = [

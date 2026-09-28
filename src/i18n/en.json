@@ -2470,13 +2470,27 @@
     "footerLink": "Support MyKrutiDev"
   },
   "links": {
-    "title": "ToolMitra | Free Hindi Typing and Font Tools",
-    "description": "All ToolMitra tools in one place: Kruti Dev and Unicode converters, Hindi typing and printable charts. Tell us which tool to build next.",
+    "title": "ToolMitra | MyKrutiDev, MemeBox and More",
+    "description": "ToolMitra's apps in one place: MyKrutiDev for Hindi typing and fonts, and MemeBox for fun on Google Meet. Tell us what to build next.",
     "h1": "ToolMitra",
     "logoAlt": "ToolMitra logo",
-    "tagline": "Free tools for Hindi typing, exams and office work. No sign-up, and your text stays on your device.",
+    "tagline": "Simple apps for everyday work, and a little fun.",
     "follow": "Follow on Instagram",
-    "toolsHeading": "Tools",
+    "appsHeading": "Our apps",
+    "apps": {
+      "mykrutidev": {
+        "name": "MyKrutiDev",
+        "kind": "Website",
+        "line": "Kruti Dev and Unicode converters, Hindi typing practice and printable charts. Free, with no sign-up."
+      },
+      "memebox": {
+        "name": "MemeBox",
+        "kind": "Chrome extension",
+        "line": "Play meme sounds in Google Meet calls with friends."
+      }
+    },
+    "soon": "Coming soon",
+    "toolsHeading": "Popular MyKrutiDev tools",
     "tools": {
       "/": "Old Kruti Dev text into Unicode Hindi that works everywhere.",
       "/unicode-to-kruti-dev": "Unicode Hindi into Kruti Dev 010, for office and exam files.",

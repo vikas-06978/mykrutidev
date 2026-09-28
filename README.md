@@ -69,8 +69,10 @@ files. Then run `npm run build` (it checks each guide has at least 550 words in
 both languages) and commit the new share images in `public/og/`.
 
 **Change the ToolMitra links page (`/links`, the Instagram bio link)?**
-The tools it lists and the Instagram handle are in `src/lib/brand.js`, its words
-under `links` in both JSON files. The "Follow on Instagram" button appears once
+The apps it shows first (MyKrutiDev, MemeBox), the MyKrutiDev tools below them
+and the Instagram handle are in `src/lib/brand.js`, its words under `links` in
+both JSON files. An app with an empty `href` shows "Coming soon". Once MemeBox
+is on the Chrome Web Store, put its address there. The "Follow on Instagram" button appears once
 `INSTAGRAM` holds the handle (without the @). Tool requests sent from its form
 show on `/admin/feedback`, under the feedback, with their own CSV download.
 

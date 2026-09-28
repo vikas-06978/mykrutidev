@@ -23,7 +23,7 @@ import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
-import { INSTAGRAM, LINKED_TOOLS, instagramUrl } from '../src/lib/brand.js';
+import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
 
 const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
 
@@ -806,6 +806,29 @@ describe('the ToolMitra links page (/links)', () => {
       assert.ok(html, 'missing /links page');
       assert.match(html, /<meta name="robots" content="noindex/);
       assert.match(html, /<h1[^>]*>ToolMitra<\/h1>/);
+    }
+  });
+
+  test('the apps come first: live ones link out, the rest say "coming soon" and link nowhere', () => {
+    for (const [lang, html] of Object.entries(links())) {
+      const cards = [...html.matchAll(/<(a|div)\b[^>]*data-links-app="([^"]+)"[^>]*>/g)];
+      assert.deepEqual(
+        cards.map((m) => m[2]),
+        APPS.map((a) => a.id),
+        lang,
+      );
+      assert.ok(html.indexOf('data-links-app=') < html.indexOf('data-links-tool='), `${lang}: apps are not above the tools`);
+      for (const [tag, el, id] of cards) {
+        const link = appHref(APPS.find((a) => a.id === id).href);
+        if (!link) {
+          assert.equal(el, 'div', `${lang}: ${id} is not out yet but is a link`);
+          assert.match(tag, /\sdata-soon[\s>]/);
+        } else {
+          assert.equal(el, 'a', `${lang}: ${id} is out but not a link`);
+          const want = link.startsWith('/') ? slash(lang === 'hi' ? hindiOf(link) : link) : link;
+          assert.equal(attr(tag, 'href'), want, `${lang}: ${id}`);
+        }
+      }
     }
   });
 
