@@ -185,6 +185,17 @@ test.describe('installable app', () => {
     await expect(page.locator('[data-tutor] .tt-c').first()).toBeVisible();
     await expect.poll(() => cached('/hindi-typing-test')).toBe(true);
 
+    // Online, a file opened in the tab comes through the worker as itself.
+    const sitemap = await page.goto('/sitemap-index.xml');
+    expect(sitemap.status()).toBe(200);
+    expect(sitemap.headers()['content-type']).toContain('xml');
+    // When fetching a file fails (the connection drops), the browser shows its
+    // own error, not the site's 404 page claiming that a file which exists is
+    // missing. context.route reaches the worker's own requests in Chromium.
+    await context.route('**/robots.txt', (route) => route.abort('internetdisconnected'));
+    await expect(page.goto('/robots.txt')).rejects.toThrow();
+    await context.unroute('**/robots.txt');
+
     await context.setOffline(true);
     try {
       await page.goto('/unicode-to-kruti-dev');
@@ -205,6 +216,7 @@ test.describe('installable app', () => {
       // The published form with a trailing slash is the same page.
       await page.goto('/devlys-to-unicode/');
       await expect(page.locator('[data-converter]')).toBeVisible();
+
     } finally {
       await context.setOffline(false);
     }
