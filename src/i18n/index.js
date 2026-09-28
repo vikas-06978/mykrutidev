@@ -156,6 +156,7 @@ export const PROTECTED_NAMES = [
   'Nirmala UI',
   'MyKrutiDev',
   'ToolMitra',
+  'MemeBox',
   'Kruti Dev',
   'KrutiDev',
   'DevLys',

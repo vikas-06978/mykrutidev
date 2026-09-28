@@ -2470,13 +2470,27 @@
     "footerLink": "MyKrutiDev की मदद करें"
   },
   "links": {
-    "title": "ToolMitra | हिंदी टाइपिंग और फ़ॉन्ट के मुफ़्त टूल",
-    "description": "ToolMitra के सारे टूल एक जगह: Kruti Dev और यूनिकोड कन्वर्टर, हिंदी टाइपिंग और प्रिंट करने वाले चार्ट। बताइए अगला कौन-सा टूल बनाएँ।",
+    "title": "ToolMitra | MyKrutiDev, MemeBox और बहुत कुछ",
+    "description": "ToolMitra के ऐप एक जगह: हिंदी टाइपिंग और फ़ॉन्ट के लिए MyKrutiDev, और Google Meet पर मस्ती के लिए MemeBox। बताइए आगे क्या बनाएँ।",
     "h1": "ToolMitra",
     "logoAlt": "ToolMitra का लोगो",
-    "tagline": "हिंदी टाइपिंग, परीक्षा और दफ़्तर के काम के मुफ़्त टूल। न साइन-अप, और आपका टेक्स्ट आपके ही डिवाइस पर रहता है।",
+    "tagline": "रोज़ के काम के लिए आसान ऐप, और थोड़ी मस्ती भी।",
     "follow": "Instagram पर फ़ॉलो करें",
-    "toolsHeading": "टूल",
+    "appsHeading": "हमारे ऐप",
+    "apps": {
+      "mykrutidev": {
+        "name": "MyKrutiDev",
+        "kind": "वेबसाइट",
+        "line": "Kruti Dev और यूनिकोड कन्वर्टर, हिंदी टाइपिंग अभ्यास और प्रिंट करने वाले चार्ट। मुफ़्त, बिना साइन-अप।"
+      },
+      "memebox": {
+        "name": "MemeBox",
+        "kind": "Chrome एक्सटेंशन",
+        "line": "दोस्तों के साथ Google Meet कॉल में मीम की आवाज़ें चलाएँ।"
+      }
+    },
+    "soon": "जल्द आ रहा है",
+    "toolsHeading": "MyKrutiDev के लोकप्रिय टूल",
     "tools": {
       "/": "पुराना Kruti Dev टेक्स्ट यूनिकोड हिंदी में, जो हर जगह चलता है।",
       "/unicode-to-kruti-dev": "यूनिकोड हिंदी को Kruti Dev 010 में, दफ़्तर और परीक्षा की फ़ाइलों के लिए।",

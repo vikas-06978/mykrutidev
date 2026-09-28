@@ -1,8 +1,8 @@
 ---
 /**
  * /links and /hi/links: ToolMitra's page, the one link in the Instagram bio.
- * Every tool on one screen, then a short "which tool should we build next?"
- * form. Never indexed (a list of links is nobody's search result), and not in
+ * The apps (MyKrutiDev, MemeBox...), then MyKrutiDev's popular tools, then a
+ * short "which tool should we build next?" form. Never indexed (a list of links is nobody's search result), and not in
  * the nav: people arrive here from social media.
  *
  * The form posts to /api/tool-request (server/feedbackApi.js). What it sends,
@@ -10,7 +10,7 @@
  * The tools listed and the Instagram handle: src/lib/brand.js.
  */
 import Base from '../layouts/Base.astro';
-import { INSTAGRAM, LINKED_TOOLS, instagramUrl } from '../lib/brand.js';
+import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../lib/brand.js';
 import { REQUEST_LIMITS } from '../lib/feedback.js';
 import { langOf, useT } from '../i18n/index.js';
 
@@ -45,8 +45,49 @@ const strings = {
         }
       </header>
 
+      <section class="mt-10" aria-labelledby="lk-apps">
+        <h2 id="lk-apps" class="text-xl">{t('links.appsHeading')}</h2>
+        <ul class="mt-4 grid gap-3" role="list">
+          {
+            APPS.map(({ id, href }) => {
+              const link = appHref(href);
+              const url = link?.startsWith('/') ? to(link) : link;
+              const body = (
+                <>
+                  <span class="lk-app-name" translate="no">
+                    {t(`links.apps.${id}.name`)}
+                  </span>
+                  <span class="lk-app-kind">{t(`links.apps.${id}.kind`)}</span>
+                  <span class="lk-app-line" set:html={render(t(`links.apps.${id}.line`))} />
+                  {url ? (
+                    <span class="lk-arrow" aria-hidden="true">
+                      →
+                    </span>
+                  ) : (
+                    <span class="lk-soon">{t('links.soon')}</span>
+                  )}
+                </>
+              );
+              return (
+                <li>
+                  {url ? (
+                    <a class="card lk-app" href={url} data-links-app={id} {...(url.startsWith('/') ? {} : { rel: 'noopener' })}>
+                      {body}
+                    </a>
+                  ) : (
+                    <div class="card lk-app" data-links-app={id} data-soon>
+                      {body}
+                    </div>
+                  )}
+                </li>
+              );
+            })
+          }
+        </ul>
+      </section>
+
       <section class="mt-10" aria-labelledby="lk-tools">
-        <h2 id="lk-tools" class="text-xl">{t('links.toolsHeading')}</h2>
+        <h2 id="lk-tools" class="text-xl" set:html={render(t('links.toolsHeading'))} />
         <ul class="mt-4 grid gap-3" role="list">
           {
             LINKED_TOOLS.map((p) => (
@@ -151,8 +192,53 @@ const strings = {
     text-decoration: none;
     transition: border-color 120ms ease;
   }
-  .lk-tool:hover {
+  .lk-tool:hover,
+  a.lk-app:hover {
     border-color: var(--color-brick);
+  }
+  .lk-app {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.125rem 0.75rem;
+    align-items: center;
+    padding: 1.125rem 1.25rem;
+    border-width: 2px;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 120ms ease;
+  }
+  .lk-app-name {
+    color: var(--color-ink);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .lk-app-kind {
+    grid-column: 1;
+    color: var(--color-brick);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .lk-app-line {
+    grid-column: 1;
+    margin-top: 0.25rem;
+    color: var(--color-body);
+    font-size: 0.9375rem;
+  }
+  .lk-app .lk-arrow,
+  .lk-soon {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+  .lk-soon {
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    background: var(--color-inset);
+    color: var(--color-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
   .lk-tool-name {
     color: var(--color-ink);

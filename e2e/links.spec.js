@@ -1,6 +1,7 @@
 /**
  * The ToolMitra links page (/links), the link in the Instagram bio.
  *
+ * - the app cards come first, and MyKrutiDev's opens the site;
  * - every tool card opens its page, in the page's own language;
  * - the request form: a too-short idea is refused on the page, a good one is
  *   sent to /api/tool-request with only the form's fields, and a thank-you
@@ -9,6 +10,18 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+
+test('the MyKrutiDev app card opens the site, in English and Hindi', async ({ page }) => {
+  for (const [path, to] of [
+    ['/links/', '/'],
+    ['/hi/links/', '/hi/'],
+  ]) {
+    await page.goto(path);
+    await expect(page.locator('[data-links-app="memebox"]')).toContainText('MemeBox');
+    await page.locator('[data-links-app="mykrutidev"]').click();
+    await expect(page).toHaveURL(new RegExp(`${to}$`));
+  }
+});
 
 test('the tool cards open their pages, in English and Hindi', async ({ page }) => {
   for (const [path, card, to] of [
