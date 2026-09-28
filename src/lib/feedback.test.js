@@ -15,6 +15,9 @@ import {
   toCsv,
   toRow,
   validateFeedback,
+  validateToolRequest,
+  toRequestRow,
+  REQUEST_LIMITS,
 } from './feedback.js';
 import { PAGES } from './routes.js';
 import en from '../i18n/en.json' with { type: 'json' };
@@ -194,6 +197,40 @@ describe('the words for every option', () => {
     for (const [path, id] of Object.entries(USED_BY_PAGE)) {
       assert.ok(paths.has(path), path);
       assert.ok(USED.includes(id), id);
+    }
+  });
+});
+
+describe('validateToolRequest', () => {
+  const ok = { idea: 'PDF to Kruti Dev', lang: 'en', device: 'desktop' };
+
+  test('accepts an idea alone, and trims it', () => {
+    const r = validateToolRequest({ ...ok, idea: '  PDF to Kruti Dev  ' });
+    assert.equal(r.ok, true);
+    assert.deepEqual(r.value, { idea: 'PDF to Kruti Dev', details: '', email: '', lang: 'en', device: 'desktop' });
+    assert.deepEqual(toRequestRow(r.value), { idea: 'PDF to Kruti Dev', details: null, email: null, lang: 'en', device: 'desktop' });
+  });
+
+  test('counts Devanagari in characters, as the form does', () => {
+    assert.equal(validateToolRequest({ ...ok, idea: 'क'.repeat(REQUEST_LIMITS.idea) }).ok, true);
+    assert.equal(validateToolRequest({ ...ok, idea: 'क'.repeat(REQUEST_LIMITS.idea + 1) }).ok, false);
+    assert.equal(validateToolRequest({ ...ok, idea: 'कि' }).ok, false, 'two characters is too short');
+  });
+
+  test('refuses anything the form does not send', () => {
+    for (const bad of [
+      null,
+      [],
+      { ...ok, idea: '' },
+      { ...ok, idea: 42 },
+      { ...ok, details: 'x'.repeat(REQUEST_LIMITS.details + 1) },
+      { ...ok, email: 'nope' },
+      { ...ok, lang: 'fr' },
+      { ...ok, device: 'tv' },
+      { ...ok, page: '/links' },
+      { ...ok, idea: 'bad\u0000text' },
+    ]) {
+      assert.equal(validateToolRequest(bad).ok, false, JSON.stringify(bad));
     }
   });
 });

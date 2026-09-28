@@ -209,6 +209,51 @@ export function validateFeedback(input) {
 }
 
 // ---------------------------------------------------------------------------
+// Tool requests: the "Which tool should we build next?" form on /links
+// ---------------------------------------------------------------------------
+
+/** Characters, as the form's maxlength counts them. */
+export const REQUEST_LIMITS = { idea: 200, details: 500, email: LIMITS.email, ideaMin: 3 };
+
+/**
+ * Check a tool request, the same way as validateFeedback(): every field
+ * re-derived, unknown fields refused. Only what was typed into the form, its
+ * language and the kind of device. Never the IP address or the user agent.
+ *
+ * @returns {{ ok: true, value: object } | { ok: false, errors: string[] }}
+ */
+export function validateToolRequest(input) {
+  const errors = [];
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    return { ok: false, errors: ['body: not an object'] };
+  }
+  const KNOWN = new Set(['idea', 'details', 'email', 'lang', 'device', 'website', 'token']);
+  for (const k of Object.keys(input)) if (!KNOWN.has(k)) errors.push(`${k}: unknown field`);
+
+  const idea = text(input.idea, REQUEST_LIMITS.idea, 'idea', errors);
+  if ([...idea].length < REQUEST_LIMITS.ideaMin) errors.push(`idea: at least ${REQUEST_LIMITS.ideaMin} characters`);
+  const details = text(input.details, REQUEST_LIMITS.details, 'details', errors);
+  const email = text(input.email, REQUEST_LIMITS.email, 'email', errors).toLowerCase();
+  if (email && !EMAIL_RE.test(email)) errors.push('email: not an email address');
+  const lang = oneOf(input.lang, LANGS, 'lang', errors);
+  const device = oneOf(input.device, DEVICES, 'device', errors);
+
+  if (errors.length) return { ok: false, errors };
+  return { ok: true, value: { idea, details, email, lang, device } };
+}
+
+/** A validated tool request as the row it becomes (without id / created_at). */
+export const toRequestRow = (v) => ({
+  idea: v.idea,
+  details: v.details || null,
+  email: v.email || null,
+  lang: v.lang,
+  device: v.device,
+});
+
+export const REQUEST_COLUMNS = ['id', 'created_at', 'idea', 'details', 'email', 'lang', 'device'];
+
+// ---------------------------------------------------------------------------
 // Storage (Cloudflare D1 = SQLite)
 // ---------------------------------------------------------------------------
 
@@ -220,7 +265,8 @@ export function validateFeedback(input) {
  *
  * `used` and `wants` are JSON arrays of the ids above, e.g. ["bug","design"].
  * `feedback_rate` holds a one-way hash per IP per hour - never the IP - and
- * each row is deleted once its hour is over.
+ * each row is deleted once its hour is over. `tool_requests` holds the /links
+ * page's "which tool next?" form.
  */
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS feedback (
@@ -244,6 +290,15 @@ export const SCHEMA = [
   bucket TEXT PRIMARY KEY,
   hits INTEGER NOT NULL,
   expires INTEGER NOT NULL
+)`,
+  `CREATE TABLE IF NOT EXISTS tool_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  idea TEXT NOT NULL,
+  details TEXT,
+  email TEXT,
+  lang TEXT,
+  device TEXT
 )`,
 ];
 

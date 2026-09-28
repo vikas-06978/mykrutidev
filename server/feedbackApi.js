@@ -1,11 +1,13 @@
 /**
- * POST /api/feedback - store one feedback submission in Cloudflare D1.
- * GET  /api/feedback - the widget's config (the public Turnstile site key).
+ * POST /api/feedback      - store one feedback submission in Cloudflare D1.
+ * GET  /api/feedback      - the widget's config (the public Turnstile site key).
+ * POST /api/tool-request  - store one "which tool next?" request from /links.
  *
- * Wired up by functions/api/feedback.js (a Cloudflare Pages Function); kept
- * here, as plain request -> response functions, so the tests can call them
- * with a local D1 database. The rest of the site is static and never calls
- * this: only the feedback panel does, and only when its Send is pressed.
+ * Wired up by functions/api/feedback.js and tool-request.js (Cloudflare Pages
+ * Functions); kept here, as plain request -> response functions, so the tests
+ * can call them with a local D1 database. The rest of the site is static and never calls
+ * this: only the feedback panel and the /links request form do, and only
+ * when their Send is pressed.
  *
  * Environment (Cloudflare Pages -> Settings):
  *   DB                    D1 binding (required)
@@ -16,7 +18,7 @@
  * Order of checks: size and type, then the rate limit (so a flood is counted
  * before any work is done for it), then the honeypot, the fields, Turnstile.
  */
-import { LIMITS, RATE, SCHEMA, toRow, validateFeedback } from '../src/lib/feedback.js';
+import { LIMITS, RATE, SCHEMA, toRequestRow, toRow, validateFeedback, validateToolRequest } from '../src/lib/feedback.js';
 
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -107,11 +109,14 @@ export function handleConfig(env) {
 }
 
 /**
+ * The checks every form's POST goes through, in the order the header gives.
+ * Returns a refusal Response, or the validated value.
+ *
  * @param {Request} request
  * @param {Record<string, any>} env
- * @param {{ verify?: typeof verifyTurnstile, now?: number }} [deps]  for tests
+ * @param {{ scope: string, validate: (body: any) => any, verify?: typeof verifyTurnstile, now?: number }} opts
  */
-export async function handleFeedback(request, env, { verify = verifyTurnstile, now } = {}) {
+async function accept(request, env, { scope, validate, verify = verifyTurnstile, now }) {
   const db = env.DB;
   if (!db) return reply(503, { ok: false, error: 'not-configured' });
 
@@ -127,7 +132,7 @@ export async function handleFeedback(request, env, { verify = verifyTurnstile, n
   }
 
   await ensureSchema(db);
-  const { hits, retryAfter } = await countHit(db, clientIp(request), rateSalt(env), { now });
+  const { hits, retryAfter } = await countHit(db, clientIp(request), rateSalt(env), { scope, now });
   if (hits > RATE.max) {
     return reply(429, { ok: false, error: 'rate-limited' }, { 'Retry-After': String(retryAfter) });
   }
@@ -144,7 +149,7 @@ export async function handleFeedback(request, env, { verify = verifyTurnstile, n
     return reply(400, { ok: false, error: 'rejected' });
   }
 
-  const checked = validateFeedback(body);
+  const checked = validate(body);
   if (!checked.ok) return reply(400, { ok: false, error: 'invalid', details: checked.errors });
 
   if (env.TURNSTILE_SECRET_KEY) {
@@ -153,14 +158,38 @@ export async function handleFeedback(request, env, { verify = verifyTurnstile, n
       return reply(403, { ok: false, error: 'challenge-failed' });
     }
   }
+  return { value: checked.value };
+}
 
-  const row = toRow(checked.value);
+/** INSERT one row into `table` and answer 201 with its id. */
+async function insert(db, table, row) {
   const cols = Object.keys(row);
   const saved = await db
-    .prepare(
-      `INSERT INTO feedback (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')}) RETURNING id`,
-    )
+    .prepare(`INSERT INTO ${table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')}) RETURNING id`)
     .bind(...cols.map((c) => row[c]))
     .first();
   return reply(201, { ok: true, id: saved.id });
+}
+
+/**
+ * POST /api/feedback
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ verify?: typeof verifyTurnstile, now?: number }} [deps]  for tests
+ */
+export async function handleFeedback(request, env, deps = {}) {
+  const got = await accept(request, env, { ...deps, scope: 'feedback', validate: validateFeedback });
+  return got instanceof Response ? got : insert(env.DB, 'feedback', toRow(got.value));
+}
+
+/**
+ * POST /api/tool-request - the /links page's "which tool next?" form. Same
+ * checks as feedback, with its own rate-limit count.
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ verify?: typeof verifyTurnstile, now?: number }} [deps]  for tests
+ */
+export async function handleToolRequest(request, env, deps = {}) {
+  const got = await accept(request, env, { ...deps, scope: 'tool-request', validate: validateToolRequest });
+  return got instanceof Response ? got : insert(env.DB, 'tool_requests', toRequestRow(got.value));
 }

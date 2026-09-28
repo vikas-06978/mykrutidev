@@ -20,6 +20,15 @@ One row per submission in the D1 table `feedback`: `id, created_at, rating,
 used, wants, bug_text, message, email, page, lang, theme, device, width,
 browser` (`used` and `wants` are JSON arrays of option ids).
 
+The ToolMitra links page (`/links`, `src/components/LinksPage.astro`) has a
+"which tool should we build next?" form. It posts to `/api/tool-request`
+(`functions/api/tool-request.js` → `handleToolRequest` in
+`server/feedbackApi.js`), with the same checks and its own rate-limit count.
+One row per request in `tool_requests`: `id, created_at, idea, details, email,
+lang, device`. They are listed on `/admin/feedback` under the feedback, with a
+**Tool requests CSV** download. The table is created on first use, so there
+is nothing to run for it.
+
 Never stored or sent: the text in any tool, uploaded files, the IP address, the
 user-agent string. The server rejects any field it does not know.
 

@@ -23,6 +23,7 @@ import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
+import { INSTAGRAM, LINKED_TOOLS, instagramUrl } from '../src/lib/brand.js';
 
 const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
 
@@ -790,6 +791,56 @@ describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
     for (const html of [...pages.values(), notFound]) {
       assert.doesNotMatch(html, /upi:\/\//);
       assert.doesNotMatch(html, /<[^>]+\sdata-support-(link|upi)[\s>=]/);
+    }
+  });
+});
+
+describe('the ToolMitra links page (/links)', () => {
+  const links = () => ({ en: pages.get('/links'), hi: pages.get('/hi/links') });
+
+  test('exists in both languages, is never indexed and is in no sitemap', () => {
+    const sitemaps = readdirSync(DIST).filter((f) => /^sitemap.*\.xml$/.test(f));
+    assert.ok(sitemaps.length, 'no sitemap');
+    for (const f of sitemaps) assert.doesNotMatch(readFileSync(join(DIST, f), 'utf8'), /\/links\//, f);
+    for (const html of Object.values(links())) {
+      assert.ok(html, 'missing /links page');
+      assert.match(html, /<meta name="robots" content="noindex/);
+      assert.match(html, /<h1[^>]*>ToolMitra<\/h1>/);
+    }
+  });
+
+  test('lists every tool in brand.js, each linking to a real page in its own language', () => {
+    for (const [lang, html] of Object.entries(links())) {
+      const hrefs = [...html.matchAll(/<a[^>]*data-links-tool="([^"]+)"[^>]*>/g)].map((m) => [m[1], attr(m[0], 'href')]);
+      assert.deepEqual(
+        hrefs.map(([p]) => p),
+        LINKED_TOOLS,
+        lang,
+      );
+      for (const [p, href] of hrefs) {
+        const want = slash(lang === 'hi' ? hindiOf(p) : p);
+        assert.equal(href, want, `${lang}: ${p}`);
+        assert.ok(pages.has(want === '/' ? '/' : want.replace(/\/$/, '')), `${lang}: ${href} is not a page`);
+      }
+    }
+  });
+
+  test('the request form: its fields, the honeypot, and no Turnstile until it is used', () => {
+    for (const html of Object.values(links())) {
+      const form = html.match(/<form[^>]*data-lk-form[\s\S]*?<\/form>/)?.[0];
+      assert.ok(form, 'no request form');
+      const names = [...form.matchAll(/<(?:input|textarea)[^>]*\sname="([^"]+)"/g)].map((m) => m[1]);
+      assert.deepEqual(names, ['idea', 'details', 'email', 'website']);
+      assert.match(form, /<div class="lk-hp[^"]*" aria-hidden="true"[\s>]/);
+      assert.doesNotMatch(html, /challenges\.cloudflare\.com/);
+    }
+  });
+
+  test('the Instagram button appears only once brand.js has a handle', () => {
+    const url = instagramUrl(INSTAGRAM);
+    for (const html of Object.values(links())) {
+      if (url) assert.ok(html.includes(`href="${url}"`) && html.includes('data-links-instagram'));
+      else assert.doesNotMatch(html, /data-links-instagram|instagram\.com/);
     }
   });
 });

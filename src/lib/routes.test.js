@@ -191,9 +191,11 @@ describe('routes match the files on disk', () => {
 
   test('every .astro page file has a table entry', () => {
     // 404.astro is the host's error page for every missing URL, not a route.
-    // support.astro is linked only from the footer and never indexed, so it is
-    // kept out of the table (and so out of the nav, sitemap and search checks).
-    for (const f of files.filter((x) => x !== '404.astro' && x !== 'support.astro')) {
+    // support.astro (linked only from the footer) and links.astro (ToolMitra's
+    // Instagram bio link) are never indexed, so they are kept out of the table
+    // (and so out of the nav, sitemap and search checks).
+    const OFF_TABLE = ['404.astro', 'support.astro', 'links.astro'];
+    for (const f of files.filter((x) => !OFF_TABLE.includes(x))) {
       const path = f === 'index.astro' ? '/' : `/${f.replace(/\.astro$/, '')}`;
       assert.ok(getPage(path), `${f} has no routes.js entry`);
     }

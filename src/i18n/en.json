@@ -1844,7 +1844,7 @@
       "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
       "body": [
         "<h2>Your text and your files</h2>",
-        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only thing our server accepts is the short feedback form, and only when you press Send. You can load a page, disconnect from the internet and keep converting.</p>",
+        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only things our server accepts are the short feedback form and the tool request form on the <a href=\"/links\">ToolMitra links page</a>, and only when you press Send. You can load a page, disconnect from the internet and keep converting.</p>",
         "<h2>The one exception: English to Hindi typing</h2>",
         "<p>On <a href=\"/english-to-hindi-typing\">English to Hindi typing</a>, the Hinglish mode sends each word you type to Google's public input-tools service to get its best Hindi spelling. Only the words being transliterated are sent, not the rest of the page, and web and email addresses are never sent. If you do not want that, switch Typing to <strong>Exact (ITRANS)</strong>, which works entirely offline. Google's handling of those requests is covered by Google's own privacy policy.</p>",
         "<h2>What is stored on your device</h2>",
@@ -1858,14 +1858,16 @@
         "<p>The <strong>Feedback</strong> button at the bottom of each page opens a short form, and only when you click it. If you press Send, we store:</p>",
         "<ul><li>your rating (😞 😐 🙂 😍) and the options you ticked</li><li>what you wrote in the form's own text boxes, and an email address only if you chose to give one</li><li>the page you were on, the site language, the colour theme, whether you were on a phone or a computer, your screen width in pixels, your browser's name (for example \"Chrome\") and the date</li></ul>",
         "<p>We do <strong>not</strong> store your IP address, your browser's full identification string, or anything you typed, pasted or converted in the tools. Feedback is used only to decide what to fix and build next, and is kept in a Cloudflare D1 database that only the site's owner can read. An email address is used only to reply to you. It is never shared or used for marketing. To have your feedback deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
+        "<h2>Tool requests</h2>",
+        "<p>The <a href=\"/links\">ToolMitra links page</a> has a short form for suggesting the next tool. If you press Send, we store what you wrote in it, an email address only if you chose to give one, the site language, whether you were on a phone or a computer, and the date. Nothing else. Requests are kept in the same database as feedback, under the same rules: no IP address, read only by the site's owner, and an email used only to tell you when the tool is ready. To have a request deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
         "<h2>Spam protection</h2>",
-        "<p>To keep robots out, the feedback form uses Cloudflare Turnstile, an invisible check that runs only after you open the form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
+        "<p>To keep robots out, the feedback form and the tool request form use Cloudflare Turnstile, an invisible check that runs only after you open or start filling in a form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour on each form, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
         "<h2>Server logs</h2>",
         "<p>The site is a set of static files served by a hosting provider. Like any web server, it may keep standard access logs - IP address, the page requested, browser type and time - for security and to keep the service running. These logs never contain the text or files you convert, because those never reach the server.</p>",
         "<h2>Children</h2>",
-        "<p>The site asks no one for personal information, children included. The only place you can give any is the optional email box in the feedback form.</p>",
+        "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 27 September 2026.</p>"
+        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 28 September 2026.</p>"
       ]
     },
     "/terms": {
@@ -2466,5 +2468,41 @@
     "otherHeading": "Other ways to help",
     "other": "<ul><li><strong>Share it</strong> with someone who types Hindi or is preparing for a typing test.</li><li><strong>Tell us what to improve</strong> with the Feedback button at the bottom of any page.</li><li><strong>Link to it</strong> from your institute's, office's or blog's page of useful tools.</li></ul>",
     "footerLink": "Support MyKrutiDev"
+  },
+  "links": {
+    "title": "ToolMitra | Free Hindi Typing and Font Tools",
+    "description": "All ToolMitra tools in one place: Kruti Dev and Unicode converters, Hindi typing and printable charts. Tell us which tool to build next.",
+    "h1": "ToolMitra",
+    "logoAlt": "ToolMitra logo",
+    "tagline": "Free tools for Hindi typing, exams and office work. No sign-up, and your text stays on your device.",
+    "follow": "Follow on Instagram",
+    "toolsHeading": "Tools",
+    "tools": {
+      "/": "Old Kruti Dev text into Unicode Hindi that works everywhere.",
+      "/unicode-to-kruti-dev": "Unicode Hindi into Kruti Dev 010, for office and exam files.",
+      "/hindi-font-converter": "DevLys, Chanakya, Mangal and more, in one converter.",
+      "/english-to-hindi-typing": "Type Hindi in English letters: namaste becomes नमस्ते.",
+      "/hindi-keyboard": "Type Hindi on screen or with your keyboard, no Hindi keypad needed.",
+      "/hindi-typing-test": "Kruti Dev Remington typing practice for CPCT and SSC.",
+      "/kruti-dev-keyboard": "Free Kruti Dev keyboard chart PDF to print.",
+      "/all-converters": "Every font converter on MyKrutiDev, in one list."
+    },
+    "nextHeading": "Which tool should we build next?",
+    "nextLede": "More tools are on the way. Tell us the one you need. Every request is read, and the most asked-for tools come first.",
+    "ideaLabel": "Tool you want",
+    "ideaHint": "For example: PDF to Kruti Dev, or a typing test for the Court exam",
+    "detailsLabel": "What would it help you do?",
+    "optional": "(optional)",
+    "emailLabel": "Email",
+    "emailHint": "only if you want to hear when it is ready",
+    "send": "Send request",
+    "sending": "Sending…",
+    "thanks": "Thank you! Your request has reached us.",
+    "another": "Suggest another tool",
+    "errorIdea": "Please write the tool you want (at least 3 letters).",
+    "errorEmail": "That email address does not look right. Fix it or leave the box empty.",
+    "errorRate": "Too many requests from here for now. Please try again in an hour.",
+    "errorGeneric": "It could not be sent just now. Please try again in a minute.",
+    "privacy": "We save only what you type in this form, the site language and whether you are on a phone or a computer. Never your IP address."
   }
 }

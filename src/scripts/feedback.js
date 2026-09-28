@@ -13,9 +13,9 @@
 // hoisted by Astro into every page's inline stylesheet.
 import css from '../styles/feedback.css?inline';
 import { LIMITS, QUIET_DAYS, SENT_KEY, THEMES, browserName } from '../lib/feedback.js';
+import { challenge } from './turnstile.js';
 
 const ENDPOINT = '/api/feedback';
-const TURNSTILE_JS = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const STEPS = 4;
 
 let panel = null;
@@ -53,57 +53,12 @@ export function context() {
 }
 
 // ---------------------------------------------------------------------------
-// Turnstile (invisible). Fetched only once the panel is open, and only when
-// the server says a site key is configured.
+// Turnstile (invisible): src/scripts/turnstile.js. Started once the panel is open.
 // ---------------------------------------------------------------------------
-let config = null;
-function loadConfig() {
-  config ??= fetch(ENDPOINT, { headers: { Accept: 'application/json' } })
-    .then((r) => (r.ok && /json/.test(r.headers.get('Content-Type') ?? '') ? r.json() : null))
-    .catch(() => null);
-  return config;
-}
+let turnstile = null; // Promise of the check, or of null when there is none
 
-let turnstile = null; // { id, token }
-async function startTurnstile(el, lang) {
-  if (turnstile) return;
-  const cfg = await loadConfig();
-  const sitekey = cfg?.turnstileSiteKey;
-  if (!sitekey) return;
-  turnstile = { id: null, token: null };
-  await new Promise((resolve) => {
-    const s = document.createElement('script');
-    s.src = TURNSTILE_JS;
-    s.async = true;
-    s.onload = resolve;
-    s.onerror = resolve;
-    document.head.append(s);
-  });
-  if (!window.turnstile) return;
-  turnstile.id = window.turnstile.render(el, {
-    sitekey,
-    language: lang,
-    appearance: 'interaction-only',
-    'refresh-expired': 'auto',
-    callback: (t) => (turnstile.token = t),
-    'expired-callback': () => (turnstile.token = null),
-    'error-callback': () => (turnstile.token = null),
-  });
-}
-
-/** The token, waiting a few seconds for the invisible check if it is still running. */
-async function turnstileToken() {
-  if (!turnstile) return undefined;
-  for (let i = 0; i < 40 && !turnstile.token; i++) await new Promise((r) => setTimeout(r, 200));
-  return turnstile.token ?? undefined;
-}
-
-function resetTurnstile() {
-  if (turnstile?.id != null && window.turnstile) {
-    turnstile.token = null;
-    window.turnstile.reset(turnstile.id);
-  }
-}
+const turnstileToken = async () => (await turnstile)?.token();
+const resetTurnstile = () => void turnstile?.then((t) => t?.reset());
 
 // ---------------------------------------------------------------------------
 // Sending
@@ -304,7 +259,7 @@ function openPanel(btn) {
   onChange(true);
   // Back where the visitor left off, focus on its first control.
   ui.show(ui.step());
-  void startTurnstile(ui.turnstileEl, ui.lang);
+  turnstile ??= challenge(ui.turnstileEl, ui.lang);
 }
 
 export function close() {
