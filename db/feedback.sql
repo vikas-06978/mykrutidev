@@ -34,3 +34,15 @@ CREATE TABLE IF NOT EXISTS feedback_rate (
   hits INTEGER NOT NULL,
   expires INTEGER NOT NULL
 );
+
+-- The "Which tool should we build next?" form on /links. Only what was typed
+-- into it, plus its language and the kind of device.
+CREATE TABLE IF NOT EXISTS tool_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  idea TEXT NOT NULL,
+  details TEXT,
+  email TEXT,
+  lang TEXT,
+  device TEXT
+);

@@ -1,0 +1,304 @@
+---
+/**
+ * /links and /hi/links: ToolMitra's page, the one link in the Instagram bio.
+ * Every tool on one screen, then a short "which tool should we build next?"
+ * form. Never indexed (a list of links is nobody's search result), and not in
+ * the nav: people arrive here from social media.
+ *
+ * The form posts to /api/tool-request (server/feedbackApi.js). What it sends,
+ * and what it never does: validateToolRequest() in src/lib/feedback.js.
+ * The tools listed and the Instagram handle: src/lib/brand.js.
+ */
+import Base from '../layouts/Base.astro';
+import { INSTAGRAM, LINKED_TOOLS, instagramUrl } from '../lib/brand.js';
+import { REQUEST_LIMITS } from '../lib/feedback.js';
+import { langOf, useT } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+const { t, render, path: to } = useT(lang);
+const instagram = instagramUrl(INSTAGRAM);
+
+// Words the script shows itself.
+const strings = {
+  send: t('links.send'),
+  sending: t('links.sending'),
+  errorIdea: t('links.errorIdea'),
+  errorEmail: t('links.errorEmail'),
+  errorRate: t('links.errorRate'),
+  errorGeneric: t('links.errorGeneric'),
+};
+---
+
+<Base title={t('links.title')} description={t('links.description')} noindex crumb={t('links.h1')}>
+  <div class="wrap py-8 sm:py-12" data-links>
+    <div class="lk mx-auto">
+      <header class="text-center">
+        <img src="/favicon.svg" alt={t('links.logoAlt')} width="72" height="72" class="lk-logo mx-auto" />
+        <h1 class="mt-4 text-3xl sm:text-4xl" translate="no">{t('links.h1')}</h1>
+        <p class="mt-2 text-base text-body" set:html={render(t('links.tagline'))} />
+        {
+          instagram && (
+            <a class="btn btn-primary mt-5" href={instagram} rel="me noopener" data-links-instagram>
+              {t('links.follow')}
+            </a>
+          )
+        }
+      </header>
+
+      <section class="mt-10" aria-labelledby="lk-tools">
+        <h2 id="lk-tools" class="text-xl">{t('links.toolsHeading')}</h2>
+        <ul class="mt-4 grid gap-3" role="list">
+          {
+            LINKED_TOOLS.map((p) => (
+              <li>
+                <a class="card lk-tool" href={to(p)} data-links-tool={p}>
+                  <span class="lk-tool-name" set:html={render(t(`pages.${p}.nav`))} />
+                  <span class="lk-tool-line" set:html={render(t(`links.tools.${p}`))} />
+                  <span class="lk-arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="card mt-10 p-5 sm:p-6" aria-labelledby="lk-next" data-links-request>
+        <h2 id="lk-next" class="text-xl">{t('links.nextHeading')}</h2>
+        <p class="mt-2 text-sm text-body" set:html={render(t('links.nextLede'))} />
+
+        <form class="mt-5 grid gap-4" novalidate data-lk-form data-i18n={JSON.stringify(strings)} lang={lang}>
+          <div class="grid gap-1.5">
+            <label for="lk-idea" class="lk-label">{t('links.ideaLabel')}</label>
+            <input
+              id="lk-idea"
+              name="idea"
+              type="text"
+              required
+              minlength={REQUEST_LIMITS.ideaMin}
+              maxlength={REQUEST_LIMITS.idea}
+              autocomplete="off"
+              translate="no"
+              aria-describedby="lk-idea-hint"
+              class="lk-input"
+            />
+            <p id="lk-idea-hint" class="text-xs text-mute" set:html={render(t('links.ideaHint'))} />
+          </div>
+          <div class="grid gap-1.5">
+            <label for="lk-details" class="lk-label">
+              {t('links.detailsLabel')} <span class="lk-opt">{t('links.optional')}</span>
+            </label>
+            <textarea
+              id="lk-details"
+              name="details"
+              rows="3"
+              maxlength={REQUEST_LIMITS.details}
+              translate="no"
+              class="lk-input"></textarea>
+          </div>
+          <div class="grid gap-1.5">
+            <label for="lk-email" class="lk-label">
+              {t('links.emailLabel')} <span class="lk-opt">({t('links.emailHint')})</span>
+            </label>
+            <input
+              id="lk-email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              maxlength={REQUEST_LIMITS.email}
+              class="lk-input"
+            />
+          </div>
+          {/* The honeypot: out of sight and out of the tab order. A person never fills it. */}
+          <div class="lk-hp" aria-hidden="true">
+            <label for="lk-website">Website</label>
+            <input id="lk-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <div data-lk-turnstile></div>
+          <p class="lk-err" data-lk-error role="alert" hidden></p>
+          <div>
+            <button type="submit" class="btn btn-primary" data-lk-send>{t('links.send')}</button>
+          </div>
+        </form>
+
+        <div class="mt-5" data-lk-thanks hidden tabindex="-1">
+          <p class="font-medium text-ink">{t('links.thanks')}</p>
+          <button type="button" class="btn btn-ghost mt-3" data-lk-again>{t('links.another')}</button>
+        </div>
+
+        <p class="mt-5 text-xs text-mute">
+          {t('links.privacy')} <a href={to('/privacy-policy')}>{t('pages./privacy-policy.nav')}</a>
+        </p>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .lk {
+    max-width: 36rem;
+  }
+  .lk-logo {
+    border-radius: 16px;
+  }
+  .lk-tool {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.125rem 0.75rem;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 120ms ease;
+  }
+  .lk-tool:hover {
+    border-color: var(--color-brick);
+  }
+  .lk-tool-name {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .lk-tool-line {
+    grid-column: 1;
+    color: var(--color-body);
+    font-size: 0.875rem;
+  }
+  .lk-arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--color-brick);
+    font-size: 1.25rem;
+  }
+  .lk-label {
+    color: var(--color-ink);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .lk-opt {
+    color: var(--color-mute);
+    font-weight: 400;
+  }
+  .lk-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+  }
+  textarea.lk-input {
+    resize: vertical;
+  }
+  .lk-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .lk-err {
+    color: var(--color-err);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+</style>
+
+<script>
+  import { REQUEST_LIMITS } from '../lib/feedback.js';
+  import { challenge } from '../scripts/turnstile.js';
+
+  const form = document.querySelector<HTMLFormElement>('[data-lk-form]');
+  if (form) {
+    const L = JSON.parse(form.dataset.i18n ?? '{}');
+    const lang = form.lang === 'hi' ? 'hi' : 'en';
+    const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
+    const idea = $<HTMLInputElement>('#lk-idea');
+    const details = $<HTMLTextAreaElement>('#lk-details');
+    const email = $<HTMLInputElement>('#lk-email');
+    const err = $<HTMLParagraphElement>('[data-lk-error]');
+    const sendBtn = $<HTMLButtonElement>('[data-lk-send]');
+    const thanks = $<HTMLDivElement>('[data-lk-thanks]');
+
+    // Turnstile starts once someone begins filling in the form, not on page load.
+    type Check = Awaited<ReturnType<typeof challenge>>;
+    let check: Promise<Check> | null = null;
+    form.addEventListener('focusin', () => (check ??= challenge($('[data-lk-turnstile]'), lang)), { once: true });
+
+    const fail = (text: string, focusEl?: HTMLElement) => {
+      err.textContent = text;
+      err.hidden = false;
+      focusEl?.focus();
+    };
+
+    /** 'offline': no API here (local dev, a static preview), so nothing is saved. */
+    async function send(payload: Record<string, unknown>) {
+      let r: Response | null = null;
+      try {
+        r = await fetch('/api/tool-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        r = null;
+      }
+      const json = r && /json/.test(r.headers.get('Content-Type') ?? '') ? await r.json().catch(() => null) : null;
+      if (!json) {
+        console.info('[tool request] No API here (local dev?) - not saved. It would have sent:', payload.idea);
+        return 'offline';
+      }
+      if (json.ok) return 'ok';
+      if (r!.status === 429) return 'rate';
+      if (json.error === 'invalid' && json.details?.some((d: string) => d.startsWith('email'))) return 'email';
+      return 'error';
+    }
+
+    let busy = false;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (busy) return;
+      err.hidden = true;
+      const text = idea.value.trim();
+      if ([...text].length < REQUEST_LIMITS.ideaMin) return fail(L.errorIdea, idea);
+      const mail = email.value.trim();
+      if (mail && !email.checkValidity()) return fail(L.errorEmail, email);
+
+      const payload: Record<string, unknown> = {
+        idea: text,
+        ...(details.value.trim() ? { details: details.value.trim() } : {}),
+        ...(mail ? { email: mail } : {}),
+        lang,
+        // The same test as the feedback panel's context().
+        device: matchMedia('(max-width: 767px), (pointer: coarse)').matches ? 'mobile' : 'desktop',
+        website: $<HTMLInputElement>('#lk-website').value,
+      };
+      busy = true;
+      sendBtn.disabled = true;
+      sendBtn.textContent = L.sending;
+      const token = await (await check)?.token();
+      if (token) payload.token = token;
+      const result = await send(payload);
+      busy = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = L.send;
+      void check?.then((c) => c?.reset());
+
+      if (result === 'ok' || result === 'offline') {
+        form.reset();
+        form.hidden = true;
+        thanks.hidden = false;
+        thanks.focus();
+      } else if (result === 'rate') fail(L.errorRate);
+      else if (result === 'email') fail(L.errorEmail, email);
+      else fail(L.errorGeneric);
+    });
+
+    $('[data-lk-again]').addEventListener('click', () => {
+      thanks.hidden = true;
+      form.hidden = false;
+      idea.focus();
+    });
+  }
+</script>

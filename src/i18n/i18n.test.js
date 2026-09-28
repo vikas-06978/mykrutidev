@@ -224,7 +224,7 @@ describe('code examples and Unicode output survive translation untouched', () =>
 
   test('the brand and file types are never translated', () => {
     for (const key of flatKeys(en)) {
-      for (const name of ['MyKrutiDev', '.docx', '.txt']) {
+      for (const name of ['MyKrutiDev', 'ToolMitra', '.docx', '.txt']) {
         if (raw('en', key).includes(name)) {
           assert.ok(raw('hi', key).includes(name), `${key}: Hindi lost "${name}"`);
         }

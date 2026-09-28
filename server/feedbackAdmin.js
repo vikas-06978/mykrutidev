@@ -7,14 +7,16 @@
  * form once and a session cookie is set for 8 hours, or send it as
  * `Authorization: Bearer <key>` (curl, scripts).
  *
- *   GET  /admin/feedback              totals, top requests, latest 50 messages
+ *   GET  /admin/feedback              totals, top requests, latest 50 messages,
+ *                                     latest 100 tool requests (from /links)
  *   GET  /admin/feedback?format=csv   every row, as a spreadsheet
+ *   GET  /admin/feedback?format=csv&table=requests   every tool request
  *   POST /admin/feedback              key=...   (sign in) | logout=1
  *
  * Everything shown was typed by strangers: it is escaped on the way out, and
  * the page runs with a CSP that allows no script at all.
  */
-import { COLUMNS, RATING_EMOJI, RATINGS, USED, WANTS, toCsv } from '../src/lib/feedback.js';
+import { COLUMNS, RATING_EMOJI, RATINGS, REQUEST_COLUMNS, USED, WANTS, toCsv } from '../src/lib/feedback.js';
 import { clientIp, countHit, ensureSchema } from './feedbackApi.js';
 // Not en.json itself: see scripts/admin-labels.mjs for why this is a generated module.
 import { LABELS } from './adminLabels.js';
@@ -130,7 +132,7 @@ function bars(rows, group) {
     .join('')}</ol>`;
 }
 
-function dashboard({ total, ratings, wants, used, latest }) {
+function dashboard({ total, ratings, wants, used, latest, requestTotal, requests }) {
   const byRating = Object.fromEntries(ratings.map((r) => [r.rating, r.n]));
   const avg = total ? ratings.reduce((s, r) => s + r.rating * r.n, 0) / total : 0;
   const tiles = RATINGS.map(
@@ -150,12 +152,24 @@ function dashboard({ total, ratings, wants, used, latest }) {
     })
     .join('');
 
+  const requestRows = requests
+    .map(
+      (r) => `<tr>
+  <td class="fa-nowrap">${esc(r.created_at?.slice(0, 16).replace('T', ' '))}</td>
+  <td><p class="fa-idea">${esc(r.idea)}</p>${r.details ? `<p>${esc(r.details)}</p>` : ''}</td>
+  <td>${r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ''}</td>
+  <td class="fa-sub">${esc(r.lang)} · ${esc(r.device)}</td>
+</tr>`,
+    )
+    .join('');
+
   return page(
     'Feedback',
     `<header class="fa-top">
   <h1>Feedback</h1>
   <div class="fa-actions">
     <a class="fa-button" href="?format=csv" download>Download CSV</a>
+    <a class="fa-button" href="?format=csv&amp;table=requests" download>Tool requests CSV</a>
     <form method="post"><button type="submit" name="logout" value="1" class="fa-link">Sign out</button></form>
   </div>
 </header>
@@ -185,6 +199,17 @@ function dashboard({ total, ratings, wants, used, latest }) {
 <tbody>${rows}</tbody></table></div>`
       : '<p class="fa-empty">No written messages yet.</p>'
   }
+</section>
+
+<section aria-labelledby="h-requests">
+  <h2 id="h-requests">Tool requests <span class="fa-sub">${requestTotal} in total, from the /links page${requests.length < requestTotal ? ` · latest ${requests.length} shown` : ''}</span></h2>
+  ${
+    requests.length
+      ? `<div class="fa-scroll"><table>
+<thead><tr><th>Date (UTC)</th><th>Tool idea</th><th>Email</th><th>Context</th></tr></thead>
+<tbody>${requestRows}</tbody></table></div>`
+      : '<p class="fa-empty">No tool requests yet.</p>'
+  }
 </section>`,
   );
 }
@@ -212,7 +237,7 @@ async function counts(db, column, allowed) {
 }
 
 export async function loadSummary(db) {
-  const [ratings, wants, used, latest] = await Promise.all([
+  const [ratings, wants, used, latest, requestCount, requests] = await Promise.all([
     db.prepare('SELECT rating, COUNT(*) AS n FROM feedback GROUP BY rating').all(),
     counts(db, 'wants', WANTS),
     counts(db, 'used', USED),
@@ -221,9 +246,19 @@ export async function loadSummary(db) {
         "SELECT * FROM feedback WHERE COALESCE(message, '') <> '' OR COALESCE(bug_text, '') <> '' ORDER BY id DESC LIMIT 50",
       )
       .all(),
+    db.prepare('SELECT COUNT(*) AS n FROM tool_requests').first(),
+    db.prepare('SELECT * FROM tool_requests ORDER BY id DESC LIMIT 100').all(),
   ]);
   const r = ratings.results;
-  return { total: r.reduce((s, x) => s + x.n, 0), ratings: r, wants, used, latest: latest.results };
+  return {
+    total: r.reduce((s, x) => s + x.n, 0),
+    ratings: r,
+    wants,
+    used,
+    latest: latest.results,
+    requestTotal: requestCount?.n ?? 0,
+    requests: requests.results,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -266,13 +301,18 @@ export async function handleAdmin(request, env, { now } = {}) {
   }
   if (!(await isAuthorized(request, key))) return loginPage('', 401);
 
-  if (new URL(request.url).searchParams.get('format') === 'csv') {
-    const { results } = await db.prepare(`SELECT ${COLUMNS.join(', ')} FROM feedback ORDER BY id`).all();
+  const params = new URL(request.url).searchParams;
+  if (params.get('format') === 'csv') {
+    const requests = params.get('table') === 'requests';
+    const [table, columns, name] = requests
+      ? ['tool_requests', REQUEST_COLUMNS, 'tool-requests']
+      : ['feedback', COLUMNS, 'feedback'];
+    const { results } = await db.prepare(`SELECT ${columns.join(', ')} FROM ${table} ORDER BY id`).all();
     const day = new Date(now ?? Date.now()).toISOString().slice(0, 10);
-    return new Response(toCsv(results), {
+    return new Response(toCsv(results, columns), {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="mykrutidev-feedback-${day}.csv"`,
+        'Content-Disposition': `attachment; filename="mykrutidev-${name}-${day}.csv"`,
         ...SECURITY,
       },
     });
@@ -319,7 +359,8 @@ th,td{text-align:left;vertical-align:top;padding:.625rem .75rem;border-bottom:1p
 th{color:var(--ink);font-weight:600;white-space:nowrap}
 tbody tr:last-child td{border-bottom:0}
 td p{margin:0 0 .25rem;white-space:pre-wrap;overflow-wrap:anywhere}
-.fa-bug{color:var(--ink)}
+.fa-bug,.fa-idea{color:var(--ink)}
+.fa-idea{font-weight:500}
 .fa-nowrap{white-space:nowrap}
 .fa-login{display:flex;flex-wrap:wrap;align-items:end;gap:.5rem;margin-top:1rem}
 .fa-login label{flex-basis:100%;color:var(--ink);font-weight:500}

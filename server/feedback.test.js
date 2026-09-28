@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { getPlatformProxy } from 'wrangler';
 
-import { ensureSchema, handleConfig, handleFeedback } from './feedbackApi.js';
+import { ensureSchema, handleConfig, handleFeedback, handleToolRequest } from './feedbackApi.js';
 import { handleAdmin } from './feedbackAdmin.js';
 import { LIMITS, RATE } from '../src/lib/feedback.js';
 
@@ -47,7 +47,67 @@ const rows = async () => (await DB.prepare('SELECT * FROM feedback ORDER BY id')
 beforeEach(async () => {
   // Every test starts on empty tables.
   await ensureSchema(DB);
-  await DB.batch([DB.prepare('DELETE FROM feedback'), DB.prepare('DELETE FROM feedback_rate')]);
+  await DB.batch(['feedback', 'feedback_rate', 'tool_requests'].map((t) => DB.prepare(`DELETE FROM ${t}`)));
+});
+
+const request = { idea: 'PDF to Kruti Dev', details: 'सरकारी नोटिस PDF में आते हैं', lang: 'hi', device: 'mobile' };
+const postRequest = (body, { ip = `203.0.113.${++ipN}`, env = {}, deps } = {}) =>
+  handleToolRequest(
+    new Request('https://mykrutidev.com/api/tool-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+      body: JSON.stringify(body),
+    }),
+    { DB, ...env },
+    deps,
+  );
+const requestRows = async () => (await DB.prepare('SELECT * FROM tool_requests ORDER BY id').all()).results;
+
+describe('POST /api/tool-request', () => {
+  test('stores a request, with no IP address anywhere', async () => {
+    const r = await postRequest({ ...request, email: 'Me@Example.com' }, { ip: '198.51.100.9' });
+    assert.equal(r.status, 201);
+    const [row] = await requestRows();
+    assert.equal(row.id, (await r.json()).id);
+    assert.deepEqual(
+      [row.idea, row.details, row.email, row.lang, row.device],
+      ['PDF to Kruti Dev', 'सरकारी नोटिस PDF में आते हैं', 'me@example.com', 'hi', 'mobile'],
+    );
+    assert.match(row.created_at, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
+    const everything = JSON.stringify([await requestRows(), (await DB.prepare('SELECT * FROM feedback_rate').all()).results]);
+    assert.doesNotMatch(everything, /198\.51\.100\.9/);
+    assert.equal((await rows()).length, 0, 'nothing in the feedback table');
+  });
+
+  test('refuses an empty idea, unknown fields, the honeypot - and stores nothing', async () => {
+    for (const bad of [
+      { ...request, idea: ' a ' },
+      { ...request, idea: undefined },
+      { ...request, rating: 4 },
+      { ...request, email: 'not-an-email' },
+      { ...request, website: 'http://spam' },
+    ]) {
+      const r = await postRequest(bad);
+      assert.equal(r.status, 400, JSON.stringify(bad));
+    }
+    assert.equal((await requestRows()).length, 0);
+  });
+
+  test(`its own rate limit: ${RATE.max} per IP per hour, apart from feedback`, async () => {
+    const ip = '198.51.100.20';
+    for (let i = 0; i < RATE.max; i++) assert.equal((await postRequest(request, { ip })).status, 201);
+    assert.equal((await postRequest(request, { ip })).status, 429);
+    // Feedback from the same IP is counted separately.
+    assert.equal((await post(good, { ip })).status, 201);
+  });
+
+  test('with a Turnstile secret, a request needs a good token', async () => {
+    const env = { TURNSTILE_SECRET_KEY: 'secret' };
+    const verify = async (token) => token === 'good';
+    assert.equal((await postRequest(request, { env, deps: { verify } })).status, 403);
+    assert.equal((await postRequest({ ...request, token: 'bad' }, { env, deps: { verify } })).status, 403);
+    assert.equal((await postRequest({ ...request, token: 'good' }, { env, deps: { verify } })).status, 201);
+  });
 });
 
 describe('POST /api/feedback', () => {
@@ -247,5 +307,22 @@ describe('/admin/feedback', () => {
     assert.equal(lines.length, 3);
     assert.match(csv, /"पहला, ""quoted"""/);
     assert.match(csv, /,'=cmd\|calc,/);
+  });
+
+  test('lists the tool requests, newest first and escaped, with their own CSV', async () => {
+    await postRequest({ ...request, idea: 'Typing test for Court exam' });
+    await postRequest({ ...request, idea: '<img src=x onerror=alert(1)>', details: '=HYPERLINK("x")', email: 'a@b.co' });
+    const html = await (await get('/admin/feedback', bearer)).text();
+    assert.match(html, /Tool requests <span class="fa-sub">2 in total/);
+    assert.ok(html.indexOf('&lt;img src=x') < html.indexOf('Typing test for Court exam'), 'newest first');
+    assert.doesNotMatch(html, /<img src=x/);
+    assert.match(html, /href="\?format=csv&amp;table=requests"/);
+
+    const r = await get('/admin/feedback?format=csv&table=requests', bearer);
+    assert.match(r.headers.get('Content-Disposition'), /filename="mykrutidev-tool-requests-\d{4}-\d\d-\d\d\.csv"/);
+    const lines = (await r.text()).replace(/^\uFEFF/, '').trim().split('\r\n');
+    assert.equal(lines[0], 'id,created_at,idea,details,email,lang,device');
+    assert.equal(lines.length, 3);
+    assert.match(lines[2], /,"'=HYPERLINK\(""x""\)",a@b\.co,hi,mobile$/);
   });
 });
