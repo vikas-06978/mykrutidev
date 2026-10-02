@@ -27,6 +27,7 @@ const links = fontLinksFor(page);
     links.map((l) => (
       <a
         href={to(l.path)}
+        translate="no"
         class="shrink-0 rounded-full border border-hairline bg-surface px-3 py-1 text-body no-underline hover:border-brick hover:text-ink"
       >
         {t(`fontStrip.fonts.${l.key}`)}
