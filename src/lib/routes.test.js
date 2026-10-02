@@ -10,8 +10,8 @@ import {
   livePages,
   pendingPages,
   liveConverters,
-  navGroups,
-  navTools,
+  navMenus,
+  NAV_MENUS,
   allGroups,
   reversePage,
   isIndexable,
@@ -26,7 +26,7 @@ describe('status: the one flag every "Soon" badge renders from', () => {
   });
 
   test('nav and /all-converters items carry it, agreeing with `live`', () => {
-    for (const g of [...navGroups(), ...allGroups()]) {
+    for (const g of allGroups()) {
       for (const p of g.pages) {
         assert.equal(p.status, statusOf(getPage(p.path)), p.path);
         assert.equal(p.live, p.status === 'live', p.path);
@@ -201,91 +201,58 @@ describe('routes match the files on disk', () => {
 });
 
 describe('navigation', () => {
-  test('nav contains only converter pages', () => {
-    for (const g of navGroups()) {
-      for (const p of g.pages) assert.equal(p.kind, 'converter', `${p.path}`);
-    }
+  const MENUS = navMenus();
+
+  test('three menus: converters, typing, tools', () => {
+    assert.deepEqual(MENUS.map((m) => m.key), ['converters', 'typing', 'tools']);
   });
 
-  test('every nav group has at least one live page', () => {
-    // A menu of nothing but "soon" rows is a dead end.
-    for (const g of navGroups()) {
-      assert.ok(
-        g.pages.some((p) => p.live),
-        `nav group "${g.name}" has no live page`,
-      );
-    }
-  });
-
-  test('nav liveness flags match isLive, so nothing unusable gets linked', () => {
-    for (const g of navGroups()) {
-      for (const p of g.pages) {
-        assert.equal(p.live, isLive(getPage(p.path)), `${p.path}`);
+  test('every path in NAV_MENUS is a real, live page', () => {
+    // navMenus() drops a page that is not live; a typo or a page switched off
+    // must fail here instead of quietly vanishing from the header.
+    for (const m of NAV_MENUS) {
+      for (const path of m.paths) {
+        const p = getPage(path);
+        assert.ok(p, `${m.key}: ${path} is not in routes.js`);
+        assert.ok(isLive(p), `${m.key}: ${path} is not live`);
       }
     }
   });
 
-  test('nav lists live pages before pending ones within a group', () => {
-    for (const g of navGroups()) {
-      const firstPending = g.pages.findIndex((p) => !p.live);
-      if (firstPending === -1) continue;
-      assert.ok(
-        g.pages.slice(firstPending).every((p) => !p.live),
-        `nav group "${g.name}" interleaves live and pending items`,
-      );
+  test('each menu is short, has no duplicates, and ends at its section of All tools', () => {
+    const seen = new Set();
+    for (const m of MENUS) {
+      assert.ok(m.pages.length >= 3 && m.pages.length <= 8, `${m.key} has ${m.pages.length} items`);
+      for (const p of m.pages) {
+        assert.ok(!seen.has(p.path), `${p.path} is in two menus`);
+        seen.add(p.path);
+      }
+      assert.equal(m.all, `/all-converters#${m.key}`);
     }
   });
 
-  test('nav groups are non-empty and uniquely named', () => {
-    const names = navGroups().map((g) => g.name);
-    assert.equal(new Set(names).size, names.length);
-    for (const g of navGroups()) assert.ok(g.pages.length > 0);
+  test('the Converters menu holds converters only, led by the home page', () => {
+    const conv = MENUS.find((m) => m.key === 'converters');
+    assert.equal(conv.pages[0].path, '/');
+    for (const p of conv.pages) assert.ok(p.from && p.to, `${p.path} is not a converter`);
   });
 
-  test('every live converter is reachable from the nav', () => {
-    const reachable = new Set(
-      navGroups().flatMap((g) => g.pages.filter((p) => p.live).map((p) => p.path)),
-    );
-    for (const p of liveConverters()) {
-      assert.ok(reachable.has(p.path), `${p.path} is live but not in any nav group`);
+  test('every typing menu page carries a nav subtitle', () => {
+    for (const p of MENUS.find((m) => m.key === 'typing').pages) {
+      assert.ok(p.navSub, `${p.path} has no nav subtitle`);
     }
   });
 
-  test('the nav groups are the source families that have a live page', () => {
-    assert.deepEqual(
-      navGroups().map((g) => g.name),
-      // Chanakya appears because Abbasi Chanakya New is live under it; the
-      // generic Chanakya pages in that group are still "coming soon". Shusha
-      // and its Marathi twin Shivaji have a menu each, and Nepali is Preeti.
-      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys', 'Chanakya', 'Shusha', 'Marathi', 'Nepali'],
-    );
-  });
-
-  test('tools sit beside the groups, never inside one', () => {
-    // A tool has no source font, so it cannot be filed under one. If it ever
-    // turns up in a group it means someone gave it a from/to it should not have.
-    const inGroups = new Set(navGroups().flatMap((g) => g.pages.map((p) => p.path)));
-    for (const t of navTools()) {
-      assert.ok(!inGroups.has(t.path), `${t.path} is a tool but also in a nav group`);
-    }
-  });
-
-  test('every tool is live, non-converter and carries its nav labels', () => {
-    assert.ok(navTools().length > 0, 'expected at least one tool');
-    for (const t of navTools()) {
-      assert.equal(t.kind, 'content', `${t.path}`);
-      assert.equal(t.from, null, `${t.path} should have no source font`);
-      assert.equal(t.to, null, `${t.path} should have no target font`);
-      assert.ok(t.nav, `${t.path} has no nav label`);
-      assert.ok(t.navSub, `${t.path} has no nav subtitle`);
-    }
+  test('every live converter is on All tools, one click from the header', () => {
+    const listed = new Set(allGroups().flatMap((g) => g.pages.filter((p) => p.live).map((p) => p.path)));
+    for (const p of liveConverters()) assert.ok(listed.has(p.path), `${p.path} is live but not on All tools`);
   });
 
   test('the Roman typing page is a tool, and indexable', () => {
     const p = getPage('/english-to-hindi-typing');
     assert.ok(p, 'the typing page is missing from routes.js');
     assert.ok(isLive(p));
-    assert.ok(navTools().some((t) => t.path === p.path), 'not offered in the nav');
+    assert.ok(navMenus().some((m) => m.pages.some((t) => t.path === p.path)), 'not offered in the nav');
     assert.equal(isIndexable(new URL(p.path, SITE).href), true);
   });
 

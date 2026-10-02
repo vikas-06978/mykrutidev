@@ -35,7 +35,17 @@
     "menu": "Menu",
     "home": "Home",
     "breadcrumb": "Breadcrumb",
-    "guides": "Guides"
+    "guides": "Guides",
+    "menus": {
+      "converters": "Converters",
+      "typing": "Hindi typing",
+      "tools": "Hindi tools"
+    },
+    "seeAll": {
+      "converters": "All converters →",
+      "typing": "All typing tools →",
+      "tools": "All Hindi tools →"
+    }
   },
   "groups": {
     "Kruti Dev": "Kruti Dev",
@@ -2798,6 +2808,7 @@
     },
     "/remington-hindi-keyboard": {
       "nav": "Remington Hindi keyboard",
+      "navSub": "Type Hindi on the Kruti Dev layout",
       "h1": "Remington Hindi Keyboard Online",
       "title": "Remington Hindi Keyboard Online | Kruti Dev Layout to Unicode",
       "description": "Type Hindi online on the Remington (Kruti Dev) typewriter layout with your normal keyboard, see every key and its Shift character, copy as Unicode.",
