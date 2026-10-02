@@ -68,6 +68,9 @@ export const PREVIEW_FONTS = {
   // the files their maps were read from.
   shusha: preview('Shusha', 'shusha.woff'),
   shivaji: preview('Shivaji01', 'shivaji01.woff'),
+  // Converted from vendor/fonts/DV-TTSurekh/DV-TTSurekh.ttf, the file the
+  // DV-TT map was read from.
+  dvtt: preview('DV-TTSurekh', 'dvtt-surekh.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

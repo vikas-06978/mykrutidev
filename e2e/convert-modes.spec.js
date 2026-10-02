@@ -18,6 +18,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { unzipSync, strFromU8 } from 'fflate';
 
 // Run once (in the desktop project); viewports are set per test.
@@ -335,4 +336,47 @@ test.describe('the Mangal pages convert files exactly like the Kruti Dev <-> Uni
       expect(here).toBe(await convertedXml(page, twin, name, base64));
     });
   }
+});
+
+test.describe('every font: Upload Word file and Convert to', () => {
+  const D = '[data-doc-converter] ';
+
+  async function convertTo(page, path, target, file) {
+    await page.goto(`${path}?mode=file`);
+    await page.selectOption(`${D}[data-role="target"]`, target);
+    await page.setInputFiles(`${D}input[type=file]`, fileURLToPath(new URL(`../src/lib/__fixtures__/${file}`, import.meta.url)));
+    const link = page.locator(`${D}[data-role="result"] [data-role="download"]`);
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    const [download] = await Promise.all([page.waitForEvent('download'), link.click()]);
+    const files = unzipSync(new Uint8Array(readFileSync(await download.path())));
+    return { name: download.suggestedFilename(), xml: strFromU8(files['word/document.xml']) };
+  }
+
+  test('a Kruti Dev file can be downloaded in DevLys, DV-TT or Unicode in Nirmala UI', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    const devlys = await convertTo(page, '/', 'devlys|DevLys 010', 'kruti-test.docx');
+    expect(devlys.name).toBe('kruti-test-devlys.docx');
+    expect(devlys.xml).toContain('w:ascii="DevLys 010"');
+    expect(devlys.xml).toContain('<w:tbl>');
+    const dvtt = await convertTo(page, '/', 'dvtt|DV-TTSurekh', 'kruti-test.docx');
+    expect(dvtt.xml).toContain('w:ascii="DV-TTSurekh"');
+    const nirmala = await convertTo(page, '/', 'unicode|Nirmala UI', 'kruti-test.docx');
+    expect(nirmala.xml).toContain('w:ascii="Nirmala UI"');
+    expect(nirmala.xml).toContain('भारत');
+  });
+
+  for (const path of ['/preeti-to-unicode/', '/marathi-font-converter/', '/unicode-to-shivaji/', '/hi/devlys-to-unicode/']) {
+    test(`${path} has the Upload tab and a Convert to menu`, async ({ page }) => {
+      await page.goto(`${path}?mode=file`);
+      await expect(tab(page, 'file')).toHaveAttribute('aria-selected', 'true');
+      await expect(page.locator(`${D}[data-role="target"] option`)).not.toHaveCount(0);
+    });
+  }
+
+  test('a Unicode file goes to DV-TT Surekh from the Marathi reverse page', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    const out = await convertTo(page, '/unicode-to-dvtt-surekh/', 'dvtt|DV-TTSurekh', 'unicode-test.docx');
+    expect(out.name).toBe('unicode-test-dvtt.docx');
+    expect(out.xml).toContain('w:ascii="DV-TTSurekh"');
+  });
 });

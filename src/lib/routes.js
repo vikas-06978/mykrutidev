@@ -38,6 +38,8 @@
 
 import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
+import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
+import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
 export const SITE = 'https://mykrutidev.com';
@@ -58,7 +60,7 @@ export const SITE = 'https://mykrutidev.com';
  * @property {string}  [note]    why it is not ready yet, shown on the panel
  * @property {boolean} [beta]    live, but shows a Beta badge beside the h1
  * @property {string}  [betaNote] one line under the badge saying what it is for
- * @property {boolean} [documents] offer "Convert a document" under the boxes
+ * (Upload Word file is offered on every page docPairFor() accepts.)
  * @property {boolean} [app]  a content page that embeds a tool (PageView's TOOLS)
  *   without being a menubar `tool` itself: it still gets WebApplication data
  */
@@ -76,7 +78,6 @@ export const PAGES = [
     to: 'unicode',
     group: 'Kruti Dev',
     related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev'],
-    documents: true,
   },
   {
     path: '/unicode-to-kruti-dev',
@@ -86,7 +87,6 @@ export const PAGES = [
     to: 'kruti-dev',
     group: 'Unicode / Hindi',
     related: ['/', '/mangal-to-kruti-dev', '/kruti-dev-to-mangal'],
-    documents: true,
   },
   {
     path: '/kruti-dev-to-mangal',
@@ -96,7 +96,6 @@ export const PAGES = [
     to: 'mangal',
     group: 'Kruti Dev',
     related: ['/', '/mangal-to-kruti-dev', '/unicode-to-kruti-dev'],
-    documents: true,
   },
   {
     path: '/mangal-to-kruti-dev',
@@ -106,7 +105,6 @@ export const PAGES = [
     to: 'kruti-dev',
     group: 'Mangal',
     related: ['/kruti-dev-to-mangal', '/unicode-to-kruti-dev', '/'],
-    documents: true,
   },
   {
     path: '/english-to-hindi-typing',
@@ -379,7 +377,7 @@ export const PAGES = [
     from: 'shivaji',
     to: 'unicode',
     group: 'Marathi',
-    related: ['/unicode-to-shivaji', '/shusha-to-unicode', '/'],
+    related: ['/unicode-to-shivaji', '/marathi-font-converter', '/shusha-to-unicode'],
     beta: true,
   },
   {
@@ -437,22 +435,33 @@ export const PAGES = [
     beta: true,
   },
 
+  {
+    // The broad "Marathi font converter" search, answered with the font most
+    // Maharashtra offices typed in: DV-TT Surekh (and Yogesh, the same layout).
+    // Shivaji has its own pages above.
+    path: '/marathi-font-converter',
+    ready: true,
+    kind: 'converter',
+    from: 'dvtt',
+    to: 'unicode',
+    group: 'Marathi',
+    related: ['/unicode-to-dvtt-surekh', '/shivaji-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-dvtt-surekh',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'dvtt',
+    group: 'Marathi',
+    related: ['/marathi-font-converter', '/unicode-to-shivaji', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
   // ==========================================================================
   // PLANNED - other Indic scripts. Routes only, no mapping work started.
   // Activate only after a keyword-volume check AND a tested mapping.
   // ==========================================================================
-  {
-    path: '/marathi-font-converter',
-    ready: false,
-    kind: 'converter',
-    // Null on purpose, even though Marathi is Devanagari and the Kruti Dev map
-    // would "work". Pointing it at a Hindi-verified map would let this page go
-    // live on a mapping nobody has checked against Marathi text.
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/', '/all-converters'],
-  },
   {
     path: '/gujarati-font-converter',
     ready: false,
@@ -871,7 +880,7 @@ export const NAV_MENUS = [
       '/devlys-to-unicode',
       '/unicode-to-devlys',
       '/preeti-to-unicode',
-      '/shivaji-to-unicode',
+      '/marathi-font-converter',
     ],
   },
   {
@@ -991,3 +1000,50 @@ export function assertKnownFonts(pages, fonts) {
 }
 
 assertKnownFonts(PAGES, FONTS);
+
+/**
+ * How many live pages All tools lists: every live converter, every everyday
+ * tool and every typing page. The number the site quotes ("All 52 tools").
+ */
+export function liveToolCount() {
+  const converters = allGroups().reduce((n, g) => n + g.pages.filter((p) => p.live).length, 0);
+  const others = [...TOOL_PATHS, ...TYPING_PATHS].map(getPage).filter((p) => p && isLive(p)).length;
+  return converters + others;
+}
+
+/**
+ * The font links under a converter's intro: one per font family, so a visitor
+ * who landed on the wrong font sees the others without opening a menu.
+ * `fonts` are the registry keys a link is about: it is left out on a page
+ * that already converts that font.
+ */
+export const FONT_LINKS = [
+  { key: 'kruti-dev', path: '/', fonts: ['kruti-dev'] },
+  { key: 'devlys', path: '/devlys-to-unicode', fonts: ['devlys'] },
+  { key: 'mangal', path: '/kruti-dev-to-mangal', fonts: ['mangal'] },
+  { key: 'chanakya', path: '/abbasi-chanakya-to-unicode', fonts: ['abbasi-chanakya'] },
+  { key: 'preeti', path: '/preeti-to-unicode', fonts: ['preeti'] },
+  { key: 'marathi', path: '/marathi-font-converter', fonts: ['dvtt'] },
+  { key: 'shivaji', path: '/shivaji-to-unicode', fonts: ['shivaji'] },
+  { key: 'shusha', path: '/shusha-to-unicode', fonts: ['shusha'] },
+];
+
+/** FONT_LINKS for one page: live targets only, minus the fonts it converts. */
+export function fontLinksFor(page) {
+  return FONT_LINKS.filter(
+    (l) => l.path !== page.path && !l.fonts.includes(page.from) && !l.fonts.includes(page.to) && isLive(getPage(l.path)),
+  );
+}
+
+/**
+ * Whether a converter page offers "Upload Word file", as { from, to }: on
+ * every live converter whose two fonts the document converter can read and
+ * write (wordFonts.js). Null on every other page.
+ */
+export function docPairFor(page) {
+  if (!page || page.kind !== 'converter' || !isLive(page) || !page.from || !page.to) return null;
+  const known = (k) => isUnicodeKey(k) || (k in WORD_FONTS && FONTS[k]?.accurate);
+  if (!known(page.from) || !known(page.to)) return null;
+  if (isUnicodeKey(page.from) && isUnicodeKey(page.to)) return null;
+  return { from: page.from, to: page.to };
+}

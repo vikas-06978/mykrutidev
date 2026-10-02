@@ -76,7 +76,8 @@
     "abbasi-chanakya": "Abbasi Chanakya New",
     "shusha": "Shusha",
     "preeti": "Preeti",
-    "shivaji": "Shivaji"
+    "shivaji": "Shivaji",
+    "dvtt": "DV-TT Surekh"
   },
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
@@ -151,16 +152,17 @@
   },
   "doc": {
     "title": "Convert a document",
-    "introToUnicode": "Upload a Word (.docx) or text (.txt) file typed in Kruti Dev. Only the Kruti Dev text is converted. English, tables, images and formatting stay as they are.",
-    "introToKruti": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted to Kruti Dev 010. English, tables, images and formatting stay as they are.",
+    "introLegacy": "Upload a Word (.docx) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
+    "introUnicode": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
     "private": "Your file never leaves your computer.",
     "drag": "Drag a file here, or ",
     "choose": "Choose file",
     "limits": ".docx or .txt, up to 20 MB",
-    "fontLabel": "Hindi font in the converted file:",
+    "targetLabel": "Convert to:",
+    "unicodeIn": "Unicode ({font})",
     "progress": "Converting",
     "download": "Download converted file",
-    "downloadKrutiDocx": "Download as Word (.docx) with Kruti Dev 010",
+    "downloadLegacyDocx": "Download as Word (.docx) with {font}",
     "saveAs": "Please open it in Word and Save As → Word Document (.docx).",
     "pdf": "PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.",
     "passwordHint": "If the document is password-protected, remove the password first.",
@@ -175,8 +177,8 @@
     "tableMany": "{n} tables",
     "fontKruti": "Kruti Dev",
     "fontUnicode": "Unicode",
-    "noKruti": "No Kruti Dev text found in this document. Is it already Unicode?",
-    "noUnicode": "No Unicode Hindi text found in this document. Is it already in Kruti Dev?",
+    "noLegacy": "No {font} text found in this document. Is it already Unicode?",
+    "noUnicode": "No Unicode Hindi text found in this document. Is it already in {font}?",
     "allConverted": "All Hindi text converted.",
     "partial": "{pct}% of the Hindi text was in {from} and has been converted. {rest}% was already {to} and was left as it is."
   },
@@ -435,6 +437,21 @@
       "converters": "Font converters",
       "tools": "Everyday Hindi tools",
       "typing": "Typing, keyboards and charts"
+    }
+  },
+  "fontStrip": {
+    "aria": "Other font converters",
+    "label": "Other fonts:",
+    "all": "All {n} tools →",
+    "fonts": {
+      "kruti-dev": "Kruti Dev",
+      "devlys": "DevLys",
+      "mangal": "Mangal",
+      "chanakya": "Chanakya",
+      "preeti": "Preeti (Nepali)",
+      "marathi": "Marathi",
+      "shivaji": "Shivaji",
+      "shusha": "Shusha"
     }
   },
   "pages": {
@@ -1945,18 +1962,90 @@
       }
     },
     "/marathi-font-converter": {
-      "nav": "Marathi",
-      "h1": "Marathi Font Converter",
-      "title": "Marathi Font Converter | Legacy Marathi Fonts to Unicode (Planned)",
-      "description": "A planned Marathi font converter for Shree Lipi and other legacy Devanagari Marathi fonts to Unicode.",
-      "note": "Planned. Marathi uses the same Devanagari script as Hindi, so parts of the Kruti Dev work may carry over, but Shree Lipi and the other Marathi DTP fonts have their own layouts, and Marathi conjuncts differ enough that this needs testing against real Marathi documents before anything ships.",
-      "lede": "Planned: a Marathi font converter for Shree Lipi and other legacy Marathi fonts to Unicode.",
+      "nav": "Marathi (DV-TT) → Unicode",
+      "h1": "Marathi Font Converter: DV-TT Surekh to Unicode",
+      "title": "Marathi Font Converter | DV-TT Surekh, Yogesh to Unicode Online",
+      "description": "Convert Marathi typed in DV-TT Surekh or DV-TT Yogesh to Unicode for Aaple Sarkar, email and Word. ळ, च्या and the reph handled. Free, private.",
+      "betaNote": "For Marathi typed in DV-TT Surekh or DV-TT Yogesh.",
+      "lede": "Paste DV-TT text on the left and get Unicode Marathi on the right, ready for any portal, email or phone.",
       "body": [
-        "<h2>Planned, not started</h2>",
-        "<p>Marathi is written in Devanagari, the same script as Hindi, so this is the closest of the planned scripts to what the site already does. Some of the engine, meaning the matra reordering, the reph and the conjunct handling, carries over directly.</p>",
-        "<p>The character maps do not. Shree Lipi and the other Marathi DTP fonts have their own key arrangements, and Marathi uses some conjuncts and the eyelash <span lang=\"mr\">ऱ</span> in ways Hindi does not. Reusing the Kruti Dev map would produce Marathi that is wrong in precisely the places Marathi differs from Hindi, which is the hardest kind of error to notice.</p>",
-        "<p>This will be built only after a keyword check says it is worth doing and a mapping has been tested against real Marathi documents. Meanwhile, if your document is Hindi in Kruti Dev, <a href=\"/\">the main converter</a> handles it.</p>"
-      ]
+        "<h2>Which Marathi fonts this covers</h2>",
+        "<p>DV-TT Surekh is the font a great many Maharashtra government offices typed Marathi in. DV-TT Yogesh is the same keyboard layout in another design, and so are the Bold, Italic and EN styles of both. On a computer without the font, <strong lang=\"hi\">महाराष्ट्र</strong> shows up as <code>¨É½É®É¹]Å</code>. This page turns those characters into real Unicode Marathi.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>Half letters and the bar.</strong> Most letters are a half form plus <code>É</code>, so <code>MÉ</code> is ग and <code>MÉÉ</code> is गा.</li><li><strong>ि before its letter, the reph after its syllable.</strong> Both are moved, so <code>CÉªÉÉÇ±ÉªÉ</code> becomes <strong lang=\"hi\">कार्यालय</strong>. The combined ि + reph glyphs, as in <strong lang=\"hi\">कीर्ति</strong>, are handled too.</li><li><strong>Marathi letters.</strong> <strong lang=\"hi\">ळ</strong>, <strong lang=\"hi\">च्या</strong>, <strong lang=\"hi\">ज्ञ</strong>, <strong lang=\"hi\">श्र</strong> and the ready-made conjuncts such as <strong lang=\"hi\">द्ध</strong> and <strong lang=\"hi\">ह्य</strong>.</li></ul>",
+        "<p>For the other direction use <a href=\"/unicode-to-dvtt-surekh\">Unicode to DV-TT Surekh</a>. Documents typed in Shivaji go through <a href=\"/shivaji-to-unicode\">Shivaji to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was read off the DV-TT Surekh font file, and converted Marathi words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Does it work for Shree Lipi?",
+          "a": "Not yet. Shree Lipi has its own layout. This page is for DV-TT Surekh and DV-TT Yogesh, and Shivaji has its own page."
+        },
+        {
+          "q": "Why do the numbers come out as १२३?",
+          "a": "DV-TT Surekh draws Marathi digits on the number keys, so they become Marathi digits. If your file used an EN font and showed English digits, change them back with <a href=\"/hindi-to-english-numbers\">Hindi to English numbers</a>."
+        },
+        {
+          "q": "Is the Marathi changed into Hindi?",
+          "a": "No. Nothing is translated. The same Marathi words come out in Unicode."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Marathi out of your DV-TT Surekh or Yogesh document. It may look like symbols, which is fine.",
+          "Paste it into the <strong>DV-TT Surekh</strong> box. Unicode Marathi appears on the right.",
+          "Press <strong>Copy text</strong> and paste it into Aaple Sarkar, an email or a new file."
+        ],
+        "tip": "In Word, set the pasted Marathi to a Unicode font such as Mangal, Kokila or Nirmala UI."
+      }
+    },
+    "/unicode-to-dvtt-surekh": {
+      "nav": "Unicode → DV-TT Surekh",
+      "h1": "Unicode to DV-TT Surekh Converter (Marathi)",
+      "title": "Unicode to DV-TT Surekh Converter | Marathi Unicode to DV-TT Font",
+      "description": "Convert Unicode Marathi into DV-TT Surekh font code for office letters and old templates. ि, the reph and ो drawn the way the font draws them. Free.",
+      "betaNote": "For documents that will be set in DV-TT Surekh or DV-TT Yogesh.",
+      "lede": "Type or paste Marathi on the left and get DV-TT Surekh code on the right, ready for Word or your DTP program.",
+      "body": [
+        "<h2>When you need DV-TT Surekh</h2>",
+        "<p>Many Maharashtra offices still keep letters and forms in DV-TT Surekh. Marathi typed on a phone or with the Windows Marathi keyboard is Unicode, and it shows the wrong letters once set in DV-TT. This page writes it out again as the keys DV-TT expects, in the order the font draws them.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>The right ि.</strong> DV-TT has a narrow ि for one letter and a wide one for a cluster such as <strong lang=\"hi\">स्थि</strong>, each also with ं or a reph, and the converter picks the one that fits.</li><li><strong>The reph after its syllable</strong>, as in <strong lang=\"hi\">कार्यालय</strong>.</li><li><strong>ो on the bar.</strong> ो is written as the bar plus the curved े that sits on it.</li></ul>",
+        "<p>To go back, use the <a href=\"/marathi-font-converter\">Marathi font converter</a>. For Shivaji, use <a href=\"/unicode-to-shivaji\">Unicode to Shivaji</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was read off the DV-TT Surekh font file, and converted Marathi words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like symbols. Is that right?",
+          "a": "Yes. That is DV-TT code. Press <strong>Preview (Hindi)</strong> to see it in the font here, or set the font to <strong>DV-TTSurekh</strong> in Word."
+        },
+        {
+          "q": "Does it work with DV-TT Yogesh?",
+          "a": "Yes. DV-TT Yogesh uses the same keys, so the same code shows correctly in either font."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Marathi for your DV-TT document.",
+          "Press <strong>Copy DV-TT code</strong>.",
+          "Paste into Word and set the font to <strong>DV-TTSurekh</strong> or <strong>DV-TTYogesh</strong>, or use <strong>Download .docx</strong>."
+        ],
+        "tip": "Check a word like स्थिती in the preview: the ि should reach over both letters."
+      }
     },
     "/gujarati-font-converter": {
       "nav": "Gujarati",

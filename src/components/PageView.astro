@@ -15,9 +15,10 @@ import PrintKeyboard from './PrintKeyboard.astro';
 import Problems from './Problems.astro';
 import { printableFor } from '../lib/printables.js';
 import AllConverters from './AllConverters.astro';
+import FontStrip from './FontStrip.astro';
 import HindiTool from './HindiTool.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
-import { getPage, isLive, reversePage, statusOf, CONTACT_EMAIL } from '../lib/routes.js';
+import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
 import { FONTS } from '../lib/fontMaps.js';
 import { langOf, useT } from '../i18n/index.js';
@@ -71,15 +72,9 @@ const fontName = (k: string) => t(`fontBox.${k}`);
 const fromName = page.from ? fontName(page.from) : null;
 const toName = page.to ? fontName(page.to) : null;
 
-// Document conversion exists for Kruti Dev <-> Unicode only. Mangal is Unicode
-// (the same text, drawn in another font), so its two pages get the same engine.
-const isUnicode = (k: string | null | undefined) => !!k && FONTS[k]?.kind === 'unicode';
-const docDirection =
-  page.from === 'kruti-dev' && isUnicode(page.to)
-    ? 'to-unicode'
-    : isUnicode(page.from) && page.to === 'kruti-dev'
-      ? 'to-kruti'
-      : null;
+// "Upload Word file" on every converter whose two fonts the document
+// converter knows (docPairFor in routes.js).
+const docPair = docPairFor(page);
 
 // Which half is holding it up - worth saying plainly rather than a blanket
 // "coming soon", because often one side is done and tested already.
@@ -131,6 +126,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     </div>
     {betaNote && <p class="mt-2 text-sm font-medium text-ink" set:html={render(betaNote)} />}
     <p class="mt-3 max-w-2xl text-base text-body" set:html={render(text('lede'))} />
+    {live && page.kind === 'converter' && <FontStrip page={page} />}
 
     {
       Tool && (
@@ -143,9 +139,9 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {
       live && page.from && page.to && (
         <div class="mt-6 scroll-mt-4" id="tool">
-          {page.documents && docDirection ? (
+          {docPair ? (
             // Paste text / Upload Word file, as tabs in the same place.
-            <ConvertModes direction={docDirection} path={path}>
+            <ConvertModes from={docPair.from} to={docPair.to} path={path}>
               <Converter from={page.from} to={page.to} reverse={reverse} />
             </ConvertModes>
           ) : (
@@ -180,7 +176,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {/* The document converter now lives in the Upload tab at the top; here, where
         it used to be, a link back up to it. */}
     {
-      live && page.documents && docDirection && (
+      docPair && (
         <p class="mt-8 text-sm text-body" set:html={render(t('modes.back', { href: `${to(path)}?mode=file` }))} />
       )
     }

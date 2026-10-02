@@ -1,0 +1,40 @@
+---
+import { fontLinksFor, liveToolCount } from '../lib/routes.js';
+import { langOf, useT } from '../i18n/index.js';
+
+/**
+ * One slim row under a converter's intro: the other fonts the site converts,
+ * and the way to everything else. Someone who lands on the Kruti Dev page with
+ * a Preeti file should see "Preeti" here, without opening a menu. On a phone
+ * it is one line that scrolls sideways, so it never pushes the converter down.
+ */
+interface Props {
+  page: { path: string; from: string | null; to: string | null };
+}
+
+const { page } = Astro.props;
+const lang = langOf(Astro.url);
+const { t, path: to } = useT(lang);
+const links = fontLinksFor(page);
+---
+
+<nav
+  aria-label={t('fontStrip.aria')}
+  class="font-strip -mx-4 mt-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 text-sm whitespace-nowrap sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:whitespace-normal"
+>
+  <span class="shrink-0 text-mute">{t('fontStrip.label')}</span>
+  {
+    links.map((l) => (
+      <a
+        href={to(l.path)}
+        translate="no"
+        class="shrink-0 rounded-full border border-hairline bg-surface px-3 py-1 text-body no-underline hover:border-brick hover:text-ink"
+      >
+        {t(`fontStrip.fonts.${l.key}`)}
+      </a>
+    ))
+  }
+  <a href={to('/all-converters')} class="shrink-0 px-1 py-1 font-medium text-brick no-underline hover:underline">
+    {t('fontStrip.all', { n: liveToolCount() })}
+  </a>
+</nav>

@@ -1,7 +1,7 @@
 ---
 /**
- * Two ways to convert, as tabs directly above the tool, on the pages that can
- * do both (Kruti Dev -> Unicode and Unicode -> Kruti Dev):
+ * Two ways to convert, as tabs directly above the tool, on every converter
+ * page whose two fonts the document converter knows (docPairFor in routes.js):
  *
  *   "Paste text"        the two text boxes (the slot: Converter.astro), default
  *   "Upload Word file"  the document converter (DocumentConverter.astro)
@@ -21,12 +21,14 @@ import DocumentConverter from './DocumentConverter.astro';
 import { langOf, useT } from '../i18n/index.js';
 
 interface Props {
-  direction: 'to-unicode' | 'to-kruti';
+  /** The page's two fonts, handed to the document converter. */
+  from: string;
+  to: string;
   /** Route path of this page, for the ?mode=file links. */
   path: string;
 }
 
-const { direction, path } = Astro.props;
+const { from, to: toFont, path } = Astro.props;
 const { t, render, path: to } = useT(langOf(Astro.url));
 const fileHref = `${to(path)}?mode=file`;
 ---
@@ -94,7 +96,7 @@ const fileHref = `${to(path)}?mode=file`;
   </div>
 
   <div role="tabpanel" id="cm-panel-file" aria-labelledby="cm-tab-file" class="cm-panel" data-mode-panel="file">
-    <DocumentConverter direction={direction} embedded />
+    <DocumentConverter from={from} to={toFont} embedded />
   </div>
 
   {/* Shown only while a file is dragged over the page. Fixed, so it moves nothing. */}

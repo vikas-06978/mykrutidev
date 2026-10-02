@@ -91,13 +91,15 @@ test.describe('opening and closing', () => {
       }).observe({ type: 'layout-shift', buffered: true });
     });
     // (On a phone the Hindi Keyboard's keys fill its corner, so it is hidden
-    // there - tested below. The converter page shows it.)
+    // there - tested below. The converter page shows it once scrolled a
+    // little: at the very top, Try example sits in its corner.)
     for (const [viewport, path] of [
       [PHONE, '/'],
       [DESKTOP, '/hindi-keyboard'],
     ]) {
       await page.setViewportSize(viewport);
       await page.goto(path);
+      if (viewport === PHONE) await page.evaluate(() => window.scrollTo(0, 120));
       await page.waitForTimeout(1500);
       await button(page).click();
       await expect(panel(page)).toBeVisible();
@@ -362,6 +364,9 @@ test.describe('never covers Copy, Download or the keys', () => {
   test('on a phone it is a 44px icon', async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto('/');
+    // At the very top Try example is in its corner, so it waits for a scroll.
+    await page.evaluate(() => window.scrollTo(0, 120));
+    await expect(button(page)).toHaveAttribute('data-hidden', 'false');
     const box = await button(page).boundingBox();
     expect(Math.round(box.width)).toBe(44);
     expect(Math.round(box.height)).toBe(44);

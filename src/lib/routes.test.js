@@ -372,3 +372,26 @@ describe('assertKnownFonts - the build-time guard', () => {
     );
   });
 });
+
+describe('font links under each converter', async () => {
+  const { FONT_LINKS, fontLinksFor, liveToolCount, getPage: page, isLive: live, PAGES: all } = await import('./routes.js');
+
+  test('every link points at a live converter', () => {
+    for (const l of FONT_LINKS) assert.ok(live(page(l.path)), l.path);
+  });
+
+  test('a page never links to itself or to a font it already converts', () => {
+    for (const p of all.filter((x) => x.kind === 'converter' && live(x))) {
+      for (const l of fontLinksFor(p)) {
+        assert.notEqual(l.path, p.path);
+        assert.ok(!l.fonts.includes(p.from) && !l.fonts.includes(p.to), `${p.path} -> ${l.key}`);
+      }
+    }
+    assert.ok(!fontLinksFor(page('/')).some((l) => l.key === 'kruti-dev'));
+    assert.ok(fontLinksFor(page('/')).some((l) => l.key === 'preeti'));
+  });
+
+  test('the tool count is every live page All tools lists', () => {
+    assert.ok(liveToolCount() >= 50);
+  });
+});

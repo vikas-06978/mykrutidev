@@ -20,6 +20,7 @@
  */
 
 import { fill } from './fill.js';
+import { pairOf, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
 
 // Two messages docConvert.js writes inline rather than exporting. Pinned here
 // and checked against checkFile() in i18n.test.js.
@@ -53,22 +54,28 @@ const fmt = (n) => n.toLocaleString('en-IN');
  * Mirror of summarize() in docConvert.js, worded from `L`.
  *
  * @param {{ paragraphs: number, tables: number, convertedChars: number, alreadyChars: number }} stats
- * @param {'to-unicode' | 'to-kruti'} direction
+ * @param {'to-unicode' | 'to-kruti' | { from: string, to: string }} direction
  * @param {Record<string, string>} L
  * @returns {{ line: string, share: string | null, warning: string | null }}
  */
 export function localizeSummary(stats, direction, L) {
+  const pair = pairOf(direction);
   const count = (n, one, many) => fill(n === 1 ? one : many, { n: fmt(n) });
   const parts = [fill(L.summaryLine, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
   if (stats.tables) parts.push(count(stats.tables, L.tableOne, L.tableMany));
   const line = parts.join(' · ');
 
-  const from = direction === 'to-unicode' ? L.fontKruti : L.fontUnicode;
-  const to = direction === 'to-unicode' ? L.fontUnicode : L.fontKruti;
+  const fromUnicode = isUnicodeKey(pair.from);
+  const from = docLabel(pair.from, L);
+  const to = fromUnicode ? docLabel(pair.to, L) : docLabel('unicode', L);
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    return { line, share: null, warning: direction === 'to-unicode' ? L.noKruti : L.noUnicode };
+    return {
+      line,
+      share: null,
+      warning: fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from }),
+    };
   }
   if (a === 0) return { line, share: L.allConverted, warning: null };
 
