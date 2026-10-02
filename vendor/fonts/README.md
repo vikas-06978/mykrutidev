@@ -33,7 +33,8 @@ produces believable but wrong Hindi.
 | Vakil | close to Shusha | Map to be built |
 | Krishna, New Delhi, Ruchi | close to each other | Map to be built |
 | Agra, Aman, Maya, Ajay | their own layouts | Map to be built |
-| DV-TTSurekh, DV-TTYogesh, DV-TTGanesh, DV-Divyae | DV-TT (Marathi) | Map to be built |
+| DV-TTSurekh, DV-TTYogesh | DV-TT (Marathi). Yogesh draws the same letter as Surekh on every key, the EN styles differ only in drawing English digits | **Live (Beta)** on /marathi-font-converter |
+| DV-TTGanesh, DV-Divyae | their own layouts, not DV-TT Surekh's | Map to be built |
 | Millennium (Varun, Shailesh, Mogara, Priya, Gauri, Shridhar, Deepak) | Millennium | Map to be built |
 | Chanakya, Patrika | newspaper Chanakya: conjuncts on the lowercase keys, letters in the upper range | Needs real documents typed in it |
 | BharatVani, Shree-Dev-0708EW, Devanagari New, Fontasy Himali | unknown yet | To be examined |

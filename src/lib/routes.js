@@ -379,7 +379,7 @@ export const PAGES = [
     from: 'shivaji',
     to: 'unicode',
     group: 'Marathi',
-    related: ['/unicode-to-shivaji', '/shusha-to-unicode', '/'],
+    related: ['/unicode-to-shivaji', '/marathi-font-converter', '/shusha-to-unicode'],
     beta: true,
   },
   {
@@ -437,22 +437,33 @@ export const PAGES = [
     beta: true,
   },
 
+  {
+    // The broad "Marathi font converter" search, answered with the font most
+    // Maharashtra offices typed in: DV-TT Surekh (and Yogesh, the same layout).
+    // Shivaji has its own pages above.
+    path: '/marathi-font-converter',
+    ready: true,
+    kind: 'converter',
+    from: 'dvtt',
+    to: 'unicode',
+    group: 'Marathi',
+    related: ['/unicode-to-dvtt-surekh', '/shivaji-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-dvtt-surekh',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'dvtt',
+    group: 'Marathi',
+    related: ['/marathi-font-converter', '/unicode-to-shivaji', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
   // ==========================================================================
   // PLANNED - other Indic scripts. Routes only, no mapping work started.
   // Activate only after a keyword-volume check AND a tested mapping.
   // ==========================================================================
-  {
-    path: '/marathi-font-converter',
-    ready: false,
-    kind: 'converter',
-    // Null on purpose, even though Marathi is Devanagari and the Kruti Dev map
-    // would "work". Pointing it at a Hindi-verified map would let this page go
-    // live on a mapping nobody has checked against Marathi text.
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/', '/all-converters'],
-  },
   {
     path: '/gujarati-font-converter',
     ready: false,
@@ -871,7 +882,7 @@ export const NAV_MENUS = [
       '/devlys-to-unicode',
       '/unicode-to-devlys',
       '/preeti-to-unicode',
-      '/shivaji-to-unicode',
+      '/marathi-font-converter',
     ],
   },
   {

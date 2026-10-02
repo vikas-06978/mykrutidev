@@ -28,6 +28,7 @@ published with the site, so it lives here instead.
 | `preeti.woff`        | Preeti          | **TrueType**      | **preview on the Preeti pages** (the map was read off this file) |
 | `shusha.woff`        | Shusha          | WOFF              | **preview on the Shusha pages** (the map was read off this file) |
 | `shivaji01.woff`     | Shivaji01       | WOFF              | **preview on the Shivaji pages** (the map was read off this file) |
+| `dvtt-surekh.woff`   | DV-TTSurekh     | WOFF              | **preview on the Marathi (DV-TT) pages** (the map was read off this file) |
 
 The numbered Kruti Dev variants used to fill a dropdown in the output box. That
 picker is gone: the variants share one keyboard layout and differ only in

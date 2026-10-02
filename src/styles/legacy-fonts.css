@@ -96,3 +96,13 @@
     url('/fonts/shivaji01.woff') format('woff');
   font-display: swap;
 }
+
+/* DV-TT Surekh: previews the Marathi converter pages. The map was read off
+   vendor/fonts/DV-TTSurekh/DV-TTSurekh.ttf, which this face is made from. */
+@font-face {
+  font-family: 'MKD DV-TTSurekh';
+  src:
+    local('DV-TTSurekh'),
+    url('/fonts/dvtt-surekh.woff') format('woff');
+  font-display: swap;
+}

@@ -57,6 +57,11 @@ const REPH = ''; // marks "a reph belongs in front of the cluster I follow"
 // the passes that resolve them never match anything.
 const PRE_I_NASAL = ''; // "िं, typed before the cluster I precede"
 const FIXED_I = ''; // "ि already in logical order - do not move it"
+// DV-TT only: one glyph draws ि together with the reph of the cluster after
+// it, so the reph arrives BEFORE its cluster instead of after it.
+const PRE_REPH = '\uE004'; // "a reph belongs in front of the cluster I precede"
+// DV-TT reverse only: "the next ि spans a cluster, use the wide glyph".
+const WIDE_I = '\uE005';
 
 // --- Devanagari character classes -------------------------------------------
 const NUKTA = '़';
@@ -1019,6 +1024,329 @@ const SHIVAJI = { ...SHUSHA, '.': '.' };
 delete SHIVAJI['†'];
 delete SHIVAJI['‰'];
 
+// ============================================================================
+// DV-TT Surekh (Marathi)
+// ============================================================================
+// Read off vendor/fonts/DV-TTSurekh/DV-TTSurekh.ttf glyph by glyph: every key
+// drawn on its own, every key drawn with the bar `É` after it (to tell a half
+// letter from a full one), every sign drawn after द and प, and converted
+// words drawn in the font and read back (see dvtt.test.js).
+//
+// HOW THE FONT WORKS
+//
+//  - Most letters are a half form plus the bar `É`, exactly like Kruti Dev's
+//    `k`: `M` is ग्, `MÉ` is ग, `MÉÉ` is गा. Every half + `É` is listed below.
+//  - क and फ are the exception. Their full form has its own key (`E`, `¡`),
+//    and the half form plus the bar draws का / फा, so `CÉ` is का.
+//  - ि comes in a narrow (`Ê`) and a wide (`Î`) glyph for one letter or a
+//    cluster, each also with ं, with a reph, or with both, all typed before
+//    the cluster. ी, े, ै and ॅ come with ं and with a reph too.
+//  - The reph (`Ç`) is typed after its syllable, as in Kruti Dev.
+//  - The number keys draw Devanagari digits. (The EN fonts draw English digits
+//    on them, and differ on nothing else that is mapped.)
+//
+// Left out: `#` (a dotted circle), `ß` (a sign below the letter that is not
+// one certain character) and the dots on ð-þ.
+//
+// Order matters only for the reverse direction: buildReverse() keeps the
+// FIRST key for each Unicode value.
+const DVTT = {
+  // -- Independent vowels -----------------------------------------------------
+  '+Éà': 'ओ',
+  '+Éè': 'औ',
+  '+Éì': 'ऑ',
+  '+É': 'आ',
+  '+ì': 'ॲ',
+  '+': 'अ',
+  '<Ç': 'ई',
+  '<': 'इ',
+  '=': 'उ',
+  '>': 'ऊ',
+  '@': 'ऋ',
+  A: 'ॠ',
+  'Bä': 'ऐ',
+  'Bà': 'ऐ',
+  B: 'ए',
+
+  // -- क and फ: full form on its own key, half + bar is का / फा ------------------
+  E: 'क',
+  F: 'क़',
+  'CÉ': 'का',
+  'DÉ': 'क़ा',
+  C: 'क्',
+  D: 'क़्',
+  '¡': 'फ',
+  '¢': 'फ़',
+  '}É': 'फा',
+  '~É': 'फ़ा',
+  '}': 'फ्',
+  '~': 'फ़्',
+
+  // -- Half + bar = full letter ---------------------------------------------------
+  'IÉ': 'क्ष',
+  'JÉ': 'ख',
+  'KÉ': 'ख़',
+  'LÉ': 'ख्र',
+  'MÉ': 'ग',
+  'NÉ': 'ग़',
+  'OÉ': 'ग्र',
+  'PÉ': 'घ',
+  'QÉ': 'घ्र',
+  'SÉ': 'च',
+  'TÉ': 'च्र',
+  'VÉ': 'ज',
+  'WÉ': 'ज़',
+  'XÉ': 'ज्र',
+  'YÉ': 'ज्ञ',
+  'ZÉ': 'झ',
+  '[É': 'झ्र',
+  '\\É': 'ञ',
+  'hÉ': 'ण',
+  'iÉ': 'त',
+  'jÉ': 'त्र',
+  'kÉ': 'त्त',
+  'lÉ': 'थ',
+  'mÉ': 'थ्र',
+  'vÉ': 'ध',
+  'wÉ': 'ध्र',
+  'xÉ': 'न',
+  'yÉ': 'न्र',
+  'zÉ': 'न्न',
+  '{É': 'प',
+  '|É': 'प्र',
+  '¤É': 'ब',
+  '¥É': 'ब्र',
+  '¦É': 'भ',
+  '§É': 'भ्र',
+  '¨É': 'म',
+  '©É': 'म्र',
+  'ªÉ': 'य',
+  // `¬` is a य whose left hook joins the letter before it (`S¬É` च्या).
+  '¬': 'य',
+  '«É': 'य्र',
+  '±É': 'ल',
+  '´É': 'व',
+  'µÉ': 'व्र',
+  '¶É': 'श',
+  '·É': 'श',
+  '¸É': 'श्र',
+  '¹É': 'ष',
+  'ºÉ': 'स',
+  '»É': 'स्र',
+
+  // -- The half forms ----------------------------------------------------------------
+  I: 'क्ष्',
+  J: 'ख्',
+  K: 'ख़्',
+  L: 'ख्र्',
+  M: 'ग्',
+  N: 'ग़्',
+  O: 'ग्र्',
+  P: 'घ्',
+  Q: 'घ्र्',
+  S: 'च्',
+  T: 'च्र्',
+  V: 'ज्',
+  W: 'ज़्',
+  X: 'ज्र्',
+  Y: 'ज्ञ्',
+  Z: 'झ्',
+  '[': 'झ्र्',
+  '\\': 'ञ्',
+  h: 'ण्',
+  i: 'त्',
+  j: 'त्र्',
+  k: 'त्त्',
+  l: 'थ्',
+  m: 'थ्र्',
+  v: 'ध्',
+  w: 'ध्र्',
+  x: 'न्',
+  y: 'न्र्',
+  z: 'न्न्',
+  '{': 'प्',
+  '|': 'प्र्',
+  '¤': 'ब्',
+  '¥': 'ब्र्',
+  '¦': 'भ्',
+  '§': 'भ्र्',
+  '¨': 'म्',
+  '©': 'म्र्',
+  'ª': 'य्',
+  '«': 'य्र्',
+  '±': 'ल्',
+  '´': 'व्',
+  'µ': 'व्र्',
+  '¶': 'श्',
+  '·': 'श्',
+  '¸': 'श्र्',
+  '¹': 'ष्',
+  'º': 'स्',
+  '»': 'स्र्',
+  '¼': 'ह्',
+
+  // -- Letters and conjuncts with no stem: one key each ------------------------
+  G: 'क्र',
+  H: 'क्त',
+  R: 'ङ',
+  U: 'छ',
+  ']': 'ट',
+  '^': 'ट्ट',
+  _: 'ट्ठ',
+  '`': 'ठ',
+  a: 'ठ्ठ',
+  b: 'ड',
+  c: 'ड़',
+  d: 'ड्ड',
+  e: 'ड्ढ',
+  f: 'ढ',
+  g: 'ढ़',
+  n: 'द',
+  o: 'दृ',
+  p: 'द्र',
+  q: 'द्द',
+  r: 'द्ध',
+  s: 'द्म',
+  t: 'द्य',
+  u: 'द्व',
+  '£': 'फ्र',
+  '®': 'र',
+  '¯': 'रु',
+  '°': 'रू',
+  '²': 'ळ',
+  '³': 'ळ',
+  '½': 'ह',
+  '¾': 'हृ',
+  '¿': 'ह्ल',
+  'À': 'ह्म',
+  'Á': 'ह्य',
+
+  // -- Signs ---------------------------------------------------------------------
+  'É': 'ा',
+  'Ê': 'ि',
+  'Ë': PRE_I_NASAL,
+  'Ì': 'ि' + PRE_REPH,
+  'Í': PRE_I_NASAL + PRE_REPH,
+  'Î': 'ि',
+  'Ï': PRE_I_NASAL,
+  'Ð': 'ि' + PRE_REPH,
+  'Ñ': PRE_I_NASAL + PRE_REPH,
+  'Ò': 'ी',
+  'Ó': 'ीं',
+  'Ô': 'ी' + REPH,
+  'Õ': 'ी' + REPH + 'ं',
+  'Ö': 'ु',
+  '×': '़ु',
+  'Ø': '्रु',
+  'Ù': 'ु',
+  'Ú': 'ू',
+  'Û': '़ू',
+  'Ü': '्रू',
+  'Ý': 'ू',
+  'Þ': 'ृ',
+  // Two े glyphs: `ä` is the plain े, `à` is curled to sit on the bar, so
+  // `É` + `à` draws ो. Both are े here: the bar before it makes the ो.
+  'ä': 'े',
+  'å': 'ें',
+  'æ': 'े' + REPH,
+  'ç': 'े' + REPH + 'ं',
+  'à': 'े',
+  'á': 'ें',
+  'â': 'े' + REPH,
+  'ã': 'े' + REPH + 'ं',
+  'è': 'ै',
+  'é': 'ैं',
+  'ê': 'ै' + REPH,
+  'ë': 'ै' + REPH + 'ं',
+  'ì': 'ॅ',
+  'í': 'ॅं',
+  'î': 'ॅ' + REPH,
+  'ï': 'ॅ' + REPH + 'ं',
+  'Â': '्',
+  'Ã': '़',
+  'Ä': 'ँ',
+  'Å': '्र',
+  'Æ': 'ं',
+  'Ç': REPH,
+  'È': REPH + 'ं',
+  '&': 'ः',
+  '%': 'ऽ',
+  $: 'ॐ',
+
+  // -- Digits and punctuation -------------------------------------------------------
+  0: '०',
+  1: '१',
+  2: '२',
+  3: '३',
+  4: '४',
+  5: '५',
+  6: '६',
+  7: '७',
+  8: '८',
+  9: '९',
+  '*': '।',
+  '"': '‘',
+  "'": '’',
+  '!': '!',
+  '(': '(',
+  ')': ')',
+  ',': ',',
+  '-': '-',
+  '.': '.',
+  '/': '/',
+  ':': ':',
+  ';': ';',
+  '?': '?',
+};
+
+// Unicode -> DV-TT. Built inline: buildReverse()'s cache does not exist yet
+// while FONTS is being set up. First key wins, as in buildReverse().
+const DVTT_REV = {};
+for (const [key, uni] of Object.entries(DVTT)) {
+  if (!(uni in DVTT_REV)) DVTT_REV[uni] = key;
+}
+// ो is the bar plus the CURLED े (`Éà`), never the plain one. Where the bar
+// belongs to a key of its own (`CÉ` का), that key is followed by `à` too.
+for (const [sign, curled] of [
+  ['े', 'à'],
+  ['ें', 'á'],
+  ['े' + REPH, 'â'],
+  ['े' + REPH + 'ं', 'ã'],
+]) {
+  DVTT_REV['ा' + sign] = 'É' + curled;
+  for (const aa of ['का', 'क़ा', 'फा', 'फ़ा']) DVTT_REV[aa + sign] = DVTT_REV[aa] + curled;
+}
+// The wide ि glyphs, picked by dvttToVisualOrder() for a cluster that is
+// drawn as a half letter plus a letter.
+Object.assign(DVTT_REV, {
+  [WIDE_I + 'ि']: 'Î',
+  [WIDE_I + PRE_I_NASAL]: 'Ï',
+  [WIDE_I + 'ि' + PRE_REPH]: 'Ð',
+  [WIDE_I + PRE_I_NASAL + PRE_REPH]: 'Ñ',
+});
+
+// Two-letter conjuncts DV-TT draws as ONE glyph (क्ष, द्ध, ह्य ...). A ि
+// before them needs only the narrow glyph.
+const DVTT_ONE_GLYPH = Object.values(DVTT).filter((v) =>
+  new RegExp(`^${C}${HALANT}${C}$`).test(v),
+);
+
+/**
+ * Logical -> visual order for DV-TT: the usual passes, then the font's own
+ * combined glyphs. A ि before a cluster carrying a reph or ं takes the glyph
+ * that draws them together, and a ि before a half letter + letter is wide.
+ */
+function dvttToVisualOrder(s) {
+  s = toVisualOrder(s.normalize('NFD'));
+  s = s.replace(RE_PRE_I_NASAL_REV, `${PRE_I_NASAL}$1`);
+  s = s.replace(RE_DVTT_I_REPH, `$1${PRE_REPH}$2`);
+  return s.replace(RE_DVTT_I_CLUSTER, (m, sign, cluster) => {
+    let rest = cluster.replace(new RegExp(`${HALANT}र`, 'g'), '');
+    for (const pair of DVTT_ONE_GLYPH) rest = rest.split(pair).join('');
+    return rest.includes(HALANT) ? WIDE_I + m : m;
+  });
+}
+
 const PREETI = {
   // -- Independent vowels, longest pieces first -------------------------------
   'cf]': 'ओ',
@@ -1401,6 +1729,26 @@ export const FONTS = {
     sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
     placeholder: 'marazI  (example)',
   },
+  dvtt: {
+    key: 'dvtt',
+    label: 'DV-TT Surekh',
+    shortLabel: 'DV-TT',
+    lang: 'mr',
+    kind: 'legacy',
+    map: DVTT,
+    // Read off the font file glyph by glyph (see the note above DVTT). `beta`
+    // until a real DV-TT document has been run through it.
+    accurate: true,
+    beta: true,
+    // Its letter keys cover A-Z and a-z, and its number keys draw ०-९.
+    asciiIsScript: true,
+    reverse: DVTT_REV,
+    toVisual: dvttToVisualOrder,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: '¨É½É®É¹]Å ¶ÉÉºÉxÉ, ¨É®É`Ò ¦ÉÉ¹ÉÉ Ê´É¦ÉÉMÉ.',
+    placeholder: '¨É®É`Ò  (example)',
+  },
   preeti: {
     key: 'preeti',
     label: 'Preeti',
@@ -1531,6 +1879,15 @@ const RE_IMATRA_REV = new RegExp(`(${CLUSTER_R})ि`, 'g');
 const RE_PRE_I_NASAL_REV = new RegExp(`ि(${CLUSTER_R})ं`, 'g');
 const RE_PRE_I_NASAL_FWD = new RegExp(`${PRE_I_NASAL}(${CLUSTER})`, 'g');
 const RE_ABBASI_LEFTOVERS = new RegExp(`[${PRE_I_NASAL}${FIXED_I}]`, 'g');
+const RE_DVTT_I_REPH = new RegExp(
+  `([ि${PRE_I_NASAL}])(${C}(?:${HALANT}${C})*)${REPH}`,
+  'g',
+);
+const RE_DVTT_I_CLUSTER = new RegExp(
+  `([ि${PRE_I_NASAL}]${PRE_REPH}?)(${C}(?:${HALANT}${C})*)`,
+  'g',
+);
+const RE_PRE_REPH_FWD = new RegExp(`${PRE_REPH}(${C}(?:${HALANT}${C})*)`, 'g');
 
 /** Visual order (legacy) -> logical order (Unicode). Order of passes is load-bearing. */
 function toLogicalOrder(s) {
@@ -1538,6 +1895,9 @@ function toLogicalOrder(s) {
   //    `कम<reph>` -> `कर्म`, and for कीर्ति the reph must land before the त that
   //    the i-matra is about to hop over.
   s = s.replace(RE_REPH_FWD, `र${HALANT}$1`);
+  //    DV-TT only: a reph drawn into the ि glyph arrives in front of its
+  //    cluster. It joins the cluster here, so the ि hops over both.
+  s = s.replace(RE_PRE_REPH_FWD, `र${HALANT}$1`);
   // 2. i-matra hops to the far side of its (possibly reph'd) cluster.
   s = s.replace(RE_IMATRA_FWD, '$1ि');
   //    Abbasi Chanakya only: `Ç` (िं) hops the same way, and a ि that `Æ`/`É`
@@ -1783,7 +2143,7 @@ export function legacyToUnicode(text, map, { keepEnglish = true } = {}) {
 
   // Any reph marker still standing had no cluster to attach to. Drop it rather
   // than leak a private-use codepoint into the user's clipboard.
-  return out.replace(new RegExp(REPH, 'g'), '');
+  return out.replace(new RegExp(`[${REPH}${PRE_REPH}]`, 'g'), '');
 }
 
 /** Drop trailing punctuation before well-formedness checking. */
