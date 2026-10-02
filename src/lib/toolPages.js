@@ -19,3 +19,16 @@ export const TOOL_PAGES = {
 };
 
 export const TOOL_PATHS = Object.keys(TOOL_PAGES);
+
+/** The typing pages listed on All tools, in the order they are shown. */
+export const TYPING_PATHS = [
+  '/english-to-hindi-typing',
+  '/hindi-keyboard',
+  '/hindi-typing-test',
+  '/hindi-typing-test-for-exams',
+  '/remington-hindi-keyboard',
+  '/kruti-dev-keyboard',
+  '/hindi-typing-finger-chart',
+  '/kruti-dev-matra-chart',
+  '/hindi-typing-practice-sheets',
+];

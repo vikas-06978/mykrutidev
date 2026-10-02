@@ -15,6 +15,7 @@ import PrintKeyboard from './PrintKeyboard.astro';
 import Problems from './Problems.astro';
 import { printableFor } from '../lib/printables.js';
 import AllConverters from './AllConverters.astro';
+import FontStrip from './FontStrip.astro';
 import HindiTool from './HindiTool.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, CONTACT_EMAIL } from '../lib/routes.js';
@@ -131,6 +132,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     </div>
     {betaNote && <p class="mt-2 text-sm font-medium text-ink" set:html={render(betaNote)} />}
     <p class="mt-3 max-w-2xl text-base text-body" set:html={render(text('lede'))} />
+    {live && page.kind === 'converter' && <FontStrip page={page} />}
 
     {
       Tool && (

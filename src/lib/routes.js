@@ -38,6 +38,7 @@
 
 import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
+import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
 export const SITE = 'https://mykrutidev.com';
@@ -1002,3 +1003,37 @@ export function assertKnownFonts(pages, fonts) {
 }
 
 assertKnownFonts(PAGES, FONTS);
+
+/**
+ * How many live pages All tools lists: every live converter, every everyday
+ * tool and every typing page. The number the site quotes ("All 52 tools").
+ */
+export function liveToolCount() {
+  const converters = allGroups().reduce((n, g) => n + g.pages.filter((p) => p.live).length, 0);
+  const others = [...TOOL_PATHS, ...TYPING_PATHS].map(getPage).filter((p) => p && isLive(p)).length;
+  return converters + others;
+}
+
+/**
+ * The font links under a converter's intro: one per font family, so a visitor
+ * who landed on the wrong font sees the others without opening a menu.
+ * `fonts` are the registry keys a link is about: it is left out on a page
+ * that already converts that font.
+ */
+export const FONT_LINKS = [
+  { key: 'kruti-dev', path: '/', fonts: ['kruti-dev'] },
+  { key: 'devlys', path: '/devlys-to-unicode', fonts: ['devlys'] },
+  { key: 'mangal', path: '/kruti-dev-to-mangal', fonts: ['mangal'] },
+  { key: 'chanakya', path: '/abbasi-chanakya-to-unicode', fonts: ['abbasi-chanakya'] },
+  { key: 'preeti', path: '/preeti-to-unicode', fonts: ['preeti'] },
+  { key: 'marathi', path: '/marathi-font-converter', fonts: ['dvtt'] },
+  { key: 'shivaji', path: '/shivaji-to-unicode', fonts: ['shivaji'] },
+  { key: 'shusha', path: '/shusha-to-unicode', fonts: ['shusha'] },
+];
+
+/** FONT_LINKS for one page: live targets only, minus the fonts it converts. */
+export function fontLinksFor(page) {
+  return FONT_LINKS.filter(
+    (l) => l.path !== page.path && !l.fonts.includes(page.from) && !l.fonts.includes(page.to) && isLive(getPage(l.path)),
+  );
+}

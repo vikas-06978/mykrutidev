@@ -191,7 +191,13 @@ describe('code examples and Unicode output survive translation untouched', () =>
       // way a Hindi reader says them (कृतिदेव, मंगल, देवलिस, चाणक्य), and
       // fontNames is the map lists use to do the same. Page text - where the
       // reader is told which font to pick in Word - keeps the exact Latin name.
-      if (key.startsWith('groups.') || key.startsWith('fontNames.') || /^pages\.[^.]+\.nav$/.test(key)) {
+      // The font links under each converter are nav too.
+      if (
+        key.startsWith('groups.') ||
+        key.startsWith('fontNames.') ||
+        key.startsWith('fontStrip.fonts.') ||
+        /^pages\.[^.]+\.nav$/.test(key)
+      ) {
         continue;
       }
       for (const name of PICK) {

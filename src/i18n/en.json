@@ -438,6 +438,21 @@
       "typing": "Typing, keyboards and charts"
     }
   },
+  "fontStrip": {
+    "aria": "Other font converters",
+    "label": "Other fonts:",
+    "all": "All {n} tools →",
+    "fonts": {
+      "kruti-dev": "Kruti Dev",
+      "devlys": "DevLys",
+      "mangal": "Mangal",
+      "chanakya": "Chanakya",
+      "preeti": "Preeti (Nepali)",
+      "marathi": "Marathi",
+      "shivaji": "Shivaji",
+      "shusha": "Shusha"
+    }
+  },
   "pages": {
     "/": {
       "nav": "Kruti Dev → Unicode",

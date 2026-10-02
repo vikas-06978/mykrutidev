@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import { allGroups, getPage, isLive } from '../lib/routes.js';
-import { TOOL_PATHS } from '../lib/toolPages.js';
+import { allGroups, getPage, isLive, liveToolCount } from '../lib/routes.js';
+import { TOOL_PATHS, TYPING_PATHS } from '../lib/toolPages.js';
 import { langOf, useT, t as tIn } from '../i18n/index.js';
 import SoonBadge from './SoonBadge.astro';
 
@@ -23,21 +23,11 @@ const P = '/all-converters';
 const groups = allGroups();
 
 const live = (paths: string[]) => paths.map(getPage).filter((p) => p && isLive(p));
-const TYPING = live([
-  '/english-to-hindi-typing',
-  '/hindi-keyboard',
-  '/hindi-typing-test',
-  '/hindi-typing-test-for-exams',
-  '/remington-hindi-keyboard',
-  '/kruti-dev-keyboard',
-  '/hindi-typing-finger-chart',
-  '/kruti-dev-matra-chart',
-  '/hindi-typing-practice-sheets',
-]);
+const TYPING = live(TYPING_PATHS);
 const TOOLS = live(TOOL_PATHS);
 
-const converterCount = groups.reduce((n, g) => n + g.pages.filter((p) => p.live).length, 0);
-const total = converterCount + TOOLS.length + TYPING.length;
+// The same number the font links under every converter quote.
+const total = liveToolCount();
 const body: string[] = raw('allConverters.body');
 
 // Words a search can match: the page's nav label and h1 in both languages.
