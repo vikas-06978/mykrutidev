@@ -89,8 +89,9 @@ const blockers = [page.from, page.to]
 
 const body: string[] = (maybe(`pages.${path}.body`) ?? []).map((s: string) => s.replaceAll('{email}', CONTACT_EMAIL));
 const problems: { problem: string; fix: string }[] = maybe(`pages.${path}.problems`) ?? [];
-// Converters sit under "All converters" in the breadcrumb trail.
-const trail = page.kind === 'converter' && path !== '/' ? [{ name: t('nav.allConverters'), path: '/all-converters' }] : [];
+// Converters and the everyday tools sit under "All tools" in the breadcrumb trail.
+const trail =
+  (page.kind === 'converter' && path !== '/') || hindiTool ? [{ name: t('nav.allConverters'), path: '/all-converters' }] : [];
 const faq: { q: string; a: string }[] = maybe(`pages.${path}.faq`) ?? [];
 const howTo: { steps: string[]; tip: string } | undefined = maybe(`pages.${path}.howTo`);
 const tour: string[] | undefined = maybe(`pages.${path}.tour`);

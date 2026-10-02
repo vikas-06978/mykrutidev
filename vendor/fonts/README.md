@@ -29,7 +29,7 @@ produces believable but wrong Hindi.
 | Arjun | Kruti Dev 010, except `=` (half त्र, full त्र is `=k`) | Being checked |
 | Kundli | close to Kruti Dev 010, `Ñ` draws औ | Being checked |
 | Akshar, Aakriti, DINA, Himalaya, Narad, Devanagari Bold, Anjali | close to Preeti (Nepali) | Being checked |
-| Shusha, Shivaji | one layout (Shivaji01 and Shusha are the same font) | Map to be built |
+| Shusha, Shivaji | one layout. Shivaji01 is Shusha with a full stop for the danda | **Live (Beta)** for Shusha and Shivaji01. Shusha02/05 and Shivaji02/05 change some keys and are not covered yet |
 | Vakil | close to Shusha | Map to be built |
 | Krishna, New Delhi, Ruchi | close to each other | Map to be built |
 | Agra, Aman, Maya, Ajay | their own layouts | Map to be built |

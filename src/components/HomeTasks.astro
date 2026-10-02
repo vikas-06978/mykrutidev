@@ -21,6 +21,10 @@ const TASKS = [
   ['keyboard', '/hindi-keyboard'],
   ['tutor', '/hindi-typing-test'],
   ['printables', '/kruti-dev-keyboard'],
+  ['amountWords', '/number-to-hindi-words'],
+  ['hindiDate', '/english-date-to-hindi'],
+  ['wordCounter', '/hindi-word-counter'],
+  ['otherScripts', '/hindi-to-gujarati-script'],
 ] as const;
 const why: string[] = raw('home.why');
 ---
@@ -42,6 +46,9 @@ const why: string[] = raw('home.why');
       ))
     }
   </ul>
+  <p class="mt-4 text-sm">
+    <a href={to('/all-converters')} class="font-medium">{t('home.allTools')}</a>
+  </p>
 </section>
 
 <section aria-labelledby="why-heading" class="mt-10 rounded-(--radius-card) bg-inset px-5 py-5 sm:px-6">

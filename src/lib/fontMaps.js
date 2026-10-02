@@ -755,7 +755,224 @@ function abbasiToVisualOrder(s) {
   return toVisualOrder(s.normalize('NFD')).replace(RE_PRE_I_NASAL_REV, `${PRE_I_NASAL}$1`);
 }
 
-const SHUSHA = {}; // Shusha - older Hindi DTP font
+// ============================================================================
+// Shusha (and Shivaji, the same font under a Marathi name)
+// ============================================================================
+//
+// HOW IT WAS BUILT. From vendor/fonts/Shusha/Shusha.ttf, drawn key by key and
+// read by eye, every mark drawn again after a consonant, every consonant key
+// drawn again followed by the bar (`a`) to tell a half letter (the bar
+// completes it) from a full one (the bar becomes ा). Shivaji01.ttf draws the
+// same glyph on every key, so this one table serves both. Shusha02/05 and
+// Shivaji02/05 are later cuts with differences, and are NOT covered yet.
+//
+// Unlike Kruti Dev this layout is broadly phonetic: k क, p प, t त, r र, h ह,
+// and most consonants come as a half form on the lowercase key that the bar
+// completes (b ब्, ba ब). The rules the engine already applies hold here too:
+// ि (`i`) is typed BEFORE its cluster, the reph (`-`) AFTER its syllable.
+//
+// Left out on purpose, because their drawing does not read as one certain
+// character: `_` (द with a hook), `;` (ल with a loop), `Ï` and `Î`.
+// They pass through unchanged rather than being guessed.
+//
+// Punctuation: almost every ASCII punctuation key carries a letter here, so
+// the font draws ordinary punctuation on Latin-1 slots instead (¸ is the
+// comma, º the full stop, Á the colon). Those entries let Unicode punctuation
+// be written back with keys that show it.
+const SHUSHA = {
+  // -- Independent vowels -----------------------------------------------------
+  'Aa^': 'ऑ',
+  AaO: 'औ',
+  Aao: 'ओ',
+  'AÝ': 'औ',
+  'AÜ': 'ओ',
+  Aa: 'आ',
+  A: 'अ',
+  '[': 'इ',
+  'š': 'ई',
+  ']': 'उ',
+  '}': 'ऊ',
+  '?': 'ऋ',
+  eO: 'ऐ',
+  e: 'ए',
+
+  // -- Conjuncts with their own glyph -------------------------------------------
+  xa: 'क्ष',
+  x: 'क्ष्',
+  '&': 'ज्ञ',
+  '~': 'त्र',
+  Ea: 'श्र',
+  E: 'श्र्',
+  '<a': 'त्त',
+  '<': 'त्त्',
+  '>': 'क्त',
+  '+': 'ट्ट',
+  '{': 'ड्ड',
+  w: 'द्ध',
+  W: 'द्व',
+  V: 'द्य',
+  '(': 'ह्य',
+  ')': 'हृ',
+  'œ': 'हृ',
+  K: 'ख्र',
+  'Ë': 'क्र',
+  'Ì': 'कृ',
+  'Í': 'फ्र',
+  'Ù': 'न्न',
+  'É': 'रु',
+  $: 'रू',
+  'Ÿ': 'ज' + FIXED_I, // a ready-made जि: its ि is already in place
+
+  // -- Full consonants ------------------------------------------------------------
+  k: 'क',
+  '#a': 'ख',
+  ga: 'ग',
+  Ga: 'घ',
+  '=': 'ङ',
+  ca: 'च',
+  C: 'छ',
+  ja: 'ज',
+  Ja: 'झ',
+  Ha: 'ञ',
+  T: 'ट',
+  z: 'ठ',
+  D: 'ड',
+  Z: 'ढ',
+  Na: 'ण',
+  t: 'त',
+  '%a': 'त',
+  qa: 'थ',
+  d: 'द',
+  Qa: 'ध',
+  na: 'न',
+  p: 'प',
+  Pa: 'प',
+  f: 'फ',
+  Fa: 'फ',
+  ba: 'ब',
+  Ba: 'भ',
+  ma: 'म',
+  ya: 'य',
+  r: 'र',
+  la: 'ल',
+  va: 'व',
+  Sa: 'श',
+  Xa: 'श',
+  Ya: 'ष',
+  sa: 'स',
+  h: 'ह',
+  L: 'ळ',
+  '@a': 'क',
+
+  // -- Half consonants -----------------------------------------------------------
+  '@': 'क्',
+  '#': 'ख्',
+  g: 'ग्',
+  G: 'घ्',
+  c: 'च्',
+  j: 'ज्',
+  J: 'झ्',
+  H: 'ञ्',
+  N: 'ण्',
+  '%': 'त्',
+  q: 'थ्',
+  Q: 'ध्',
+  n: 'न्',
+  P: 'प्',
+  F: 'फ्',
+  b: 'ब्',
+  B: 'भ्',
+  m: 'म्',
+  y: 'य्',
+  l: 'ल्',
+  v: 'व्',
+  S: 'श्',
+  X: 'श्',
+  Y: 'ष्',
+  s: 'स्',
+
+  // -- Nukta letters drawn as one glyph ---------------------------------------------
+  'Ô': 'फ़',
+  'Ó': 'ख़',
+
+  // -- Rakar: '`' under a stemmed letter, '/' under ट ठ ड ढ -----------------------------
+  '`': '्र',
+  '/': '्र',
+  // Spelled out so the REVERSE direction writes the rakar hook, not a half
+  // letter followed by a full र (the same reason KRUTI_DEV lists them).
+  'T/': 'ट्र',
+  'z/': 'ठ्र',
+  'D/': 'ड्र',
+  'Z/': 'ढ्र',
+  'k`': 'क्र',
+  'ga`': 'ग्र',
+  'Ga`': 'घ्र',
+  'ja`': 'ज्र',
+  'qa`': 'थ्र',
+  'd`': 'द्र',
+  'Qa`': 'ध्र',
+  'na`': 'न्र',
+  'p`': 'प्र',
+  'ba`': 'ब्र',
+  'Ba`': 'भ्र',
+  'ma`': 'म्र',
+  'va`': 'व्र',
+  'sa`': 'स्र',
+  'h`': 'ह्र',
+
+  // -- Matras and signs ---------------------------------------------------------------
+  a: 'ा',
+  i: 'ि',
+  I: 'ी',
+  u: 'ु',
+  U: 'ू',
+  R: 'ृ',
+  o: 'े',
+  O: 'ै',
+  'Ü': 'ो',
+  'Ý': 'ौ',
+  '^': 'ॅ',
+  M: 'ं',
+  'Ð': 'ँ',
+  ':': 'ः',
+  '\\': HALANT,
+  ',': NUKTA,
+  '|': 'ऽ',
+  '!': 'ॐ',
+
+  // -- Reph: typed AFTER its syllable, belongs BEFORE it -------------------------------
+  '-': REPH,
+
+  // -- Punctuation -----------------------------------------------------------------------
+  '.': '।',
+  'º': '.',
+  '¸': ',',
+  'Ê': ',',
+  'Á': ':',
+  'Â': ';',
+  '²': '!',
+  'Ñ': '!',
+  'Æ': '?',
+  '³': '(',
+  '´': ')',
+  '¤': '[',
+  '¥': ']',
+  '¡': '{',
+  '£': '}',
+  'À': '/',
+  'Ò': '\\',
+  'Ã': '<',
+  'Ä': '=',
+  'Å': '>',
+  'Ç': '@',
+  'È': '|',
+  'Ö': '_',
+  'µ': '*',
+  '†': '+',
+  '‰': '%',
+  "'": "'",
+  '"': '"',
+};
 // ============================================================================
 // Preeti - the Nepali legacy font (Ajay Mishra, 1993)
 // ============================================================================
@@ -793,6 +1010,15 @@ const SHUSHA = {}; // Shusha - older Hindi DTP font
 //
 // Order matters only for the reverse direction: buildReverse() keeps the
 // FIRST key for each Unicode value.
+// Shivaji01: the same font as Shusha on every key but three, read the same
+// way from vendor/fonts/Shivaji/Shivaji01.ttf. Marathi ends a sentence with a
+// full stop, and Shivaji's `.` draws one, where Shusha's draws the danda. Its
+// `†` and `‰` draw themselves rather than + and %. `á` draws a fragment that
+// is not one certain letter, so it is left out like Shusha's unread keys.
+const SHIVAJI = { ...SHUSHA, '.': '.' };
+delete SHIVAJI['†'];
+delete SHIVAJI['‰'];
+
 const PREETI = {
   // -- Independent vowels, longest pieces first -------------------------------
   'cf]': 'ओ',
@@ -1143,10 +1369,29 @@ export const FONTS = {
     label: 'Shusha',
     kind: 'legacy',
     map: SHUSHA,
-    accurate: false,
-    css: '"Shusha", monospace',
-    sample: '',
-    placeholder: '',
+    // Read off the font file glyph by glyph, and checked by drawing converted
+    // words in the font itself (see the note above SHUSHA). `beta` until a
+    // real Shusha document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Baart sarkar¸ raYT/Iya iSaxaa naIit.',
+    placeholder: 'Baart  (example)',
+  },
+  shivaji: {
+    key: 'shivaji',
+    label: 'Shivaji',
+    // Marathi, in the same script.
+    lang: 'mr',
+    kind: 'legacy',
+    map: SHIVAJI,
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
+    placeholder: 'marazI  (example)',
   },
   preeti: {
     key: 'preeti',

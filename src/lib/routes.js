@@ -349,24 +349,48 @@ export const PAGES = [
     related: ['/kruti-dev-to-chanakya', '/chanakya-to-unicode'],
   },
 
-  // ---- Shusha: older Hindi DTP font, map is empty --------------------------
+  // ---- Shusha and Shivaji: one layout, read off the font files. Shivaji is
+  // the Marathi name, with a full stop where Shusha has the danda. Beta until
+  // a real document typed in either has been run through it.
   {
     path: '/shusha-to-unicode',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'shusha',
     to: 'unicode',
     group: 'Shusha',
-    related: ['/unicode-to-shusha', '/'],
+    related: ['/unicode-to-shusha', '/shivaji-to-unicode', '/'],
+    beta: true,
   },
   {
     path: '/unicode-to-shusha',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'unicode',
     to: 'shusha',
-    group: 'Unicode / Hindi',
-    related: ['/shusha-to-unicode', '/'],
+    group: 'Shusha',
+    related: ['/shusha-to-unicode', '/unicode-to-shivaji', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/shivaji-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'shivaji',
+    to: 'unicode',
+    group: 'Marathi',
+    related: ['/unicode-to-shivaji', '/shusha-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-shivaji',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'shivaji',
+    group: 'Marathi',
+    related: ['/shivaji-to-unicode', '/unicode-to-shusha', '/unicode-to-kruti-dev'],
+    beta: true,
   },
 
   // ---- Preeti: Nepali, not Hindi. Map read off the font file, glyph by glyph;

@@ -14,7 +14,7 @@ Remington layout that exams use.
 
 | | Pages |
 | :-- | :-- |
-| **Converters** | Kruti Dev ↔ Unicode (the home page) · Kruti Dev ↔ Mangal · DevLys ↔ Unicode · DevLys ↔ Mangal · Kruti Dev ↔ DevLys · Abbasi Chanakya ↔ Unicode, Mangal, Kruti Dev and DevLys (beta) · Preeti (Nepali) ↔ Unicode and Kruti Dev (beta) |
+| **Converters** | Kruti Dev ↔ Unicode (the home page) · Kruti Dev ↔ Mangal · DevLys ↔ Unicode · DevLys ↔ Mangal · Kruti Dev ↔ DevLys · Abbasi Chanakya ↔ Unicode, Mangal, Kruti Dev and DevLys (beta) · Preeti (Nepali) ↔ Unicode and Kruti Dev (beta) · Shusha ↔ Unicode and Shivaji (Marathi) ↔ Unicode (beta) |
 | **Hindi tools** | Number to Hindi words · Amount in words (lakh, crore) · Hindi ↔ English digits · Date in Hindi · Hindi word counter · Hindi to IAST / ISO 15919 · Hindi to Gujarati, Bengali, Odia, Telugu, Kannada and Malayalam script |
 | **Word files** | Upload a `.docx` or `.txt` on the Kruti Dev ↔ Unicode and Kruti Dev ↔ Mangal pages. Only the Hindi changes, and English, tables and formatting stay as they were. |
 | **Typing** | Typing tutor and timed tests, Hindi typing test for exams, on-screen Hindi keyboard, Remington keyboard, English to Hindi (Hinglish) typing |

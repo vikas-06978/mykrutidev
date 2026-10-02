@@ -156,11 +156,10 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
     }
   });
 
-  test('Chanakya and Shusha stay off until their maps exist', () => {
+  test('the generic Chanakya pages stay off until their map is verified', () => {
     for (const path of [
       '/chanakya-to-unicode', '/unicode-to-chanakya',
       '/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev',
-      '/shusha-to-unicode', '/unicode-to-shusha',
     ]) {
       assert.equal(isLive(getPage(path)), false, `${path} must stay pending`);
     }
@@ -256,9 +255,9 @@ describe('navigation', () => {
     assert.deepEqual(
       navGroups().map((g) => g.name),
       // Chanakya appears because Abbasi Chanakya New is live under it; the
-      // generic Chanakya pages in that group are still "coming soon". Nepali
-      // is Preeti, all three of its pages in one menu.
-      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys', 'Chanakya', 'Nepali'],
+      // generic Chanakya pages in that group are still "coming soon". Shusha
+      // and its Marathi twin Shivaji have a menu each, and Nepali is Preeti.
+      ['Kruti Dev', 'Unicode / Hindi', 'Mangal', 'DevLys', 'Chanakya', 'Shusha', 'Marathi', 'Nepali'],
     );
   });
 
