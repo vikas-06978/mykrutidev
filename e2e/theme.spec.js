@@ -245,19 +245,19 @@ test.describe('real colours', () => {
     test.skip(!isDesktop(testInfo), 'desktop menus');
     await page.goto('/');
     const panel = page.locator('[data-theme-panel]');
-    const dropdown = page.locator('#navmenu-0');
+    const dropdown = page.locator('#navmenu-converters');
     const openCount = () =>
       page.evaluate(() => [...document.querySelectorAll('[data-menu], [data-theme-panel]')].filter((m) => !m.hidden).length);
 
-    await page.locator('#navtrigger-0').click();
+    await page.locator('#navtrigger-converters').click();
     await expect(dropdown).toBeVisible();
     await page.locator('[data-theme-trigger]').click();
     await expect(panel).toBeVisible();
     await expect(dropdown).toBeHidden();
     expect(await openCount()).toBe(1);
 
-    await page.locator('#navtrigger-1').click();
-    await expect(page.locator('#navmenu-1')).toBeVisible();
+    await page.locator('#navtrigger-typing').click();
+    await expect(page.locator('#navmenu-typing')).toBeVisible();
     await expect(panel).toBeHidden();
     expect(await openCount()).toBe(1);
 
@@ -505,7 +505,7 @@ test.describe('the picker', () => {
 const PREPARE = {
   async '/'(page, desktop) {
     if (desktop) {
-      await page.locator('#navtrigger-0').click(); // a dropdown with a Soon badge
+      await page.locator('#navtrigger-converters').click(); // a dropdown, with its See-all link
     } else {
       await page.locator('[data-burger]').click();
       await page.locator('[data-mobile-nav] summary').first().click();
