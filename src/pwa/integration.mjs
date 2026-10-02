@@ -4,7 +4,7 @@
  * version hash.
  *
  * The first visit downloads only what the converters need offline: the app
- * shell, every converter page in both languages, their scripts (followed
+ * shell, every converter page to or from Unicode in both languages, their scripts (followed
  * through every import, so a lazily loaded chunk such as the .docx writer is
  * there too) and the fonts those pages actually use. Everything else - the
  * typing tutor, guides, printables, PDFs, the English word list - is kept by
@@ -37,8 +37,13 @@ export function urlOf(path) {
   return `/${m ? m[1] : path}`;
 }
 
-/** A page that hosts a converter (font converter or English to Hindi typing). */
-export const isConverterPage = (html) => /\bdata-(converter|translit)\b/.test(html);
+/**
+ * A page that hosts a converter (font converter or English to Hindi typing),
+ * unless it asks to be kept on first visit instead (data-offline="visit": the
+ * font-to-font pairings, see Converter.astro).
+ */
+export const isConverterPage = (html) =>
+  /\bdata-(converter|translit)\b/.test(html) && !/\bdata-offline="visit"/.test(html);
 
 const unquote = (s) => s.trim().replace(/^["']|["']$/g, '').replace(/&quot;/g, '');
 

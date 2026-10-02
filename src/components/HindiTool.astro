@@ -1,0 +1,320 @@
+---
+import { FONTS } from '../lib/fontMaps.js';
+import { langOf, useT } from '../i18n/index.js';
+
+/**
+ * The everyday Hindi tools, one component for all of them (src/lib/toolPages.js
+ * says which page shows which). Every tool here has exactly one right answer,
+ * worked out by src/lib/hindiTools.js, indicScripts.js or romanize.js, so
+ * none of them needs the converter's preview, font or .docx machinery: text
+ * in, text out, a copy button.
+ *
+ *   amount-hindi    number -> Hindi words, as rupees for a cheque or plain
+ *   amount-english  number -> English words in lakh and crore
+ *   to-english-digits / to-hindi-digits
+ *   hindi-date      a date -> every way it is written in Hindi
+ *   word-count      words, characters, akshar, sentences, paragraphs
+ *   roman           Hindi -> IAST or ISO 15919
+ *   script          Hindi -> another Indian script (`script` prop)
+ */
+interface Props {
+  tool: string;
+  script?: string;
+}
+const { tool, script } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+
+const isAmount = tool === 'amount-hindi' || tool === 'amount-english';
+const isText = !isAmount && tool !== 'hindi-date';
+// Which language the OUTPUT is in, for screen readers and fonts.
+const OUT_LANG: Record<string, string> = {
+  'amount-hindi': 'hi', 'to-hindi-digits': 'hi', 'hindi-date': 'hi', 'to-english-digits': 'hi',
+  'amount-english': 'en', roman: 'en',
+};
+const SCRIPT_LANG: Record<string, string> = {
+  bengali: 'bn', gujarati: 'gu', oriya: 'or', telugu: 'te', kannada: 'kn', malayalam: 'ml',
+};
+const outLang = tool === 'script' ? SCRIPT_LANG[script!] : OUT_LANG[tool];
+const inputIsHindi = ['to-english-digits', 'word-count', 'roman', 'script'].includes(tool);
+const SAMPLES: Record<string, string> = {
+  'amount-hindi': '125000.50',
+  'amount-english': '125000.50',
+  'to-english-digits': 'दिनांक १५/०८/१९४७, कक्ष संख्या १०१',
+  'to-hindi-digits': 'दिनांक 15/08/1947, कक्ष संख्या 101',
+  'word-count': 'भारत की राजधानी नई दिल्ली है। यहाँ संसद भवन और राष्ट्रपति भवन हैं।',
+  roman: 'भारत सरकार, प्रधानमंत्री कार्यालय।',
+  script: 'भारत सरकार, प्रधानमंत्री कार्यालय।',
+};
+const COUNTS = ['words', 'characters', 'charactersNoSpaces', 'akshar', 'sentences', 'paragraphs'];
+const DATE_FORMATS = ['long', 'longHindiDigits', 'weekday', 'numeric', 'numericHindiDigits', 'words'];
+
+const strings = {
+  nothingToCopy: t('common.nothingToCopy'),
+  copiedToast: t('workspace.copiedToast'),
+  copyFailed: t('tools.copyFailed'),
+  empty: '',
+  invalid: t('tools.errors.invalid'),
+  'too-large': t('tools.errors.tooLarge'),
+  paise: t('tools.errors.paise'),
+  badDate: t('tools.errors.badDate'),
+};
+---
+
+<div
+  class="cv card"
+  data-hindi-tool={tool}
+  data-script={script ?? ''}
+  data-i18n={JSON.stringify(strings)}
+  style={`--cv-preview:${FONTS.unicode.css}`}
+>
+  {
+    tool === 'hindi-date' ? (
+      <div class="cv-panel">
+        <div class="cv-head">
+          <label for="ht-date" class="cv-eyebrow">{t('tools.dateLabel')}</label>
+        </div>
+        <div class="cv-field">
+          <input id="ht-date" data-role="input" type="date" class="cv-area text-lg" style="min-height:auto" />
+        </div>
+        <ul class="divide-y divide-hairline border-t border-hairline" lang="hi">
+          {DATE_FORMATS.map((key) => (
+            <li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
+              <span class="min-w-0">
+                <span class="block text-xs text-mute">{t(`tools.dateFormats.${key}`)}</span>
+                <span data-date={key} class="deva block text-lg text-ink" translate="no" />
+              </span>
+              <button type="button" data-copy-date={key} class="btn btn-ghost shrink-0">
+                {t('tools.copy')}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <div class="grid md:grid-cols-2 md:divide-x md:divide-hairline">
+        <div class="cv-panel border-b border-hairline md:border-b-0">
+          <div class="cv-head">
+            <label for={`ht-in-${tool}`} class="cv-eyebrow">{t(`tools.input.${tool}`)}</label>
+          </div>
+          <div class="cv-field">
+            {isAmount ? (
+              <input
+                id={`ht-in-${tool}`}
+                data-role="input"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder={t('tools.amountPlaceholder')}
+                class="cv-area text-2xl"
+                style="min-height:auto"
+              />
+            ) : (
+              <textarea
+                id={`ht-in-${tool}`}
+                data-role="input"
+                spellcheck="false"
+                autocomplete="off"
+                autocapitalize="off"
+                translate="no"
+                lang={inputIsHindi ? 'hi' : undefined}
+                placeholder={t(`tools.placeholder.${tool}`)}
+                class="cv-area text-lg deva"
+              />
+            )}
+          </div>
+          {isAmount && (
+            <label class="flex items-start gap-2.5 px-4 pb-3 text-sm text-body sm:px-5">
+              <input type="checkbox" data-role="rupees" checked class="mt-0.5 size-4 shrink-0 accent-[var(--color-brick)]" />
+              <span>{t('tools.asRupees')}</span>
+            </label>
+          )}
+          <div class="cv-actions">
+            <div class="cv-secondary">
+              <button type="button" data-role="clear" class="btn btn-ghost">{t('common.clear')}</button>
+              <button type="button" data-role="sample" class="btn btn-ghost" data-sample={SAMPLES[tool]}>
+                {t('common.tryExample')}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cv-panel bg-surface">
+          <div class="cv-head">
+            <label for={`ht-out-${tool}`} class="cv-eyebrow">{t(`tools.output.${tool}`)}</label>
+            {tool === 'roman' && (
+              <div role="group" aria-label={t('tools.standard')} class="cv-seg">
+                <button type="button" data-standard="iast" aria-pressed="true">IAST</button>
+                <button type="button" data-standard="iso" aria-pressed="false">ISO 15919</button>
+              </div>
+            )}
+          </div>
+          {tool === 'word-count' ? (
+            <dl class="grid grid-cols-2 gap-px border-y border-hairline bg-hairline">
+              {COUNTS.map((key) => (
+                <div class="bg-surface px-4 py-3">
+                  <dt class="text-xs text-mute">{t(`tools.counts.${key}`)}</dt>
+                  <dd data-count={key} class="text-2xl font-semibold text-ink tabular-nums">0</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <div class="cv-field">
+              <textarea
+                id={`ht-out-${tool}`}
+                data-role="output"
+                readonly
+                spellcheck="false"
+                translate="no"
+                lang={outLang}
+                placeholder={t('tools.outPlaceholder')}
+                class={`cv-area cv-out text-lg ${outLang === 'hi' ? 'deva' : ''}`}
+              />
+            </div>
+          )}
+          <p data-role="error" role="alert" hidden class="cv-hint" />
+          {(tool === 'script' || tool === 'roman') && (
+            <p data-role="missed" hidden class="cv-hint">
+              {t('tools.missed')} <span data-role="missed-list" lang="hi" translate="no" />
+            </p>
+          )}
+          {tool !== 'word-count' && (
+            <div class="cv-actions">
+              <div class="cv-secondary">
+                <button type="button" data-role="copy" class="btn btn-primary">{t('tools.copy')}</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+  <span data-role="status" role="status" aria-live="polite" class="sr-only"></span>
+</div>
+
+<script>
+  import {
+    amountInHindi,
+    amountInEnglish,
+    toEnglishDigits,
+    toHindiDigits,
+    hindiDate,
+    countText,
+  } from '../lib/hindiTools.js';
+  import { toScript } from '../lib/indicScripts.js';
+  import { romanize } from '../lib/romanize.js';
+  import { toast } from '../scripts/toast.js';
+
+  async function copy(text: string, L: Record<string, string>, status: HTMLElement) {
+    if (!text) {
+      status.textContent = L.nothingToCopy;
+      toast(L.nothingToCopy);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(L.copiedToast);
+      status.textContent = L.copiedToast;
+    } catch {
+      status.textContent = L.copyFailed;
+      toast(L.copyFailed);
+    }
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-hindi-tool]')) {
+    const tool = root.dataset.hindiTool!;
+    const script = root.dataset.script || '';
+    const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
+    const q = <T extends HTMLElement>(role: string) => root.querySelector<T>(`[data-role="${role}"]`);
+    const input = q<HTMLInputElement | HTMLTextAreaElement>('input')!;
+    const output = q<HTMLTextAreaElement>('output');
+    const error = q<HTMLElement>('error');
+    const missed = q<HTMLElement>('missed');
+    const missedList = q<HTMLElement>('missed-list');
+    const rupees = q<HTMLInputElement>('rupees');
+    const status = q<HTMLElement>('status')!;
+    let standard: 'iast' | 'iso' = 'iast';
+
+    const showError = (code: string | null) => {
+      if (!error) return;
+      const msg = code ? L[code] ?? '' : '';
+      error.hidden = !msg;
+      error.textContent = msg;
+    };
+    const showMissed = (chars: string[]) => {
+      if (!missed || !missedList) return;
+      missed.hidden = chars.length === 0;
+      missedList.textContent = chars.join(' ');
+    };
+
+    function run() {
+      const v = input.value;
+      if (tool === 'hindi-date') {
+        const rows = v ? hindiDate(v) : null;
+        for (const el of root.querySelectorAll<HTMLElement>('[data-date]')) {
+          el.textContent = rows?.find((r) => r.key === el.dataset.date)?.text ?? '';
+        }
+        return;
+      }
+      if (tool === 'word-count') {
+        const c = countText(v) as Record<string, number>;
+        for (const el of root.querySelectorAll<HTMLElement>('[data-count]')) {
+          el.textContent = String(c[el.dataset.count!]);
+        }
+        return;
+      }
+      let out = '';
+      if (tool === 'amount-hindi' || tool === 'amount-english') {
+        const fn = tool === 'amount-hindi' ? amountInHindi : amountInEnglish;
+        const r = v.trim() ? fn(v, { rupees: rupees?.checked ?? true }) : null;
+        showError(r && !r.ok ? r.error : null);
+        out = r && r.ok ? r.text : '';
+      } else if (tool === 'to-english-digits') out = toEnglishDigits(v);
+      else if (tool === 'to-hindi-digits') out = toHindiDigits(v);
+      else if (tool === 'roman') {
+        const r = romanize(v, standard);
+        out = r.text;
+        showMissed(r.missed);
+      } else if (tool === 'script') {
+        const r = toScript(v, script);
+        out = r.text;
+        showMissed(r.missed);
+      }
+      if (output && output.value !== out) output.value = out;
+    }
+
+    input.addEventListener('input', run);
+    rupees?.addEventListener('change', run);
+    q('clear')?.addEventListener('click', () => {
+      input.value = '';
+      run();
+      input.focus();
+    });
+    q('sample')?.addEventListener('click', (e) => {
+      input.value = (e.currentTarget as HTMLElement).dataset.sample || '';
+      run();
+    });
+    q('copy')?.addEventListener('click', () => copy(output?.value ?? '', L, status));
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-standard]')) {
+      b.addEventListener('click', () => {
+        standard = b.dataset.standard as 'iast' | 'iso';
+        for (const x of root.querySelectorAll<HTMLButtonElement>('[data-standard]')) {
+          x.setAttribute('aria-pressed', String(x === b));
+        }
+        run();
+      });
+    }
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-copy-date]')) {
+      b.addEventListener('click', () => {
+        const el = root.querySelector<HTMLElement>(`[data-date="${b.dataset.copyDate}"]`);
+        copy(el?.textContent ?? '', L, status);
+      });
+    }
+
+    // The date tool opens on today's date, in the visitor's own calendar day.
+    if (tool === 'hindi-date' && !input.value) {
+      const d = new Date();
+      input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    run();
+  }
+</script>

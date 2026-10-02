@@ -275,7 +275,7 @@ describe('convert() routing', () => {
     // longer unavailable; it is still not accurate, and the test for that gate
     // lives in chanakya.test.js.
     assert.equal(isPairUnavailable('shusha', 'unicode'), true);
-    assert.equal(isPairUnavailable('preeti', 'unicode'), true);
+    assert.equal(isPairUnavailable('preeti', 'unicode'), false);
     assert.equal(isPairUnavailable('chanakya', 'unicode'), false);
     assert.equal(isPairUnavailable('kruti-dev', 'unicode'), false);
   });
@@ -449,7 +449,7 @@ describe('font registry', () => {
     assert.equal(isPairAccurate('kruti-dev', 'devlys'), true);
     assert.equal(isPairAccurate('kruti-dev', 'chanakya'), false);
     assert.equal(isPairAccurate('chanakya', 'unicode'), false);
-    assert.equal(isPairAccurate('preeti', 'unicode'), false);
+    assert.equal(isPairAccurate('shusha', 'unicode'), false);
   });
 
   test('boxLabel disambiguates Unicode as Hindi', () => {

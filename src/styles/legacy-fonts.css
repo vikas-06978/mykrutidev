@@ -69,8 +69,8 @@
   font-display: swap;
 }
 
-/* Preeti has a file but no verified map, so nothing previews in it yet.
-   Declared now so the day a mapping lands there is nothing to wire. */
+/* Preeti: previews the output of the Unicode to Preeti page. The map in
+   fontMaps.js was read off this very file. */
 @font-face {
   font-family: 'MKD Preeti';
   src:
