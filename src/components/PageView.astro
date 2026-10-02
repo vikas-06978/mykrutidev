@@ -15,6 +15,8 @@ import PrintKeyboard from './PrintKeyboard.astro';
 import Problems from './Problems.astro';
 import { printableFor } from '../lib/printables.js';
 import AllConverters from './AllConverters.astro';
+import HindiTool from './HindiTool.astro';
+import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
 import { FONTS } from '../lib/fontMaps.js';
@@ -54,7 +56,10 @@ const TOOLS: Record<string, any> = {
   '/hindi-typing-test-for-exams': TypingTutor,
   '/how-to-type-hindi-in-ms-word': Transliterator,
 };
-const Tool = TOOLS[path];
+// The everyday tools share one component, told which tool to be.
+const hindiTool = (TOOL_PAGES as Record<string, { tool: string; script?: string }>)[path];
+const Tool = TOOLS[path] ?? (hindiTool ? HindiTool : undefined);
+const toolProps = hindiTool ?? {};
 
 // Only offer the swap link when the reverse page is actually usable.
 const rev = reversePage(page);
@@ -129,7 +134,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {
       Tool && (
         <div class="mt-6 scroll-mt-4" id="tool">
-          <Tool />
+          <Tool {...toolProps} />
         </div>
       )
     }

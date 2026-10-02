@@ -72,7 +72,8 @@
     "legal": "Kruti Dev, DevLys, Chanakya and Mangal are the property of their respective owners. This site is not affiliated with them.",
     "typing": "Typing & fonts",
     "guides": "Guides",
-    "site": "About the site"
+    "site": "About the site",
+    "tools": "Hindi tools"
   },
   "page": {
     "beta": "Beta",
@@ -1935,6 +1936,485 @@
         }
       ]
     },
+    "/number-to-hindi-words": {
+      "nav": "Number to Hindi words",
+      "h1": "Number to Hindi Words Converter",
+      "title": "Number to Hindi Words | Amount in Hindi Words for Cheques",
+      "description": "Write any amount in Hindi words for a cheque, form or receipt: 1,25,000 becomes एक लाख पच्चीस हज़ार रुपये मात्र. Lakh, crore, paise. Free.",
+      "lede": "Type an amount in digits and get it in Hindi words, ready for a cheque, a challan or a receipt.",
+      "body": [
+        "<h2>How Hindi counts</h2>",
+        "<p>Hindi numbers are not built from parts the way English ones are. Every number from 1 to 99 is its own word, so 39 is <strong lang=\"hi\">उनतालीस</strong> and 79 is <strong lang=\"hi\">उनासी</strong>, and that is exactly where people slip when they write an amount by hand. This tool has all hundred of them written out, in the spellings used in school books and bank forms.</p>",
+        "<p>Above a hundred the Indian place values take over: <strong lang=\"hi\">सौ</strong>, <strong lang=\"hi\">हज़ार</strong>, <strong lang=\"hi\">लाख</strong>, <strong lang=\"hi\">करोड़</strong>, <strong lang=\"hi\">अरब</strong> and <strong lang=\"hi\">खरब</strong>. So 98,76,54,321 is <strong lang=\"hi\">अट्ठानवे करोड़ छिहत्तर लाख चौवन हज़ार तीन सौ इक्कीस</strong>.</p>",
+        "<h2>Cheque wording</h2>",
+        "<p>With the rupees box ticked, the amount ends in <strong lang=\"hi\">रुपये मात्र</strong>, and paise are added after <strong lang=\"hi\">और</strong>: 1250.50 becomes <strong lang=\"hi\">एक हज़ार दो सौ पचास रुपये और पचास पैसे मात्र</strong>. Clear the box to write a plain number, where digits after the point are read one by one.</p>",
+        "<p>Need the same amount in English? Use <a href=\"/amount-in-words\">Amount in Words</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it write छह and not छः?",
+          "a": "Both are correct and both mean six. छह is the spelling in current school books. A few other numbers also have two accepted spellings, such as पंद्रह and पन्द्रह, and the meaning never changes."
+        },
+        {
+          "q": "Can I type commas or the rupee sign?",
+          "a": "Yes. 125000, 1,25,000, ₹1,25,000 and 1,25,000/- all work, and so do Hindi digits such as १२५०००."
+        },
+        {
+          "q": "What is the largest number it can write?",
+          "a": "99 kharab, which is 14 digits. That is far beyond any cheque."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type the amount in digits, with or without commas.",
+          "Leave the rupees box ticked for a cheque, or clear it for a plain number.",
+          "Press <strong>Copy</strong> and paste the Hindi words into your form or document."
+        ],
+        "tip": "Read the words back against the digits once before you sign a cheque."
+      }
+    },
+    "/amount-in-words": {
+      "nav": "Amount in words (lakh, crore)",
+      "h1": "Amount in Words Converter (Lakh and Crore)",
+      "title": "Amount in Words Converter | Rupees in Words, Lakh and Crore",
+      "description": "Write a rupee amount in English words the Indian way, for cheques and invoices: Rupees One Lakh Twenty-Five Thousand Only. Free, instant.",
+      "lede": "Type an amount and get it in English words with lakh and crore, the way Indian cheques and invoices write it.",
+      "body": [
+        "<h2>Indian, not international</h2>",
+        "<p>Most number-to-words tools count in thousands and millions, so 1,25,000 comes out as \"one hundred twenty-five thousand\". Indian cheques, invoices and government forms count in lakh and crore, and so does this tool: <strong>Rupees One Lakh Twenty-Five Thousand Only</strong>.</p>",
+        "<p>Amounts above 99 crore stay in crore, as Indian banks print them: 125,00,00,000 is <strong>One Hundred Twenty-Five Crore</strong>.</p>",
+        "<h2>Paise and plain numbers</h2>",
+        "<p>With the rupees box ticked, paise follow \"and\": 1250.50 is <strong>Rupees One Thousand Two Hundred Fifty and Fifty Paise Only</strong>. Clear the box for a plain number, where digits after the point are read one by one, as in \"Three Point One Four\".</p>",
+        "<p>For the same amount in Hindi, use <a href=\"/number-to-hindi-words\">Number to Hindi Words</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why \"Rupees One Only\" and not \"Rupee One\"?",
+          "a": "Because that is the fixed form on cheques. The word Rupees comes first whatever the amount."
+        },
+        {
+          "q": "Does it use hyphens, as in Twenty-Five?",
+          "a": "Yes, as written English does. Banks accept the amount with or without them."
+        },
+        {
+          "q": "Can I paste an amount with ₹ or /-?",
+          "a": "Yes. The rupee sign, Rs., commas, spaces and a trailing /- are ignored."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Enter the rupee amount in digits.",
+          "Keep the rupees box ticked for cheque wording with \"Only\" at the end.",
+          "Press <strong>Copy</strong> and paste the words onto the invoice or cheque."
+        ],
+        "tip": "On a cheque, draw a line after \"Only\" so nothing can be added."
+      }
+    },
+    "/hindi-to-english-numbers": {
+      "nav": "Hindi to English numbers",
+      "h1": "Hindi to English Numbers Converter",
+      "title": "Hindi to English Numbers | १२३ to 123 Digit Converter",
+      "description": "Change Hindi (Devanagari) digits to English digits in any text: १५/०८/१९४७ becomes 15/08/1947. Words stay as they are. Free, private.",
+      "lede": "Paste text with Hindi digits such as १२३ and get the same text with 123. Nothing else changes.",
+      "body": [
+        "<h2>When you need it</h2>",
+        "<p>Online forms, spreadsheets and bank portals often refuse Hindi digits: a date typed as <strong lang=\"hi\">१५/०८/१९४७</strong> or a mobile number in Devanagari digits is rejected as invalid. This tool swaps every Hindi digit for its English one and leaves every letter, space and symbol exactly where it was.</p>",
+        "<h2>Exactly ten changes</h2>",
+        "<p>There are only ten Hindi digits, <strong lang=\"hi\">० १ २ ३ ४ ५ ६ ७ ८ ९</strong>, and each has one English twin, so the result is always exact. Your Hindi words are not translated or touched.</p>",
+        "<p>For the reverse, use <a href=\"/english-to-hindi-numbers\">English to Hindi Numbers</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will my Hindi words change?",
+          "a": "No. Only the ten digits ० to ९ are replaced. Everything else stays as it was."
+        },
+        {
+          "q": "Does it work on Marathi or Nepali digits?",
+          "a": "Yes. Marathi and Nepali use the same Devanagari digits."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the text that has Hindi digits in it.",
+          "Read the result on the right, where only the digits have changed.",
+          "Press <strong>Copy</strong> and paste it into the form that wanted English digits."
+        ],
+        "tip": "Phone numbers and PIN codes in Hindi digits are the usual reason a form says \"invalid\"."
+      }
+    },
+    "/english-to-hindi-numbers": {
+      "nav": "English to Hindi numbers",
+      "h1": "English to Hindi Numbers Converter",
+      "title": "English to Hindi Numbers | 123 to १२३ Digit Converter",
+      "description": "Change English digits to Hindi (Devanagari) digits in any text: 15/08/1947 becomes १५/०८/१९४७. Words stay as they are. Free.",
+      "lede": "Paste text with digits such as 123 and get the same text with Hindi digits, १२३.",
+      "body": [
+        "<h2>For Hindi documents</h2>",
+        "<p>Rajbhasha letters, notices and printed Hindi often use Devanagari digits throughout. Typing them one by one is slow, and most keyboards do not have them. Paste the text here and every 0 to 9 becomes ० to ९, with everything else left in place.</p>",
+        "<h2>What stays the same</h2>",
+        "<p>Letters, punctuation, spaces and line breaks are not touched, so a whole letter can go through in one paste. <strong lang=\"hi\">दिनांक 15/08/1947</strong> becomes <strong lang=\"hi\">दिनांक १५/०८/१९४७</strong>.</p>",
+        "<p>For the reverse, use <a href=\"/hindi-to-english-numbers\">Hindi to English Numbers</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a website or email address change?",
+          "a": "Yes, if it has digits in it, because every 0 to 9 is converted. Convert the Hindi text alone if it has addresses in it."
+        },
+        {
+          "q": "Do I need a Hindi font?",
+          "a": "No. Hindi digits are Unicode characters, so any phone or computer that shows Hindi shows them."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the text whose digits should be in Hindi.",
+          "Check the right-hand box, where every 0 to 9 is now ० to ९.",
+          "Press <strong>Copy</strong> and paste the result into your Hindi document."
+        ],
+        "tip": "Convert dates and amounts in a Rajbhasha letter in one go by pasting the whole letter."
+      }
+    },
+    "/english-date-to-hindi": {
+      "nav": "Date in Hindi",
+      "h1": "English Date to Hindi Date Converter",
+      "title": "Date in Hindi | English Date to Hindi Date Converter",
+      "description": "Write any date in Hindi: 02/10/2026 becomes 2 अक्टूबर 2026, शुक्रवार, with Hindi digits or in words for letters and documents. Free.",
+      "lede": "Pick a date and see it written every way a Hindi letter or document needs, each with its own copy button.",
+      "body": [
+        "<h2>Six ways to write one date</h2>",
+        "<p>The tool writes the date with the Hindi month name (<strong lang=\"hi\">2 अक्टूबर 2026</strong>), the same in Hindi digits, with the day of the week (<strong lang=\"hi\">शुक्रवार</strong>), in the numeric form 02/10/2026 and its Hindi-digit twin, and fully in words for legal and formal documents.</p>",
+        "<h2>In words, the way Hindi says years</h2>",
+        "<p>Years before 2000 are read in pairs in Hindi, so 15 August 1947 in words is <strong lang=\"hi\">पंद्रह अगस्त उन्नीस सौ सैंतालीस</strong>, while 2026 is <strong lang=\"hi\">दो हज़ार छब्बीस</strong>. The day of the week is worked out from the calendar, so it is right for any date.</p>",
+        "<p>To write a number or an amount in Hindi, use <a href=\"/number-to-hindi-words\">Number to Hindi Words</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Which spelling of the months does it use?",
+          "a": "The standard Hindi ones: जनवरी, फ़रवरी, मार्च, अप्रैल, मई, जून, जुलाई, अगस्त, सितंबर, अक्टूबर, नवंबर, दिसंबर."
+        },
+        {
+          "q": "Does it give the Vikram Samvat date?",
+          "a": "No. Converting to the Hindu calendar depends on the moon and on regional rules, so this tool sticks to the English calendar date written in Hindi."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Pick the date. Today is filled in when the page opens.",
+          "Find the form you need in the list: with the month name, with the day, in digits or in words.",
+          "Press the <strong>Copy</strong> button beside that line."
+        ],
+        "tip": "For a formal document, the line in words is the hardest to forge or misread."
+      }
+    },
+    "/hindi-word-counter": {
+      "nav": "Hindi word counter",
+      "h1": "Hindi Word Counter",
+      "title": "Hindi Word Counter | Count Hindi Words, Characters and Akshar",
+      "description": "Count words, characters, akshar, sentences and paragraphs in Hindi text. Counts conjuncts correctly and sentences ending in ।. Free, private.",
+      "lede": "Paste Hindi text to count its words, characters, akshar, sentences and paragraphs as you type.",
+      "body": [
+        "<h2>Why ordinary counters get Hindi wrong</h2>",
+        "<p>Most word counters were written for English. They miss sentences that end in <strong lang=\"hi\">।</strong>, and their \"characters\" count every matra and halant separately, so <strong lang=\"hi\">क्षेत्र</strong> looks like seven characters. This counter gives both numbers, because both are asked for.</p>",
+        "<h2>What each number means</h2>",
+        "<ul><li><strong>Characters</strong> count Unicode characters, matras and halants included. This is what SMS limits and many online forms count.</li><li><strong>Akshar</strong> count written syllables, the units a reader sees: <strong lang=\"hi\">क्षे</strong> is one, <strong lang=\"hi\">त्र</strong> is another.</li><li><strong>Sentences</strong> end at <strong lang=\"hi\">।</strong>, ॥, ?, ! or a full stop.</li></ul>",
+        "<p>Practising for a typing exam? Try the <a href=\"/hindi-typing-test\">Hindi typing test</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Which number should I give for an essay word limit?",
+          "a": "Words. They are counted by the spaces between them, the same way examiners and Word count them."
+        },
+        {
+          "q": "Why do characters and akshar differ?",
+          "a": "A Hindi akshar is often several Unicode characters: क्षे is क, halant, ष and the e-matra. Forms with a character limit usually count characters, readers see akshar."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste or type your Hindi text in the box.",
+          "Watch the six counts update on the right as you type.",
+          "Use the word count for essay limits and the character count for form and SMS limits."
+        ],
+        "tip": "Leave a blank line between paragraphs so the paragraph count is right."
+      }
+    },
+    "/hindi-to-iast": {
+      "nav": "Hindi to IAST (Roman)",
+      "h1": "Hindi to IAST and ISO 15919 Converter",
+      "title": "Hindi to IAST Converter | Devanagari to Roman, ISO 15919",
+      "description": "Write Hindi in Roman letters by the IAST or ISO 15919 standard, with long vowels and retroflex letters marked: भारत is bhārata. Free.",
+      "lede": "Paste Hindi and get it in Roman letters by a fixed standard, IAST or ISO 15919, with every letter marked exactly.",
+      "body": [
+        "<h2>Exact, letter by letter</h2>",
+        "<p>IAST and ISO 15919 give each Devanagari letter one Roman spelling, with marks for what English letters cannot show: long vowels (<strong>ā ī ū</strong>), retroflex letters (<strong>ṭ ḍ ṇ ṣ</strong>) and the nasal marks. So the result can be read back into Hindi without guessing, which is why scholars, libraries and dictionaries use them.</p>",
+        "<h2>Every a is written</h2>",
+        "<p>Both standards write the vowel a after every consonant that carries one, so <strong lang=\"hi\">भारत</strong> is <strong>bhārata</strong>, not \"bharat\". Hindi drops some of those a sounds in speech, but which ones cannot be told from the spelling, so a tool that dropped them would be guessing. Here nothing is guessed.</p>",
+        "<h2>IAST or ISO 15919?</h2>",
+        "<p>They agree on most letters. ISO 15919 also marks the long ē and ō and writes ऋ as r̥, which keeps ड़ (ṛ) apart. IAST writes ऋ as ṛ, so in IAST mode this tool writes ड़ as r̤.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Can I get \"bharat\" instead of \"bhārata\"?",
+          "a": "Not from this tool. Dropping the silent a and the accent marks is a guess about pronunciation, and this page only gives answers that are exact."
+        },
+        {
+          "q": "How are ज़, फ़ and ऑ written?",
+          "a": "With the ISO 15919 letters, in both modes: ज़ is z, फ़ is f, क़ is q and ऑ is ô."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi text you need in Roman letters.",
+          "Pick IAST or ISO 15919 above the output.",
+          "Press <strong>Copy</strong>. The accented letters paste correctly into Word and email."
+        ],
+        "tip": "Use ISO 15919 when the text will be converted back into Devanagari later."
+      }
+    },
+    "/hindi-to-gujarati-script": {
+      "nav": "Hindi to Gujarati script",
+      "h1": "Hindi to Gujarati Script Converter",
+      "title": "Hindi to Gujarati Script Converter | Devanagari to Gujarati Lipi",
+      "description": "Write Hindi text in Gujarati script, letter for letter: भारत सरकार becomes ભારત સરકાર. Same words, Gujarati letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Gujarati letters, so a Gujarati reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Gujarati letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"gu\">ભારત સરકાર</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Gujarati but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Gujarati has a letter for every sound Hindi writes, including ऑ (ઑ) and the dotted letters such as ज़ (જ઼), so nothing is left out.</p>",
+        "<p>Gujarati drops the top line that Hindi letters hang from, which is the first thing a Hindi reader notices. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Gujarati speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Gujarati letters.",
+          "Read the Gujarati version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Gujarati text where you need it."
+        ],
+        "tip": "If a note appears under the Gujarati box, those letters have no Gujarati form and were kept in Devanagari."
+      }
+    },
+    "/hindi-to-bengali-script": {
+      "nav": "Hindi to Bengali script",
+      "h1": "Hindi to Bengali Script Converter",
+      "title": "Hindi to Bengali Script Converter | Devanagari to Bengali Lipi",
+      "description": "Write Hindi text in Bengali script, letter for letter: भारत सरकार becomes ভারত সরকার. Same words, Bengali letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Bengali letters, so a Bengali reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Bengali letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"bn\">ভারত সরকার</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Bengali but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Bengali has no separate letter for व, so it is written ব, the way Bengali spells it. ऑ and ॉ have no Bengali letter and are left as they were, with a note.</p>",
+        "<p>Bengali script is also used for Assamese, though Assamese writes ra and wa with letters of its own. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Bengali speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Bengali letters.",
+          "Read the Bengali version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Bengali text where you need it."
+        ],
+        "tip": "If a note appears under the Bengali box, those letters have no Bengali form and were kept in Devanagari."
+      }
+    },
+    "/hindi-to-odia-script": {
+      "nav": "Hindi to Odia script",
+      "h1": "Hindi to Odia Script Converter",
+      "title": "Hindi to Odia Script Converter | Devanagari to Odia Lipi",
+      "description": "Write Hindi text in Odia script, letter for letter: भारत सरकार becomes ଭାରତ ସରକାର. Same words, Odia letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Odia letters, so a Odia reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Odia letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"or\">ଭାରତ ସରକାର</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Odia but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Odia writes व with ବ, the way Odia spells it. ऑ and ॉ have no Odia letter and are left as they were, with a note.</p>",
+        "<p>Odia letters are rounded on top instead of hanging from a line, which is why the same word looks so different. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Odia speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Odia letters.",
+          "Read the Odia version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Odia text where you need it."
+        ],
+        "tip": "If a note appears under the Odia box, those letters have no Odia form and were kept in Devanagari."
+      }
+    },
+    "/hindi-to-telugu-script": {
+      "nav": "Hindi to Telugu script",
+      "h1": "Hindi to Telugu Script Converter",
+      "title": "Hindi to Telugu Script Converter | Devanagari to Telugu Lipi",
+      "description": "Write Hindi text in Telugu script, letter for letter: भारत सरकार becomes భారత సరకార. Same words, Telugu letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Telugu letters, so a Telugu reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Telugu letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"te\">భారత సరకార</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Telugu but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Telugu has a short and a long e and o. Hindi ए and ओ are long, so they become ఏ and ఓ. The dot in ज़ or फ़ is dropped, giving జ and ఫ, because few Telugu fonts draw one.</p>",
+        "<p>A Telugu reader says the a at the end of every word, so भारत written in Telugu is read bhārata. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Telugu speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Telugu letters.",
+          "Read the Telugu version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Telugu text where you need it."
+        ],
+        "tip": "If a note appears under the Telugu box, those letters have no Telugu form and were kept in Devanagari."
+      }
+    },
+    "/hindi-to-kannada-script": {
+      "nav": "Hindi to Kannada script",
+      "h1": "Hindi to Kannada Script Converter",
+      "title": "Hindi to Kannada Script Converter | Devanagari to Kannada Lipi",
+      "description": "Write Hindi text in Kannada script, letter for letter: भारत सरकार becomes ಭಾರತ ಸರಕಾರ. Same words, Kannada letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Kannada letters, so a Kannada reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Kannada letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"kn\">ಭಾರತ ಸರಕಾರ</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Kannada but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Kannada has a short and a long e and o. Hindi ए and ओ are long, so they become ಏ and ಓ. The dotted letters such as ज़ keep their dot (ಜ಼).</p>",
+        "<p>Kannada and Telugu letters look alike because the two scripts grew from the same one, but the letters are not interchangeable. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Kannada speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Kannada letters.",
+          "Read the Kannada version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Kannada text where you need it."
+        ],
+        "tip": "If a note appears under the Kannada box, those letters have no Kannada form and were kept in Devanagari."
+      }
+    },
+    "/hindi-to-malayalam-script": {
+      "nav": "Hindi to Malayalam script",
+      "h1": "Hindi to Malayalam Script Converter",
+      "title": "Hindi to Malayalam Script Converter | Devanagari to Malayalam Lipi",
+      "description": "Write Hindi text in Malayalam script, letter for letter: भारत सरकार becomes ഭാരത സരകാര. Same words, Malayalam letters. Not a translation. Free.",
+      "lede": "Paste Hindi and get the same words written in Malayalam letters, so a Malayalam reader can read them aloud.",
+      "body": [
+        "<h2>Script, not translation</h2>",
+        "<p>This tool changes the letters, not the language. Each Hindi letter is written with the matching Malayalam letter, so <strong lang=\"hi\">भारत सरकार</strong> becomes <strong lang=\"ml\">ഭാരത സരകാര</strong> and still says \"bhārat sarkār\". Use it to help someone who reads Malayalam but not Devanagari say a Hindi name, a slogan or a prayer. To change the language, you need a translator instead.</p>",
+        "<h2>How exact it is</h2>",
+        "<p>Unicode lays out the Indian scripts in parallel, and every letter here was matched by its official Unicode name, so nothing is guessed. Malayalam has a short and a long e and o. Hindi ए and ओ are long, so they become ഏ and ഓ. Malayalam has no nukta, so ज़ becomes ജ.</p>",
+        "<p>Malayalam joins many conjuncts into one round shape, so a Hindi word can look shorter in Malayalam than it is. For Roman letters instead, use <a href=\"/hindi-to-iast\">Hindi to IAST</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will a Malayalam speaker understand the result?",
+          "a": "They will be able to read it aloud. Understanding it depends on whether they know Hindi, because the words are still Hindi words."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "They stay as they are. Hindi digits such as १२३ are changed into the digits of the new script."
+        },
+        {
+          "q": "Is anything I type uploaded?",
+          "a": "No. The tool runs in your browser and nothing you type leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Paste the Hindi you want to show in Malayalam letters.",
+          "Read the Malayalam version on the right as you type.",
+          "Press <strong>Copy</strong> and paste the Malayalam text where you need it."
+        ],
+        "tip": "If a note appears under the Malayalam box, those letters have no Malayalam form and were kept in Devanagari."
+      }
+    },
     "/about": {
       "nav": "About",
       "h1": "About MyKrutiDev",
@@ -2989,5 +3469,62 @@
     "errorRate": "Too many requests from here for now. Please try again in an hour.",
     "errorGeneric": "It could not be sent just now. Please try again in a minute.",
     "privacy": "We save only what you type in this form, the site language and whether you are on a phone or a computer. Never your IP address."
+  },
+  "tools": {
+    "copy": "Copy",
+    "copyFailed": "Could not copy. Select the text and copy it yourself.",
+    "outPlaceholder": "The result appears here.",
+    "amountPlaceholder": "e.g. 1,25,000.50",
+    "asRupees": "Write it as rupees and paise, for a cheque (clear this for a plain number)",
+    "standard": "Standard",
+    "missed": "Left unchanged, this script has no letter for:",
+    "dateLabel": "Pick a date",
+    "errors": {
+      "invalid": "Type a number using digits, for example 125000 or 1,25,000.50.",
+      "tooLarge": "That is more than 99 kharab (14 digits). Try a smaller number.",
+      "paise": "Paise have only two digits. Round the amount to two places after the point.",
+      "badDate": "That is not a real date."
+    },
+    "input": {
+      "amount-hindi": "Number",
+      "amount-english": "Number",
+      "to-english-digits": "Text with Hindi digits",
+      "to-hindi-digits": "Text with English digits",
+      "word-count": "Hindi text",
+      "roman": "Hindi text",
+      "script": "Hindi text"
+    },
+    "output": {
+      "amount-hindi": "In Hindi words",
+      "amount-english": "In English words",
+      "to-english-digits": "With English digits",
+      "to-hindi-digits": "With Hindi digits",
+      "word-count": "Count",
+      "roman": "Roman letters",
+      "script": "Converted script"
+    },
+    "placeholder": {
+      "to-english-digits": "Paste text with Hindi digits like १२३",
+      "to-hindi-digits": "Paste text with digits like 123",
+      "word-count": "Type or paste Hindi text",
+      "roman": "Type or paste Hindi text",
+      "script": "Type or paste Hindi text"
+    },
+    "counts": {
+      "words": "Words",
+      "characters": "Characters",
+      "charactersNoSpaces": "Characters without spaces",
+      "akshar": "Akshar (written syllables)",
+      "sentences": "Sentences",
+      "paragraphs": "Paragraphs"
+    },
+    "dateFormats": {
+      "long": "Date",
+      "longHindiDigits": "Date in Hindi digits",
+      "weekday": "With the day",
+      "numeric": "Numeric",
+      "numericHindiDigits": "Numeric, Hindi digits",
+      "words": "In words"
+    }
   }
 }

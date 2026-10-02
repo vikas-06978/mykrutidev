@@ -161,3 +161,68 @@ for (const url of BOTH('/hindi-keyboard')) {
     expect(errors).toEqual([]);
   });
 }
+
+// ---------------------------------------------------------------------------
+// Everyday Hindi tools (HindiTool.astro): the example in, the exact answer out
+// ---------------------------------------------------------------------------
+
+const HINDI_TOOLS = {
+  '/number-to-hindi-words': 'एक लाख पच्चीस हज़ार रुपये और पचास पैसे मात्र',
+  '/amount-in-words': 'Rupees One Lakh Twenty-Five Thousand and Fifty Paise Only',
+  '/hindi-to-english-numbers': 'दिनांक 15/08/1947, कक्ष संख्या 101',
+  '/english-to-hindi-numbers': 'दिनांक १५/०८/१९४७, कक्ष संख्या १०१',
+  '/hindi-to-iast': 'bhārata sarakāra, pradhānamaṃtrī kāryālaya|',
+  '/hindi-to-gujarati-script': 'ભારત સરકાર, પ્રધાનમંત્રી કાર્યાલય।',
+  '/hindi-to-bengali-script': 'ভারত সরকার, প্রধানমংত্রী কার্যালয।',
+  '/hindi-to-odia-script': 'ଭାରତ ସରକାର, ପ୍ରଧାନମଂତ୍ରୀ କାର୍ଯାଲଯ।',
+  '/hindi-to-telugu-script': 'భారత సరకార, ప్రధానమంత్రీ కార్యాలయ।',
+  '/hindi-to-kannada-script': 'ಭಾರತ ಸರಕಾರ, ಪ್ರಧಾನಮಂತ್ರೀ ಕಾರ್ಯಾಲಯ।',
+  '/hindi-to-malayalam-script': 'ഭാരത സരകാര, പ്രധാനമംത്രീ കാര്യാലയ।',
+};
+
+for (const [path, want] of Object.entries(HINDI_TOOLS)) {
+  for (const url of BOTH(path)) {
+    test(`tool ${url}: the example gives the exact answer`, async ({ page }) => {
+      const errors = errorsOf(page);
+      await page.goto(url);
+      const root = page.locator('[data-hindi-tool]');
+      await root.locator('[data-role="sample"]').click();
+      await expect(root.locator('[data-role="output"]')).toHaveValue(want);
+      expect(errors).toEqual([]);
+    });
+  }
+}
+
+for (const url of BOTH('/hindi-word-counter')) {
+  test(`tool ${url}: counts the example`, async ({ page }) => {
+    const errors = errorsOf(page);
+    await page.goto(url);
+    const root = page.locator('[data-hindi-tool]');
+    await root.locator('[data-role="sample"]').click();
+    await expect(root.locator('[data-count="words"]')).toHaveText('13');
+    await expect(root.locator('[data-count="sentences"]')).toHaveText('2');
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const url of BOTH('/english-date-to-hindi')) {
+  test(`tool ${url}: writes a picked date in Hindi`, async ({ page }) => {
+    const errors = errorsOf(page);
+    await page.goto(url);
+    const root = page.locator('[data-hindi-tool]');
+    // Opens on today, so the long form is filled before anything is touched.
+    await expect(root.locator('[data-date="long"]')).not.toHaveText('');
+    await root.locator('[data-role="input"]').fill('1947-08-15');
+    await expect(root.locator('[data-date="weekday"]')).toHaveText('शुक्रवार, 15 अगस्त 1947');
+    await expect(root.locator('[data-date="words"]')).toHaveText('पंद्रह अगस्त उन्नीस सौ सैंतालीस');
+    expect(errors).toEqual([]);
+  });
+}
+
+test('amount tool: a third paise digit is refused, not rounded', async ({ page }) => {
+  await page.goto('/number-to-hindi-words');
+  const root = page.locator('[data-hindi-tool]');
+  await root.locator('[data-role="input"]').fill('12.345');
+  await expect(root.locator('[data-role="error"]')).toBeVisible();
+  await expect(root.locator('[data-role="output"]')).toHaveValue('');
+});
