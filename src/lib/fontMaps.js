@@ -326,6 +326,98 @@ const KRUTI_DEV = {
   'Û': '•',
 };
 
+// The upper range of Kruti Dev 010: ready-made conjuncts, full and half
+// letters, combined signs and the Hindi digits typists reach with Alt codes.
+// Each was read off public/fonts/KRDEV010.woff glyph by glyph, every key drawn
+// before the bar `k` to tell a half letter from a full one, and DevLys 010
+// draws the same glyph on every one of them. Left out, because the glyph is
+// not one certain character: ¢ ¤ § Ú ö ˜ õ ›. The curly quotes and dashes
+// (‘ ’ “ ” – —) and … (३) carry letters in the font too, but stay
+// punctuation here, as they are in any English text pasted alongside.
+//
+// They are for READING only (the registry's `readMap`): KRUTI_DEV itself, which
+// writes Unicode back as Kruti Dev and draws the typing charts, keeps the keys
+// typists are taught (`n~n` for द्द, not `Ì`).
+const KRUTI_EXTENDED = {
+  // Half letters, completed by the bar like the ASCII ones
+  '«k': 'त्र',
+  '«': 'त्र्',
+  '¸k': 'य',
+  '¸': 'य्',
+  'Ök': 'झ',
+  'Ö': 'झ्',
+  '÷k': 'झ',
+  '÷': 'झ्',
+  'Ük': 'श',
+  'Ü': 'श्',
+  'Ùk': 'त्त',
+  'Ù': 'त्त्',
+  'Ÿk': 'त्त',
+  'Ÿ': 'त्त्',
+  'Ëk': 'ध',
+  'Ë': 'ध्',
+  'èk': 'ध',
+  'è': 'ध्',
+  'º': 'ह्',
+  // Full letters
+  '£': 'ख्र',
+  '¶': 'फ',
+  'Ò': 'भ',
+  '¥': 'ञ',
+  '´': 'ञ',
+  '³': 'ङ',
+  'Ã': 'ई',
+  'Ä': 'घ',
+  // Ready-made conjuncts
+  'Ì': 'द्द',
+  'í': 'द्द',
+  'Í': 'ट्ट',
+  'ê': 'ट्ट',
+  'Î': 'ट्ठ',
+  'ë': 'ट्ठ',
+  'Ï': 'ड्ड',
+  'ì': 'ड्ड',
+  'Ô': 'ड्ढ',
+  'ï': 'ड्ढ',
+  'ð': 'ठ्ठ',
+  'Ý': 'फ्र',
+  'à': 'ह्न',
+  'á': 'ह्य',
+  'â': 'हृ',
+  'ã': 'ह्म',
+  'ä': 'क्त',
+  'æ': 'द्र',
+  'é': 'न्न',
+  'ó': 'स्त्र',
+  'ô': 'क्क',
+  'ù': 'द्म',
+  // ्य drawn to join the letter before it: `dÓ` is क्य
+  'Ó': '्य',
+  'î': '्य',
+  // Signs with something built in. `Æ` is ि with the reph of the cluster
+  // after it, `Ç` is िं, `É` both; they are typed before the cluster.
+  'Æ': 'ि' + PRE_REPH,
+  'Ç': PRE_I_NASAL,
+  'É': PRE_I_NASAL + PRE_REPH,
+  'È': 'ीं',
+  'Ê': 'ी' + REPH,
+  '±': REPH + 'ं',
+  '¨': 'ो',
+  '®': 'ो',
+  '©': 'ौ',
+  '·': 'ऽ',
+  // Hindi digits
+  'å': '०',
+  'ƒ': '१',
+  '„': '२',
+  '†': '४',
+  '‡': '५',
+  'ˆ': '६',
+  '‰': '७',
+  'Š': '८',
+  '‹': '९',
+};
+
 // ============================================================================
 // DevLys 010 - VERIFIED to share the Kruti Dev 010 layout on every mapped key
 // ============================================================================
@@ -675,7 +767,6 @@ const CHANAKYA = {
   'å': '०',
   'ƒ': '१',
   '„': '२',
-  '…': '३',
   '†': '४',
   '‡': '५',
   'ˆ': '६',
@@ -1121,8 +1212,9 @@ const DVTT = {
   '¨É': 'म',
   '©É': 'म्र',
   'ªÉ': 'य',
-  // `¬` is a य whose left hook joins the letter before it (`S¬É` च्या).
-  '¬': 'य',
+  // `¬` is ्य drawn to join the letter before it: `ºÉ¬É` स्या. After a half
+  // letter (`S¬É` च्या) the doubled halant collapses.
+  '¬': '्य',
   '«É': 'य्र',
   '±É': 'ल',
   '´É': 'व',
@@ -1611,6 +1703,8 @@ export const FONTS = {
     shortLabel: 'Kruti',
     kind: 'legacy',
     map: KRUTI_DEV,
+    // Kruti Dev -> Unicode also reads the upper-range keys (KRUTI_EXTENDED).
+    readMap: { ...KRUTI_DEV, ...KRUTI_EXTENDED },
     // Same keyboard layout as DevLys (see the note above DEVLYS): text moving
     // between the two is passed through untouched rather than via Unicode.
     layout: 'kruti',
@@ -1654,6 +1748,7 @@ export const FONTS = {
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
+    readMap: { ...DEVLYS, ...KRUTI_EXTENDED },
     layout: 'kruti',
     // Verified by comparing glyph outlines against Kruti Dev 010 - see the note
     // above DEVLYS. Every codepoint this map uses draws the same letter in both
@@ -2245,7 +2340,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.kind === 'unicode' && to.kind === 'unicode') return text;
 
   if (from.kind === 'legacy' && to.kind === 'unicode') {
-    return legacyToUnicode(text, from.map, opts);
+    return legacyToUnicode(text, from.readMap ?? from.map, opts);
   }
   if (from.kind === 'unicode' && to.kind === 'legacy') {
     return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
@@ -2256,7 +2351,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.layout && from.layout === to.layout) return text;
 
   // legacy -> legacy routes through Unicode.
-  return unicodeToLegacy(legacyToUnicode(text, from.map, opts), to.map, {
+  return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, opts), to.map, {
     ...opts,
     ...reverseOpts(to),
   });
