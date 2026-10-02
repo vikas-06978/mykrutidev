@@ -314,7 +314,13 @@ describe('document messages', () => {
       }
     }
     for (const stats of cases) {
-      for (const dir of ['to-unicode', 'to-kruti']) {
+      for (const dir of [
+        'to-unicode',
+        'to-kruti',
+        { from: 'preeti', to: 'unicode' },
+        { from: 'unicode', to: 'dvtt' },
+        { from: 'kruti-dev', to: 'devlys' },
+      ]) {
         assert.deepEqual(localizeSummary(stats, dir, L.en), docConvert.summarize(stats, dir), JSON.stringify({ stats, dir }));
       }
     }

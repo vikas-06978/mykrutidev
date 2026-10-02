@@ -39,6 +39,7 @@
 import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
+import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
 export const SITE = 'https://mykrutidev.com';
@@ -59,7 +60,7 @@ export const SITE = 'https://mykrutidev.com';
  * @property {string}  [note]    why it is not ready yet, shown on the panel
  * @property {boolean} [beta]    live, but shows a Beta badge beside the h1
  * @property {string}  [betaNote] one line under the badge saying what it is for
- * @property {boolean} [documents] offer "Convert a document" under the boxes
+ * (Upload Word file is offered on every page docPairFor() accepts.)
  * @property {boolean} [app]  a content page that embeds a tool (PageView's TOOLS)
  *   without being a menubar `tool` itself: it still gets WebApplication data
  */
@@ -77,7 +78,6 @@ export const PAGES = [
     to: 'unicode',
     group: 'Kruti Dev',
     related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev'],
-    documents: true,
   },
   {
     path: '/unicode-to-kruti-dev',
@@ -87,7 +87,6 @@ export const PAGES = [
     to: 'kruti-dev',
     group: 'Unicode / Hindi',
     related: ['/', '/mangal-to-kruti-dev', '/kruti-dev-to-mangal'],
-    documents: true,
   },
   {
     path: '/kruti-dev-to-mangal',
@@ -97,7 +96,6 @@ export const PAGES = [
     to: 'mangal',
     group: 'Kruti Dev',
     related: ['/', '/mangal-to-kruti-dev', '/unicode-to-kruti-dev'],
-    documents: true,
   },
   {
     path: '/mangal-to-kruti-dev',
@@ -107,7 +105,6 @@ export const PAGES = [
     to: 'kruti-dev',
     group: 'Mangal',
     related: ['/kruti-dev-to-mangal', '/unicode-to-kruti-dev', '/'],
-    documents: true,
   },
   {
     path: '/english-to-hindi-typing',
@@ -1036,4 +1033,17 @@ export function fontLinksFor(page) {
   return FONT_LINKS.filter(
     (l) => l.path !== page.path && !l.fonts.includes(page.from) && !l.fonts.includes(page.to) && isLive(getPage(l.path)),
   );
+}
+
+/**
+ * Whether a converter page offers "Upload Word file", as { from, to }: on
+ * every live converter whose two fonts the document converter can read and
+ * write (wordFonts.js). Null on every other page.
+ */
+export function docPairFor(page) {
+  if (!page || page.kind !== 'converter' || !isLive(page) || !page.from || !page.to) return null;
+  const known = (k) => isUnicodeKey(k) || (k in WORD_FONTS && FONTS[k]?.accurate);
+  if (!known(page.from) || !known(page.to)) return null;
+  if (isUnicodeKey(page.from) && isUnicodeKey(page.to)) return null;
+  return { from: page.from, to: page.to };
 }

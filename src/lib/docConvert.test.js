@@ -653,3 +653,94 @@ describe('dev server', () => {
     assert.match(config, /optimizeDeps:\s*\{\s*include:\s*\[[^\]]*'fflate'/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Every other font: the same engine for any { from, to } pair
+// ---------------------------------------------------------------------------
+
+describe('documents in every font', async () => {
+  const { convert } = await import('./fontMaps.js');
+  const font = (name) => `<w:rFonts w:ascii="${name}" w:hAnsi="${name}"/>`;
+
+  test('Preeti -> Unicode: the Preeti runs convert, bold and italic carry over', async () => {
+    const doc = makeDocx({
+      document: body(p(r(font('Preeti'), 'g]kfn', '<w:b/><w:i/>'), r(ARIAL, ' Nepal'))),
+    });
+    const { text, stats } = await run(doc, { from: 'preeti', to: 'unicode' });
+    const xml = text('word/document.xml');
+    assert.deepEqual(runsOf(xml), [[['नेपाल', 'Mangal'], [' Nepal', 'Arial']]]);
+    assert.match(xml, /<w:b\/><w:bCs\/><w:i\/><w:iCs\/>/);
+    assert.ok(stats.convertedChars > 0);
+  });
+
+  test('Unicode -> DV-TT Surekh: Marathi becomes DV-TT code in DV-TTSurekh', async () => {
+    const doc = makeDocx({ document: body(p(r(ARIAL, 'महाराष्ट्र शासन'))) });
+    const { text } = await run(doc, { from: 'unicode', to: 'dvtt' });
+    assert.deepEqual(runsOf(text('word/document.xml')), [[['¨É½É®É¹]Å ¶ÉÉºÉxÉ', 'DV-TTSurekh']]]);
+  });
+
+  test('DV-TT -> Unicode reads DV-TT Yogesh too, and the bar after a half letter stays with it', async () => {
+    // `M` (ग्) and `É` in separate runs is still ग.
+    const doc = makeDocx({ document: body(p(r(font('DV-TTYogesh'), 'M'), r(font('DV-TTYogesh'), 'É', '<w:b/>'))) });
+    const { text } = await run(doc, { from: 'dvtt', to: 'unicode' });
+    assert.deepEqual(textOf(text('word/document.xml')), ['ग']);
+  });
+
+  test('Kruti Dev -> DevLys: same keys, so the text is kept and only the font changes', async () => {
+    const doc = makeDocx({ document: body(p(r(KRUTI, 'Hkkjr'))) });
+    const { text } = await run(doc, { from: 'kruti-dev', to: 'devlys' });
+    assert.deepEqual(runsOf(text('word/document.xml')), [[['Hkkjr', 'DevLys 010']]]);
+  });
+
+  test('Kruti Dev -> Preeti goes through Unicode, as the text boxes do', async () => {
+    const doc = makeDocx({ document: body(p(r(KRUTI, 'Hkkjr'))) });
+    const { text } = await run(doc, { from: 'kruti-dev', to: 'preeti' });
+    assert.deepEqual(runsOf(text('word/document.xml')), [[[convert('भारत', 'unicode', 'preeti'), 'Preeti']]]);
+  });
+
+  test('a DevLys run converts on a Kruti Dev page: one keyboard layout', async () => {
+    const doc = makeDocx({ document: body(p(r(font('DevLys 010'), 'Hkkjr'))) });
+    const { text } = await run(doc, 'to-unicode');
+    assert.deepEqual(textOf(text('word/document.xml')), ['भारत']);
+  });
+
+  test('tables keep their structure, and only the cell text changes', async () => {
+    const table =
+      '<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/></w:tblPr><w:tblGrid><w:gridCol w:w="4000"/></w:tblGrid>' +
+      `<w:tr><w:tc><w:tcPr><w:tcW w:w="4000" w:type="dxa"/></w:tcPr>${p(r(font('Shivaji01'), 'marazI'))}</w:tc></w:tr></w:tbl>`;
+    const doc = makeDocx({ document: body(table) });
+    const { text, stats } = await run(doc, { from: 'shivaji', to: 'unicode' });
+    const xml = text('word/document.xml');
+    assert.equal(stats.tables, 1);
+    assert.match(xml, /<w:tblPr><w:tblStyle w:val="TableGrid"\/><\/w:tblPr><w:tblGrid><w:gridCol w:w="4000"\/><\/w:tblGrid>/);
+    assert.match(xml, /<w:tcPr><w:tcW w:w="4000" w:type="dxa"\/><\/w:tcPr>/);
+    assert.deepEqual(textOf(xml), ['मराठी']);
+  });
+
+  test('a later cut whose keys differ is not read as the checked font', async () => {
+    const doc = makeDocx({ document: body(p(r(font('Shusha02'), 'Baart'))) });
+    const { text, stats } = await run(doc, { from: 'shusha', to: 'unicode' });
+    assert.deepEqual(textOf(text('word/document.xml')), ['Baart']);
+    assert.equal(stats.convertedChars, 0);
+  });
+
+  test('a .txt converts between any two fonts', () => {
+    assert.equal(convertTxt('g]kfn', { from: 'preeti', to: 'unicode' }).text, 'नेपाल');
+    assert.equal(convertTxt('Hello महाराष्ट्र', { from: 'unicode', to: 'dvtt' }).text, 'Hello ¨É½É®É¹]Å');
+  });
+
+  test('file names and the summary name the fonts', () => {
+    assert.equal(outputName('a.docx', { from: 'unicode', to: 'dvtt' }, 'docx'), 'a-dvtt.docx');
+    assert.equal(outputName('a.docx', { from: 'preeti', to: 'unicode' }, 'docx'), 'a-unicode.docx');
+    assert.equal(outputName('a.docx', { from: 'kruti-dev', to: 'abbasi-chanakya' }, 'docx'), 'a-abbasichanakya.docx');
+    const none = { paragraphs: 1, tables: 0, convertedChars: 0, alreadyChars: 0 };
+    assert.equal(summarize(none, { from: 'preeti', to: 'unicode' }).warning, 'No Preeti text found in this document. Is it already Unicode?');
+    assert.equal(summarize(none, { from: 'unicode', to: 'dvtt' }).warning, 'No Unicode Hindi text found in this document. Is it already in DV-TT?');
+  });
+
+  test('syllables split across runs are kept together in any font', () => {
+    assert.equal(splitsSyllable('M', 'É', 'dvtt'), true); // ग् + bar
+    assert.equal(splitsSyllable('Ê', '´É', 'dvtt'), true); // ि before its letter
+    assert.equal(splitsSyllable('´É ', '¨É', 'dvtt'), false);
+  });
+});

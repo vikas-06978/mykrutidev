@@ -8,28 +8,45 @@
  * endpoint anywhere on this site.
  */
 import { langOf, useT, raw } from '../i18n/index.js';
+import { FONTS } from '../lib/fontMaps.js';
+import { WORD_FONTS, UNICODE_FONTS, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
 
 interface Props {
-  direction: 'to-unicode' | 'to-kruti';
+  /** The page's fonts: the document is read as FROM, converted to TO by default. */
+  from: string;
+  to: string;
   /** Inside ConvertModes' "Upload Word file" tab: no top margin of its own. */
   embedded?: boolean;
 }
 
-const { direction, embedded = false } = Astro.props;
+const { from, to, embedded = false } = Astro.props;
 const lang = langOf(Astro.url);
 const { t, render } = useT(lang);
 // Every doc.* string, for the script: errors and the result summary are
 // worded in the browser, after the file has been read.
 const strings = raw(lang, 'doc');
-const toUnicode = direction === 'to-unicode';
-const id = `doc-${direction}`;
+const fromUnicode = isUnicodeKey(from);
+const id = `doc-${from}-${to}`;
+
+// "Convert to": every font the FROM text can be converted into - Unicode in
+// each offered font, and every verified legacy font other than the source.
+// The page's own target is picked to begin with.
+const beta = (k: string) => (FONTS[k]?.beta ? ` (${t('page.beta')})` : '');
+const targets = [
+  ...(fromUnicode ? [] : UNICODE_FONTS.map((f) => ({ value: `unicode|${f}`, label: t('doc.unicodeIn', { font: f }) }))),
+  ...Object.entries(WORD_FONTS)
+    .filter(([k]) => k !== from && FONTS[k]?.accurate)
+    .map(([k, w]) => ({ value: `${k}|${w.name}`, label: `${w.name}${beta(k)}` })),
+];
+const selected = isUnicodeKey(to) ? `unicode|${to === 'mangal' ? 'Mangal' : UNICODE_FONTS[0]}` : `${to}|${WORD_FONTS[to].name}`;
+const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from: docLabel(from, strings) });
 ---
 
 <section
   id="convert-document"
   class:list={['doc card scroll-mt-4', !embedded && 'mt-8']}
   data-doc-converter
-  data-direction={direction}
+  data-from={from}
   data-i18n={JSON.stringify(strings)}
   aria-labelledby={`${id}-title`}
 >
@@ -37,11 +54,26 @@ const id = `doc-${direction}`;
     <h2 id={`${id}-title`} class="text-xl">{t('doc.title')}</h2>
     <p
       class="mt-1 text-sm text-body"
-      set:html={render(toUnicode ? t('doc.introToUnicode') : t('doc.introToKruti'))}
+      set:html={render(intro)}
     />
     <p class="mt-2 text-sm font-medium text-ink">
       <span aria-hidden="true">🔒</span> {t('doc.private')}
     </p>
+
+    {/* Picked first, so the download is in the right font from the start. */}
+    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+      <label for={`${id}-target`} class="text-body">
+        {t('doc.targetLabel')}
+      </label>
+      <select
+        id={`${id}-target`}
+        data-role="target"
+        class="max-w-full rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5 text-ink"
+        translate="no"
+      >
+        {targets.map((o) => <option value={o.value} selected={o.value === selected}>{o.label}</option>)}
+      </select>
+    </div>
 
     {/*
       The whole area is the label for the file input, so a tap anywhere on it
@@ -51,7 +83,7 @@ const id = `doc-${direction}`;
     <label
       for={`${id}-input`}
       data-role="drop"
-      class="doc-drop mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-(--radius-card) border-2 border-dashed border-hairline bg-inset px-4 py-8 text-center transition-colors"
+      class="doc-drop mt-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-(--radius-card) border-2 border-dashed border-hairline bg-inset px-4 py-8 text-center transition-colors"
     >
       <span class="text-sm text-body">
         <span class="hidden sm:inline">{t('doc.drag')}</span>
@@ -66,25 +98,6 @@ const id = `doc-${direction}`;
         class="sr-only"
       />
     </label>
-
-    {
-      toUnicode && (
-        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <label for={`${id}-font`} class="text-body">
-            {t('doc.fontLabel')}
-          </label>
-          <select
-            id={`${id}-font`}
-            data-role="font"
-            class="rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5 text-ink"
-            translate="no"
-          >
-            <option value="Mangal" selected>Mangal</option>
-            <option value="Nirmala UI">Nirmala UI</option>
-          </select>
-        </div>
-      )
-    }
 
     <div data-role="status" class="mt-4" hidden>
       <p class="text-sm text-ink">
@@ -112,9 +125,7 @@ const id = `doc-${direction}`;
       <p data-role="warning" role="status" hidden class="mt-2 rounded-(--radius-chrome) border border-saffron/40 bg-warn-bg px-3 py-2 text-sm text-ink"></p>
       <div class="mt-3 flex flex-wrap gap-2">
         <a data-role="download" class="btn btn-primary" href="#" download>{t('doc.download')}</a>
-        <a data-role="download-docx" class="btn btn-outline" href="#" download hidden>
-          <Fragment set:html={render(t('doc.downloadKrutiDocx'))} />
-        </a>
+        <a data-role="download-docx" class="btn btn-outline" href="#" download hidden></a>
       </div>
     </div>
   </div>
@@ -122,6 +133,7 @@ const id = `doc-${direction}`;
 
 <script>
   import { localizeDocMessage, localizeSummary } from '../i18n/docMessages.js';
+  import { fill } from '../i18n/fill.js';
 
   type Mod = typeof import('../lib/docConvert.js');
   let mod: Promise<Mod> | null = null;
@@ -139,12 +151,17 @@ const id = `doc-${direction}`;
   function setup(root: HTMLElement) {
     const q = <T extends HTMLElement>(role: string) =>
       root.querySelector<T>(`[data-role="${role}"]`)!;
-    const direction = root.dataset.direction as 'to-unicode' | 'to-kruti';
+    const from = root.dataset.from!;
     const L: Record<string, string> = JSON.parse(root.dataset.i18n || '{}');
 
     const drop = q<HTMLLabelElement>('drop');
     const input = q<HTMLInputElement>('input');
-    const fontSelect = root.querySelector<HTMLSelectElement>('[data-role="font"]');
+    const targetSelect = q<HTMLSelectElement>('target');
+    /** The chosen target: its font key, and the font name set in the file. */
+    const target = () => {
+      const [to, font] = targetSelect.value.split('|');
+      return { pair: { from, to }, font };
+    };
     const status = q('status');
     const fileName = q('file-name');
     const fileSize = q('file-size');
@@ -213,33 +230,38 @@ const id = `doc-${direction}`;
         const bytes = new Uint8Array(await file.arrayBuffer());
         if (run !== busy) return;
         let stats;
+        const { pair, font } = target();
+        const toUnicode = pair.to === 'unicode';
 
         if (checked.kind === 'docx') {
           const out = await m.convertDocx(bytes, {
-            direction,
-            unicodeFont: fontSelect?.value ?? 'Mangal',
+            direction: pair,
+            unicodeFont: toUnicode ? font : undefined,
             onProgress: (f) => run === busy && setProgress(f),
           });
           if (run !== busy) return;
           stats = out.stats;
-          offer(download, m.docxBlob(out.bytes), m.outputName(file.name, direction, 'docx'));
+          offer(download, m.docxBlob(out.bytes), m.outputName(file.name, pair, 'docx'));
         } else {
           const { text } = m.decodeTextFile(bytes);
           setProgress(0.4);
-          const out = m.convertTxt(text, direction);
+          const out = m.convertTxt(text, pair);
           stats = out.stats;
           offer(
             download,
             new Blob([out.text], { type: 'text/plain;charset=utf-8' }),
-            m.outputName(file.name, direction, 'txt'),
+            m.outputName(file.name, pair, 'txt'),
           );
-          // A .txt cannot carry a font, and Kruti Dev text without its font is
-          // unreadable - so a Word file with the font already set is offered too.
-          if (direction === 'to-kruti' && stats.convertedChars > 0) {
+          // A .txt cannot carry a font, and legacy-font text without its font
+          // is unreadable - so a Word file with the font already set is offered
+          // too, built from the converted text.
+          if (!toUnicode && stats.convertedChars > 0) {
             const { buildDocxBytes } = await import('../lib/docx.js');
-            const unicodeDocx = buildDocxBytes(text, { fontName: 'Mangal' });
-            const kruti = await m.convertDocx(unicodeDocx, { direction });
-            offer(downloadDocx, m.docxBlob(kruti.bytes), m.outputName(file.name, direction, 'docx'));
+            const unicode = from === 'unicode' || from === 'mangal' ? text : m.convertTxt(text, { from, to: 'unicode' }).text;
+            const unicodeDocx = buildDocxBytes(unicode, { fontName: 'Mangal' });
+            const legacy = await m.convertDocx(unicodeDocx, { direction: { from: 'unicode', to: pair.to } });
+            offer(downloadDocx, m.docxBlob(legacy.bytes), m.outputName(file.name, pair, 'docx'));
+            downloadDocx.textContent = fill(L.downloadLegacyDocx, { font });
             downloadDocx.hidden = false;
           }
         }
@@ -247,7 +269,7 @@ const id = `doc-${direction}`;
         setProgress(1);
 
         // Same stats, same arithmetic as m.summarize(), in this page's words.
-        const s = localizeSummary(stats, direction, L);
+        const s = localizeSummary(stats, pair, L);
         summary.textContent = s.line;
         share.textContent = s.share ?? '';
         share.hidden = !s.share;
@@ -273,7 +295,7 @@ const id = `doc-${direction}`;
     });
 
     // A different output font means a different file: convert again.
-    fontSelect?.addEventListener('change', () => {
+    targetSelect.addEventListener('change', () => {
       if (current) void handle(current);
     });
 

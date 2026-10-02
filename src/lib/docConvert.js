@@ -38,19 +38,28 @@
  *   which runs   those containing Devanagari (U+0900-U+097F). A run mixing
  *                English and Hindi is split: the English keeps its font, the
  *                Hindi becomes Kruti Dev code in "Kruti Dev 010".
+ *
+ * EVERY OTHER FONT
+ *
+ *   The same two paths, for any { from, to } pair of fonts the site converts
+ *   (wordFonts.js): a run in the FROM font (or a font on the same keyboard
+ *   layout, so a DevLys run converts on a Kruti Dev page) is converted and set
+ *   in the TO font. Legacy -> legacy goes through convert() like the text
+ *   boxes do. 'to-unicode' and 'to-kruti' still mean Kruti Dev <-> Unicode.
  * ---------------------------------------------------------------------------
  */
 
 import { unzipSync, zipSync, strFromU8, strToU8 } from 'fflate';
-import { convert } from './fontMaps.js';
+import { convert, FONTS } from './fontMaps.js';
+import { WORD_FONTS, pairOf, isUnicodeKey, docLabel } from './wordFonts.js';
 import {
   parseXml, attrs, inner, outer, child, descendants, ancestor,
   decodeText, encodeText, encodeAttr, applyEdits,
 } from './xmlScan.js';
 
 export const MAX_BYTES = 20 * 1024 * 1024;
-export const KRUTI_FONT = 'Kruti Dev 010';
-export const UNICODE_FONTS = ['Mangal', 'Nirmala UI'];
+export const KRUTI_FONT = WORD_FONTS['kruti-dev'].name;
+export { UNICODE_FONTS } from './wordFonts.js';
 
 // Only for files that are NOT .docx - a .docx user is never told to save as .docx.
 export const SAVE_AS_MESSAGE = 'Please open it in Word and Save As → Word Document (.docx).';
@@ -112,10 +121,11 @@ export function checkFile({ name, size, head }) {
   return { error: 'Only .docx (Word) and .txt files can be converted here.' };
 }
 
-/** original.docx -> original-unicode.docx */
+/** original.docx -> original-unicode.docx, original-krutidev.docx ... */
 export function outputName(name, direction, ext) {
   const base = name.replace(/\.[^.]+$/, '') || 'document';
-  return `${base}-${direction === 'to-unicode' ? 'unicode' : 'krutidev'}.${ext}`;
+  const { to } = pairOf(direction);
+  return `${base}-${isUnicodeKey(to) ? 'unicode' : to.replace(/-/g, '')}.${ext}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,7 +134,6 @@ export function outputName(name, direction, ext) {
 
 const DEVANAGARI = /[ऀ-ॿ]/;
 const DEVANAGARI_G = /[ऀ-ॿ]/g;
-const isKrutiName = (name) => !!name && /kruti\s*dev/i.test(name);
 const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
 
 /**
@@ -169,14 +178,30 @@ export function splitScripts(text) {
 }
 
 // The existing converters, called exactly as the text boxes call them. In a
-// document the FONT already says a run is Kruti Dev, so English-guessing is
+// document the FONT already says a run is legacy, so English-guessing is
 // turned off for that direction; URLs and emails are still protected.
-const krutiToUnicode = (s) => convert(s, 'kruti-dev', 'unicode', { keepEnglish: false });
-const unicodeToKruti = (s) => convert(s, 'unicode', 'kruti-dev', { keepEnglish: true });
+const legacyToUnicode = (s, from) => convert(s, from, 'unicode', { keepEnglish: false });
+const legacyToTarget = (s, from, to) =>
+  isUnicodeKey(to) ? legacyToUnicode(s, from) : convert(s, from, to, { keepEnglish: false });
+const unicodeToLegacy = (s, to) => convert(s, 'unicode', to, { keepEnglish: true });
 
-/** Unicode -> Kruti for mixed text: only the Hindi pieces change. */
-export const unicodeTextToKruti = (text) =>
-  splitScripts(text).map((p) => (p.hindi ? unicodeToKruti(p.s) : p.s)).join('');
+/** Unicode -> a legacy font for mixed text: only the Hindi pieces change. */
+export const unicodeTextTo = (text, to) =>
+  splitScripts(text).map((p) => (p.hindi ? unicodeToLegacy(p.s, to) : p.s)).join('');
+export const unicodeTextToKruti = (text) => unicodeTextTo(text, 'kruti-dev');
+
+/**
+ * Does a font name in the document belong to `key`? A font on the same
+ * keyboard layout counts too: DevLys 010 text converts on a Kruti Dev page.
+ */
+function fontIs(name, key) {
+  if (!name) return false;
+  if (WORD_FONTS[key]?.match.test(name)) return true;
+  const layout = FONTS[key]?.layout;
+  return !!layout && Object.entries(WORD_FONTS).some(
+    ([k, w]) => k !== key && FONTS[k]?.layout === layout && w.match.test(name),
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Styles: what font does a run REALLY have?
@@ -417,8 +442,9 @@ function readRun(xml, node, resolve) {
   };
 }
 
-const krutiFontOf = (run) =>
-  isKrutiName(run.font.ascii) ? run.font.ascii : isKrutiName(run.font.hAnsi) ? run.font.hAnsi : null;
+/** The run's font name if it is in `key` (see fontIs), else null. */
+const legacyFontOf = (run, key) =>
+  fontIs(run.font.ascii, key) ? run.font.ascii : fontIs(run.font.hAnsi, key) ? run.font.hAnsi : null;
 
 /** Formatting that matters to a reader - spell-check language and noProof do not. */
 const formatKey = (rPr) =>
@@ -431,16 +457,21 @@ const formatKey = (rPr) =>
 const MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ]/;
 
 /**
- * Does the boundary between two Kruti runs fall inside a syllable?
- * `f` (the i-matra, typed BEFORE its consonant) at the end of the first run,
- * or a matra / reph / halant at the start of the second.
+ * Does the boundary between two runs in a legacy font fall inside a syllable?
+ * The first run ending in a half letter or a ि (typed BEFORE its consonant -
+ * Kruti Dev's `f`), or the second starting with a matra, a halant or a reph
+ * (typed after its syllable - Kruti Dev's `Z`, which converts to nothing on
+ * its own).
  */
-export function splitsSyllable(a, b) {
-  if (/f$/.test(a)) return true;
+export function splitsSyllable(a, b, from = 'kruti-dev') {
+  const last = a.slice(-1);
+  if (last) {
+    const u = legacyToUnicode(last, from);
+    if (u.startsWith('ि') || u.endsWith('्')) return true;
+  }
   const first = b[0];
   if (!first) return false;
-  if (first === 'Z') return true; // reph, typed after its syllable
-  const u = krutiToUnicode(first);
+  const u = legacyToUnicode(first, from);
   return u === '' || MARK.test(u);
 }
 
@@ -464,11 +495,12 @@ const openTag = (xml, node) => {
  * Convert one XML part (document, header, footer, notes).
  *
  * @param {string} xml
- * @param {{ direction: 'to-unicode' | 'to-kruti', font: string, resolve: Function,
- *           onBatch?: () => Promise<void> }} opts
+ * @param {{ direction: 'to-unicode' | 'to-kruti' | { from: string, to: string },
+ *           font: string, resolve: Function, onBatch?: () => Promise<void> }} opts
  * @returns {Promise<{ xml: string, stats: Stats }>}
  */
 export async function convertPart(xml, { direction, font, resolve, onBatch }) {
+  const pair = pairOf(direction);
   const root = parseXml(xml);
   const edits = [];
   const paragraphs = new Set();
@@ -482,8 +514,8 @@ export async function convertPart(xml, { direction, font, resolve, onBatch }) {
 
   let done = 0;
   for (const container of containers) {
-    if (direction === 'to-unicode') krutiContainer(xml, container, font, resolve, edits, paragraphs, stats);
-    else unicodeContainer(xml, container, resolve, edits, paragraphs, stats);
+    if (isUnicodeKey(pair.from)) unicodeContainer(xml, container, pair, font, resolve, edits, paragraphs, stats);
+    else legacyContainer(xml, container, pair, font, resolve, edits, paragraphs, stats);
     done += 1;
     if (onBatch && done % 400 === 0) await onBatch();
   }
@@ -492,20 +524,20 @@ export async function convertPart(xml, { direction, font, resolve, onBatch }) {
   return { xml: applyEdits(xml, edits), stats };
 }
 
-function krutiContainer(xml, container, font, resolve, edits, paragraphs, stats) {
+function legacyContainer(xml, container, pair, font, resolve, edits, paragraphs, stats) {
   /** @type {{ runs: Run[], between: import('./xmlScan.js').XmlNode[], pending: import('./xmlScan.js').XmlNode[] } | null} */
   let group = null;
 
   const close = () => {
-    if (group) emitKrutiGroup(xml, group, font, edits, paragraphs, stats);
+    if (group) emitLegacyGroup(xml, group, pair, font, edits, paragraphs, stats);
     group = null;
   };
 
   for (const c of container.children) {
     if (c.name === 'w:r') {
       const run = readRun(xml, c, resolve);
-      const kruti = krutiFontOf(run);
-      if (!kruti) {
+      const legacy = legacyFontOf(run, pair.from);
+      if (!legacy) {
         stats.alreadyChars += countDeva(run.text);
         close();
         continue;
@@ -516,9 +548,9 @@ function krutiContainer(xml, container, font, resolve, edits, paragraphs, stats)
       }
       if (group) {
         const last = group.runs[group.runs.length - 1];
-        const sameFont = krutiFontOf(last).toLowerCase() === kruti.toLowerCase();
+        const sameFont = legacyFontOf(last, pair.from).toLowerCase() === legacy.toLowerCase();
         const sameFormat = formatKey(last.rPr) === formatKey(run.rPr);
-        if (sameFont && (sameFormat || splitsSyllable(last.text, run.text))) {
+        if (sameFont && (sameFormat || splitsSyllable(last.text, run.text, pair.from))) {
           group.between.push(...group.pending);
           group.pending = [];
           group.runs.push(run);
@@ -536,7 +568,7 @@ function krutiContainer(xml, container, font, resolve, edits, paragraphs, stats)
   close();
 }
 
-function emitKrutiGroup(xml, group, font, edits, paragraphs, stats) {
+function emitLegacyGroup(xml, group, pair, font, edits, paragraphs, stats) {
   const first = group.runs[0];
   const last = group.runs[group.runs.length - 1];
 
@@ -546,9 +578,10 @@ function emitKrutiGroup(xml, group, font, edits, paragraphs, stats) {
   let pendingText = '';
   const flush = () => {
     if (!pendingText) return;
-    const u = krutiToUnicode(pendingText);
+    const u = legacyToUnicode(pendingText, pair.from);
     stats.convertedChars += countDeva(u);
-    body += `<w:t xml:space="preserve">${encodeText(u)}</w:t>`;
+    const out = isUnicodeKey(pair.to) ? u : legacyToTarget(pendingText, pair.from, pair.to);
+    body += `<w:t xml:space="preserve">${encodeText(out)}</w:t>`;
     pendingText = '';
   };
   for (const run of group.runs) {
@@ -564,7 +597,7 @@ function emitKrutiGroup(xml, group, font, edits, paragraphs, stats) {
 
   const merged =
     openTag(xml, first.node) +
-    rewriteRPr(first.rPr, font, 'to-unicode') +
+    rewriteRPr(first.rPr, font, isUnicodeKey(pair.to) ? 'to-unicode' : 'to-kruti') +
     body +
     '</w:r>' +
     group.between.map((n) => outer(xml, n)).join('');
@@ -574,12 +607,12 @@ function emitKrutiGroup(xml, group, font, edits, paragraphs, stats) {
   if (p) paragraphs.add(p);
 }
 
-function unicodeContainer(xml, container, resolve, edits, paragraphs, stats) {
+function unicodeContainer(xml, container, pair, font, resolve, edits, paragraphs, stats) {
   for (const c of container.children) {
     if (c.name !== 'w:r') continue;
     const run = readRun(xml, c, resolve);
     if (run.opaque || !DEVANAGARI.test(run.text)) {
-      if (krutiFontOf(run)) stats.alreadyChars += run.text.length;
+      if (legacyFontOf(run, pair.to)) stats.alreadyChars += run.text.length;
       continue;
     }
 
@@ -600,16 +633,16 @@ function unicodeContainer(xml, container, resolve, edits, paragraphs, stats) {
         let s = part.s;
         if (part.hindi) {
           stats.convertedChars += countDeva(s);
-          s = unicodeToKruti(s);
+          s = unicodeToLegacy(s, pair.to);
         }
         push(part.hindi, `<w:t xml:space="preserve">${encodeText(s)}</w:t>`);
       }
     }
 
     const open = openTag(xml, c);
-    const krutiRPr = rewriteRPr(run.rPr, KRUTI_FONT, 'to-kruti');
+    const legacyRPr = rewriteRPr(run.rPr, font, 'to-kruti');
     const out = pieces
-      .map((p) => `${open}${p.hindi ? krutiRPr : run.rPr}${p.xml}</w:r>`)
+      .map((p) => `${open}${p.hindi ? legacyRPr : run.rPr}${p.xml}</w:r>`)
       .join('');
     edits.push({ start: c.start, end: c.end, text: out });
     const p = ancestor(c, 'w:p');
@@ -649,7 +682,7 @@ function textParts(files) {
 /**
  * @param {Uint8Array} bytes
  * @param {{
- *   direction: 'to-unicode' | 'to-kruti',
+ *   direction: 'to-unicode' | 'to-kruti' | { from: string, to: string },
  *   unicodeFont?: string,
  *   onProgress?: (fraction: number) => void,
  * }} opts
@@ -680,7 +713,8 @@ export async function convertDocx(bytes, { direction, unicodeFont = 'Mangal', on
     if (/^Malformed XML/.test(err?.message)) throw new UserError(DAMAGED_MESSAGE, { cause: err });
     throw err;
   }
-  const font = direction === 'to-unicode' ? unicodeFont : KRUTI_FONT;
+  const { to } = pairOf(direction);
+  const font = isUnicodeKey(to) ? unicodeFont : WORD_FONTS[to].name;
 
   const total = parts.reduce((n, p) => n + files[p].length, 0);
   let doneBytes = 0;
@@ -748,23 +782,24 @@ export function decodeTextFile(bytes) {
 
 /**
  * @param {string} text
- * @param {'to-unicode' | 'to-kruti'} direction
+ * @param {'to-unicode' | 'to-kruti' | { from: string, to: string }} direction
  * @returns {{ text: string, stats: Stats }}
  */
 export function convertTxt(text, direction) {
+  const { from, to } = pairOf(direction);
   const lines = text.split(/\r\n|\r|\n/).filter((l) => l.trim()).length;
-  if (direction === 'to-unicode') {
-    // No fonts in a .txt, so the whole text is Kruti Dev - with the same
-    // English-keeping default as the text box.
+  if (!isUnicodeKey(from)) {
+    // No fonts in a .txt, so the whole text is in the FROM font - with the
+    // same English-keeping default as the text box.
     const alreadyChars = countDeva(text);
-    const out = convert(text, 'kruti-dev', 'unicode');
+    const unicode = convert(text, from, 'unicode');
     return {
-      text: out,
-      stats: { paragraphs: lines, tables: 0, convertedChars: countDeva(out) - alreadyChars, alreadyChars },
+      text: isUnicodeKey(to) ? unicode : convert(text, from, to),
+      stats: { paragraphs: lines, tables: 0, convertedChars: countDeva(unicode) - alreadyChars, alreadyChars },
     };
   }
   return {
-    text: unicodeTextToKruti(text),
+    text: unicodeTextTo(text, to),
     stats: { paragraphs: lines, tables: 0, convertedChars: countDeva(text), alreadyChars: 0 },
   };
 }
@@ -778,26 +813,28 @@ const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
 
 /**
  * @param {Stats} stats
- * @param {'to-unicode' | 'to-kruti'} direction
+ * @param {'to-unicode' | 'to-kruti' | { from: string, to: string }} direction
  * @returns {{ line: string, share: string | null, warning: string | null }}
  */
 export function summarize(stats, direction) {
+  const pair = pairOf(direction);
   const parts = [`Converted ${plural(stats.paragraphs, 'paragraph', 'paragraphs')}`];
   if (stats.tables) parts.push(plural(stats.tables, 'table', 'tables'));
   const line = parts.join(' · ');
 
-  const from = direction === 'to-unicode' ? 'Kruti Dev' : 'Unicode';
-  const to = direction === 'to-unicode' ? 'Unicode' : 'Kruti Dev';
+  // What the rest of the Hindi already was: Unicode when converting FROM a
+  // legacy font, the target font when converting from Unicode.
+  const from = docLabel(pair.from);
+  const to = isUnicodeKey(pair.from) ? docLabel(pair.to) : docLabel('unicode');
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
     return {
       line,
       share: null,
-      warning:
-        direction === 'to-unicode'
-          ? 'No Kruti Dev text found in this document. Is it already Unicode?'
-          : 'No Unicode Hindi text found in this document. Is it already in Kruti Dev?',
+      warning: isUnicodeKey(pair.from)
+        ? `No Unicode Hindi text found in this document. Is it already in ${docLabel(pair.to)}?`
+        : `No ${from} text found in this document. Is it already Unicode?`,
     };
   }
   if (a === 0) return { line, share: 'All Hindi text converted.', warning: null };
