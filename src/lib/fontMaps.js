@@ -783,6 +783,9 @@ export const FONTS = {
     shortLabel: 'Kruti',
     kind: 'legacy',
     map: KRUTI_DEV,
+    // Same keyboard layout as DevLys (see the note above DEVLYS): text moving
+    // between the two is passed through untouched rather than via Unicode.
+    layout: 'kruti',
     accurate: true,
     css: '"Kruti Dev 010", "Kruti Dev", monospace',
     sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
@@ -817,6 +820,7 @@ export const FONTS = {
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
+    layout: 'kruti',
     // Verified by comparing glyph outlines against Kruti Dev 010 - see the note
     // above DEVLYS. Every codepoint this map uses draws the same letter in both
     // fonts; the ranges where they differ are ones the map never touches.
@@ -1341,6 +1345,11 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.kind === 'unicode' && to.kind === 'legacy') {
     return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
   }
+  // Two fonts on one keyboard layout draw the same letter on every key, so the
+  // keys ARE the answer. Going through Unicode would only lose detail it cannot
+  // hold, such as which way a quote mark faces (Kruti's Þ and ß both become ").
+  if (from.layout && from.layout === to.layout) return text;
+
   // legacy -> legacy routes through Unicode.
   return unicodeToLegacy(legacyToUnicode(text, from.map, opts), to.map, {
     ...opts,

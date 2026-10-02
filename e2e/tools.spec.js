@@ -13,6 +13,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { convert, FONTS } from '../src/lib/fontMaps.js';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 if (!existsSync(DIST)) throw new Error('dist/ not found - run `npm run build` first');
@@ -126,7 +127,16 @@ for (const url of CONVERTERS) {
 
     const out = root.locator('textarea[data-role="output"]');
     await expect(out).not.toHaveValue('');
-    expect(await out.inputValue()).not.toBe(sample);
+    const from = await root.getAttribute('data-from');
+    const to = await root.getAttribute('data-to');
+    if (FONTS[from].kind === 'legacy' && FONTS[to].kind === 'legacy') {
+      // Two legacy fonts can share most of their keys (Kruti Dev and DevLys
+      // share all of them), so the output may rightly equal the input. What
+      // the page shows must be exactly what the engine gives.
+      expect(await out.inputValue()).toBe(convert(sample, from, to, { keepEnglish: true }));
+    } else {
+      expect(await out.inputValue()).not.toBe(sample);
+    }
     await expect(root.locator('[data-role="count-out"]')).not.toHaveText('0');
     expect(errors).toEqual([]);
   });

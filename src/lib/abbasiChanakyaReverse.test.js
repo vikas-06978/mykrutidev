@@ -173,7 +173,13 @@ describe('the page', () => {
     assert.equal(page.beta, true);
     const chanakya = navGroups().find((g) => g.name === 'Chanakya');
     const live = chanakya.pages.filter((p) => p.live).map((p) => p.path);
-    assert.deepEqual(live.sort(), ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya'].sort());
+    for (const p of ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya']) assert.ok(live.includes(p), p);
+    // Everything live under "Chanakya" is an Abbasi page: the generic Chanakya
+    // map has no live page anywhere.
+    for (const p of live) {
+      const { from, to } = getPage(p);
+      assert.ok(from === 'abbasi-chanakya' || to === 'abbasi-chanakya', p);
+    }
     // The generic Chanakya items are still there, still "coming soon".
     assert.ok(chanakya.pages.some((p) => p.path === '/chanakya-to-unicode' && !p.live));
   });

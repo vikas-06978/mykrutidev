@@ -81,6 +81,12 @@ const outputFaceName = previewFont?.label ?? toFont.label;
 // differed only in letterforms, so the dropdown looked like a setting that
 // mattered and was not.
 const previewStack = previewFont?.stack ?? toFont.css;
+
+// Font-to-font pages are not part of the first-visit download (src/pwa):
+// each is a pairing of two converters that are, and precaching every pairing
+// would grow that download with every font the site adds. They are kept for
+// offline use from the first time they are opened, like the guides.
+const offlineOnVisit = fromFont.kind === 'legacy' && outputIsLegacy;
 ---
 
 {/*
@@ -91,6 +97,7 @@ const previewStack = previewFont?.stack ?? toFont.css;
 <div
   class="cv card"
   data-converter
+  data-offline={offlineOnVisit ? 'visit' : undefined}
   data-from={from}
   data-to={to}
   data-from-label={fromLabel}
@@ -460,8 +467,11 @@ const previewStack = previewFont?.stack ?? toFont.css;
       }
       showHint(text);
       if (unmapped) {
+        // unmappedChars() reads Unicode. A legacy source is keys, not Hindi,
+        // so it is checked by what those keys mean.
+        const hindi = FONTS[from]?.kind === 'legacy' ? unicodeText() : text;
         unmapped.hidden =
-          unmappedChars(text, to, { keepEnglish: keepEnglish.checked }).length === 0;
+          unmappedChars(hindi, to, { keepEnglish: keepEnglish.checked }).length === 0;
       }
       whatsapp.setAttribute('aria-disabled', result ? 'false' : 'true');
     }

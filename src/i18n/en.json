@@ -1209,6 +1209,338 @@
         "tip": "This is for Abbasi Chanakya New only. Other Chanakya fonts use different keys and will show the wrong letters."
       }
     },
+    "/kruti-dev-to-devlys": {
+      "nav": "Kruti Dev → DevLys",
+      "h1": "Kruti Dev to DevLys Converter",
+      "title": "Kruti Dev to DevLys Converter | Kruti Dev 010 to DevLys 010 Font",
+      "description": "Move Kruti Dev 010 Hindi into DevLys 010. Both fonts share one keyboard layout, so the page checks every letter and previews it in DevLys. Free, private.",
+      "lede": "Paste Kruti Dev text on the left and get DevLys 010 code on the right, with a live preview in the DevLys font.",
+      "body": [
+        "<h2>Kruti Dev and DevLys use the same keys</h2>",
+        "<p>DevLys 010 was drawn on the same keyboard layout as Kruti Dev 010. We compared the two font files letter by letter, and every key that ordinary Hindi uses draws the same letter in both. So <code>Hkkjr</code> reads <strong lang=\"hi\">भारत</strong> in either font, and most text leaves this page exactly as it came in.</p>",
+        "<p>That is the honest answer to \"how do I convert Kruti Dev to DevLys\". In most documents you only need to select the text in Word and change the font to <strong>DevLys 010</strong>. This page is for when you want to be sure before you send the file, or need the code to paste into another program.</p>",
+        "<h2>What the page still does for you</h2>",
+        "<ul><li><strong>Shows it in DevLys.</strong> Press <strong>Preview (Hindi)</strong> to see the text drawn in DevLys 010 before it goes anywhere. Anything that was not Kruti Dev code to begin with shows up wrong there, where you can spot it.</li><li><strong>Changes nothing it does not have to.</strong> Every key is kept exactly as it was, including which way each quote mark faces, so the DevLys file reads the same as the Kruti Dev one.</li><li><strong>Hands you the code.</strong> Copy it, share it or download it as a .docx with DevLys 010 already applied.</li></ul>",
+        "<p>Going the other way? Use <a href=\"/devlys-to-kruti-dev\">DevLys to Kruti Dev</a>. If a website or portal wants Unicode instead, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why is the output the same as my input?",
+          "a": "Because Kruti Dev 010 and DevLys 010 put the same Hindi letter on the same key. So the Kruti Dev keys already are the DevLys code, and the page keeps every one of them. Press <strong>Preview (Hindi)</strong> above the output to see it drawn in DevLys."
+        },
+        {
+          "q": "Are the two fonts different anywhere?",
+          "a": "Yes, in one block of rarely used symbol slots (character codes 128 to 159). Typed Hindi does not use them, and this converter never writes them, so they cannot affect your text."
+        },
+        {
+          "q": "Can I just change the font in Word?",
+          "a": "Usually, yes. Select the text and pick <strong>DevLys 010</strong> from the font list. Use this page when the text came from somewhere you do not trust, or when you want the DevLys code on its own."
+        },
+        {
+          "q": "Does my text get uploaded?",
+          "a": "No. The conversion runs in your browser and the text never leaves your computer."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Select the Hindi in your Kruti Dev file and copy it, the part you want in DevLys.",
+          "Paste it into the <strong>Kruti Dev</strong> box. The DevLys code appears on the right.",
+          "Press <strong>Copy DevLys code</strong>, paste into Word and set the font to <strong>DevLys 010</strong>."
+        ],
+        "tip": "Check the preview before you copy: a letter that looks wrong there is a letter that was not Kruti Dev code to begin with."
+      }
+    },
+    "/devlys-to-kruti-dev": {
+      "nav": "DevLys → Kruti Dev",
+      "h1": "DevLys to Kruti Dev Converter",
+      "title": "DevLys to Kruti Dev Converter | DevLys 010 to Kruti Dev 010 Font",
+      "description": "Turn DevLys 010 Hindi into Kruti Dev 010 code for typing offices and exam centres. Same keyboard layout, every letter checked. Free, no upload.",
+      "lede": "Paste DevLys text on the left and get Kruti Dev 010 code on the right, previewed in the Kruti Dev font.",
+      "body": [
+        "<h2>When you need this</h2>",
+        "<p>Plenty of offices standardised on Kruti Dev 010 years ago, and a file typed in DevLys 010 still turns up from another department or an outside typist. Both fonts are built on the same Remington-style layout, so the Hindi itself does not need to be retyped.</p>",
+        "<p>The two font files were compared key by key: every key that typed Hindi uses draws the same letter in both. The output therefore keeps your text exactly as it is, key for key, and you finish the job by setting the font to <strong>Kruti Dev 010</strong>.</p>",
+        "<h2>Three checks before you send the file</h2>",
+        "<ol><li>Look at <strong>Preview (Hindi)</strong>. If a word looks broken there, that part of your text was not DevLys code.</li><li>Make sure the receiving computer has Kruti Dev 010 installed. Without it the text shows as English letters such as <code>fgUnh</code>.</li><li>If the file is going to a website, an email or a phone, send Unicode instead with <a href=\"/devlys-to-unicode\">DevLys to Unicode</a>.</li></ol>",
+        "<p>For the reverse direction, use <a href=\"/kruti-dev-to-devlys\">Kruti Dev to DevLys</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Will the converted text look the same in Kruti Dev?",
+          "a": "Yes. Both fonts draw the same letter on every key that Hindi text uses, so the words read the same once the font is set to Kruti Dev 010."
+        },
+        {
+          "q": "My computer shows English letters after pasting. What went wrong?",
+          "a": "Nothing. That is Kruti Dev code. Select it and choose <strong>Kruti Dev 010</strong> as the font, and it turns into Hindi. If the font is not in the list, it is not installed on that computer."
+        },
+        {
+          "q": "Which Kruti Dev version should I pick?",
+          "a": "Kruti Dev 010 is the one exams and most offices ask for. The other numbered versions use the same keys with different letter shapes, so the code works in any of them."
+        },
+        {
+          "q": "Is anything sent to a server?",
+          "a": "No. All the work happens in your browser, and the page keeps working offline after it has loaded once."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Open the file typed in DevLys and copy the Hindi you need in Kruti Dev.",
+          "Paste it into the <strong>DevLys</strong> box on the left.",
+          "Press <strong>Copy Kruti code</strong>, paste into Word and set the font to <strong>Kruti Dev 010</strong>."
+        ],
+        "tip": "Sending the file to someone outside your office? Unicode is safer, because it needs no special font on their side."
+      }
+    },
+    "/kruti-dev-to-abbasi-chanakya": {
+      "nav": "Kruti Dev → Abbasi Chanakya",
+      "h1": "Kruti Dev to Abbasi Chanakya New Converter",
+      "title": "Kruti Dev to Abbasi Chanakya Converter | Kruti Dev to Chanakya Code",
+      "description": "Convert Kruti Dev 010 Hindi into Abbasi Chanakya New font code. The keys that differ, such as भ and प्र, are rewritten for you. Free and private.",
+      "betaNote": "For documents that will be set in the Abbasi Chanakya New font.",
+      "lede": "Paste Kruti Dev text on the left and get Abbasi Chanakya New code on the right, ready to paste into Word and set in that font.",
+      "body": [
+        "<h2>Why you cannot just change the font</h2>",
+        "<p>Kruti Dev and Abbasi Chanakya New look alike on paper but do not put every letter on the same key. Most keys match, which is why a quick font change seems to work at first glance, and then a handful of words come out wrong. Three common examples:</p>",
+        "<ul><li><strong lang=\"hi\">भ</strong> is <code>Hk</code> in Kruti Dev and <code>Ò</code> in Abbasi Chanakya New, so <code>Hkkjr</code> has to become <code>Òkjr</code>.</li><li><strong lang=\"hi\">प्र</strong> is <code>iz</code> in Kruti Dev and <code>ç</code> in Abbasi Chanakya New.</li><li><strong lang=\"hi\">सिं</strong> uses a single combined key in Abbasi Chanakya New, so <code>flag</code> becomes <code>Çlg</code>.</li></ul>",
+        "<p>This page reads the Kruti Dev text as real Hindi first, then writes it out again with the Abbasi Chanakya New keys, so every one of those differences is handled.</p>",
+        "<h2>After you copy</h2>",
+        "<p>Paste the code into Word, select it and set the font to <strong>Abbasi Chanakya New</strong>. The <strong>Download .docx</strong> button does that step for you. To go back, use <a href=\"/abbasi-chanakya-to-kruti-dev\">Abbasi Chanakya to Kruti Dev</a>.</p>",
+        "<p>This is for <strong>Abbasi Chanakya New</strong> only. Walkman Chanakya and other Chanakya fonts use different keys and are not supported yet.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Abbasi Chanakya New has no key for a few rare signs, for example ॐ. Those are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Will it work with Walkman Chanakya 901 or 905?",
+          "a": "No. Those are separate fonts with a different layout. Text converted here will show some wrong letters in them."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion happens in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Kruti Dev text you want to move into Abbasi Chanakya New.",
+          "Paste it into the <strong>Kruti Dev</strong> box. Words with भ or प्र change on the right.",
+          "Press <strong>Copy Abbasi Chanakya code</strong>, paste into Word and pick <strong>Abbasi Chanakya New</strong> as the font for the Kruti Dev text."
+        ],
+        "tip": "Words with भ or प्र are the quickest way to check the result: they are the ones a plain font change gets wrong."
+      }
+    },
+    "/abbasi-chanakya-to-kruti-dev": {
+      "nav": "Abbasi Chanakya → Kruti Dev",
+      "h1": "Abbasi Chanakya New to Kruti Dev Converter",
+      "title": "Abbasi Chanakya to Kruti Dev Converter | Chanakya to Kruti Dev 010",
+      "description": "Convert Abbasi Chanakya New font text to Kruti Dev 010 code for typing work and exams. Keys that differ between the fonts are fixed. Free, no upload.",
+      "betaNote": "For text typed in the Abbasi Chanakya New font.",
+      "lede": "Paste Abbasi Chanakya New text on the left and get Kruti Dev 010 code on the right, previewed in the Kruti Dev font.",
+      "body": [
+        "<h2>What changes between the two fonts</h2>",
+        "<p>A document typed in Abbasi Chanakya New shows mostly the right Hindi if you switch it to Kruti Dev, and that is the trap. The letters on shared keys survive, and the few that sit on different keys turn into the wrong letter without any warning.</p>",
+        "<p>This converter does not swap fonts. It reads the Abbasi Chanakya New code as Hindi, including its combined keys such as <code>Çlg</code> for <strong lang=\"hi\">सिंह</strong>, and writes that Hindi out again in Kruti Dev keys, giving <code>flag</code>. The same goes for <code>Òkjr</code>, which becomes <code>Hkkjr</code> for <strong lang=\"hi\">भारत</strong>.</p>",
+        "<h2>Using the output</h2>",
+        "<ol><li>Press <strong>Copy Kruti code</strong>, or use <strong>Download .docx</strong>.</li><li>Paste into Word and set the font to <strong>Kruti Dev 010</strong>.</li><li>Read a few lines in the preview first, especially names and rare conjuncts.</li></ol>",
+        "<p>Need Unicode for a portal or email instead? Use <a href=\"/abbasi-chanakya-to-unicode\">Abbasi Chanakya to Unicode</a>. The reverse of this page is <a href=\"/kruti-dev-to-abbasi-chanakya\">Kruti Dev to Abbasi Chanakya</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Does this work for every Chanakya font?",
+          "a": "No, only for <strong>Abbasi Chanakya New</strong>. Walkman Chanakya 901 and 905 put several letters on other keys, so their text will not convert correctly here."
+        },
+        {
+          "q": "The left box shows English letters. Is that right?",
+          "a": "Yes. Abbasi Chanakya New stores Hindi as keyboard characters, so its raw code looks like jumbled English. The Hindi appears in the preview on the right."
+        },
+        {
+          "q": "Is my document uploaded?",
+          "a": "No. Everything runs inside your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Abbasi Chanakya New text that has to go into Kruti Dev.",
+          "Paste it into the <strong>Abbasi Chanakya New</strong> box. Kruti Dev code appears on the right.",
+          "Press <strong>Copy Kruti code</strong> and set the font to <strong>Kruti Dev 010</strong> in Word."
+        ],
+        "tip": "If the preview shows wrong letters throughout, the source was probably typed in a different Chanakya font."
+      }
+    },
+    "/devlys-to-abbasi-chanakya": {
+      "nav": "DevLys → Abbasi Chanakya",
+      "h1": "DevLys to Abbasi Chanakya New Converter",
+      "title": "DevLys to Abbasi Chanakya Converter | DevLys 010 to Chanakya Code",
+      "description": "Convert DevLys 010 Hindi into Abbasi Chanakya New font code, with the keys that differ between the two fonts rewritten. Free, in your browser.",
+      "betaNote": "For documents that will be set in the Abbasi Chanakya New font.",
+      "lede": "Paste DevLys 010 text on the left and get Abbasi Chanakya New code on the right.",
+      "body": [
+        "<h2>Two legacy fonts, two layouts</h2>",
+        "<p>DevLys 010 follows the Kruti Dev keyboard. Abbasi Chanakya New follows its own, and the two only partly agree. Change the font on a DevLys document and words with <strong lang=\"hi\">भ</strong>, <strong lang=\"hi\">प्र</strong> or <strong lang=\"hi\">सिं</strong> break, while everything around them looks fine.</p>",
+        "<p>So the page goes through Unicode. DevLys code is read as Hindi, with the short-i matra and the reph put back where they belong, and then the Hindi is typed out again with Abbasi Chanakya New keys, in the order that font draws them.</p>",
+        "<h2>An example</h2>",
+        "<p><code>iz/kkuea=h</code> in DevLys is <strong lang=\"hi\">प्रधानमंत्री</strong>. In Abbasi Chanakya New the same word is <code>ç/kkuea=h</code>, because प्र has its own key there.</p>",
+        "<p>To go back, use <a href=\"/abbasi-chanakya-to-devlys\">Abbasi Chanakya to DevLys</a>. For Unicode output, use <a href=\"/devlys-to-unicode\">DevLys to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Why is a plain font change not enough?",
+          "a": "Because the fonts disagree on several keys. A font change keeps the keys and swaps the drawings, so any letter that lives on a different key in Abbasi Chanakya New comes out wrong."
+        },
+        {
+          "q": "What happens to English and numbers?",
+          "a": "With the checkbox under the boxes ticked, English words, numbers, dates and links are left as they are."
+        },
+        {
+          "q": "Is the text uploaded?",
+          "a": "No. Conversion happens in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the DevLys text that has to go into Abbasi Chanakya New.",
+          "Paste it into the <strong>DevLys</strong> box. The Abbasi Chanakya New code appears beside it.",
+          "Press <strong>Copy Abbasi Chanakya code</strong>, paste the DevLys conversion into Word and choose <strong>Abbasi Chanakya New</strong>."
+        ],
+        "tip": "<strong>Download .docx</strong> gives you a Word file with Abbasi Chanakya New already applied."
+      }
+    },
+    "/abbasi-chanakya-to-devlys": {
+      "nav": "Abbasi Chanakya → DevLys",
+      "h1": "Abbasi Chanakya New to DevLys Converter",
+      "title": "Abbasi Chanakya to DevLys Converter | Chanakya to DevLys 010 Font",
+      "description": "Convert Abbasi Chanakya New font text to DevLys 010 code. Combined keys and keys that differ between the fonts are rewritten. Free, nothing uploaded.",
+      "betaNote": "For text typed in the Abbasi Chanakya New font.",
+      "lede": "Paste Abbasi Chanakya New text on the left and get DevLys 010 code on the right, previewed in DevLys.",
+      "body": [
+        "<h2>From one legacy font to another</h2>",
+        "<p>Both fonts store Hindi as ordinary keyboard characters, but not the same characters. Abbasi Chanakya New has single keys for some combinations that DevLys types in two or three keystrokes, and a few letters live on different keys altogether.</p>",
+        "<p>This page reads the Abbasi Chanakya New code as Hindi, then writes that Hindi out in DevLys 010 keys. For example <code>ç/kkuea=h</code> becomes <code>iz/kkuea=h</code>, which is <strong lang=\"hi\">प्रधानमंत्री</strong> in both fonts.</p>",
+        "<h2>What to do next</h2>",
+        "<p>Copy the DevLys code, paste it into Word and set the font to <strong>DevLys 010</strong>. If the text is going online, convert to Unicode with <a href=\"/abbasi-chanakya-to-unicode\">Abbasi Chanakya to Unicode</a> instead. The reverse of this page is <a href=\"/devlys-to-abbasi-chanakya\">DevLys to Abbasi Chanakya</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use Kruti Dev instead of DevLys with this output?",
+          "a": "Yes. DevLys 010 and Kruti Dev 010 use the same keys for Hindi, so the output reads correctly in either font. There is also a dedicated <a href=\"/abbasi-chanakya-to-kruti-dev\">Abbasi Chanakya to Kruti Dev</a> page."
+        },
+        {
+          "q": "My text was typed in Walkman Chanakya. Will this work?",
+          "a": "No. This page is for Abbasi Chanakya New only. Walkman Chanakya uses a different layout."
+        },
+        {
+          "q": "Does anything leave my computer?",
+          "a": "No. The conversion runs entirely in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Abbasi Chanakya New text that has to go into DevLys.",
+          "Drop it into the left-hand <strong>Abbasi Chanakya New</strong> box. DevLys code appears on the right.",
+          "Press <strong>Copy DevLys code</strong>, paste into Word and choose <strong>DevLys 010</strong> for the Abbasi Chanakya conversion."
+        ],
+        "tip": "Compare the preview with your original document before you send it on."
+      }
+    },
+    "/mangal-to-abbasi-chanakya": {
+      "nav": "Mangal → Abbasi Chanakya",
+      "h1": "Mangal to Abbasi Chanakya New Converter",
+      "title": "Mangal to Abbasi Chanakya Converter | Mangal to Chanakya Font Code",
+      "description": "Convert Mangal (Unicode) Hindi into Abbasi Chanakya New font code for DTP and print work, with matras and reph in the font’s order. Free, private.",
+      "betaNote": "For documents that will be set in the Abbasi Chanakya New font.",
+      "lede": "Paste Mangal Hindi on the left and get Abbasi Chanakya New code on the right, ready for Word or your DTP program.",
+      "body": [
+        "<h2>Mangal is Unicode</h2>",
+        "<p>Mangal is the Unicode Hindi font that comes with Windows, so text in Mangal is already real Hindi. Abbasi Chanakya New is a legacy font that draws Hindi on English keys. Moving Mangal text into it means writing every letter as the key the font expects, in the order the font draws it.</p>",
+        "<h2>What gets reordered</h2>",
+        "<ul><li><strong>The short-i matra</strong> moves in front of its letter, because that is where it is drawn. <strong lang=\"hi\">स्थिति</strong> becomes <code>fLFkfr</code>.</li><li><strong>The reph</strong> moves after its syllable. <strong lang=\"hi\">कर्म</strong> becomes <code>deZ</code>.</li><li><strong>Combined keys</strong> are used where the font has them. <strong lang=\"hi\">सिंह</strong> becomes <code>Çlg</code>.</li></ul>",
+        "<p>For the other direction use <a href=\"/abbasi-chanakya-to-mangal\">Abbasi Chanakya to Mangal</a>. If the receiver works in Kruti Dev, use <a href=\"/mangal-to-kruti-dev\">Mangal to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Is this the same as Unicode to Abbasi Chanakya?",
+          "a": "Yes. Mangal text is Unicode, so the output is identical to <a href=\"/unicode-to-abbasi-chanakya\">Unicode to Abbasi Chanakya</a>. This page exists because people search for it by the name Mangal."
+        },
+        {
+          "q": "Some characters were not converted. Why?",
+          "a": "The font has no key for a few rare signs, such as ॐ. They are left as they were and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. Everything happens in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Hindi from your Mangal document, or type it straight into the box.",
+          "Check the Abbasi Chanakya New code on the right, then press <strong>Copy Abbasi Chanakya code</strong>.",
+          "Paste into Word and set the font to <strong>Abbasi Chanakya New</strong>, or use <strong>Download .docx</strong> for the Mangal text."
+        ],
+        "tip": "Hindi typed on a phone or with the Windows Hindi keyboard is already Unicode, so it works here as well."
+      }
+    },
+    "/abbasi-chanakya-to-mangal": {
+      "nav": "Abbasi Chanakya → Mangal",
+      "h1": "Abbasi Chanakya New to Mangal Converter",
+      "title": "Abbasi Chanakya to Mangal Converter | Chanakya to Mangal Unicode",
+      "description": "Convert Abbasi Chanakya New font Hindi into Mangal (Unicode) for government portals, email and WhatsApp. Free, instant, nothing uploaded.",
+      "betaNote": "For text typed in the Abbasi Chanakya New font.",
+      "lede": "Paste Abbasi Chanakya New text on the left and get Mangal-ready Unicode Hindi on the right.",
+      "body": [
+        "<h2>Why offices ask for Mangal</h2>",
+        "<p>Online forms, e-office systems and most government portals accept only Unicode Hindi, and the font they name is usually Mangal because it comes with Windows. A document typed in Abbasi Chanakya New is not Unicode. It is keyboard characters that only look like Hindi in that one font, which is why it turns into gibberish when pasted into a portal.</p>",
+        "<p>This page converts that code into real Hindi. The short-i matra and the reph are moved to where Unicode keeps them, and combined keys are split into their letters, so <code>Çlg</code> becomes <strong lang=\"hi\">सिंह</strong>.</p>",
+        "<h2>Using the result</h2>",
+        "<p>Copy it straight into the portal, email or chat. In Word, select it and pick <strong>Mangal</strong> from the font list, or use <strong>Download .docx</strong>. To go back to the legacy font, use <a href=\"/mangal-to-abbasi-chanakya\">Mangal to Abbasi Chanakya</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "The mapping was built from the font file and every key was checked by eye, but it has not yet been compared with a real document typed in Abbasi Chanakya New. Converting the output back returns your original text, but please read anything important before you rely on it."
+        },
+        {
+          "q": "Is Mangal output the same as Unicode?",
+          "a": "Yes. Mangal is a Unicode font, so this page gives exactly what <a href=\"/abbasi-chanakya-to-unicode\">Abbasi Chanakya to Unicode</a> gives. Any Unicode Devanagari font will show it."
+        },
+        {
+          "q": "Will my Hindi search and sort correctly after this?",
+          "a": "Yes. Unicode Hindi is real text, so search, spell-check and sorting work on it, which they never do on legacy font code."
+        },
+        {
+          "q": "Does my text leave my computer?",
+          "a": "No. The conversion runs in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Abbasi Chanakya New text that a portal or office wants in Mangal.",
+          "Paste it into the <strong>Abbasi Chanakya New</strong> box. Unicode Hindi appears on the right.",
+          "Press <strong>Copy text</strong> and paste wherever Mangal is required."
+        ],
+        "tip": "Word keeps the old font on pasted text. Select it and set the font to Mangal, or download the .docx instead."
+      }
+    },
     "/chanakya-to-unicode": {
       "nav": "Chanakya → Unicode",
       "h1": "Chanakya to Unicode Converter",

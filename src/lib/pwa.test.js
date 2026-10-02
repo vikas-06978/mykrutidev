@@ -15,7 +15,9 @@ const FACES =
 const page = (body, scripts = []) =>
   `<html><head><style>${FACES}</style>${scripts.map((s) => `<script type="module" src="/_astro/${s}"></script>`).join('')}</head><body>${body}</body></html>`;
 const CONVERTER = page('<div data-converter style="--cv-preview:&quot;MKD Kruti Dev 010&quot;, monospace"></div>', ['Header.js', 'Converter.js']);
+const PAIRING = page('<div data-converter data-offline="visit" style="--cv-preview:&quot;MKD DevLys 010&quot;, monospace"></div>', ['Header.js', 'Converter.js']);
 const BUILD = {
+  'kruti-dev-to-devlys/index.html': PAIRING,
   'index.html': CONVERTER,
   'hi/index.html': CONVERTER,
   '404.html': page('', ['Header.js']),
@@ -67,7 +69,7 @@ describe('what the first visit downloads', () => {
   });
 
   test('everything else waits for a visit: tutor, guides, PDFs, images, word list', () => {
-    for (const p of ['hindi-typing-test/index.html', '_astro/TypingTutor.js', 'guides/x/index.html', 'downloads/chart.pdf', 'og/en/home.png', 'data/english-words.json']) {
+    for (const p of ['kruti-dev-to-devlys/index.html', 'hindi-typing-test/index.html', '_astro/TypingTutor.js', 'guides/x/index.html', 'downloads/chart.pdf', 'og/en/home.png', 'data/english-words.json']) {
       assert.ok(!plan.includes(p), p);
     }
   });

@@ -224,6 +224,89 @@ export const PAGES = [
     beta: true,
   },
 
+  // ---- Legacy <-> legacy: no new mapping, just two verified ones chained ----
+  // convert() routes legacy -> legacy through Unicode, so each of these is as
+  // accurate as its two halves, which are already live above. A pair with
+  // Abbasi Chanakya inherits its Beta badge.
+  {
+    path: '/kruti-dev-to-devlys',
+    ready: true,
+    kind: 'converter',
+    from: 'kruti-dev',
+    to: 'devlys',
+    group: 'Kruti Dev',
+    related: ['/devlys-to-kruti-dev', '/devlys-to-unicode', '/'],
+  },
+  {
+    path: '/devlys-to-kruti-dev',
+    ready: true,
+    kind: 'converter',
+    from: 'devlys',
+    to: 'kruti-dev',
+    group: 'DevLys',
+    related: ['/kruti-dev-to-devlys', '/devlys-to-unicode', '/unicode-to-kruti-dev'],
+  },
+  {
+    path: '/kruti-dev-to-abbasi-chanakya',
+    ready: true,
+    kind: 'converter',
+    from: 'kruti-dev',
+    to: 'abbasi-chanakya',
+    group: 'Kruti Dev',
+    related: ['/abbasi-chanakya-to-kruti-dev', '/unicode-to-abbasi-chanakya', '/'],
+    beta: true,
+  },
+  {
+    path: '/abbasi-chanakya-to-kruti-dev',
+    ready: true,
+    kind: 'converter',
+    from: 'abbasi-chanakya',
+    to: 'kruti-dev',
+    group: 'Chanakya',
+    related: ['/kruti-dev-to-abbasi-chanakya', '/abbasi-chanakya-to-unicode', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/devlys-to-abbasi-chanakya',
+    ready: true,
+    kind: 'converter',
+    from: 'devlys',
+    to: 'abbasi-chanakya',
+    group: 'DevLys',
+    related: ['/abbasi-chanakya-to-devlys', '/unicode-to-abbasi-chanakya', '/devlys-to-unicode'],
+    beta: true,
+  },
+  {
+    path: '/abbasi-chanakya-to-devlys',
+    ready: true,
+    kind: 'converter',
+    from: 'abbasi-chanakya',
+    to: 'devlys',
+    group: 'Chanakya',
+    related: ['/devlys-to-abbasi-chanakya', '/abbasi-chanakya-to-unicode', '/unicode-to-devlys'],
+    beta: true,
+  },
+  {
+    path: '/mangal-to-abbasi-chanakya',
+    ready: true,
+    kind: 'converter',
+    from: 'mangal',
+    to: 'abbasi-chanakya',
+    group: 'Mangal',
+    related: ['/abbasi-chanakya-to-mangal', '/unicode-to-abbasi-chanakya', '/mangal-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/abbasi-chanakya-to-mangal',
+    ready: true,
+    kind: 'converter',
+    from: 'abbasi-chanakya',
+    to: 'mangal',
+    group: 'Chanakya',
+    related: ['/mangal-to-abbasi-chanakya', '/abbasi-chanakya-to-unicode', '/kruti-dev-to-mangal'],
+    beta: true,
+  },
+
   // ==========================================================================
   // SCAFFOLDED - routes and SEO exist, mapping does not. Coming soon panel.
   // ==========================================================================
