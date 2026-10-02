@@ -82,11 +82,19 @@ const outputFaceName = previewFont?.label ?? toFont.label;
 // mattered and was not.
 const previewStack = previewFont?.stack ?? toFont.css;
 
-// Font-to-font pages are not part of the first-visit download (src/pwa):
-// each is a pairing of two converters that are, and precaching every pairing
-// would grow that download with every font the site adds. They are kept for
-// offline use from the first time they are opened, like the guides.
-const offlineOnVisit = fromFont.kind === 'legacy' && outputIsLegacy;
+// Not every converter is part of the first-visit download (src/pwa), or that
+// download would grow with every font the site adds. Left out, and kept for
+// offline use from the first time they are opened like the guides:
+//  - font-to-font pages, each a pairing of two converters that are in it;
+//  - pages for a font in another language (Preeti, Nepali), whose readers
+//    are not the Hindi visitors the first download is sized for.
+const otherLanguage = Boolean(fromFont.lang || toFont.lang);
+const offlineOnVisit = (fromFont.kind === 'legacy' && outputIsLegacy) || otherLanguage;
+
+// Preeti's number keys are letters, so "keep English words and numbers" has
+// nothing it could keep: convert() ignores the box for such fonts, and the
+// page does not offer it. It stays in the DOM because the script reads it.
+const asciiIsScript = Boolean(fromFont.asciiIsScript || toFont.asciiIsScript);
 ---
 
 {/*
@@ -283,7 +291,7 @@ const offlineOnVisit = fromFont.kind === 'legacy' && outputIsLegacy;
 
   <RecentStrip font={fromFont.css} unicodeCopy={outputIsLegacy} />
 
-  <div class="cv-strip bg-inset">
+  <div class="cv-strip bg-inset" hidden={asciiIsScript}>
     <label class="flex items-start gap-2.5 text-body">
       <input
         type="checkbox"

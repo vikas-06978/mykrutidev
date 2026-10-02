@@ -43,9 +43,8 @@ const preview = (label, file, format = 'woff') => ({
 /**
  * Keyed by font key in FONTS. Legacy fonts only; Unicode fonts render natively.
  *
- * Preeti is here because the owner supplied its file, but it has no verified
- * character map, so no page converts to it yet. The entry does nothing until
- * that changes.
+ * Preeti's character map was read off this same file (see the note above
+ * PREETI in fontMaps.js), so the preview shows exactly what the map means.
  *
  * Chanakya (Walkman-Chanakya) deliberately has NO entry: its pages are "coming
  * soon" and must not load any preview font. The file that used to sit here

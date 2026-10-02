@@ -1,0 +1,46 @@
+{
+  "_comment": "Preeti <-> Unicode ground truth. Every left side was drawn in public/fonts/preeti.woff and read back by eye before it was written here. Nepali words, typed the way Preeti typists type them.",
+  "letters": [
+    { "p": "s", "u": "क", "why": "full consonant on its own key" },
+    { "p": "S", "u": "क्", "why": "uppercase = half form" },
+    { "p": "0f", "u": "ण", "why": "ण is half + bar, like Kruti's .k" },
+    { "p": "if", "u": "ष", "why": "ष is half + bar too" },
+    { "p": "3", "u": "घ", "why": "a number key that is a letter" },
+    { "p": "km", "u": "फ", "why": "the m tail turns प into फ" },
+    { "p": "em", "u": "झ", "why": "and भ into झ" },
+    { "p": "qm", "u": "क्र", "why": "and त्र into क्र" },
+    { "p": "Qm", "u": "क्त", "why": "and त्त into क्त" },
+    { "p": "8Þ", "u": "ड़", "why": "nukta" }
+  ],
+  "vowels": [
+    { "p": "cf", "u": "आ", "why": "अ + bar" },
+    { "p": "cf]", "u": "ओ", "why": "अ + bar + e-matra" },
+    { "p": "cf}", "u": "औ", "why": "अ + bar + ai-matra" },
+    { "p": "O{", "u": "ई", "why": "इ + the reph-shaped hook" },
+    { "p": "P]", "u": "ऐ", "why": "ए + e-matra" },
+    { "p": "pm", "u": "ऊ", "why": "उ + tail" }
+  ],
+  "reorder": [
+    { "p": "lj", "u": "वि", "why": "ि typed before its consonant" },
+    { "p": "lzIff", "u": "शिक्षा", "why": "ि before श, then क्ष half + bar" },
+    { "p": "sd{rf/L", "u": "कर्मचारी", "why": "reph typed after its syllable" },
+    { "p": "lgb]{zg", "u": "निर्देशन", "why": "reph after a matra'd syllable, ि before" },
+    { "p": "/fi6«Lo", "u": "राष्ट्रीय", "why": "rakar under ट is «" },
+    { "p": "k|b]z", "u": "प्रदेश", "why": "rakar under a stemmed letter is |" }
+  ],
+  "words": [
+    { "p": "g]kfn ;'Gb/ b]z xf] .", "u": "नेपाल सुन्दर देश हो ।", "why": "the page sample" },
+    { "p": "cfGtl/s dGqfno", "u": "आन्तरिक मन्त्रालय", "why": "ministry name" },
+    { "p": "sfo{qmd", "u": "कार्यक्रम", "why": "reph + qm" },
+    { "p": "ljBfno", "u": "विद्यालय", "why": "द्य has its own key B" },
+    { "p": "k|wfgdGqL", "u": "प्रधानमन्त्री", "why": "rakar, half न, त्र" },
+    { "p": "dxTjk\"0f{", "u": "महत्वपूर्ण", "why": "ण half + bar under a reph" },
+    { "p": "cfpg'x'G5", "u": "आउनुहुन्छ", "why": "common Nepali verb" },
+    { "p": "ul/Psf]", "u": "गरिएको", "why": "ि before र, ओ-matra split" },
+    { "p": "b'Mvsf]", "u": "दुःखको", "why": "visarga" },
+    { "p": "cGt/f{li6«o", "u": "अन्तर्राष्ट्रिय", "why": "reph and rakar in one word" }
+  ],
+  "digits": [
+    { "p": "@)@$ ;fn", "u": "२०२४ साल", "why": "digits are on the shifted row" }
+  ]
+}

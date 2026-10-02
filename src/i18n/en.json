@@ -1623,27 +1623,166 @@
       "nav": "Preeti → Unicode",
       "h1": "Preeti to Unicode Converter (Nepali)",
       "title": "Preeti to Unicode Converter | Nepali Preeti Font to Unicode Online",
-      "description": "Convert Preeti font Nepali to Unicode Devanagari. Free, browser-based, nothing uploaded. Preeti is the Nepali equivalent of Kruti Dev.",
-      "note": "Preeti is Nepali rather than Hindi. It shares the Devanagari script but has its own layout and its own conjunct set, so it needs its own map and its own test documents.",
-      "lede": "Paste Preeti font Nepali on the left and get Unicode Devanagari on the right, once the Preeti layout has been mapped.",
+      "description": "Convert Preeti font Nepali to Unicode for government portals, email and the web. The matras, reph and digits are put right. Free, nothing uploaded.",
+      "betaNote": "For Nepali typed in the Preeti font.",
+      "lede": "Paste Preeti text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
       "body": [
-        "<h2>Preeti is Nepali, not Hindi</h2>",
-        "<p>Preeti is to Nepali roughly what Kruti Dev is to Hindi: the legacy font that a generation of government offices, newspapers and schools typed in, still embedded in older documents. It uses the same Devanagari script, which is why it looks familiar, but it is a different language with a different keyboard layout.</p>",
-        "<p>That matters for accuracy. Nepali uses conjuncts and vowel combinations that Hindi does not, so a Preeti converter built on the Hindi map would be wrong in exactly the places Nepali differs from Hindi. This one will be built and tested against real Nepali documents before it goes live.</p>"
-      ]
+        "<h2>What Preeti text is</h2>",
+        "<p>Preeti is to Nepali what Kruti Dev is to Hindi: the font a generation of government offices, newspapers and schools typed in. It does not store Nepali at all. It stores English keyboard characters and draws Nepali letters on top of them, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>What the conversion has to get right</h2>",
+        "<ul><li><strong>The number keys are letters.</strong> In Preeti <code>3/</code> is <strong lang=\"hi\">घर</strong> and <code>6</code> is ट. The digits live on the shifted row instead, so <code>@)@$</code> is <strong lang=\"hi\">२०२४</strong>. That is why this page has no \"keep numbers\" box.</li><li><strong>The i-matra and the reph.</strong> ि is typed before its letter and the reph after its syllable, so <code>sd{rf/L</code> has to be reordered into <strong lang=\"hi\">कर्मचारी</strong>.</li><li><strong>Vowels built from pieces.</strong> आ is <code>cf</code>, ओ is <code>cf]</code> and ई is <code>O{</code>. Each one is read as a single letter.</li></ul>",
+        "<p>Going the other way? Use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a>. If the text is going to a Hindi office that works in Kruti Dev, use <a href=\"/preeti-to-kruti-dev\">Preeti to Kruti Dev</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Preeti font file and read by eye, and the result was cross-checked against an independent Preeti table. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Will my English words survive?",
+          "a": "Only web and email addresses are kept as they are. Preeti uses every key on the keyboard for Nepali, so an English-looking word in Preeti text is usually Nepali: <code>of</code> is या and <code>an</code> is बल. Converting everything is the only safe choice."
+        },
+        {
+          "q": "Does this work for Kantipur or Sagarmatha?",
+          "a": "No. Those are separate Nepali fonts with their own layouts. This page is for <strong>Preeti</strong> only."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. Everything runs in your browser, and the page keeps working offline after it has loaded once."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Nepali out of your Preeti document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Preeti</strong> box. Unicode Nepali appears on the right.",
+          "Press <strong>Copy text</strong> and paste it into the portal, email or document that needs Unicode."
+        ],
+        "tip": "In Word, set the pasted Nepali to a Unicode font such as Kalimati or Mangal, or use the .docx download."
+      }
     },
     "/unicode-to-preeti": {
       "nav": "Unicode → Preeti",
       "h1": "Unicode to Preeti Converter (Nepali)",
       "title": "Unicode to Preeti Converter | Nepali Unicode to Preeti Font Online",
-      "description": "Convert Unicode Nepali Devanagari back to Preeti font text, free and entirely in your browser.",
-      "note": "Waiting on the Preeti layout and Nepali test documents.",
-      "lede": "Type or paste Nepali Devanagari on the left and get Preeti font text on the right, once the Preeti layout has been mapped.",
+      "description": "Convert Unicode Nepali into Preeti font code for offices, presses and forms that still use Preeti. Digits written the Preeti way. Free, private.",
+      "betaNote": "For documents that will be set in the Preeti font.",
+      "lede": "Type or paste Nepali on the left and get Preeti font code on the right, ready to paste into Word and set in Preeti.",
       "body": [
-        "<h2>Not ready yet</h2>",
-        "<p>This is the reverse of <a href=\"/preeti-to-unicode\">Preeti to Unicode</a> and uses the same character map read backwards, so the two pages will go live together once that map has been built from real Nepali documents.</p>",
-        "<p>Preeti is the Nepali counterpart of Kruti Dev. If you are actually working in Hindi, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> is finished and tested today.</p>"
-      ]
+        "<h2>When you need Preeti</h2>",
+        "<p>Many offices, printing presses and older forms in Nepal still expect Preeti. Text typed on a phone, on the Windows Nepali keyboard or copied from a website is Unicode, and pasting it into a Preeti document gives the wrong letters. This page writes the Unicode out again as the keys Preeti expects, in the order the font draws them.</p>",
+        "<h2>What changes on the way</h2>",
+        "<ul><li><strong>ि moves in front</strong> of its letter, and the reph moves after its syllable, because that is how Preeti draws them.</li><li><strong>Digits become Preeti digits.</strong> Preeti has no ordinary 0 to 9, since those keys are letters, so 2024 is written <code>@)@$</code>, which the font shows as <strong lang=\"hi\">२०२४</strong>.</li><li><strong>Straight quotes become curly ones.</strong> In Preeti the <code>'</code> and <code>\"</code> keys are ु and ू.</li></ul>",
+        "<p>For the reverse direction, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>. For Hindi work in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Preeti font file and read by eye, and the result was cross-checked against an independent Preeti table. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like random English letters. Is that a bug?",
+          "a": "No, that is what Preeti text is. It becomes Nepali once the font is applied. Press <strong>Preview (Hindi)</strong> to see it in Preeti here, or set the font to <strong>Preeti</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Preeti has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is anything sent to a server?",
+          "a": "No. The conversion happens in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type Nepali into the left box, or paste Unicode Nepali from anywhere.",
+          "Press <strong>Copy Preeti code</strong>.",
+          "Paste into Word and set the font to <strong>Preeti</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Check a line with a reph or a ि in the preview first: those are the letters a careless converter puts in the wrong place."
+      }
+    },
+    "/preeti-to-kruti-dev": {
+      "nav": "Preeti → Kruti Dev",
+      "h1": "Preeti to Kruti Dev Converter",
+      "title": "Preeti to Kruti Dev Converter | Preeti Font to Kruti Dev 010",
+      "description": "Convert Preeti font text into Kruti Dev 010 code, for Devanagari text that has to move from a Nepali office to a Hindi one. Free, in your browser.",
+      "betaNote": "For text typed in the Preeti font.",
+      "lede": "Paste Preeti text on the left and get Kruti Dev 010 code on the right, previewed in the Kruti Dev font.",
+      "body": [
+        "<h2>Same script, different keyboards</h2>",
+        "<p>Preeti and Kruti Dev both draw Devanagari, but they put the letters on different keys. <strong lang=\"hi\">नेपाल</strong> is <code>g]kfn</code> in Preeti and <code>usiky</code> in Kruti Dev, so changing the font in Word turns the text into nonsense.</p>",
+        "<p>This page reads the Preeti keys as real Devanagari first, then types that out again with Kruti Dev keys. <code>sd{rf/L</code> becomes <code>deZpkjh</code>, which is <strong lang=\"hi\">कर्मचारी</strong> in both fonts.</p>",
+        "<h2>Before you send it</h2>",
+        "<p>Set the font to <strong>Kruti Dev 010</strong> and read a few lines. Kruti Dev has keys for nearly everything Nepali uses. Where it lacks one, that character is left as it was, so it stands out. If the receiver can take Unicode, <a href=\"/preeti-to-unicode\">Preeti to Unicode</a> is the safer choice. To start from Unicode instead, see <a href=\"/unicode-to-preeti\">Unicode to Preeti</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Preeti font file and read by eye, and the result was cross-checked against an independent Preeti table. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Does the language change?",
+          "a": "No. Nothing is translated. The same Devanagari words are written with Kruti Dev keys, so Nepali stays Nepali."
+        },
+        {
+          "q": "What happens to Preeti digits?",
+          "a": "They are read as Devanagari digits and written with the Kruti Dev keys for them, so २०२४ stays २०२४."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. Everything happens in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Preeti document.",
+          "Paste it into the <strong>Preeti</strong> box. Kruti Dev code appears on the right.",
+          "Press <strong>Copy Kruti code</strong>, paste into Word and set the Preeti conversion to <strong>Kruti Dev 010</strong>."
+        ],
+        "tip": "Words with a reph, such as कर्मचारी, are a quick check that the order came out right."
+      }
+    },
+    "/kruti-dev-to-preeti": {
+      "nav": "Kruti Dev → Preeti",
+      "h1": "Kruti Dev to Preeti Converter",
+      "title": "Kruti Dev to Preeti Converter | Kruti Dev 010 to Preeti Font",
+      "description": "Convert Kruti Dev 010 text into Preeti font code for Nepali offices and presses that work in Preeti. Every key rewritten, nothing uploaded. Free.",
+      "betaNote": "For documents that will be set in the Preeti font.",
+      "lede": "Paste Kruti Dev text on the left and get Preeti code on the right, previewed in the Preeti font.",
+      "body": [
+        "<h2>Why a font change is not enough</h2>",
+        "<p>Kruti Dev and Preeti are both legacy Devanagari fonts, built on two different keyboards. Almost no letter sits on the same key in both. <code>usiky</code> is <strong lang=\"hi\">नेपाल</strong> in Kruti Dev, but in Preeti the same word is <code>g]kfn</code>. Switch the font in Word and you get a page of wrong letters.</p>",
+        "<p>This page reads the Kruti Dev keys as Devanagari, then types the words out again on the Preeti keyboard, with the i-matra and the reph in the places Preeti draws them. <code>deZpkjh</code> becomes <code>sd{rf/L</code>, which is <strong lang=\"hi\">कर्मचारी</strong> in either font.</p>",
+        "<h2>Digits and punctuation</h2>",
+        "<p>Preeti has no plain 0 to 9, because those keys are letters, so digits are written with the Preeti digit keys and still read as Devanagari digits. A few characters have no Preeti key at all, such as ळ. They are left as they were and a note appears under the box.</p>",
+        "<p>The reverse of this page is <a href=\"/preeti-to-kruti-dev\">Preeti to Kruti Dev</a>. For Unicode output, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Preeti font file and read by eye, and the result was cross-checked against an independent Preeti table. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Is the text translated into Nepali?",
+          "a": "No. The words stay exactly as they are and only the keys change. Hindi text stays Hindi, written in a font that Nepali offices use."
+        },
+        {
+          "q": "How do I see the Preeti text as letters?",
+          "a": "Press <strong>Preview (Hindi)</strong> above the output, or paste into Word and set the font to <strong>Preeti</strong>. The <strong>Download .docx</strong> button sets the font for you."
+        },
+        {
+          "q": "Does my document leave my computer?",
+          "a": "No. The conversion runs entirely in your browser."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Kruti Dev text that has to be set in Preeti.",
+          "Paste it into the <strong>Kruti Dev</strong> box. The Preeti code appears on the right.",
+          "Press <strong>Copy Preeti code</strong>, paste into Word and set the Kruti Dev conversion to <strong>Preeti</strong>."
+        ],
+        "tip": "Check the preview for any character left unchanged: it has no Preeti key, and you may want to retype that word."
+      }
     },
     "/marathi-font-converter": {
       "nav": "Marathi",

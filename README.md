@@ -14,7 +14,7 @@ Remington layout that exams use.
 
 | | Pages |
 | :-- | :-- |
-| **Converters** | Kruti Dev ↔ Unicode (the home page) · Kruti Dev ↔ Mangal · DevLys ↔ Unicode · DevLys ↔ Mangal · Kruti Dev ↔ DevLys · Abbasi Chanakya ↔ Unicode, Mangal, Kruti Dev and DevLys (beta) |
+| **Converters** | Kruti Dev ↔ Unicode (the home page) · Kruti Dev ↔ Mangal · DevLys ↔ Unicode · DevLys ↔ Mangal · Kruti Dev ↔ DevLys · Abbasi Chanakya ↔ Unicode, Mangal, Kruti Dev and DevLys (beta) · Preeti (Nepali) ↔ Unicode and Kruti Dev (beta) |
 | **Word files** | Upload a `.docx` or `.txt` on the Kruti Dev ↔ Unicode and Kruti Dev ↔ Mangal pages. Only the Hindi changes, and English, tables and formatting stay as they were. |
 | **Typing** | Typing tutor and timed tests, Hindi typing test for exams, on-screen Hindi keyboard, Remington keyboard, English to Hindi (Hinglish) typing |
 | **Printables** | Keyboard chart, finger chart, matra and conjunct chart, practice sheets, progress log (free PDFs) |

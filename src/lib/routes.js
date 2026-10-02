@@ -369,24 +369,48 @@ export const PAGES = [
     related: ['/shusha-to-unicode', '/'],
   },
 
-  // ---- Preeti: Nepali, not Hindi ------------------------------------------
+  // ---- Preeti: Nepali, not Hindi. Map read off the font file, glyph by glyph;
+  // Beta until a real Preeti document has been run through it.
   {
     path: '/preeti-to-unicode',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'preeti',
     to: 'unicode',
     group: 'Nepali',
-    related: ['/unicode-to-preeti', '/'],
+    related: ['/unicode-to-preeti', '/preeti-to-kruti-dev', '/'],
+    beta: true,
   },
   {
     path: '/unicode-to-preeti',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'unicode',
     to: 'preeti',
     group: 'Nepali',
-    related: ['/preeti-to-unicode', '/'],
+    related: ['/preeti-to-unicode', '/preeti-to-kruti-dev', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/preeti-to-kruti-dev',
+    ready: true,
+    kind: 'converter',
+    from: 'preeti',
+    to: 'kruti-dev',
+    group: 'Nepali',
+    related: ['/kruti-dev-to-preeti', '/preeti-to-unicode', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/kruti-dev-to-preeti',
+    ready: true,
+    kind: 'converter',
+    from: 'kruti-dev',
+    to: 'preeti',
+    // Under Nepali rather than Kruti Dev, so the four Preeti pages share one menu.
+    group: 'Nepali',
+    related: ['/preeti-to-kruti-dev', '/unicode-to-preeti', '/'],
+    beta: true,
   },
 
   // ==========================================================================
