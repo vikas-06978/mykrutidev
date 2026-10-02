@@ -30,12 +30,22 @@
   "nav": {
     "aria": "Converters",
     "typingTools": "Typing tools",
-    "allConverters": "All converters",
+    "allConverters": "All tools",
     "soon": "Soon",
     "menu": "Menu",
     "home": "Home",
     "breadcrumb": "Breadcrumb",
-    "guides": "Guides"
+    "guides": "Guides",
+    "menus": {
+      "converters": "Converters",
+      "typing": "Hindi typing",
+      "tools": "Hindi tools"
+    },
+    "seeAll": {
+      "converters": "All converters →",
+      "typing": "All typing tools →",
+      "tools": "All Hindi tools →"
+    }
   },
   "groups": {
     "Kruti Dev": "Kruti Dev",
@@ -46,7 +56,8 @@
     "Shusha": "Shusha",
     "Nepali": "Nepali",
     "Other scripts": "Other scripts",
-    "More": "More"
+    "More": "More",
+    "Marathi": "Marathi"
   },
   "fontNames": {
     "Abbasi Chanakya New": "Abbasi Chanakya New",
@@ -64,7 +75,8 @@
     "chanakya": "Chanakya",
     "abbasi-chanakya": "Abbasi Chanakya New",
     "shusha": "Shusha",
-    "preeti": "Preeti"
+    "preeti": "Preeti",
+    "shivaji": "Shivaji"
   },
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
@@ -406,7 +418,7 @@
     }
   },
   "allConverters": {
-    "intro": "Every conversion on the site, grouped by source font. {live} of {total} are live. The rest are scaffolded and waiting on a verified character map.",
+    "intro": "{live} converters and tools, all free and working in your browser. Search by font, tool or task, or jump to a section.",
     "live": "Live",
     "body": [
       "<h2>Why some of these are not switched on</h2>",
@@ -414,7 +426,16 @@
       "<p>So the pages above exist, with their titles and descriptions, but the ones marked <strong>Coming soon</strong> deliberately have no converter on them. A converter built on a guessed map produces Hindi that looks plausible and is quietly wrong in ways you would only find out later, which is worse than no converter at all.</p>",
       "<h2>&ldquo;Hindi&rdquo; and &ldquo;Unicode&rdquo; mean the same thing here</h2>",
       "<p>Text typed on an Android, iPhone or Windows Hindi keypad <em>is already Unicode</em>. So &ldquo;Hindi to Kruti Dev&rdquo; and &ldquo;Unicode to Kruti Dev&rdquo; are the same conversion and the same page, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a>. Mangal is a Unicode font too, which is why <a href=\"/kruti-dev-to-mangal\">Kruti Dev to Mangal</a> really means &ldquo;Kruti Dev to Unicode, shown in Mangal&rdquo;.</p>"
-    ]
+    ],
+    "searchLabel": "Search all tools",
+    "searchPlaceholder": "Search: Kruti Dev, Mangal, Preeti, date, amount in words…",
+    "jumpLabel": "Jump to a section",
+    "noResults": "Nothing matches that. Try a font name such as Kruti Dev, or a task such as date or words.",
+    "sections": {
+      "converters": "Font converters",
+      "tools": "Everyday Hindi tools",
+      "typing": "Typing, keyboards and charts"
+    }
   },
   "pages": {
     "/": {
@@ -893,10 +914,10 @@
       ]
     },
     "/all-converters": {
-      "nav": "All converters",
-      "h1": "All Hindi and Indic Font Converters",
-      "title": "All Font Converters | Kruti Dev, DevLys, Chanakya, Mangal, Unicode",
-      "description": "Every converter on MyKrutiDev: Kruti Dev, DevLys, Chanakya, Shusha and Mangal for Hindi, Preeti for Nepali, plus the Indic scripts we are working on next."
+      "nav": "All tools",
+      "h1": "All Hindi Converters and Tools",
+      "title": "All Hindi Tools | Font Converters, Typing, Amount in Words, Dates",
+      "description": "Every tool on MyKrutiDev in one place: Kruti Dev, DevLys, Mangal, Chanakya and Preeti converters, amount in words, Hindi dates, typing tests and more."
     },
     "/devlys-to-unicode": {
       "nav": "DevLys → Unicode",
@@ -1598,27 +1619,165 @@
       "nav": "Shusha → Unicode",
       "h1": "Shusha to Unicode Converter",
       "title": "Shusha to Unicode Converter | Shusha Hindi Font to Unicode Online",
-      "description": "Convert Shusha font Hindi to Unicode in your browser. Free, private, no upload required.",
-      "note": "The Shusha layout has not been mapped yet. It is an older DTP font with its own arrangement, so nothing can be reused from Kruti Dev.",
-      "lede": "Paste Shusha font Hindi on the left and get Unicode on the right, once the Shusha layout has been mapped.",
+      "description": "Convert Shusha font Hindi to Unicode for portals, email and Word: the i-matra, reph and nukta put right. Built from the Shusha font itself. Free.",
+      "betaNote": "For text typed in the Shusha font.",
+      "lede": "Paste Shusha text on the left and get Unicode Hindi on the right, ready for any website, portal or phone.",
       "body": [
-        "<h2>About Shusha</h2>",
-        "<p>Shusha is an older Hindi DTP font from the same era as Kruti Dev and Chanakya, and it turns up in scanned office documents and in files handed down through several machines. Like the others it is a font, not an encoding: the Hindi is stored as ASCII and only looks like Hindi when the font is installed.</p>",
-        "<p>Its key arrangement is its own, so nothing from the Kruti Dev map carries over. Until it has been read off real Shusha documents this page has no converter on it. Try <a href=\"/\">Kruti Dev to Unicode</a> if your document turns out to be Kruti Dev after all.</p>"
-      ]
+        "<h2>What Shusha text is</h2>",
+        "<p>Shusha is an older Hindi DTP font that still turns up in office files and printed forms. Like Kruti Dev it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Baart</code>. This page turns those characters into real Unicode Hindi.</p>",
+        "<h2>How Shusha differs from Kruti Dev</h2>",
+        "<ul><li><strong>Mostly phonetic keys.</strong> <code>k</code> is क, <code>p</code> is प, <code>t</code> is त, so Shusha text looks closer to English spelling than Kruti Dev does.</li><li><strong>Half letters on the lowercase keys.</strong> <code>b</code> is ब् and the bar <code>a</code> completes it, so <code>ba</code> is ब.</li><li><strong>The same reordering.</strong> ि is typed before its letter and the reph after its syllable, so <code>kma-caarI</code> becomes <strong lang=\"hi\">कर्मचारी</strong>.</li><li><strong>The comma is the nukta.</strong> <code>k,</code> is क़, and a real comma sits on another key.</li></ul>",
+        "<p>For the other direction use <a href=\"/unicode-to-shusha\">Unicode to Shusha</a>. Marathi documents are often in Shivaji, the same font under another name: use <a href=\"/shivaji-to-unicode\">Shivaji to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Does it work for Shusha02 or Shusha05?",
+          "a": "Not yet. Those later cuts change some keys. This page is for the original Shusha."
+        },
+        {
+          "q": "What about English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Hindi out of your Shusha document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Shusha</strong> box. Unicode Hindi appears on the right.",
+          "Press <strong>Copy text</strong> and paste it wherever Unicode Hindi is needed."
+        ],
+        "tip": "Words with a reph, such as कर्मचारी, are the quickest check that the Shusha text came out in the right order."
+      }
     },
     "/unicode-to-shusha": {
-      "nav": "Unicode / Hindi → Shusha",
+      "nav": "Unicode → Shusha",
       "h1": "Unicode to Shusha Converter",
-      "title": "Unicode to Shusha Converter | Hindi Unicode to Shusha Font Online",
-      "description": "Convert Unicode Hindi back to Shusha font text. Free, instant and fully client-side.",
-      "note": "The Shusha layout has not been mapped yet.",
-      "lede": "Type or paste Hindi on the left and get Shusha font text on the right, once the Shusha layout has been mapped.",
+      "title": "Unicode to Shusha Converter | Hindi Unicode to Shusha Font Code",
+      "description": "Convert Unicode Hindi into Shusha font code for DTP and old templates, with ि and the reph placed the way Shusha draws them. Free, private.",
+      "betaNote": "For documents that will be set in the Shusha font.",
+      "lede": "Type or paste Hindi on the left and get Shusha font code on the right, ready to paste into Word or your DTP program.",
       "body": [
-        "<h2>Not ready yet</h2>",
-        "<p>Going from Unicode back to a legacy font needs the same character map as the forward direction, read in reverse, so this page and <a href=\"/shusha-to-unicode\">Shusha to Unicode</a> will become available together, once the Shusha layout has been worked out from real documents.</p>",
-        "<p>If you need legacy Hindi today, <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> is finished and tested, and accepts Hindi typed straight from a phone or Windows keypad.</p>"
-      ]
+        "<h2>When you need Shusha</h2>",
+        "<p>Some offices and presses still keep templates in Shusha. Hindi typed on a phone or copied from a website is Unicode, and it shows the wrong letters once set in Shusha. This page writes the Hindi out again as the keys Shusha expects, in the order the font draws them.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>ि before its letter</strong> and the <strong>reph after its syllable</strong>, as Shusha draws them.</li><li><strong>Rakar under the right letters.</strong> <strong lang=\"hi\">प्र</strong> uses the stroke (<code>p`</code>), and ट ठ ड ढ take the caret form, as in <strong lang=\"hi\">राष्ट्रीय</strong>.</li><li><strong>Punctuation that shows.</strong> The comma and the full stop sit on special keys in Shusha, and the converter uses them.</li></ul>",
+        "<p>To go back, use <a href=\"/shusha-to-unicode\">Shusha to Unicode</a>. For Marathi documents in Shivaji, use <a href=\"/unicode-to-shivaji\">Unicode to Shivaji</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Shusha code. Press <strong>Preview (Hindi)</strong> to see it in the Shusha font here, or set the font to <strong>Shusha</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Shusha has no key for a few characters, such as Hindi digits. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Shusha document.",
+          "Press <strong>Copy Shusha code</strong>.",
+          "Paste into Word and set the font to <strong>Shusha</strong>, or use <strong>Download .docx</strong>."
+        ],
+        "tip": "Check a line with प्र or ट्र in the preview: the rakar hook should sit under the letter, not after it."
+      }
+    },
+    "/shivaji-to-unicode": {
+      "nav": "Shivaji → Unicode",
+      "h1": "Shivaji to Unicode Converter (Marathi)",
+      "title": "Shivaji to Unicode Converter | Marathi Shivaji Font to Unicode",
+      "description": "Convert Marathi typed in the Shivaji font to Unicode for government portals, email and WhatsApp. ळ, the reph and the full stop handled. Free.",
+      "betaNote": "For Marathi typed in the Shivaji font.",
+      "lede": "Paste Shivaji text on the left and get Unicode Marathi on the right, for any portal, email or phone.",
+      "body": [
+        "<h2>Shivaji is Shusha with a Marathi full stop</h2>",
+        "<p>Shivaji01 is the font many Maharashtra offices typed Marathi in. Drawn key by key, it is the same font as Shusha on every key but three, and the one that matters is the full stop: Shivaji draws a <strong>.</strong> where Shusha draws the danda, because Marathi ends sentences with a full stop.</p>",
+        "<h2>Marathi letters it handles</h2>",
+        "<ul><li><strong lang=\"hi\">ळ</strong> has its own key, <code>L</code>, so <code>kLvaavao</code> becomes <strong lang=\"hi\">कळवावे</strong>.</li><li>The reph is moved before its syllable and ि after its letter, so <code>maharaYT/</code> becomes <strong lang=\"hi\">महाराष्ट्र</strong>.</li></ul>",
+        "<p>For the other direction use <a href=\"/unicode-to-shivaji\">Unicode to Shivaji</a>. A Hindi document in Shusha goes through <a href=\"/shusha-to-unicode\">Shusha to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Does it work for Shivaji02 or Shivaji05?",
+          "a": "Not yet. Those are later cuts with some keys changed. This page is for Shivaji01."
+        },
+        {
+          "q": "Is the Marathi changed into Hindi?",
+          "a": "No. Nothing is translated. The same Marathi words come out in Unicode."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Marathi out of your Shivaji document.",
+          "Paste it into the <strong>Shivaji</strong> box. Unicode Marathi appears on the right.",
+          "Press <strong>Copy text</strong> and paste it into the portal, email or file."
+        ],
+        "tip": "In Word, set the pasted Marathi to a Unicode font such as Mangal or Kokila."
+      }
+    },
+    "/unicode-to-shivaji": {
+      "nav": "Unicode → Shivaji",
+      "h1": "Unicode to Shivaji Converter (Marathi)",
+      "title": "Unicode to Shivaji Converter | Marathi Unicode to Shivaji Font",
+      "description": "Convert Unicode Marathi into Shivaji01 font code for office templates and DTP, with ि, the reph and the full stop placed correctly. Free.",
+      "betaNote": "For documents that will be set in the Shivaji01 font.",
+      "lede": "Type or paste Marathi on the left and get Shivaji font code on the right, ready for Word or your DTP program.",
+      "body": [
+        "<h2>When you need Shivaji</h2>",
+        "<p>Many Maharashtra offices still keep letters and forms in Shivaji01. Marathi typed on a phone or the Windows Marathi keyboard is Unicode, and it needs rewriting as Shivaji keys before it can go into those files. This page does that, in the order Shivaji draws the letters.</p>",
+        "<h2>What changes on the way</h2>",
+        "<ul><li><strong>ि and the reph</strong> move to where Shivaji draws them.</li><li><strong>The full stop</strong> is written with Shivaji's own <code>.</code> key.</li><li><strong>ळ</strong> is written with <code>L</code>.</li></ul>",
+        "<p>To go back, use <a href=\"/shivaji-to-unicode\">Shivaji to Unicode</a>. For Hindi in Shusha, use <a href=\"/unicode-to-shusha\">Unicode to Shusha</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Shivaji code. Press <strong>Preview (Hindi)</strong> to see it in the font here, or set the font to <strong>Shivaji01</strong> in Word."
+        },
+        {
+          "q": "What about the danda (।)?",
+          "a": "Shivaji has no danda key, since Marathi uses the full stop. A danda in your text is left as it was and a note appears under the box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Marathi for your Shivaji document.",
+          "Press <strong>Copy Shivaji code</strong>.",
+          "Paste into Word and set the font to <strong>Shivaji01</strong>, or use <strong>Download .docx</strong>."
+        ],
+        "tip": "Words with ळ, such as कळवावे, are a quick check that the Marathi letters came through."
+      }
     },
     "/preeti-to-unicode": {
       "nav": "Preeti → Unicode",
@@ -2649,6 +2808,7 @@
     },
     "/remington-hindi-keyboard": {
       "nav": "Remington Hindi keyboard",
+      "navSub": "Type Hindi on the Kruti Dev layout",
       "h1": "Remington Hindi Keyboard Online",
       "title": "Remington Hindi Keyboard Online | Kruti Dev Layout to Unicode",
       "description": "Type Hindi online on the Remington (Kruti Dev) typewriter layout with your normal keyboard, see every key and its Shift character, copy as Unicode.",
@@ -2884,6 +3044,22 @@
       "printables": {
         "title": "Printable charts (PDF)",
         "benefit": "Keyboard and finger charts, practice sheets and a progress log to print."
+      },
+      "amountWords": {
+        "title": "Amount in Hindi words",
+        "benefit": "Write ₹1,25,000 as एक लाख पच्चीस हज़ार रुपये मात्र for a cheque."
+      },
+      "hindiDate": {
+        "title": "Date in Hindi",
+        "benefit": "Any date with the Hindi month and day, in digits or in words."
+      },
+      "wordCounter": {
+        "title": "Hindi word counter",
+        "benefit": "Words, characters and akshar, counted the way Hindi is written."
+      },
+      "otherScripts": {
+        "title": "Hindi in other scripts",
+        "benefit": "Write Hindi in Gujarati, Bengali, Odia, Telugu, Kannada or Malayalam letters."
       }
     },
     "why": [
@@ -2892,7 +3068,8 @@
       "<strong>Private</strong>: your text and files are never uploaded.",
       "<strong>Free</strong>, with no sign-up.",
       "<strong>Hindi and English</strong>: the whole site in both languages."
-    ]
+    ],
+    "allTools": "See all converters and tools →"
   },
   "print": {
     "downloadPdf": "Download PDF",

@@ -1,52 +1,141 @@
 ---
 import Base from '../layouts/Base.astro';
-import { allGroups } from '../lib/routes.js';
-import { langOf, useT } from '../i18n/index.js';
+import { allGroups, getPage, isLive } from '../lib/routes.js';
+import { TOOL_PATHS } from '../lib/toolPages.js';
+import { langOf, useT, t as tIn } from '../i18n/index.js';
 import SoonBadge from './SoonBadge.astro';
 
-const { t, raw, render, listTitle } = useT(langOf(Astro.url));
+/**
+ * Every tool on the site on one page, with a search box and jump links.
+ *
+ * Grew from "all converters" once the site had more tools than a menu can
+ * hold: the header and footer now list the popular ones, and this page is
+ * the complete index, one click from every page. So every page of the site
+ * stays at most two clicks from home.
+ *
+ * The search is a filter over the cards already on the page: no index, no
+ * request, nothing to load. Each card carries its English AND Hindi name, so
+ * "chanakya" finds चाणक्य on the Hindi page and the other way round.
+ */
+const lang = langOf(Astro.url);
+const { t, raw, render, listTitle } = useT(lang);
 const P = '/all-converters';
 const groups = allGroups();
 
-const total = groups.reduce((n, g) => n + g.pages.length, 0);
-const liveCount = groups.reduce(
-  (n, g) => n + g.pages.filter((p) => p.live).length,
-  0,
-);
+const live = (paths: string[]) => paths.map(getPage).filter((p) => p && isLive(p));
+const TYPING = live([
+  '/english-to-hindi-typing',
+  '/hindi-keyboard',
+  '/hindi-typing-test',
+  '/hindi-typing-test-for-exams',
+  '/remington-hindi-keyboard',
+  '/kruti-dev-keyboard',
+  '/hindi-typing-finger-chart',
+  '/kruti-dev-matra-chart',
+  '/hindi-typing-practice-sheets',
+]);
+const TOOLS = live(TOOL_PATHS);
+
+const converterCount = groups.reduce((n, g) => n + g.pages.filter((p) => p.live).length, 0);
+const total = converterCount + TOOLS.length + TYPING.length;
 const body: string[] = raw('allConverters.body');
+
+// Words a search can match: the page's nav label and h1 in both languages.
+const keywords = (path: string) =>
+  ['en', 'hi']
+    .flatMap((l) => [tIn(l, `pages.${path}.nav`), tIn(l, `pages.${path}.h1`)])
+    .join(' ')
+    .replace(/<[^>]+>/g, ' ')
+    .toLowerCase();
+
+const SECTIONS = [
+  { id: 'converters', label: t('allConverters.sections.converters') },
+  { id: 'tools', label: t('allConverters.sections.tools') },
+  { id: 'typing', label: t('allConverters.sections.typing') },
+];
 ---
 
 <Base title={t(`pages.${P}.title`)} description={t(`pages.${P}.description`)}>
-  <div class="wrap py-8 sm:py-12">
+  <div class="wrap py-8 sm:py-12" data-all-tools>
     <h1 class="text-3xl sm:text-4xl" set:html={render(t(`pages.${P}.h1`))} />
     <p class="mt-3 max-w-2xl text-base text-body">
-      {t('allConverters.intro', { live: liveCount, total })}
+      {t('allConverters.intro', { live: total })}
     </p>
 
+    {/* Search + jump links. Sticky, so the filter stays at hand down a long list. */}
+    <div class="sticky top-0 z-10 -mx-4 mt-6 border-b border-hairline bg-paper/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-(--radius-card) sm:border sm:px-4">
+      <label for="tool-search" class="sr-only">{t('allConverters.searchLabel')}</label>
+      <input
+        id="tool-search"
+        type="search"
+        data-tool-search
+        autocomplete="off"
+        placeholder={t('allConverters.searchPlaceholder')}
+        class="w-full rounded-(--radius-card) border border-hairline bg-surface px-4 py-3 text-base text-ink placeholder:text-mute focus:border-brick focus:outline-none"
+      />
+      <nav aria-label={t('allConverters.jumpLabel')} class="mt-3 flex flex-wrap gap-2 text-sm">
+        {
+          SECTIONS.map((s) => (
+            <a href={`#${s.id}`} class="rounded-full border border-hairline px-3 py-1 text-body no-underline hover:border-brick hover:text-ink">
+              {s.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <p data-no-results hidden class="mt-8 text-body">{t('allConverters.noResults')}</p>
+
+    {/* ---------------- Converters, grouped by the font you have ---------------- */}
+    <section id="converters" class="scroll-mt-32" data-section>
+      <h2 class="mt-10 text-2xl">{t('allConverters.sections.converters')}</h2>
+      {
+        groups.map((g) => (
+          <section class="mt-6" data-section>
+            <h3 class="text-lg" set:html={render(t(`groups.${g.name}`))} />
+            <ul class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {g.pages.map((p) => (
+                <li data-route={p.path} data-search={keywords(p.path)}>
+                  <a
+                    href={p.path}
+                    class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron"
+                  >
+                    <span class="flex items-start justify-between gap-3">
+                      <span class="font-medium text-ink" set:html={render(listTitle(t(`pages.${p.path}.h1`)))} />
+                      {p.status === 'live' && (
+                        <span class="mt-0.5 shrink-0 rounded-full bg-inset px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ok">
+                          {t('allConverters.live')}
+                        </span>
+                      )}
+                      <SoonBadge status={p.status} class="mt-0.5" />
+                    </span>
+                    <span
+                      class="mt-1.5 text-sm text-body"
+                      set:html={render(t(`pages.${p.path}.description`))}
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </section>
+
+    {/* ---------------- Everyday Hindi tools and typing ---------------- */}
     {
-      groups.map((g) => (
-        <section class="mt-10">
-          <h2 class="text-xl" set:html={render(t(`groups.${g.name}`))} />
-          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
-            {g.pages.map((p) => (
-              <li data-route={p.path}>
-                <a
-                  href={p.path}
-                  class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron"
-                >
-                  <span class="flex items-start justify-between gap-3">
-                    <span class="font-medium text-ink" set:html={render(listTitle(t(`pages.${p.path}.h1`)))} />
-                    {p.status === 'live' && (
-                      <span class="mt-0.5 shrink-0 rounded-full bg-inset px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ok">
-                        {t('allConverters.live')}
-                      </span>
-                    )}
-                    <SoonBadge status={p.status} class="mt-0.5" />
-                  </span>
-                  <span
-                    class="mt-1.5 text-sm text-body"
-                    set:html={render(t(`pages.${p.path}.description`))}
-                  />
+      [
+        { id: 'tools', pages: TOOLS },
+        { id: 'typing', pages: TYPING },
+      ].map((s) => (
+        <section id={s.id} class="scroll-mt-32" data-section>
+          <h2 class="mt-12 text-2xl">{t(`allConverters.sections.${s.id}`)}</h2>
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {s.pages.map((p) => (
+              <li data-route={p!.path} data-search={keywords(p!.path)}>
+                <a href={p!.path} class="flex h-full flex-col card p-4 no-underline transition-colors hover:border-saffron">
+                  <span class="font-medium text-ink" set:html={render(listTitle(t(`pages.${p!.path}.h1`)))} />
+                  <span class="mt-1.5 text-sm text-body" set:html={render(t(`pages.${p!.path}.description`))} />
                 </a>
               </li>
             ))}
@@ -58,3 +147,38 @@ const body: string[] = raw('allConverters.body');
     <div class="prose-page mt-14 text-body" set:html={body.map(render).join('\n')} />
   </div>
 </Base>
+
+<script>
+  // Filter the cards as you type. Sections with no match hide, and a line
+  // says so when nothing matches at all.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-all-tools]')) {
+    const input = root.querySelector<HTMLInputElement>('[data-tool-search]');
+    const none = root.querySelector<HTMLElement>('[data-no-results]');
+    const cards = [...root.querySelectorAll<HTMLElement>('li[data-search]')];
+    const sections = [...root.querySelectorAll<HTMLElement>('[data-section]')];
+    if (!input) continue;
+    const norm = (s: string) => s.toLowerCase().normalize('NFC').replace(/\s+/g, ' ').trim();
+    const apply = () => {
+      const words = norm(input.value).split(' ').filter(Boolean);
+      let shown = 0;
+      for (const li of cards) {
+        const hay = `${li.dataset.search ?? ''} ${li.textContent ?? ''}`.toLowerCase();
+        const ok = words.every((w) => hay.includes(w));
+        li.hidden = !ok;
+        if (ok) shown++;
+      }
+      // Innermost first, so a group hides before the section around it is judged.
+      for (const s of [...sections].reverse()) {
+        s.hidden = words.length > 0 && !s.querySelector('li[data-search]:not([hidden])');
+      }
+      if (none) none.hidden = shown > 0;
+    };
+    input.addEventListener('input', apply);
+    // ?q=... opens the page already filtered.
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) {
+      input.value = q;
+      apply();
+    }
+  }
+</script>

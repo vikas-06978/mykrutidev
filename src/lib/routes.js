@@ -3,7 +3,7 @@
  *
  * Five things read this array and nothing else:
  *   1. the sitemap `filter()` in astro.config.mjs   (only live pages)
- *   2. Header.astro's nav                           (only live pages, grouped)
+ *   2. Header.astro's nav                           (NAV_MENUS: the most used live pages)
  *   3. the interlink block in ConverterPage.astro   (`related`)
  *   4. each page's `noindex` flag                   (everything not live)
  *   5. /all-converters                              (the whole table, with status)
@@ -349,24 +349,48 @@ export const PAGES = [
     related: ['/kruti-dev-to-chanakya', '/chanakya-to-unicode'],
   },
 
-  // ---- Shusha: older Hindi DTP font, map is empty --------------------------
+  // ---- Shusha and Shivaji: one layout, read off the font files. Shivaji is
+  // the Marathi name, with a full stop where Shusha has the danda. Beta until
+  // a real document typed in either has been run through it.
   {
     path: '/shusha-to-unicode',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'shusha',
     to: 'unicode',
     group: 'Shusha',
-    related: ['/unicode-to-shusha', '/'],
+    related: ['/unicode-to-shusha', '/shivaji-to-unicode', '/'],
+    beta: true,
   },
   {
     path: '/unicode-to-shusha',
-    ready: false,
+    ready: true,
     kind: 'converter',
     from: 'unicode',
     to: 'shusha',
-    group: 'Unicode / Hindi',
-    related: ['/shusha-to-unicode', '/'],
+    group: 'Shusha',
+    related: ['/shusha-to-unicode', '/unicode-to-shivaji', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/shivaji-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'shivaji',
+    to: 'unicode',
+    group: 'Marathi',
+    related: ['/unicode-to-shivaji', '/shusha-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-shivaji',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'shivaji',
+    group: 'Marathi',
+    related: ['/shivaji-to-unicode', '/unicode-to-shusha', '/unicode-to-kruti-dev'],
+    beta: true,
   },
 
   // ---- Preeti: Nepali, not Hindi. Map read off the font file, glyph by glyph;
@@ -823,32 +847,67 @@ function groupConverters() {
 }
 
 /**
- * Nav menus, grouped by source font family.
+ * The header's menus: the most used pages, in three menus, each ending in a
+ * link to the full list on /all-converters.
  *
- * A group only appears if it has at least one live page: a menu containing
- * nothing but "soon" items is a dead end. Within a group every converter is
- * listed, live ones first, and `live` tells the menu whether to render a link
- * or a greyed-out placeholder - so the menu doubles as a roadmap without ever
- * linking somewhere unusable.
+ * The header used to have one dropdown per source font. With every font
+ * added it grew another, so the most used tools (Kruti Dev and Unicode)
+ * were buried among rare ones. Now the header holds a fixed, short list
+ * chosen by what people search for most, and /all-converters ("All tools")
+ * holds everything, with a search. Nothing is more than a click away from
+ * the header, and the header never grows.
+ *
+ * Only live pages are listed: a menu is no place for "coming soon".
  */
-export function navGroups() {
-  return [...groupConverters()]
-    .filter(([, pages]) => pages.some((p) => p.live))
-    .map(([name, pages]) => ({
-      name,
-      pages: [...pages].sort((a, b) => Number(b.live) - Number(a.live)),
-    }));
-}
+export const NAV_MENUS = [
+  {
+    key: 'converters',
+    all: '/all-converters#converters',
+    paths: [
+      '/',
+      '/unicode-to-kruti-dev',
+      '/kruti-dev-to-mangal',
+      '/mangal-to-kruti-dev',
+      '/devlys-to-unicode',
+      '/unicode-to-devlys',
+      '/preeti-to-unicode',
+      '/shivaji-to-unicode',
+    ],
+  },
+  {
+    key: 'typing',
+    all: '/all-converters#typing',
+    paths: [
+      '/english-to-hindi-typing',
+      '/hindi-typing-test',
+      '/hindi-typing-test-for-exams',
+      '/hindi-keyboard',
+      '/remington-hindi-keyboard',
+      '/kruti-dev-keyboard',
+    ],
+  },
+  {
+    key: 'tools',
+    all: '/all-converters#tools',
+    paths: [
+      '/number-to-hindi-words',
+      '/amount-in-words',
+      '/english-date-to-hindi',
+      '/hindi-word-counter',
+      '/hindi-to-english-numbers',
+      '/hindi-to-iast',
+    ],
+  },
+];
 
-/**
- * Live pages that sit in the menubar as their own item rather than inside a
- * source-font group.
- *
- * A converter is filed under the font you already have, because that is the
- * question its visitor arrives with. A tool like Roman typing has no source
- * font at all, so it has nowhere to be filed and gets its own entry.
- */
-export const navTools = () => PAGES.filter((p) => (p.tool || p.menu) && isLive(p));
+/** NAV_MENUS with each path resolved to its live page. */
+export function navMenus() {
+  return NAV_MENUS.map((m) => ({
+    key: m.key,
+    all: m.all,
+    pages: m.paths.map(getPage).filter((p) => p && isLive(p)),
+  }));
+}
 
 /** /all-converters, grouped the same way but showing every group. */
 export function allGroups() {

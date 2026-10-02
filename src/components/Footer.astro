@@ -1,12 +1,31 @@
 ---
-import { liveConverters, getPage, isLive } from '../lib/routes.js';
+import { getPage, isLive } from '../lib/routes.js';
 import { GUIDES, GUIDES_PATH, guidePath } from '../lib/guides.js';
 import { readSupport } from '../lib/support.build.js';
-import { TOOL_PATHS } from '../lib/toolPages.js';
 import { langOf, useT } from '../i18n/index.js';
 
 const { t, render, listTitle, path: to } = useT(langOf(Astro.url));
-const links = liveConverters();
+// The footer lists the most used converters and tools, not all of them: the
+// site has grown past what a footer can hold. "All tools" lists everything,
+// and it is linked here and from the header on every page.
+const POPULAR_CONVERTERS = [
+  '/',
+  '/unicode-to-kruti-dev',
+  '/kruti-dev-to-mangal',
+  '/mangal-to-kruti-dev',
+  '/devlys-to-unicode',
+  '/unicode-to-devlys',
+  '/abbasi-chanakya-to-unicode',
+  '/preeti-to-unicode',
+];
+const POPULAR_TOOLS = [
+  '/number-to-hindi-words',
+  '/amount-in-words',
+  '/english-date-to-hindi',
+  '/hindi-word-counter',
+  '/hindi-to-english-numbers',
+  '/hindi-to-iast',
+];
 const year = new Date().getFullYear();
 
 // On every page, so every page of the site is at most two clicks from home:
@@ -22,7 +41,8 @@ const typing = live([
   '/kruti-dev-010-font',
   '/kruti-dev-keyboard',
 ]);
-const tools = live(TOOL_PATHS);
+const links = live(POPULAR_CONVERTERS);
+const tools = live(POPULAR_TOOLS);
 const site = live(['/about', '/contact', '/privacy-policy', '/terms']);
 // Only once UPI is configured (PUBLIC_UPI_QR or PUBLIC_UPI_ID, see src/lib/support.build.js).
 const support = readSupport(import.meta.env) !== null;
@@ -45,7 +65,7 @@ const linkClass = 'text-body no-underline hover:underline';
           {
             links.map((p) => (
               <li>
-                <a href={to(p.path)} class={linkClass} set:html={render(listTitle(t(`pages.${p.path}.h1`)))} />
+                <a href={to(p!.path)} class={linkClass} set:html={render(listTitle(t(`pages.${p!.path}.h1`)))} />
               </li>
             ))
           }
@@ -80,6 +100,11 @@ const linkClass = 'text-body no-underline hover:underline';
               </li>
             ))
           }
+          <li>
+            <a href={to('/all-converters')} class={linkClass}>
+              {t('nav.allConverters')}
+            </a>
+          </li>
         </ul>
       </nav>
 

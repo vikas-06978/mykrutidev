@@ -271,10 +271,17 @@ describe('convert() routing', () => {
   test('a font with no map at all is flagged unavailable', () => {
     // "Unavailable" means there is nothing to convert WITH - an empty table.
     // It is not the same question as `accurate`, which asks whether a table
-    // that does exist has been verified. Chanakya now has a table and so is no
-    // longer unavailable; it is still not accurate, and the test for that gate
-    // lives in chanakya.test.js.
-    assert.equal(isPairUnavailable('shusha', 'unicode'), true);
+    // that does exist has been verified. Chanakya has a table and so is not
+    // unavailable; it is still not accurate, and the test for that gate lives
+    // in chanakya.test.js. Every registered font has a table today, so the
+    // empty case is checked on a stand-in.
+    FONTS.__empty = { key: '__empty', kind: 'legacy', map: {} };
+    try {
+      assert.equal(isPairUnavailable('__empty', 'unicode'), true);
+    } finally {
+      delete FONTS.__empty;
+    }
+    assert.equal(isPairUnavailable('shusha', 'unicode'), false);
     assert.equal(isPairUnavailable('preeti', 'unicode'), false);
     assert.equal(isPairUnavailable('chanakya', 'unicode'), false);
     assert.equal(isPairUnavailable('kruti-dev', 'unicode'), false);
@@ -449,7 +456,7 @@ describe('font registry', () => {
     assert.equal(isPairAccurate('kruti-dev', 'devlys'), true);
     assert.equal(isPairAccurate('kruti-dev', 'chanakya'), false);
     assert.equal(isPairAccurate('chanakya', 'unicode'), false);
-    assert.equal(isPairAccurate('shusha', 'unicode'), false);
+    assert.equal(isPairAccurate('shusha', 'unicode'), true);
   });
 
   test('boxLabel disambiguates Unicode as Hindi', () => {

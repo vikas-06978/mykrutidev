@@ -13,7 +13,7 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
-import { SITE, PAGES, isLive, isIndexable, statusOf, navGroups } from '../src/lib/routes.js';
+import { SITE, PAGES, isLive, isIndexable, statusOf, navMenus } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
 import { PRINTABLES, chartRows, practiceSheets, matraRows, pdfFile, pdfHref } from '../src/lib/printables.js';
@@ -229,7 +229,9 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
         }
       }
     }
-    assert.ok(soon > 100 && live > 100, `too few rows checked (${soon} soon, ${live} live)`);
+    // Soon rows are only on All tools now, in both languages; live rows are
+    // in every page's menus too.
+    assert.ok(soon >= 10 && live > 100, `too few rows checked (${soon} soon, ${live} live)`);
   });
 
   test('no badge anywhere outside a listed route', () => {
@@ -239,18 +241,22 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
     }
   });
 
-  test('every coming-soon item in the nav has the badge, desktop and mobile, en and hi', () => {
-    const soonInNav = navGroups().flatMap((g) => g.pages).filter((x) => x.status === 'soon');
-    assert.ok(soonInNav.length > 0);
+  test('the header menus list only working pages, as links, desktop and mobile, en and hi', () => {
+    // "Coming soon" lives on All tools. A menu is for what works today.
+    const want = navMenus().flatMap((m) => m.pages.map((p) => p.path));
     for (const home of ['/', '/hi']) {
       const html = pages.get(home);
       for (const marker of ['data-desktop-nav', 'data-mobile-nav']) {
         const nav = rows(section(html, marker));
-        for (const s of soonInNav) {
-          const r = nav.find((x) => x.route === s.path);
-          assert.ok(r, `${home} ${marker}: ${s.path} missing`);
-          assert.match(r.html, /data-soon-badge/, `${home} ${marker}: ${s.path} has no badge`);
-          assert.match(r.html, /aria-disabled="true"/, `${home} ${marker}: ${s.path} must stay greyed, not a link`);
+        assert.deepEqual(nav.map((r) => r.route), want, `${home} ${marker}`);
+        for (const r of nav) {
+          assert.doesNotMatch(r.html, /data-soon-badge/, `${home} ${marker}: ${r.route}`);
+          assert.match(r.html, /<a\b/, `${home} ${marker}: ${r.route} must be a link`);
+        }
+        // Each menu ends with its link to All tools.
+        for (const m of navMenus()) {
+          const href = (home === '/hi' ? '/hi' : '') + m.all.replace('#', '/#');
+          assert.ok(section(html, marker).includes(`href="${href}"`), `${home} ${marker}: no link to ${href}`);
         }
       }
     }

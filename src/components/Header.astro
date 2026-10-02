@@ -1,7 +1,6 @@
 ---
-import { navGroups, navTools, getPage, isLive } from '../lib/routes.js';
+import { navMenus, getPage, isLive } from '../lib/routes.js';
 import { LOCALES, LOCALE_META, splitLocale, localizePath, useT } from '../i18n/index.js';
-import SoonBadge from './SoonBadge.astro';
 import ThemePicker from './ThemePicker.astro';
 
 // `path` is the route without any /hi prefix, so "is this the current page"
@@ -11,8 +10,8 @@ const { t, render, path: to } = useT(lang);
 // Nav labels name fonts ("Kruti Dev → Mangal"), so they go through render(),
 // which marks the font names translate="no". Use with set:html.
 const label = (p: { path: string }) => render(t(`pages.${p.path}.nav`));
-const sub = (p: { path: string }) => t(`pages.${p.path}.navSub`);
-const groupName = (name: string) => render(t(`groups.${name}`));
+const { maybe } = useT(lang);
+const sub = (p: { path: string }) => maybe(`pages.${p.path}.navSub`) as string | undefined;
 
 // English | हिंदी - each links to THIS page in that language, never the home page.
 // The 404 page has no twin - it is one file for both languages - so from
@@ -25,13 +24,15 @@ const switcher = LOCALES.map((l) => ({
   current: l === lang,
 }));
 
-// Only groups with at least one live page appear. Pending pages are listed
-// inside their group but greyed and not linked - never send a visitor to a page
-// that cannot convert yet.
-const groups = navGroups();
-// Tools sit beside the groups, not inside one: they have no source font to be
-// filed under. Rendered as plain links, so they need no dropdown machinery.
-const tools = navTools();
+// Three short menus of the most used pages, each ending in "See all"; every
+// page of the site is on /all-converters ("All tools"). See NAV_MENUS.
+const menus = navMenus();
+// "/all-converters#tools" -> "/hi/all-converters/#tools": the anchor goes
+// after the localized, slashed path, never inside it.
+const toAnchor = (href: string) => {
+  const [p, hash] = href.split('#');
+  return to(p) + (hash ? `#${hash}` : '');
+};
 const allConverters = getPage('/all-converters');
 const showAll = allConverters && isLive(allConverters);
 
@@ -98,22 +99,22 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
     <nav aria-label={t('nav.aria')} class="hidden md:block" data-desktop-nav>
       <ul class="flex items-center gap-1 text-sm">
         {
-          groups.map((g, i) => (
+          menus.map((m) => (
             <li class="relative" data-group>
               <button
                 type="button"
-                id={`navtrigger-${i}`}
+                id={`navtrigger-${m.key}`}
                 aria-expanded="false"
-                aria-controls={`navmenu-${i}`}
+                aria-controls={`navmenu-${m.key}`}
                 data-trigger
                 class:list={[
                   'flex cursor-pointer items-center gap-1.5 rounded-(--radius-chrome) px-2.5 py-2 whitespace-nowrap',
-                  groupHasCurrent(g.pages)
+                  groupHasCurrent(m.pages)
                     ? 'bg-inset font-medium text-ink'
                     : 'text-body hover:bg-inset hover:text-ink',
                 ]}
               >
-                <span set:html={groupName(g.name)} />
+                {t(`nav.menus.${m.key}`)}
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 10 6"
@@ -132,122 +133,40 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               </button>
 
               <ul
-                id={`navmenu-${i}`}
-                aria-labelledby={`navtrigger-${i}`}
+                id={`navmenu-${m.key}`}
+                aria-labelledby={`navtrigger-${m.key}`}
                 hidden
                 data-menu
                 class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu before:absolute before:inset-x-0 before:bottom-full before:h-1"
               >
-                {g.pages.map((p) =>
-                  p.live ? (
-                    <li data-route={p.path}>
-                      <a
-                        href={to(p.path)}
-                        aria-current={isCurrent(p.path) ? 'page' : undefined}
-                        class:list={[
-                          'block rounded-(--radius-chrome) px-3 py-2.5 no-underline',
-                          isCurrent(p.path)
-                            ? 'bg-inset font-medium text-brick'
-                            : 'text-body hover:bg-inset hover:text-ink',
-                        ]}
-                      >
-                        <span set:html={label(p)} />
-                      </a>
-                    </li>
-                  ) : (
-                    <li data-route={p.path}>
-                      {/* Not a link on purpose - the page exists but cannot convert yet. */}
-                      <span
-                        aria-disabled="true"
-                        aria-current={isCurrent(p.path) ? 'page' : undefined}
-                        class:list={[
-                          'flex cursor-default items-center justify-between gap-3 rounded-(--radius-chrome) px-3 py-2.5 text-mute',
-                          isCurrent(p.path) && 'bg-inset font-medium',
-                        ]}
-                      >
-                        <span set:html={label(p)} />
-                        <SoonBadge status={p.status} />
-                      </span>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </li>
-          ))
-        }
-
-        {/*
-          Tools live in a disclosure of their own rather than as flat links.
-          They used to be flat, and that was right while there was one of them;
-          at three the menubar stops fitting its container well before the
-          container stops growing, and this nav must never scroll or wrap -
-          see the warning above.
-
-          Same markup as a converter group (`data-group`, trigger, menu), so
-          the keyboard handling, hover-open and click-outside below pick it up
-          with no special case.
-        */}
-        {
-          tools.length > 0 && (
-            <li class="relative" data-group>
-              <button
-                type="button"
-                id="navtrigger-tools"
-                aria-expanded="false"
-                aria-controls="navmenu-tools"
-                data-trigger
-                class:list={[
-                  'flex cursor-pointer items-center gap-1.5 rounded-(--radius-chrome) px-2.5 py-2 whitespace-nowrap',
-                  groupHasCurrent(tools)
-                    ? 'bg-inset font-medium text-ink'
-                    : 'text-body hover:bg-inset hover:text-ink',
-                ]}
-              >
-                {t('nav.typingTools')}
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 10 6"
-                  class="h-1.5 w-2.5 shrink-0 transition-transform duration-150"
-                  data-chevron
-                >
-                  <path
-                    d="M1 1l4 4 4-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-
-              <ul
-                id="navmenu-tools"
-                aria-labelledby="navtrigger-tools"
-                hidden
-                data-menu
-                class="absolute end-0 z-50 mt-1 min-w-64 rounded-(--radius-card) border border-hairline bg-surface p-1 shadow-menu before:absolute before:inset-x-0 before:bottom-full before:h-1"
-              >
-                {tools.map((tool) => (
-                  <li>
+                {m.pages.map((p) => (
+                  <li data-route={p.path}>
                     <a
-                      href={to(tool.path)}
-                      aria-current={isCurrent(tool.path) ? 'page' : undefined}
+                      href={to(p.path)}
+                      aria-current={isCurrent(p.path) ? 'page' : undefined}
                       class:list={[
                         'block rounded-(--radius-chrome) px-3 py-2.5 no-underline',
-                        isCurrent(tool.path)
+                        isCurrent(p.path)
                           ? 'bg-inset font-medium text-brick'
                           : 'text-body hover:bg-inset hover:text-ink',
                       ]}
                     >
-                      <span set:html={label(tool)} />
-                      <span class="block text-xs text-mute">{sub(tool)}</span>
+                      <span set:html={label(p)} />
+                      {sub(p) && <span class="block text-xs text-mute">{sub(p)}</span>}
                     </a>
                   </li>
                 ))}
+                <li class="mt-1 border-t border-hairline pt-1">
+                  <a
+                    href={toAnchor(m.all)}
+                    class="block rounded-(--radius-chrome) px-3 py-2.5 font-medium text-brick no-underline hover:bg-inset"
+                  >
+                    {t(`nav.seeAll.${m.key}`)}
+                  </a>
+                </li>
               </ul>
             </li>
-          )
+          ))
         }
 
         {
@@ -430,16 +349,16 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
         </button>
       </li>
       {
-        groups.map((g) => (
+        menus.map((m) => (
           <li>
             <details data-acc class="group">
               <summary
                 class:list={[
                   'flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base marker:hidden',
-                  groupHasCurrent(g.pages) ? 'font-medium text-ink' : 'text-body',
+                  groupHasCurrent(m.pages) ? 'font-medium text-ink' : 'text-body',
                 ]}
               >
-                <span set:html={groupName(g.name)} />
+                {t(`nav.menus.${m.key}`)}
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 10 6"
@@ -457,94 +376,33 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               </summary>
 
               <ul class="pb-2">
-                {g.pages.map((p) =>
-                  p.live ? (
-                    <li data-route={p.path}>
-                      <a
-                        href={to(p.path)}
-                        aria-current={isCurrent(p.path) ? 'page' : undefined}
-                        class:list={[
-                          'flex min-h-11 items-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
-                          isCurrent(p.path)
-                            ? 'bg-inset font-medium text-brick'
-                            : 'text-body',
-                        ]}
-                      >
-                        <span set:html={label(p)} />
-                      </a>
-                    </li>
-                  ) : (
-                    <li data-route={p.path}>
-                      <span
-                        aria-disabled="true"
-                        aria-current={isCurrent(p.path) ? 'page' : undefined}
-                        class:list={[
-                          'flex min-h-11 items-center justify-between gap-3 rounded-(--radius-chrome) px-3 py-2.5 text-mute',
-                          isCurrent(p.path) && 'bg-inset font-medium',
-                        ]}
-                      >
-                        <span set:html={label(p)} />
-                        <SoonBadge status={p.status} />
-                      </span>
-                    </li>
-                  ),
-                )}
+                {m.pages.map((p) => (
+                  <li data-route={p.path}>
+                    <a
+                      href={to(p.path)}
+                      aria-current={isCurrent(p.path) ? 'page' : undefined}
+                      class:list={[
+                        'flex min-h-11 flex-col justify-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
+                        isCurrent(p.path) ? 'bg-inset font-medium text-brick' : 'text-body',
+                      ]}
+                    >
+                      <span class="text-base" set:html={label(p)} />
+                      {sub(p) && <span class="text-xs text-mute">{sub(p)}</span>}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href={toAnchor(m.all)}
+                    class="flex min-h-11 items-center rounded-(--radius-chrome) px-3 py-2.5 font-medium text-brick no-underline"
+                  >
+                    {t(`nav.seeAll.${m.key}`)}
+                  </a>
+                </li>
               </ul>
             </details>
           </li>
         ))
-      }
-
-      {/* Same accordion as the converter groups, so the panel stays short. */}
-      {
-        tools.length > 0 && (
-          <li>
-            <details data-acc class="group">
-              <summary
-                class:list={[
-                  'flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base marker:hidden',
-                  groupHasCurrent(tools) ? 'font-medium text-ink' : 'text-body',
-                ]}
-              >
-                {t('nav.typingTools')}
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 10 6"
-                  class="h-2 w-3.5 shrink-0 text-mute transition-transform duration-150 group-open:rotate-180"
-                >
-                  <path
-                    d="M1 1l4 4 4-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </summary>
-
-              <ul class="pb-2">
-                {tools.map((tool) => (
-                  <li>
-                    <a
-                      href={to(tool.path)}
-                      aria-current={isCurrent(tool.path) ? 'page' : undefined}
-                      class:list={[
-                        'flex min-h-11 flex-col justify-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
-                        isCurrent(tool.path)
-                          ? 'bg-inset font-medium text-brick'
-                          : 'text-body',
-                      ]}
-                    >
-                      <span class="text-base" set:html={label(tool)} />
-                      <span class="text-xs text-mute">{sub(tool)}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          </li>
-        )
       }
 
       {

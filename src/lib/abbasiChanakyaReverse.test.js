@@ -8,7 +8,7 @@ import {
   ONE_WAY,
   TESTS,
 } from './abbasiChanakya.js';
-import { getPage, isLive, isIndexable, navGroups, reversePage, SITE } from './routes.js';
+import { getPage, isLive, isIndexable, allGroups, reversePage, SITE } from './routes.js';
 import { previewFontFor } from './legacyFonts.js';
 
 /** Unicode -> Abbasi Chanakya New. */
@@ -167,11 +167,11 @@ describe('what is left alone', () => {
 describe('the page', () => {
   const page = getPage('/unicode-to-abbasi-chanakya');
 
-  test('is live, indexed, Beta, and under the Chanakya dropdown', () => {
+  test('is live, indexed, Beta, and listed under Chanakya on All tools', () => {
     assert.ok(isLive(page));
     assert.ok(isIndexable(new URL(page.path, SITE).href));
     assert.equal(page.beta, true);
-    const chanakya = navGroups().find((g) => g.name === 'Chanakya');
+    const chanakya = allGroups().find((g) => g.name === 'Chanakya');
     const live = chanakya.pages.filter((p) => p.live).map((p) => p.path);
     for (const p of ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya']) assert.ok(live.includes(p), p);
     // Everything live under "Chanakya" is an Abbasi page: the generic Chanakya

@@ -78,3 +78,21 @@
     url('/fonts/preeti.woff') format('truetype');
   font-display: swap;
 }
+
+/* Shusha and Shivaji01: preview the output of their converter pages. Each map
+   was read off the very file its face points at (vendor/fonts/). */
+@font-face {
+  font-family: 'MKD Shusha';
+  src:
+    local('Shusha'),
+    url('/fonts/shusha.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Shivaji01';
+  src:
+    local('Shivaji01'),
+    url('/fonts/shivaji01.woff') format('woff');
+  font-display: swap;
+}

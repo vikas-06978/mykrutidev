@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 import { FONTS, convert, isAccurate } from './fontMaps.js';
 import { ABBASI_CHANAKYA_TABLE, EXCLUDED, TESTS } from './abbasiChanakya.js';
-import { getPage, isLive, isIndexable, navGroups, SITE } from './routes.js';
+import { getPage, isLive, isIndexable, allGroups, SITE } from './routes.js';
 import { previewFontFor } from './legacyFonts.js';
 
 /** Abbasi Chanakya New -> Unicode. */
@@ -151,12 +151,12 @@ describe('the table', () => {
 describe('the page', () => {
   const page = getPage('/abbasi-chanakya-to-unicode');
 
-  test('is live, in the sitemap and in the nav, with a Beta badge', () => {
+  test('is live, in the sitemap and on All tools, with a Beta badge', () => {
     assert.ok(isLive(page));
     assert.ok(isIndexable(new URL(page.path, SITE).href));
     assert.ok(
-      navGroups().some((g) => g.pages.some((p) => p.path === page.path && p.live)),
-      'not reachable from the nav',
+      allGroups().some((g) => g.pages.some((p) => p.path === page.path && p.live)),
+      'not listed on All tools',
     );
     assert.equal(page.beta, true);
     assert.equal(page.betaNote, 'For text typed in the Abbasi Chanakya New font.');

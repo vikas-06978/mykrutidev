@@ -1,0 +1,137 @@
+{
+  "_comment": "Shusha <-> Unicode ground truth. Every left side was written by the converter, then drawn in vendor/fonts/Shusha/Shusha.ttf in a browser and read back by eye against the Unicode on the right before it was recorded here.",
+  "words": [
+    {
+      "s": "Baart",
+      "u": "भारत"
+    },
+    {
+      "s": "sarkar¸",
+      "u": "सरकार,"
+    },
+    {
+      "s": "raYT/Iya",
+      "u": "राष्ट्रीय"
+    },
+    {
+      "s": "iSaxaa",
+      "u": "शिक्षा"
+    },
+    {
+      "s": "naIit.",
+      "u": "नीति।"
+    },
+    {
+      "s": "p`QaanamaM~I",
+      "u": "प्रधानमंत्री"
+    },
+    {
+      "s": "kayaa-laya¸",
+      "u": "कार्यालय,"
+    },
+    {
+      "s": "maharaYT/",
+      "u": "महाराष्ट्र"
+    },
+    {
+      "s": "Saasana.",
+      "u": "शासन।"
+    },
+    {
+      "s": "kma-caarI",
+      "u": "कर्मचारी"
+    },
+    {
+      "s": "inado-Sa",
+      "u": "निर्देश"
+    },
+    {
+      "s": "mah<vapUNa-",
+      "u": "महत्त्वपूर्ण"
+    },
+    {
+      "s": "ivaValaya",
+      "u": "विद्यालय"
+    },
+    {
+      "s": "&ana",
+      "u": "ज्ञान"
+    },
+    {
+      "s": "EaI",
+      "u": "श्री"
+    },
+    {
+      "s": "ÌYNa",
+      "u": "कृष्ण"
+    },
+    {
+      "s": "ihMdI",
+      "u": "हिंदी"
+    },
+    {
+      "s": "marazI",
+      "u": "मराठी"
+    },
+    {
+      "s": "BaaYaa",
+      "u": "भाषा"
+    },
+    {
+      "s": "xao~",
+      "u": "क्षेत्र"
+    },
+    {
+      "s": "puZIla",
+      "u": "पुढील"
+    },
+    {
+      "s": "kLvaavao",
+      "u": "कळवावे"
+    },
+    {
+      "s": "Aa^iÔsa",
+      "u": "ऑफ़िस"
+    },
+    {
+      "s": "Da^@Tr",
+      "u": "डॉक्टर"
+    },
+    {
+      "s": "]wva",
+      "u": "उद्धव"
+    },
+    {
+      "s": "Wara",
+      "u": "द्वारा"
+    },
+    {
+      "s": "}jaa-",
+      "u": "ऊर्जा"
+    },
+    {
+      "s": "eOithaisak",
+      "u": "ऐतिहासिक"
+    },
+    {
+      "s": "AaOYaQa",
+      "u": "औषध"
+    },
+    {
+      "s": "šSvar",
+      "u": "ईश्वर"
+    },
+    {
+      "s": "D/amaa",
+      "u": "ड्रामा"
+    },
+    {
+      "s": "ga`ama",
+      "u": "ग्राम"
+    },
+    {
+      "s": "ba`ah\\maNa",
+      "u": "ब्राह्मण"
+    }
+  ]
+}

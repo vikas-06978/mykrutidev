@@ -64,6 +64,10 @@ export const PREVIEW_FONTS = {
   // the exact file the mapping was built from. Unrelated to Walkman-Chanakya.
   'abbasi-chanakya': preview('Abbasi Chanakya New', 'abbasi-chanakya-new.woff'),
   preeti: preview('Preeti', 'preeti.woff', 'truetype'),
+  // Converted from vendor/fonts/Shusha/Shusha.ttf and Shivaji/Shivaji01.ttf,
+  // the files their maps were read from.
+  shusha: preview('Shusha', 'shusha.woff'),
+  shivaji: preview('Shivaji01', 'shivaji01.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */
