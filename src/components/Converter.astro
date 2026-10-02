@@ -83,13 +83,12 @@ const outputFaceName = previewFont?.label ?? toFont.label;
 const previewStack = previewFont?.stack ?? toFont.css;
 
 // Not every converter is part of the first-visit download (src/pwa), or that
-// download would grow with every font the site adds. Left out, and kept for
-// offline use from the first time they are opened like the guides:
-//  - font-to-font pages, each a pairing of two converters that are in it;
-//  - pages for a font in another language (Preeti, Nepali), whose readers
-//    are not the Hindi visitors the first download is sized for.
-const otherLanguage = Boolean(fromFont.lang || toFont.lang);
-const offlineOnVisit = (fromFont.kind === 'legacy' && outputIsLegacy) || otherLanguage;
+// download would grow with every font the site adds. Only the core pages are:
+// Kruti Dev, DevLys and Mangal to and from Unicode (`core` in fontMaps.js),
+// which is what most visitors come for. Every other converter - each further
+// font, and the font-to-font pairings - is kept for offline use from the
+// first time it is opened, like the guides.
+const offlineOnVisit = !(fromFont.core && toFont.core) || (fromFont.kind === 'legacy' && outputIsLegacy);
 
 // Preeti's number keys are letters, so "keep English words and numbers" has
 // nothing it could keep: convert() ignores the box for such fonts, and the

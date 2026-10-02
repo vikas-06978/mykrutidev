@@ -1277,6 +1277,8 @@ const PREETI_REV = {
 export const FONTS = {
   'kruti-dev': {
     key: 'kruti-dev',
+    // In the first-visit offline download (see Converter.astro).
+    core: true,
     label: 'Kruti Dev',
     shortLabel: 'Kruti',
     kind: 'legacy',
@@ -1294,6 +1296,8 @@ export const FONTS = {
   },
   unicode: {
     key: 'unicode',
+    // In the first-visit offline download (see Converter.astro).
+    core: true,
     label: 'Unicode',
     altLabel: 'Unicode / Hindi',
     kind: 'unicode',
@@ -1304,6 +1308,8 @@ export const FONTS = {
   },
   mangal: {
     key: 'mangal',
+    // In the first-visit offline download (see Converter.astro).
+    core: true,
     label: 'Mangal',
     altLabel: 'Mangal (Unicode)',
     kind: 'unicode',
@@ -1315,6 +1321,8 @@ export const FONTS = {
   },
   devlys: {
     key: 'devlys',
+    // In the first-visit offline download (see Converter.astro).
+    core: true,
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
