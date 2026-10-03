@@ -446,6 +446,25 @@ function readRun(xml, node, resolve) {
 const legacyFontOf = (run, key) =>
   fontIs(run.font.ascii, key) ? run.font.ascii : fontIs(run.font.hAnsi, key) ? run.font.hAnsi : null;
 
+/**
+ * The font a run is really typed in, as { name, key }: the page's own font
+ * (or one on its keyboard), else any other verified font in WORD_FONTS. So a
+ * paragraph in Arjun inside a Kruti Dev document converts as Arjun, and a
+ * Preeti file dropped on the Kruti Dev page still comes out right. A run
+ * already in the target font is left alone. Null for any other font.
+ */
+function sourceOf(run, pair) {
+  const own = legacyFontOf(run, pair.from);
+  if (own) return { name: own, key: pair.from };
+  for (const name of [run.font.ascii, run.font.hAnsi]) {
+    if (!name) continue;
+    for (const [k, w] of Object.entries(WORD_FONTS)) {
+      if (k !== pair.to && FONTS[k]?.accurate && w.match.test(name)) return { name, key: k };
+    }
+  }
+  return null;
+}
+
 /** Formatting that matters to a reader - spell-check language and noProof do not. */
 const formatKey = (rPr) =>
   rPr
@@ -525,7 +544,7 @@ export async function convertPart(xml, { direction, font, resolve, onBatch }) {
 }
 
 function legacyContainer(xml, container, pair, font, resolve, edits, paragraphs, stats) {
-  /** @type {{ runs: Run[], between: import('./xmlScan.js').XmlNode[], pending: import('./xmlScan.js').XmlNode[] } | null} */
+  /** @type {{ runs: Run[], between: import('./xmlScan.js').XmlNode[], pending: import('./xmlScan.js').XmlNode[], from: string, name: string } | null} */
   let group = null;
 
   const close = () => {
@@ -536,8 +555,8 @@ function legacyContainer(xml, container, pair, font, resolve, edits, paragraphs,
   for (const c of container.children) {
     if (c.name === 'w:r') {
       const run = readRun(xml, c, resolve);
-      const legacy = legacyFontOf(run, pair.from);
-      if (!legacy) {
+      const src = sourceOf(run, pair);
+      if (!src) {
         stats.alreadyChars += countDeva(run.text);
         close();
         continue;
@@ -548,9 +567,9 @@ function legacyContainer(xml, container, pair, font, resolve, edits, paragraphs,
       }
       if (group) {
         const last = group.runs[group.runs.length - 1];
-        const sameFont = legacyFontOf(last, pair.from).toLowerCase() === legacy.toLowerCase();
+        const sameFont = group.from === src.key && group.name.toLowerCase() === src.name.toLowerCase();
         const sameFormat = formatKey(last.rPr) === formatKey(run.rPr);
-        if (sameFont && (sameFormat || splitsSyllable(last.text, run.text, pair.from))) {
+        if (sameFont && (sameFormat || splitsSyllable(last.text, run.text, src.key))) {
           group.between.push(...group.pending);
           group.pending = [];
           group.runs.push(run);
@@ -558,7 +577,7 @@ function legacyContainer(xml, container, pair, font, resolve, edits, paragraphs,
         }
       }
       close();
-      group = { runs: [run], between: [], pending: [] };
+      group = { runs: [run], between: [], pending: [], from: src.key, name: src.name };
     } else if (TRANSPARENT.has(c.name) && group) {
       group.pending.push(c);
     } else {
@@ -578,9 +597,9 @@ function emitLegacyGroup(xml, group, pair, font, edits, paragraphs, stats) {
   let pendingText = '';
   const flush = () => {
     if (!pendingText) return;
-    const u = legacyToUnicode(pendingText, pair.from);
+    const u = legacyToUnicode(pendingText, group.from);
     stats.convertedChars += countDeva(u);
-    const out = isUnicodeKey(pair.to) ? u : legacyToTarget(pendingText, pair.from, pair.to);
+    const out = isUnicodeKey(pair.to) ? u : legacyToTarget(pendingText, group.from, pair.to);
     body += `<w:t xml:space="preserve">${encodeText(out)}</w:t>`;
     pendingText = '';
   };

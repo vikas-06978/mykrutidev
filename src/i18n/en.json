@@ -57,7 +57,8 @@
     "Nepali": "Nepali",
     "Other scripts": "Other scripts",
     "More": "More",
-    "Marathi": "Marathi"
+    "Marathi": "Marathi",
+    "More Hindi fonts": "More Hindi fonts"
   },
   "fontNames": {
     "Abbasi Chanakya New": "Abbasi Chanakya New",
@@ -178,6 +179,10 @@
     "limits": ".docx or .txt, up to 20 MB",
     "targetLabel": "Convert to:",
     "unicodeIn": "Unicode ({font})",
+    "groupUnicode": "Unicode",
+    "groupHindi": "Hindi fonts",
+    "groupNepali": "Nepali fonts",
+    "groupMarathi": "Marathi fonts",
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
@@ -1671,7 +1676,7 @@
         },
         {
           "q": "Does it work for Shusha02 or Shusha05?",
-          "a": "Not yet. Those later cuts change some keys. This page is for the original Shusha."
+          "a": "Shusha05 has the same keys as Shusha, so it works here. Shusha02 changes four keys and has its own page: <a href=\"/shusha02-to-unicode\">Shusha02 to Unicode</a>."
         },
         {
           "q": "What about English words and numbers?",
@@ -3108,6 +3113,1482 @@
         "<h2>Changes and contact</h2>",
         "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 26 September 2026.</p>"
       ]
+    },
+    "/arjun-to-unicode": {
+      "nav": "Arjun → Unicode",
+      "h1": "Arjun to Unicode Converter",
+      "title": "Arjun to Unicode Converter | Arjun Hindi Font to Unicode Online",
+      "description": "Convert Arjun font Hindi to Unicode for portals, email and Word, with the keys Arjun types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Arjun font.",
+      "lede": "Paste Arjun text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Arjun text is</h2>",
+        "<p>Arjun is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Arjun differs from Kruti Dev</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>, where Kruti Dev types <code>i=</code>. A Kruti Dev converter turns every त्र in Arjun text into त्रा.</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9, and ० to ९ sit in the upper range of the font.</li><li><strong>Signs of its own.</strong> ॐ, ॠ and ऌ have keys, and ि with a reph is one key.</li></ul>",
+        "<p>The Arjun font file was read key by key. For the other direction use <a href=\"/unicode-to-arjun\">Unicode to Arjun</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Arjun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Arjun draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Arjun document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Arjun</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Arjun text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">पत्र</strong> are the quickest check: Arjun types it as <code>i=k</code>, and the right-hand box should show <strong lang=\"hi\">पत्र</strong>."
+      }
+    },
+    "/unicode-to-arjun": {
+      "nav": "Unicode → Arjun",
+      "h1": "Unicode to Arjun Converter",
+      "title": "Unicode to Arjun Converter | Hindi Unicode to Arjun Font Online",
+      "description": "Convert Unicode Hindi into Arjun font code for documents and templates set in Arjun, with ि and the reph placed the way Arjun draws them. Free.",
+      "betaNote": "For documents that will be set in the Arjun font.",
+      "lede": "Type or paste Hindi on the left and get Arjun font code on the right, ready to paste into Word and set in Arjun.",
+      "body": [
+        "<h2>When you need Arjun</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Arjun, it shows the wrong letters. This page writes it out again as the keys Arjun expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Arjun keys it uses</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>, where Kruti Dev types <code>i=</code>. A Kruti Dev converter turns every त्र in Arjun text into त्रा.</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9, and ० to ९ sit in the upper range of the font.</li><li><strong>Signs of its own.</strong> ॐ, ॠ and ऌ have keys, and ि with a reph is one key.</li></ul>",
+        "<p>To go back, use <a href=\"/arjun-to-unicode\">Arjun to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Arjun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Arjun code. Press <strong>Preview (Hindi)</strong> to see it in the Arjun font here, or set the font to <strong>Arjun</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Arjun has no key for a few characters, such as ऍ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Arjun document.",
+          "Press <strong>Copy Arjun code</strong>.",
+          "Paste into Word and set the font to <strong>Arjun</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">पत्र</strong> in the preview. Arjun types it as <code>i=k</code> and Kruti Dev as <code>i=</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/kundli-to-unicode": {
+      "nav": "Kundli → Unicode",
+      "h1": "Kundli to Unicode Converter",
+      "title": "Kundli to Unicode Converter | Kundli Hindi Font to Unicode Online",
+      "description": "Convert Kundli font Hindi to Unicode for portals, email and Word, with the keys Kundli types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Kundli font.",
+      "lede": "Paste Kundli text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Kundli text is</h2>",
+        "<p>Kundli is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Kundli differs from Kruti Dev</h2>",
+        "<ul><li><strong><code>Ñ</code> is औ.</strong> In Kruti Dev the same key is कृ, so a Kruti Dev converter puts कृ wherever Kundli text has औ.</li><li><strong>Full letters on single keys.</strong> श, ष, ण, थ, ध and क्ष each have one key in the upper range, as well as the Kruti Dev way of typing them.</li><li><strong>No Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>The Kundli Hindi Normal file was read key by key. For the other direction use <a href=\"/unicode-to-kundli\">Unicode to Kundli</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Kundli font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Kundli draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Kundli document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Kundli</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Kundli text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">स्त्र</strong> are the quickest check: Kundli types it as <code>ò</code>, and the right-hand box should show <strong lang=\"hi\">स्त्र</strong>."
+      }
+    },
+    "/unicode-to-kundli": {
+      "nav": "Unicode → Kundli",
+      "h1": "Unicode to Kundli Converter",
+      "title": "Unicode to Kundli Converter | Hindi Unicode to Kundli Font Online",
+      "description": "Convert Unicode Hindi into Kundli font code for documents and templates set in Kundli, with ि and the reph placed the way Kundli draws them. Free.",
+      "betaNote": "For documents that will be set in the Kundli font.",
+      "lede": "Type or paste Hindi on the left and get Kundli font code on the right, ready to paste into Word and set in Kundli.",
+      "body": [
+        "<h2>When you need Kundli</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Kundli, it shows the wrong letters. This page writes it out again as the keys Kundli expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Kundli keys it uses</h2>",
+        "<ul><li><strong><code>Ñ</code> is औ.</strong> In Kruti Dev the same key is कृ, so a Kruti Dev converter puts कृ wherever Kundli text has औ.</li><li><strong>Full letters on single keys.</strong> श, ष, ण, थ, ध and क्ष each have one key in the upper range, as well as the Kruti Dev way of typing them.</li><li><strong>No Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>To go back, use <a href=\"/kundli-to-unicode\">Kundli to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Kundli font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Kundli code. Press <strong>Preview (Hindi)</strong> to see it in the Kundli font here, or set the font to <strong>Kundli</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Kundli has no key for a few characters, such as ॲ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Kundli document.",
+          "Press <strong>Copy Kundli code</strong>.",
+          "Paste into Word and set the font to <strong>Kundli</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">स्त्र</strong> in the preview. Kundli types it as <code>ò</code> and Kruti Dev as <code>L=</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/krishna-to-unicode": {
+      "nav": "Krishna → Unicode",
+      "h1": "Krishna to Unicode Converter",
+      "title": "Krishna to Unicode Converter | Krishna Hindi Font to Unicode Online",
+      "description": "Convert Krishna font Hindi to Unicode for portals, email and Word, with the keys Krishna types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Krishna font.",
+      "lede": "Paste Krishna text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Krishna text is</h2>",
+        "<p>Krishna is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Krishna differs from Kruti Dev</h2>",
+        "<ul><li><strong>Vowels on one key.</strong> आ, ओ, औ and ऋ each have a single key in the upper range (<code>Á Î Ï Û</code>).</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9.</li><li><strong>Ready-made conjuncts of its own.</strong> श्च, श्व, ह्व and दृ each have one key in the upper range (<code>õ ý à å</code>).</li></ul>",
+        "<p>Krishna, Krishna Condensed, Krishna Wide and Krishna Bold Italic were each drawn and checked. Krishna Italic is a different layout and is not covered. For the other direction use <a href=\"/unicode-to-krishna\">Unicode to Krishna</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Krishna font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Krishna draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Krishna document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Krishna</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Krishna text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">शक्ति</strong> are the quickest check: Krishna types it as <code>'kfŸ</code>, and the right-hand box should show <strong lang=\"hi\">शक्ति</strong>."
+      }
+    },
+    "/unicode-to-krishna": {
+      "nav": "Unicode → Krishna",
+      "h1": "Unicode to Krishna Converter",
+      "title": "Unicode to Krishna Converter | Hindi Unicode to Krishna Font Online",
+      "description": "Convert Unicode Hindi into Krishna font code for documents and templates set in Krishna, with ि and the reph placed the way Krishna draws them. Free.",
+      "betaNote": "For documents that will be set in the Krishna font.",
+      "lede": "Type or paste Hindi on the left and get Krishna font code on the right, ready to paste into Word and set in Krishna.",
+      "body": [
+        "<h2>When you need Krishna</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Krishna, it shows the wrong letters. This page writes it out again as the keys Krishna expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Krishna keys it uses</h2>",
+        "<ul><li><strong>Vowels on one key.</strong> आ, ओ, औ and ऋ each have a single key in the upper range (<code>Á Î Ï Û</code>).</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9.</li><li><strong>Ready-made conjuncts of its own.</strong> श्च, श्व, ह्व and दृ each have one key in the upper range (<code>õ ý à å</code>).</li></ul>",
+        "<p>To go back, use <a href=\"/krishna-to-unicode\">Krishna to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Krishna font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Krishna code. Press <strong>Preview (Hindi)</strong> to see it in the Krishna font here, or set the font to <strong>Krishna</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Krishna has no key for a few characters, such as ऩ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Krishna document.",
+          "Press <strong>Copy Krishna code</strong>.",
+          "Paste into Word and set the font to <strong>Krishna</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">शक्ति</strong> in the preview. Krishna types it as <code>'kfŸ</code> and Kruti Dev as <code>'kfDr</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/new-delhi-to-unicode": {
+      "nav": "New Delhi → Unicode",
+      "h1": "New Delhi to Unicode Converter",
+      "title": "New Delhi to Unicode Converter | Hindi Font to Unicode Online",
+      "description": "Convert New Delhi font Hindi to Unicode for portals, email and Word, with the keys New Delhi types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the New Delhi font.",
+      "lede": "Paste New Delhi text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What New Delhi text is</h2>",
+        "<p>New Delhi is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How New Delhi differs from Kruti Dev</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>.</li><li><strong>Half श is on the curly apostrophe.</strong> <code>’kfDr</code> is <strong lang=\"hi\">शक्ति</strong>. Word types <code>’</code> for the apostrophe key, and the Bold styles also draw श on the straight <code>'</code>. Both are read.</li><li><strong>No Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>NewDelhi in Normal, Bold, Italic and Bold Italic was drawn and checked. For the other direction use <a href=\"/unicode-to-new-delhi\">Unicode to New Delhi</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the New Delhi font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way New Delhi draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your New Delhi document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>New Delhi</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted New Delhi text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">शक्ति</strong> are the quickest check: New Delhi types it as <code>’kfDr</code>, and the right-hand box should show <strong lang=\"hi\">शक्ति</strong>."
+      }
+    },
+    "/unicode-to-new-delhi": {
+      "nav": "Unicode → New Delhi",
+      "h1": "Unicode to New Delhi Converter",
+      "title": "Unicode to New Delhi Converter | Hindi Unicode to New Delhi Font",
+      "description": "Convert Unicode Hindi into New Delhi font code for documents and templates set in New Delhi, with ि and the reph placed the way New Delhi draws them. Free.",
+      "betaNote": "For documents that will be set in the New Delhi font.",
+      "lede": "Type or paste Hindi on the left and get New Delhi font code on the right, ready to paste into Word and set in New Delhi.",
+      "body": [
+        "<h2>When you need New Delhi</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in New Delhi, it shows the wrong letters. This page writes it out again as the keys New Delhi expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The New Delhi keys it uses</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>.</li><li><strong>Half श is on the curly apostrophe.</strong> <code>’kfDr</code> is <strong lang=\"hi\">शक्ति</strong>. Word types <code>’</code> for the apostrophe key, and the Bold styles also draw श on the straight <code>'</code>. Both are read.</li><li><strong>No Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>To go back, use <a href=\"/new-delhi-to-unicode\">New Delhi to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the New Delhi font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is New Delhi code. Press <strong>Preview (Hindi)</strong> to see it in the New Delhi font here, or set the font to <strong>NewDelhi</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "New Delhi has no key for a few characters, such as ऍ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a New Delhi document.",
+          "Press <strong>Copy New Delhi code</strong>.",
+          "Paste into Word and set the font to <strong>NewDelhi</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">शक्ति</strong> in the preview. New Delhi types it as <code>’kfDr</code> and Kruti Dev as <code>'kfDr</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/ruchi-to-unicode": {
+      "nav": "Ruchi → Unicode",
+      "h1": "Ruchi to Unicode Converter",
+      "title": "Ruchi to Unicode Converter | Ruchi Hindi Font to Unicode Online",
+      "description": "Convert Ruchi font Hindi to Unicode for portals, email and Word, with the keys Ruchi types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Ruchi font.",
+      "lede": "Paste Ruchi text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Ruchi text is</h2>",
+        "<p>Ruchi is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Ruchi differs from Kruti Dev</h2>",
+        "<ul><li><strong>The number keys are Hindi digits.</strong> <code>2024</code> shows as <strong lang=\"hi\">२०२४</strong> in Ruchi, so numbers are converted too, not kept.</li><li><strong>ष्ट on one key.</strong> <code>jkþz</code> is <strong lang=\"hi\">राष्ट्र</strong>.</li><li><strong>ळ has a key</strong> (<code>”</code>), which Kruti Dev lacks.</li></ul>",
+        "<p>Ruchi-Normal and Ruchi-Normal Bold Italic were drawn and checked. For the other direction use <a href=\"/unicode-to-ruchi\">Unicode to Ruchi</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Ruchi font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Ruchi draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Ruchi the number keys draw Hindi letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Ruchi document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Ruchi</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Ruchi text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">राष्ट्र</strong> are the quickest check: Ruchi types it as <code>jkþz</code>, and the right-hand box should show <strong lang=\"hi\">राष्ट्र</strong>."
+      }
+    },
+    "/unicode-to-ruchi": {
+      "nav": "Unicode → Ruchi",
+      "h1": "Unicode to Ruchi Converter",
+      "title": "Unicode to Ruchi Converter | Hindi Unicode to Ruchi Font Online",
+      "description": "Convert Unicode Hindi into Ruchi font code for documents and templates set in Ruchi, with ि and the reph placed the way Ruchi draws them. Free.",
+      "betaNote": "For documents that will be set in the Ruchi font.",
+      "lede": "Type or paste Hindi on the left and get Ruchi font code on the right, ready to paste into Word and set in Ruchi.",
+      "body": [
+        "<h2>When you need Ruchi</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Ruchi, it shows the wrong letters. This page writes it out again as the keys Ruchi expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Ruchi keys it uses</h2>",
+        "<ul><li><strong>The number keys are Hindi digits.</strong> <code>2024</code> shows as <strong lang=\"hi\">२०२४</strong> in Ruchi, so numbers are converted too, not kept.</li><li><strong>ष्ट on one key.</strong> <code>jkþz</code> is <strong lang=\"hi\">राष्ट्र</strong>.</li><li><strong>ळ has a key</strong> (<code>”</code>), which Kruti Dev lacks.</li></ul>",
+        "<p>To go back, use <a href=\"/ruchi-to-unicode\">Ruchi to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Ruchi font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Ruchi code. Press <strong>Preview (Hindi)</strong> to see it in the Ruchi font here, or set the font to <strong>Ruchi-Normal</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Ruchi has no key for a few characters, such as ॐ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Ruchi document.",
+          "Press <strong>Copy Ruchi code</strong>.",
+          "Paste into Word and set the font to <strong>Ruchi-Normal</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">राष्ट्र</strong> in the preview. Ruchi types it as <code>jkþz</code> and Kruti Dev as <code>jk\"Vª</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/devlys-020-to-unicode": {
+      "nav": "DevLys 020 → Unicode",
+      "h1": "DevLys 020 to Unicode Converter",
+      "title": "DevLys 020 to Unicode Converter | Hindi Font to Unicode Online",
+      "description": "Convert DevLys 020 font Hindi to Unicode for portals, email and Word, with the keys DevLys 020 types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the DevLys 020 font.",
+      "lede": "Paste DevLys 020 text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What DevLys 020 text is</h2>",
+        "<p>DevLys 020 is a Hindi font typed on the DevLys 010 keyboard. Like DevLys 010, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How DevLys 020 differs from DevLys 010</h2>",
+        "<ul><li><strong>The number keys are Hindi digits.</strong> In DevLys 010 <code>2024</code> is 2024. In DevLys 020 it shows as <strong lang=\"hi\">२०२४</strong>, so this page converts the numbers too.</li><li><strong><code>Ä</code> is ध.</strong> DevLys 010 and Kruti Dev draw घ there.</li><li><strong>A few conjuncts moved.</strong> स्त्र is on <code>Û</code>, ह्व on <code>à</code>, हृ on <code>‚</code>.</li></ul>",
+        "<p>DevLys 020, DevLys 020 Condensed, Italic and Thin were drawn and checked. For the other direction use <a href=\"/unicode-to-devlys-020\">Unicode to DevLys 020</a>. For text typed in DevLys 010 itself, use <a href=\"/devlys-to-unicode\">DevLys 010 to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the DevLys 020 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a DevLys 010 converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a DevLys 010 converter gets exactly those letters wrong. This page reads them the way DevLys 020 draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in DevLys 020 the number keys draw Hindi letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your DevLys 020 document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>DevLys 020</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted DevLys 020 text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">स्त्र</strong> are the quickest check: DevLys 020 types it as <code>Û</code>, and the right-hand box should show <strong lang=\"hi\">स्त्र</strong>."
+      }
+    },
+    "/unicode-to-devlys-020": {
+      "nav": "Unicode → DevLys 020",
+      "h1": "Unicode to DevLys 020 Converter",
+      "title": "Unicode to DevLys 020 Converter | Hindi Unicode to DevLys 020 Font",
+      "description": "Convert Unicode Hindi into DevLys 020 font code for documents and templates set in DevLys 020, with ि and the reph placed the way DevLys 020 draws them. Free.",
+      "betaNote": "For documents that will be set in the DevLys 020 font.",
+      "lede": "Type or paste Hindi on the left and get DevLys 020 font code on the right, ready to paste into Word and set in DevLys 020.",
+      "body": [
+        "<h2>When you need DevLys 020</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in DevLys 020, it shows the wrong letters. This page writes it out again as the keys DevLys 020 expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The DevLys 020 keys it uses</h2>",
+        "<ul><li><strong>The number keys are Hindi digits.</strong> In DevLys 010 <code>2024</code> is 2024. In DevLys 020 it shows as <strong lang=\"hi\">२०२४</strong>, so this page converts the numbers too.</li><li><strong><code>Ä</code> is ध.</strong> DevLys 010 and Kruti Dev draw घ there.</li><li><strong>A few conjuncts moved.</strong> स्त्र is on <code>Û</code>, ह्व on <code>à</code>, हृ on <code>‚</code>.</li></ul>",
+        "<p>To go back, use <a href=\"/devlys-020-to-unicode\">DevLys 020 to Unicode</a>. For a document set in DevLys 010, use <a href=\"/unicode-to-devlys\">Unicode to DevLys 010</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the DevLys 020 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is DevLys 020 code. Press <strong>Preview (Hindi)</strong> to see it in the DevLys 020 font here, or set the font to <strong>DevLys 020</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "DevLys 020 has no key for a few characters, such as ॐ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a DevLys 020 document.",
+          "Press <strong>Copy DevLys 020 code</strong>.",
+          "Paste into Word and set the font to <strong>DevLys 020</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">स्त्र</strong> in the preview. DevLys 020 types it as <code>Û</code> and DevLys 010 as <code>L=</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/ajay-to-unicode": {
+      "nav": "Ajay → Unicode",
+      "h1": "Ajay to Unicode Converter",
+      "title": "Ajay to Unicode Converter | Ajay Hindi Font to Unicode Online",
+      "description": "Convert Ajay font Hindi to Unicode for portals, email and Word, with the keys Ajay types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Ajay font.",
+      "lede": "Paste Ajay text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Ajay text is</h2>",
+        "<p>Ajay is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Ajay differs from Kruti Dev</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>, where Kruti Dev types <code>i=</code>.</li><li><strong>Half ञ on <code>´</code></strong> as well as on <code>×</code>.</li><li><strong>A bold design with no Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>Ajay Normal and Ajay Normal Bold Italic were drawn and checked. For the other direction use <a href=\"/unicode-to-ajay\">Unicode to Ajay</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Ajay font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Ajay draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Ajay document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Ajay</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Ajay text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">पत्र</strong> are the quickest check: Ajay types it as <code>i=k</code>, and the right-hand box should show <strong lang=\"hi\">पत्र</strong>."
+      }
+    },
+    "/unicode-to-ajay": {
+      "nav": "Unicode → Ajay",
+      "h1": "Unicode to Ajay Converter",
+      "title": "Unicode to Ajay Converter | Hindi Unicode to Ajay Font Online",
+      "description": "Convert Unicode Hindi into Ajay font code for documents and templates set in Ajay, with ि and the reph placed the way Ajay draws them. Free.",
+      "betaNote": "For documents that will be set in the Ajay font.",
+      "lede": "Type or paste Hindi on the left and get Ajay font code on the right, ready to paste into Word and set in Ajay.",
+      "body": [
+        "<h2>When you need Ajay</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Ajay, it shows the wrong letters. This page writes it out again as the keys Ajay expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Ajay keys it uses</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>, where Kruti Dev types <code>i=</code>.</li><li><strong>Half ञ on <code>´</code></strong> as well as on <code>×</code>.</li><li><strong>A bold design with no Hindi digits.</strong> Numbers stay as 0 to 9.</li></ul>",
+        "<p>To go back, use <a href=\"/ajay-to-unicode\">Ajay to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Ajay font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Ajay code. Press <strong>Preview (Hindi)</strong> to see it in the Ajay font here, or set the font to <strong>Ajay Normal</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Ajay has no key for a few characters, such as ऌ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Ajay document.",
+          "Press <strong>Copy Ajay code</strong>.",
+          "Paste into Word and set the font to <strong>Ajay Normal</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">पत्र</strong> in the preview. Ajay types it as <code>i=k</code> and Kruti Dev as <code>i=</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/aman-to-unicode": {
+      "nav": "Aman → Unicode",
+      "h1": "Aman to Unicode Converter",
+      "title": "Aman to Unicode Converter | Aman Hindi Font to Unicode Online",
+      "description": "Convert Aman font Hindi to Unicode for portals, email and Word, with the keys Aman types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Aman font.",
+      "lede": "Paste Aman text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Aman text is</h2>",
+        "<p>Aman is a Hindi font typed on the Krishna keyboard. Like Krishna, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Aman differs from Krishna</h2>",
+        "<ul><li><strong>Krishna's keys in a calligraphic design.</strong> Every key was drawn beside Krishna Condensed and draws the same letter.</li><li><strong>Vowels on one key.</strong> आ, ओ and औ have single keys (<code>Á Î Ï</code>), unlike Kruti Dev.</li><li><strong>Only some Hindi digits.</strong> ० and ५ to ९ have keys in the upper range, but १ to ४ do not.</li></ul>",
+        "<p>Aman Condensed, Aman Italic, Aman Thin and Aman Wide were drawn and checked. There is no plain Aman. For the other direction use <a href=\"/unicode-to-aman\">Unicode to Aman</a>. For text typed in Krishna itself, use <a href=\"/krishna-to-unicode\">Krishna to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Aman font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Krishna converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Krishna converter gets exactly those letters wrong. This page reads them the way Aman draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Aman document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Aman</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Aman text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">शक्ति</strong> are the quickest check: Aman types it as <code>'kfŸ</code>, and the right-hand box should show <strong lang=\"hi\">शक्ति</strong>."
+      }
+    },
+    "/unicode-to-aman": {
+      "nav": "Unicode → Aman",
+      "h1": "Unicode to Aman Converter",
+      "title": "Unicode to Aman Converter | Hindi Unicode to Aman Font Online",
+      "description": "Convert Unicode Hindi into Aman font code for documents and templates set in Aman, with ि and the reph placed the way Aman draws them. Free.",
+      "betaNote": "For documents that will be set in the Aman font.",
+      "lede": "Type or paste Hindi on the left and get Aman font code on the right, ready to paste into Word and set in Aman.",
+      "body": [
+        "<h2>When you need Aman</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Aman, it shows the wrong letters. This page writes it out again as the keys Aman expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Aman keys it uses</h2>",
+        "<ul><li><strong>Krishna's keys in a calligraphic design.</strong> Every key was drawn beside Krishna Condensed and draws the same letter.</li><li><strong>Vowels on one key.</strong> आ, ओ and औ have single keys (<code>Á Î Ï</code>), unlike Kruti Dev.</li><li><strong>Only some Hindi digits.</strong> ० and ५ to ९ have keys in the upper range, but १ to ४ do not.</li></ul>",
+        "<p>To go back, use <a href=\"/aman-to-unicode\">Aman to Unicode</a>. For a document set in Krishna, use <a href=\"/unicode-to-krishna\">Unicode to Krishna</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Aman font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Aman code. Press <strong>Preview (Hindi)</strong> to see it in the Aman font here, or set the font to <strong>Aman Condensed</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Aman has no key for a few characters, such as ॲ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Aman document.",
+          "Press <strong>Copy Aman code</strong>.",
+          "Paste into Word and set the font to <strong>Aman Condensed</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">शक्ति</strong> in the preview. Aman types it as <code>'kfŸ</code> and Kruti Dev as <code>'kfDr</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/agra-to-unicode": {
+      "nav": "Agra → Unicode",
+      "h1": "Agra to Unicode Converter",
+      "title": "Agra to Unicode Converter | Agra Hindi Font to Unicode Online",
+      "description": "Convert Agra font Hindi to Unicode for portals, email and Word, with the keys Agra types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Agra font.",
+      "lede": "Paste Agra text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Agra text is</h2>",
+        "<p>Agra is a Hindi font typed on the Kruti Dev keyboard. Like Kruti Dev, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Hkkjr</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Agra differs from Kruti Dev</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>.</li><li><strong>Brackets on <code>¿</code> and <code>À</code>.</strong> Kruti Dev's ready-made conjuncts in the upper range are not in Agra at all.</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9.</li></ul>",
+        "<p>This page is for the regular Agra file. Agra Bold, Agra Wide and Agra Thin type त्र on <code>=</code> as Kruti Dev does, so they need a different map and are not covered yet. For the other direction use <a href=\"/unicode-to-agra\">Unicode to Agra</a>. For text typed in Kruti Dev itself, use <a href=\"/\">Kruti Dev to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Agra font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Kruti Dev converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Kruti Dev converter gets exactly those letters wrong. This page reads them the way Agra draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Agra document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Agra</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Agra text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">पत्र</strong> are the quickest check: Agra types it as <code>i=k</code>, and the right-hand box should show <strong lang=\"hi\">पत्र</strong>."
+      }
+    },
+    "/unicode-to-agra": {
+      "nav": "Unicode → Agra",
+      "h1": "Unicode to Agra Converter",
+      "title": "Unicode to Agra Converter | Hindi Unicode to Agra Font Online",
+      "description": "Convert Unicode Hindi into Agra font code for documents and templates set in Agra, with ि and the reph placed the way Agra draws them. Free.",
+      "betaNote": "For documents that will be set in the Agra font.",
+      "lede": "Type or paste Hindi on the left and get Agra font code on the right, ready to paste into Word and set in Agra.",
+      "body": [
+        "<h2>When you need Agra</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Agra, it shows the wrong letters. This page writes it out again as the keys Agra expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Hkkjr</code>.</p>",
+        "<h2>The Agra keys it uses</h2>",
+        "<ul><li><strong><code>=</code> is half त्र.</strong> <code>i=k</code> is <strong lang=\"hi\">पत्र</strong>.</li><li><strong>Brackets on <code>¿</code> and <code>À</code>.</strong> Kruti Dev's ready-made conjuncts in the upper range are not in Agra at all.</li><li><strong>Hindi digits on the Alt-code keys.</strong> The number keys stay 0 to 9.</li></ul>",
+        "<p>To go back, use <a href=\"/agra-to-unicode\">Agra to Unicode</a>. For a document set in Kruti Dev, use <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Agra font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Agra code. Press <strong>Preview (Hindi)</strong> to see it in the Agra font here, or set the font to <strong>Agra</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Agra has no key for a few characters, such as ॐ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Agra document.",
+          "Press <strong>Copy Agra code</strong>.",
+          "Paste into Word and set the font to <strong>Agra</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">पत्र</strong> in the preview. Agra types it as <code>i=k</code> and Kruti Dev as <code>i=</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/himalaya-to-unicode": {
+      "nav": "Himalaya → Unicode",
+      "h1": "Himalaya to Unicode Converter (Nepali)",
+      "title": "Himalaya to Unicode Converter | Himalaya Nepali Font to Unicode Online",
+      "description": "Convert Himalaya font Nepali to Unicode for portals, email and Word, with the keys Himalaya types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the Himalaya font.",
+      "lede": "Paste Himalaya text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Himalaya text is</h2>",
+        "<p>Himalaya is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Himalaya differs from Preeti</h2>",
+        "<ul><li><strong>The number keys are digits.</strong> <code>2081</code> is <strong lang=\"hi\">२०८१</strong>, where Preeti types <code>@)*!</code>. The letters Preeti keeps on 0 to 9 move to the shifted row: <code>!</code> is ज्ञ.</li><li><strong>The quote keys are swapped.</strong> <code>'</code> and <code>\"</code> are ू and ु, the other way round from Preeti.</li><li><strong>ँ on <code>¤</code></strong>, and ा on both <code>f</code> and <code>F</code>.</li></ul>",
+        "<p>The font is listed in Word as HIMALAYA TT FONT. For the other direction use <a href=\"/unicode-to-himalaya\">Unicode to Himalaya</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Himalaya font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way Himalaya draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Himalaya the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Himalaya document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Himalaya</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Himalaya text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">२०८१</strong> are the quickest check: Himalaya types it as <code>2081</code>, and the right-hand box should show <strong lang=\"hi\">२०८१</strong>."
+      }
+    },
+    "/unicode-to-himalaya": {
+      "nav": "Unicode → Himalaya",
+      "h1": "Unicode to Himalaya Converter (Nepali)",
+      "title": "Unicode to Himalaya Converter | Nepali Unicode to Himalaya Font Online",
+      "description": "Convert Unicode Nepali into Himalaya font code for documents and templates set in Himalaya, with ि and the reph placed the way Himalaya draws them. Free.",
+      "betaNote": "For documents that will be set in the Himalaya font.",
+      "lede": "Type or paste Nepali on the left and get Himalaya font code on the right, ready to paste into Word and set in Himalaya.",
+      "body": [
+        "<h2>When you need Himalaya</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Himalaya, it shows the wrong letters. This page writes it out again as the keys Himalaya expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Himalaya keys it uses</h2>",
+        "<ul><li><strong>The number keys are digits.</strong> <code>2081</code> is <strong lang=\"hi\">२०८१</strong>, where Preeti types <code>@)*!</code>. The letters Preeti keeps on 0 to 9 move to the shifted row: <code>!</code> is ज्ञ.</li><li><strong>The quote keys are swapped.</strong> <code>'</code> and <code>\"</code> are ू and ु, the other way round from Preeti.</li><li><strong>ँ on <code>¤</code></strong>, and ा on both <code>f</code> and <code>F</code>.</li></ul>",
+        "<p>To go back, use <a href=\"/himalaya-to-unicode\">Himalaya to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Himalaya font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Himalaya code. Press <strong>Preview (Hindi)</strong> to see it in the Himalaya font here, or set the font to <strong>HIMALAYA TT FONT</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Himalaya has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Himalaya document.",
+          "Press <strong>Copy Himalaya code</strong>.",
+          "Paste into Word and set the font to <strong>HIMALAYA TT FONT</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">२०८१</strong> in the preview. Himalaya types it as <code>2081</code> and Preeti as <code>@)*!</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/akshar-to-unicode": {
+      "nav": "Akshar → Unicode",
+      "h1": "Akshar to Unicode Converter (Nepali)",
+      "title": "Akshar to Unicode Converter | Akshar Nepali Font to Unicode Online",
+      "description": "Convert Akshar font Nepali to Unicode for portals, email and Word, with the keys Akshar types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the Akshar font.",
+      "lede": "Paste Akshar text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Akshar text is</h2>",
+        "<p>Akshar is a Nepali font typed on the Himalaya keyboard. Like Himalaya, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Akshar differs from Himalaya</h2>",
+        "<ul><li><strong>Himalaya's keyboard.</strong> The number keys are digits (<code>2081</code> is <strong lang=\"hi\">२०८१</strong>) and Preeti's letters from that row are on the shifted keys.</li><li><strong>फ on <code>F</code>, झ on <code>X</code>, ँ on <code>~</code>.</strong> Himalaya has ा and हृ on the first two, and ँ on <code>¤</code>.</li><li><strong>Punctuation on the upper keys.</strong> Brackets and signs that the letter keys took have new places in the upper range.</li></ul>",
+        "<p>Akshar Normal and Akshar Bold were drawn and checked. Akshar Unicode is already Unicode and needs no converting. For the other direction use <a href=\"/unicode-to-akshar\">Unicode to Akshar</a>. For text typed in Himalaya itself, use <a href=\"/himalaya-to-unicode\">Himalaya to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Akshar font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Himalaya converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Himalaya converter gets exactly those letters wrong. This page reads them the way Akshar draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Akshar the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Akshar document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Akshar</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Akshar text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">हृदय</strong> are the quickest check: Akshar types it as <code>›bo</code>, and the right-hand box should show <strong lang=\"hi\">हृदय</strong>."
+      }
+    },
+    "/unicode-to-akshar": {
+      "nav": "Unicode → Akshar",
+      "h1": "Unicode to Akshar Converter (Nepali)",
+      "title": "Unicode to Akshar Converter | Nepali Unicode to Akshar Font Online",
+      "description": "Convert Unicode Nepali into Akshar font code for documents and templates set in Akshar, with ि and the reph placed the way Akshar draws them. Free.",
+      "betaNote": "For documents that will be set in the Akshar font.",
+      "lede": "Type or paste Nepali on the left and get Akshar font code on the right, ready to paste into Word and set in Akshar.",
+      "body": [
+        "<h2>When you need Akshar</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Akshar, it shows the wrong letters. This page writes it out again as the keys Akshar expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Akshar keys it uses</h2>",
+        "<ul><li><strong>Himalaya's keyboard.</strong> The number keys are digits (<code>2081</code> is <strong lang=\"hi\">२०८१</strong>) and Preeti's letters from that row are on the shifted keys.</li><li><strong>फ on <code>F</code>, झ on <code>X</code>, ँ on <code>~</code>.</strong> Himalaya has ा and हृ on the first two, and ँ on <code>¤</code>.</li><li><strong>Punctuation on the upper keys.</strong> Brackets and signs that the letter keys took have new places in the upper range.</li></ul>",
+        "<p>To go back, use <a href=\"/akshar-to-unicode\">Akshar to Unicode</a>. For a document set in Himalaya, use <a href=\"/unicode-to-himalaya\">Unicode to Himalaya</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Akshar font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Akshar code. Press <strong>Preview (Hindi)</strong> to see it in the Akshar font here, or set the font to <strong>Akshar</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Akshar has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Akshar document.",
+          "Press <strong>Copy Akshar code</strong>.",
+          "Paste into Word and set the font to <strong>Akshar</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Akshar types it as <code>›bo</code> and Himalaya as <code>Xbo</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/dina-to-unicode": {
+      "nav": "DINA → Unicode",
+      "h1": "DINA to Unicode Converter (Nepali)",
+      "title": "DINA to Unicode Converter | DINA Nepali Font to Unicode Online",
+      "description": "Convert DINA font Nepali to Unicode for portals, email and Word, with the keys DINA types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the DINA font.",
+      "lede": "Paste DINA text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What DINA text is</h2>",
+        "<p>DINA is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How DINA differs from Preeti</h2>",
+        "<ul><li><strong>Preeti on every letter key.</strong> Text typed for Preeti reads the same in DINA, letter for letter.</li><li><strong>Rakar on the backtick.</strong> <code>`</code> is the ्र stroke, and च, झ, ङ and ट्ट have keys in the upper range.</li><li><strong>Fewer ready-made conjuncts.</strong> Most of Preeti's upper-range conjuncts are not in DINA, so they never turn up in DINA text.</li></ul>",
+        "<p>DINA-A, Dina Outline and DINA27 were drawn and checked. DINA30 Outline is not covered. For the other direction use <a href=\"/unicode-to-dina\">Unicode to DINA</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the DINA font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way DINA draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in DINA the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your DINA document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>DINA</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted DINA text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">राष्ट्र</strong> are the quickest check: DINA types it as <code>/fi6|</code>, and the right-hand box should show <strong lang=\"hi\">राष्ट्र</strong>."
+      }
+    },
+    "/unicode-to-dina": {
+      "nav": "Unicode → DINA",
+      "h1": "Unicode to DINA Converter (Nepali)",
+      "title": "Unicode to DINA Converter | Nepali Unicode to DINA Font Online",
+      "description": "Convert Unicode Nepali into DINA font code for documents and templates set in DINA, with ि and the reph placed the way DINA draws them. Free.",
+      "betaNote": "For documents that will be set in the DINA font.",
+      "lede": "Type or paste Nepali on the left and get DINA font code on the right, ready to paste into Word and set in DINA.",
+      "body": [
+        "<h2>When you need DINA</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in DINA, it shows the wrong letters. This page writes it out again as the keys DINA expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The DINA keys it uses</h2>",
+        "<ul><li><strong>Preeti on every letter key.</strong> Text typed for Preeti reads the same in DINA, letter for letter.</li><li><strong>Rakar on the backtick.</strong> <code>`</code> is the ्र stroke, and च, झ, ङ and ट्ट have keys in the upper range.</li><li><strong>Fewer ready-made conjuncts.</strong> Most of Preeti's upper-range conjuncts are not in DINA, so they never turn up in DINA text.</li></ul>",
+        "<p>To go back, use <a href=\"/dina-to-unicode\">DINA to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the DINA font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is DINA code. Press <strong>Preview (Hindi)</strong> to see it in the DINA font here, or set the font to <strong>DINA-A</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "DINA has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a DINA document.",
+          "Press <strong>Copy DINA code</strong>.",
+          "Paste into Word and set the font to <strong>DINA-A</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">राष्ट्र</strong> in the preview. DINA types it as <code>/fi6|</code> and Preeti as <code>/fi6«</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/devanagari-bold-to-unicode": {
+      "nav": "Devanagari Bold → Unicode",
+      "h1": "Devanagari Bold to Unicode Converter (Nepali)",
+      "title": "Devanagari Bold to Unicode Converter | Nepali Font to Unicode Online",
+      "description": "Convert Devanagari Bold font Nepali to Unicode for portals, email and Word. Built from the Devanagari Bold font file itself. Free.",
+      "betaNote": "For Nepali typed in the Devanagari Bold font.",
+      "lede": "Paste Devanagari Bold text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Devanagari Bold text is</h2>",
+        "<p>Devanagari Bold is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Devanagari Bold differs from Preeti</h2>",
+        "<ul><li><strong>Preeti's keys in a bold design.</strong> Every key it shares with Preeti was drawn beside Preeti and draws the same letter.</li><li><strong>ऽ on <code>›</code>.</strong> Preeti has द्र there. फ is on <code>©</code> and ह्य on <code>Ã</code>.</li><li><strong>A few Preeti conjuncts are missing</strong>, so text typed in this font never uses those keys.</li></ul>",
+        "<p>The font is listed in Word as DevanagariBold. For the other direction use <a href=\"/unicode-to-devanagari-bold\">Unicode to Devanagari Bold</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Devanagari Bold font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way Devanagari Bold draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Devanagari Bold the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Devanagari Bold document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Devanagari Bold</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Devanagari Bold text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">ह्य</strong> are the quickest check: Devanagari Bold types it as <code>Ã</code>, and the right-hand box should show <strong lang=\"hi\">ह्य</strong>."
+      }
+    },
+    "/unicode-to-devanagari-bold": {
+      "nav": "Unicode → Devanagari Bold",
+      "h1": "Unicode to Devanagari Bold Converter (Nepali)",
+      "title": "Unicode to Devanagari Bold Converter | Nepali to Devanagari Bold Font",
+      "description": "Convert Unicode Nepali into Devanagari Bold font code for documents set in Devanagari Bold, with ि and the reph placed as the font draws them. Free.",
+      "betaNote": "For documents that will be set in the Devanagari Bold font.",
+      "lede": "Type or paste Nepali on the left and get Devanagari Bold font code on the right, ready to paste into Word and set in Devanagari Bold.",
+      "body": [
+        "<h2>When you need Devanagari Bold</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Devanagari Bold, it shows the wrong letters. This page writes it out again as the keys Devanagari Bold expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Devanagari Bold keys it uses</h2>",
+        "<ul><li><strong>Preeti's keys in a bold design.</strong> Every key it shares with Preeti was drawn beside Preeti and draws the same letter.</li><li><strong>ऽ on <code>›</code>.</strong> Preeti has द्र there. फ is on <code>©</code> and ह्य on <code>Ã</code>.</li><li><strong>A few Preeti conjuncts are missing</strong>, so text typed in this font never uses those keys.</li></ul>",
+        "<p>To go back, use <a href=\"/devanagari-bold-to-unicode\">Devanagari Bold to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Devanagari Bold font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Devanagari Bold code. Press <strong>Preview (Hindi)</strong> to see it in the Devanagari Bold font here, or set the font to <strong>DevanagariBold</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Devanagari Bold has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Devanagari Bold document.",
+          "Press <strong>Copy Devanagari Bold code</strong>.",
+          "Paste into Word and set the font to <strong>DevanagariBold</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">ह्य</strong> in the preview. Devanagari Bold types it as <code>Ã</code> and Preeti as <code>Xo</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/narad-to-unicode": {
+      "nav": "Narad → Unicode",
+      "h1": "Narad to Unicode Converter (Nepali)",
+      "title": "Narad to Unicode Converter | Narad Nepali Font to Unicode Online",
+      "description": "Convert Narad font Nepali to Unicode for portals, email and Word, with the keys Narad types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the Narad font.",
+      "lede": "Paste Narad text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Narad text is</h2>",
+        "<p>Narad is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Narad differs from Preeti</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a bold design.</li><li><strong>A full झ on <code>‰</code>.</strong> Preeti draws half झ there.</li><li><strong>Curly quotes swapped.</strong> <code>æ</code> and <code>Æ</code> are ” and “, the other way round from Preeti.</li></ul>",
+        "<p>Narad and Narad Italic were drawn and checked. For the other direction use <a href=\"/unicode-to-narad\">Unicode to Narad</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Narad font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way Narad draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Narad the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Narad document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Narad</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Narad text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">हृदय</strong> are the quickest check: Narad types it as <code>x[bo</code>, and the right-hand box should show <strong lang=\"hi\">हृदय</strong>."
+      }
+    },
+    "/unicode-to-narad": {
+      "nav": "Unicode → Narad",
+      "h1": "Unicode to Narad Converter (Nepali)",
+      "title": "Unicode to Narad Converter | Nepali Unicode to Narad Font Online",
+      "description": "Convert Unicode Nepali into Narad font code for documents and templates set in Narad, with ि and the reph placed the way Narad draws them. Free.",
+      "betaNote": "For documents that will be set in the Narad font.",
+      "lede": "Type or paste Nepali on the left and get Narad font code on the right, ready to paste into Word and set in Narad.",
+      "body": [
+        "<h2>When you need Narad</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Narad, it shows the wrong letters. This page writes it out again as the keys Narad expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Narad keys it uses</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a bold design.</li><li><strong>A full झ on <code>‰</code>.</strong> Preeti draws half झ there.</li><li><strong>Curly quotes swapped.</strong> <code>æ</code> and <code>Æ</code> are ” and “, the other way round from Preeti.</li></ul>",
+        "<p>To go back, use <a href=\"/narad-to-unicode\">Narad to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Narad font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Narad code. Press <strong>Preview (Hindi)</strong> to see it in the Narad font here, or set the font to <strong>Narad</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Narad has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Narad document.",
+          "Press <strong>Copy Narad code</strong>.",
+          "Paste into Word and set the font to <strong>Narad</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Narad types it as <code>x[bo</code> and Preeti as <code>Åbo</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/aakriti-to-unicode": {
+      "nav": "Aakriti → Unicode",
+      "h1": "Aakriti to Unicode Converter (Nepali)",
+      "title": "Aakriti to Unicode Converter | Aakriti Nepali Font to Unicode Online",
+      "description": "Convert Aakriti font Nepali to Unicode for portals, email and Word, with the keys Aakriti types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the Aakriti font.",
+      "lede": "Paste Aakriti text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Aakriti text is</h2>",
+        "<p>Aakriti is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Aakriti differs from Preeti</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a decorative design.</li><li><strong>ळ on <code>˜</code>.</strong> Preeti has ऽ there. ष also has a key of its own, <code>È</code>.</li><li><strong>Preeti's upper-range conjuncts are mostly missing</strong>, so they never turn up in Aakriti text.</li></ul>",
+        "<p>Aakriti, Aakriti Bold and Aakriti Italic were drawn and checked. For the other direction use <a href=\"/unicode-to-aakriti\">Unicode to Aakriti</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Aakriti font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way Aakriti draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Aakriti the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Aakriti document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Aakriti</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Aakriti text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">हृदय</strong> are the quickest check: Aakriti types it as <code>x[bo</code>, and the right-hand box should show <strong lang=\"hi\">हृदय</strong>."
+      }
+    },
+    "/unicode-to-aakriti": {
+      "nav": "Unicode → Aakriti",
+      "h1": "Unicode to Aakriti Converter (Nepali)",
+      "title": "Unicode to Aakriti Converter | Nepali Unicode to Aakriti Font Online",
+      "description": "Convert Unicode Nepali into Aakriti font code for documents and templates set in Aakriti, with ि and the reph placed the way Aakriti draws them. Free.",
+      "betaNote": "For documents that will be set in the Aakriti font.",
+      "lede": "Type or paste Nepali on the left and get Aakriti font code on the right, ready to paste into Word and set in Aakriti.",
+      "body": [
+        "<h2>When you need Aakriti</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Aakriti, it shows the wrong letters. This page writes it out again as the keys Aakriti expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Aakriti keys it uses</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a decorative design.</li><li><strong>ळ on <code>˜</code>.</strong> Preeti has ऽ there. ष also has a key of its own, <code>È</code>.</li><li><strong>Preeti's upper-range conjuncts are mostly missing</strong>, so they never turn up in Aakriti text.</li></ul>",
+        "<p>To go back, use <a href=\"/aakriti-to-unicode\">Aakriti to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Aakriti font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Aakriti code. Press <strong>Preview (Hindi)</strong> to see it in the Aakriti font here, or set the font to <strong>Aakriti</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Aakriti has no key for a few characters, such as ऍ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Aakriti document.",
+          "Press <strong>Copy Aakriti code</strong>.",
+          "Paste into Word and set the font to <strong>Aakriti</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Aakriti types it as <code>x[bo</code> and Preeti as <code>Åbo</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/anjali-to-unicode": {
+      "nav": "Anjali → Unicode",
+      "h1": "Anjali to Unicode Converter (Nepali)",
+      "title": "Anjali to Unicode Converter | Anjali Nepali Font to Unicode Online",
+      "description": "Convert Anjali font Nepali to Unicode for portals, email and Word, with the keys Anjali types differently put right. Built from the font file. Free.",
+      "betaNote": "For Nepali typed in the Anjali font.",
+      "lede": "Paste Anjali text on the left and get Unicode Nepali on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Anjali text is</h2>",
+        "<p>Anjali is a Nepali font typed on the Preeti keyboard. Like Preeti, it stores Nepali as keyboard characters, so on a computer without the font <strong lang=\"hi\">नेपाल</strong> shows up as <code>g]kfn</code>. This page turns those characters into real Unicode Nepali, which works everywhere.</p>",
+        "<h2>How Anjali differs from Preeti</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a heavy display design for headings.</li><li><strong>ा on <code>F</code>.</strong> Preeti has ँ there. य is also on <code>Ø</code>.</li><li><strong>Extras of its own.</strong> ङ्क, फ and ॐ have keys in the upper range.</li></ul>",
+        "<p>The Anjali Regular file was read key by key. For the other direction use <a href=\"/unicode-to-anjali\">Unicode to Anjali</a>. For text typed in Preeti itself, use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Anjali font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Preeti converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Preeti converter gets exactly those letters wrong. This page reads them the way Anjali draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "Numbers are converted too: in Anjali the number keys draw Nepali letters or digits, so there is nothing to keep as it is. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Anjali document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Anjali</strong> box. Unicode Nepali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Anjali text where it is needed. In Word, set it in a Unicode font such as Kalimati or Mangal."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">हृदय</strong> are the quickest check: Anjali types it as <code>x[bo</code>, and the right-hand box should show <strong lang=\"hi\">हृदय</strong>."
+      }
+    },
+    "/unicode-to-anjali": {
+      "nav": "Unicode → Anjali",
+      "h1": "Unicode to Anjali Converter (Nepali)",
+      "title": "Unicode to Anjali Converter | Nepali Unicode to Anjali Font Online",
+      "description": "Convert Unicode Nepali into Anjali font code for documents and templates set in Anjali, with ि and the reph placed the way Anjali draws them. Free.",
+      "betaNote": "For documents that will be set in the Anjali font.",
+      "lede": "Type or paste Nepali on the left and get Anjali font code on the right, ready to paste into Word and set in Anjali.",
+      "body": [
+        "<h2>When you need Anjali</h2>",
+        "<p>Nepali typed on a phone or copied from a website is Unicode. Pasted into a document set in Anjali, it shows the wrong letters. This page writes it out again as the keys Anjali expects, in the order the font draws them: <strong lang=\"hi\">नेपाल</strong> becomes <code>g]kfn</code>.</p>",
+        "<h2>The Anjali keys it uses</h2>",
+        "<ul><li><strong>Preeti on every letter key</strong>, in a heavy display design for headings.</li><li><strong>ा on <code>F</code>.</strong> Preeti has ँ there. य is also on <code>Ø</code>.</li><li><strong>Extras of its own.</strong> ङ्क, फ and ॐ have keys in the upper range.</li></ul>",
+        "<p>To go back, use <a href=\"/anjali-to-unicode\">Anjali to Unicode</a>. For a document set in Preeti, use <a href=\"/unicode-to-preeti\">Unicode to Preeti</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Anjali font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Anjali code. Press <strong>Preview (Hindi)</strong> to see it in the Anjali font here, or set the font to <strong>Anjali</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Anjali has no key for a few characters, such as ळ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Nepali that has to go into a Anjali document.",
+          "Press <strong>Copy Anjali code</strong>.",
+          "Paste into Word and set the font to <strong>Anjali</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Anjali types it as <code>x[bo</code> and Preeti as <code>Åbo</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/shusha02-to-unicode": {
+      "nav": "Shusha02 → Unicode",
+      "h1": "Shusha02 to Unicode Converter",
+      "title": "Shusha02 to Unicode Converter | Shusha02 Hindi Font to Unicode Online",
+      "description": "Convert Shusha02 font Hindi to Unicode for portals, email and Word, with the keys Shusha02 types differently put right. Built from the font file. Free.",
+      "betaNote": "For Hindi typed in the Shusha02 font.",
+      "lede": "Paste Shusha02 text on the left and get Unicode Hindi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Shusha02 text is</h2>",
+        "<p>Shusha02 is a Hindi font typed on the Shusha keyboard. Like Shusha, it stores Hindi as keyboard characters, so on a computer without the font <strong lang=\"hi\">भारत</strong> shows up as <code>Baart</code>. This page turns those characters into real Unicode Hindi, which works everywhere.</p>",
+        "<h2>How Shusha02 differs from Shusha</h2>",
+        "<ul><li><strong><code>~</code> is half त्र.</strong> <code>pa~a</code> is <strong lang=\"hi\">पात्र</strong>. In Shusha the same keys read पात्रा.</li><li><strong><code>(</code> is हृ and <code>)</code> is half थ.</strong> <code>(dya</code> is <strong lang=\"hi\">हृदय</strong>. Shusha has ह्य and हृ on those keys.</li><li><strong><code>Ù</code> is half न्न.</strong> Every other key is Shusha's, in a heavier design.</li></ul>",
+        "<p>The Shusha02 file was read key by key. Shusha05 has the original Shusha keys: use the Shusha pages for it. For the other direction use <a href=\"/unicode-to-shusha02\">Unicode to Shusha02</a>. For text typed in Shusha itself, use <a href=\"/shusha-to-unicode\">Shusha to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Shusha02 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Shusha converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Shusha converter gets exactly those letters wrong. This page reads them the way Shusha02 draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Shusha02 document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Shusha02</strong> box. Unicode Hindi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Shusha02 text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">पात्र</strong> are the quickest check: Shusha02 types it as <code>pa~a</code>, and the right-hand box should show <strong lang=\"hi\">पात्र</strong>."
+      }
+    },
+    "/unicode-to-shusha02": {
+      "nav": "Unicode → Shusha02",
+      "h1": "Unicode to Shusha02 Converter",
+      "title": "Unicode to Shusha02 Converter | Hindi Unicode to Shusha02 Font Online",
+      "description": "Convert Unicode Hindi into Shusha02 font code for documents and templates set in Shusha02, with ि and the reph placed the way Shusha02 draws them. Free.",
+      "betaNote": "For documents that will be set in the Shusha02 font.",
+      "lede": "Type or paste Hindi on the left and get Shusha02 font code on the right, ready to paste into Word and set in Shusha02.",
+      "body": [
+        "<h2>When you need Shusha02</h2>",
+        "<p>Hindi typed on a phone or copied from a website is Unicode. Pasted into a document set in Shusha02, it shows the wrong letters. This page writes it out again as the keys Shusha02 expects, in the order the font draws them: <strong lang=\"hi\">भारत</strong> becomes <code>Baart</code>.</p>",
+        "<h2>The Shusha02 keys it uses</h2>",
+        "<ul><li><strong><code>~</code> is half त्र.</strong> <code>pa~a</code> is <strong lang=\"hi\">पात्र</strong>. In Shusha the same keys read पात्रा.</li><li><strong><code>(</code> is हृ and <code>)</code> is half थ.</strong> <code>(dya</code> is <strong lang=\"hi\">हृदय</strong>. Shusha has ह्य and हृ on those keys.</li><li><strong><code>Ù</code> is half न्न.</strong> Every other key is Shusha's, in a heavier design.</li></ul>",
+        "<p>To go back, use <a href=\"/shusha02-to-unicode\">Shusha02 to Unicode</a>. For a document set in Shusha, use <a href=\"/unicode-to-shusha\">Unicode to Shusha</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Shusha02 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Shusha02 code. Press <strong>Preview (Hindi)</strong> to see it in the Shusha02 font here, or set the font to <strong>Shusha02</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Shusha02 has no key for a few characters, such as १. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Shusha02 document.",
+          "Press <strong>Copy Shusha02 code</strong>.",
+          "Paste into Word and set the font to <strong>Shusha02</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">पात्र</strong> in the preview. Shusha02 types it as <code>pa~a</code> and Shusha as <code>pa~</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/shivaji02-to-unicode": {
+      "nav": "Shivaji02 → Unicode",
+      "h1": "Shivaji02 to Unicode Converter",
+      "title": "Shivaji02 to Unicode Converter | Marathi Font to Unicode Online",
+      "description": "Convert Shivaji02 font Marathi to Unicode for portals, email and Word, with the keys Shivaji02 types differently put right. Built from the font file. Free.",
+      "betaNote": "For Marathi typed in the Shivaji02 font.",
+      "lede": "Paste Shivaji02 text on the left and get Unicode Marathi on the right, ready for any website, portal, email or phone.",
+      "body": [
+        "<h2>What Shivaji02 text is</h2>",
+        "<p>Shivaji02 is a Marathi font typed on the Shivaji01 keyboard. Like Shivaji01, it stores Marathi as keyboard characters, so on a computer without the font <strong lang=\"hi\">महाराष्ट्र</strong> shows up as <code>maharaYT/</code>. This page turns those characters into real Unicode Marathi, which works everywhere.</p>",
+        "<h2>How Shivaji02 differs from Shivaji01</h2>",
+        "<ul><li><strong>Shusha02's keys.</strong> <code>pa~a</code> is <strong lang=\"hi\">पात्र</strong> and <code>(dya</code> is <strong lang=\"hi\">हृदय</strong>. Shivaji01 reads the same keys differently.</li><li><strong>A full stop, not a danda.</strong> <code>.</code> is the full stop Marathi uses, as in Shivaji01.</li><li><strong>ळ and the Marathi reph.</strong> <code>kLvaavao</code> is <strong lang=\"hi\">कळवावे</strong>.</li></ul>",
+        "<p>The Shivaji02 file was read key by key. Shivaji05 has Shivaji01's keys: use the Shivaji pages for it. For the other direction use <a href=\"/unicode-to-shivaji02\">Unicode to Shivaji02</a>. For text typed in Shivaji01 itself, use <a href=\"/shivaji-to-unicode\">Shivaji01 to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Shivaji02 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Can I use a Shivaji01 converter instead?",
+          "a": "Most keys are the same, but not the ones listed above, and a Shivaji01 converter gets exactly those letters wrong. This page reads them the way Shivaji02 draws them."
+        },
+        {
+          "q": "What happens to English words and numbers?",
+          "a": "With the checkbox under the boxes ticked, numbers, dates and common English words stay as they are. Web and email addresses are always kept."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the text out of your Shivaji02 document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Shivaji02</strong> box. Unicode Marathi appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste the converted Shivaji02 text where it is needed. In Word, set it in a Unicode font such as Mangal or Nirmala UI."
+        ],
+        "tip": "Lines with <strong lang=\"hi\">हृदय</strong> are the quickest check: Shivaji02 types it as <code>(dya</code>, and the right-hand box should show <strong lang=\"hi\">हृदय</strong>."
+      }
+    },
+    "/unicode-to-shivaji02": {
+      "nav": "Unicode → Shivaji02",
+      "h1": "Unicode to Shivaji02 Converter",
+      "title": "Unicode to Shivaji02 Converter | Marathi Unicode to Shivaji02 Font",
+      "description": "Convert Unicode Marathi into Shivaji02 font code for documents and templates set in Shivaji02, with ि and the reph placed the way Shivaji02 draws them. Free.",
+      "betaNote": "For documents that will be set in the Shivaji02 font.",
+      "lede": "Type or paste Marathi on the left and get Shivaji02 font code on the right, ready to paste into Word and set in Shivaji02.",
+      "body": [
+        "<h2>When you need Shivaji02</h2>",
+        "<p>Marathi typed on a phone or copied from a website is Unicode. Pasted into a document set in Shivaji02, it shows the wrong letters. This page writes it out again as the keys Shivaji02 expects, in the order the font draws them: <strong lang=\"hi\">महाराष्ट्र</strong> becomes <code>maharaYT/</code>.</p>",
+        "<h2>The Shivaji02 keys it uses</h2>",
+        "<ul><li><strong>Shusha02's keys.</strong> <code>pa~a</code> is <strong lang=\"hi\">पात्र</strong> and <code>(dya</code> is <strong lang=\"hi\">हृदय</strong>. Shivaji01 reads the same keys differently.</li><li><strong>A full stop, not a danda.</strong> <code>.</code> is the full stop Marathi uses, as in Shivaji01.</li><li><strong>ळ and the Marathi reph.</strong> <code>kLvaavao</code> is <strong lang=\"hi\">कळवावे</strong>.</li></ul>",
+        "<p>To go back, use <a href=\"/shivaji02-to-unicode\">Shivaji02 to Unicode</a>. For a document set in Shivaji01, use <a href=\"/unicode-to-shivaji\">Unicode to Shivaji01</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Shivaji02 font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Shivaji02 code. Press <strong>Preview (Hindi)</strong> to see it in the Shivaji02 font here, or set the font to <strong>Shivaji02</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Shivaji02 has no key for a few characters, such as ।. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Marathi that has to go into a Shivaji02 document.",
+          "Press <strong>Copy Shivaji02 code</strong>.",
+          "Paste into Word and set the font to <strong>Shivaji02</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Shivaji02 types it as <code>(dya</code> and Shivaji01 as <code>)dya</code>, so it shows at once that the right font was picked."
+      }
     }
   },
   "guide": {

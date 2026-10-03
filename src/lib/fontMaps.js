@@ -653,6 +653,11 @@ const NEW_DELHI = krutiVariant({
     '•': 'ऽ',
   },
 });
+// New Delhi Bold and Bold Italic (the same family in Word) draw half श on
+// `'` as Kruti Dev does, where the regular style has no glyph at all. So `'`
+// reads as श, and writing keeps `’`, which all four styles draw.
+NEW_DELHI.readMap["'k"] = 'श';
+NEW_DELHI.readMap["'"] = 'श्';
 
 // Ruchi (vendor/fonts/Ruchi/Ruchi.ttf). Kruti Dev's ASCII keys in a slanted
 // design, and the number keys draw Hindi digits (`asciiIsScript`). Its own

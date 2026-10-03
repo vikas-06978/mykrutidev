@@ -8,6 +8,8 @@ import assert from 'node:assert/strict';
 
 import { FONTS, convert } from './fontMaps.js';
 import { previewFontFor } from './legacyFonts.js';
+import { getPage, isLive, reversePage, docPairFor } from './routes.js';
+import { WORD_FONTS } from './wordFonts.js';
 
 const toU = (s, f) => convert(s, f, 'unicode', { keepEnglish: false });
 const toF = (u, f) => convert(u, 'unicode', f);
@@ -119,5 +121,38 @@ describe('registry', () => {
 
   test('Shivaji02 writes the full stop as Shivaji01 does', () => {
     assert.equal(toF('विभाग.', 'shivaji02'), toF('विभाग.', 'shivaji'));
+  });
+});
+
+describe('pages and Word upload', () => {
+  const SLUG = { 'new-delhi': 'new-delhi', 'devlys-020': 'devlys-020', 'devanagari-bold': 'devanagari-bold' };
+  for (const f of [...KRUTI_FAMILY, ...PREETI_FAMILY, ...SHUSHA_FAMILY]) {
+    test(`${f}: both directions live, Beta, each other's reverse, with Word upload`, () => {
+      const slug = SLUG[f] ?? f;
+      const to = getPage(`/${slug}-to-unicode`);
+      const from = getPage(`/unicode-to-${slug}`);
+      for (const p of [to, from]) {
+        assert.ok(p && isLive(p), `${slug}`);
+        assert.equal(p.beta, true);
+      }
+      assert.equal(reversePage(to), from);
+      assert.deepEqual(docPairFor(to), { from: f, to: 'unicode' });
+      assert.deepEqual(docPairFor(from), { from: 'unicode', to: f });
+    });
+  }
+
+  test('Word font names match the styles that were checked, and not the ones that differ', () => {
+    const is = (k, name) => WORD_FONTS[k].match.test(name);
+    for (const n of ['Krishna', 'Krishna Condensed', 'Krishna Wide']) assert.ok(is('krishna', n), n);
+    for (const n of ['Aman', 'Aman Condensed', 'Aman Thin', 'Aman Wide']) assert.ok(is('aman', n), n);
+    for (const n of ['DevLys 020', 'DevLys 020 Condensed', 'DevLys 020 Thin']) assert.ok(is('devlys-020', n), n);
+    for (const n of ['DINA-A', 'DINA27']) assert.ok(is('dina', n), n);
+    assert.ok(is('himalaya', 'HIMALAYA TT FONT'));
+    assert.ok(is('new-delhi', 'NewDelhi'));
+    assert.ok(!is('agra', 'Agra Wide') && !is('agra', 'Agra Thin'));
+    assert.ok(!is('dina', 'DINA30'));
+    assert.ok(!is('akshar', 'Akshar Unicode'));
+    assert.ok(!is('devlys', 'DevLys 020') && !is('devlys-020', 'DevLys 010'));
+    assert.ok(!is('shusha', 'Shusha02') && !is('shusha02', 'Shusha'));
   });
 });
