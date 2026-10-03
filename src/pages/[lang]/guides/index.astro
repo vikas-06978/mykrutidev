@@ -1,0 +1,9 @@
+---
+// /<lang>/guides/ - the same page as /guides/, words from src/i18n/<lang>.json.
+import GuidesIndex from '../../../components/GuidesIndex.astro';
+import { PREFIXED_LOCALES } from '../../../i18n/locales.js';
+
+export const getStaticPaths = () => PREFIXED_LOCALES.map((lang) => ({ params: { lang } }));
+---
+
+<GuidesIndex />

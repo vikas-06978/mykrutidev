@@ -24,11 +24,22 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
+import { PREFIXED_LOCALES } from '../i18n/locales.js';
+
 /** Compressed bytes the first visit may download in the background. */
 export const PRECACHE_BUDGET = 1.5 * 1024 * 1024;
 
 /** Always kept, whatever the pages use: the shell and the offline fallback. */
 const SHELL = ['index.html', 'hi/index.html', '404.html', 'manifest.json', 'hi/manifest.json', 'favicon.svg', 'favicon.ico'];
+
+/**
+ * The languages whose converter pages are downloaded on the first visit:
+ * English and Hindi, the site's first two. Every other language's pages are
+ * kept the first time they are opened instead - all of them up front would
+ * blow PRECACHE_BUDGET several times over, for pages most visitors never
+ * open in that language.
+ */
+const otherLanguage = (path) => PREFIXED_LOCALES.some((l) => l !== 'hi' && path.startsWith(`${l}/`));
 
 /** "foo/index.html" -> "/foo"; "index.html" -> "/"; anything else -> "/<path>". */
 export function urlOf(path) {
@@ -102,7 +113,7 @@ export function precachePlan(paths, read) {
     const html = read(p);
     if (html === null) continue;
     const shell = SHELL.includes(p);
-    if (!shell && !isConverterPage(html)) continue;
+    if (!shell && (otherLanguage(p) || !isConverterPage(html))) continue;
     out.add(p);
     for (const f of [...scriptClosure(html, read), ...fontFiles(html)]) if (have.has(f)) out.add(f);
   }

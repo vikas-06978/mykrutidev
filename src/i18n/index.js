@@ -1,40 +1,34 @@
 /**
- * Site text in two languages, and the few helpers that turn a key into a
+ * Site text in every language, and the few helpers that turn a key into a
  * string, a path into its other-language twin, or a block of authored HTML
  * into something safe to hand to a browser translator.
  *
  * ---------------------------------------------------------------------------
  * RULES
  *
- * - Every visible word of the website lives in en.json / hi.json. The two must
- *   hold exactly the same keys; i18n.test.js enforces it, and so does t(): a
- *   missing key THROWS, so a gap fails the build instead of quietly showing
- *   English on a Hindi page.
+ * - Every visible word of the website lives in <lang>.json, one per language
+ *   in locales.js. They must all hold exactly the keys of en.json;
+ *   i18n.test.js enforces it, and so does t(): a missing key THROWS, so a gap
+ *   fails the build instead of quietly showing English on a Hindi page.
  * - Nothing here touches conversion. Converter input/output, legacy-font code
  *   examples and test data are never translated - they are data, not copy.
- * - English is the default locale and lives at the root. Hindi lives under
- *   /hi, with the same slugs.
+ * - English is the default locale and lives at the root. Every other language
+ *   lives under its code (/hi, /bn, ...), with the same slugs.
  * ---------------------------------------------------------------------------
  */
 
 import en from './en.json' with { type: 'json' };
 import hi from './hi.json' with { type: 'json' };
 import { fill } from './fill.js';
+import { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES, isLocale } from './locales.js';
 
-export const LOCALES = /** @type {const} */ (['en', 'hi']);
-export const DEFAULT_LOCALE = 'en';
+export { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES };
+
+/** One dictionary per language in LOCALES (see locales.js to add one). */
 export const DICTS = { en, hi };
-
-/** What each locale is called in markup, Open Graph and the switcher. */
-export const LOCALE_META = {
-  en: { htmlLang: 'en', hreflang: 'en', ogLocale: 'en_IN', label: 'English' },
-  hi: { htmlLang: 'hi', hreflang: 'hi', ogLocale: 'hi_IN', label: 'हिंदी' },
-};
 
 /** Where the visitor's explicit language choice is remembered. */
 export const LANG_PREF_KEY = 'mkd-lang';
-
-const isLocale = (x) => LOCALES.includes(x);
 
 // ---------------------------------------------------------------------------
 // Lookup
@@ -264,15 +258,21 @@ export function keyDiff(a, b) {
   };
 }
 
-export function assertParity(a = en, b = hi) {
+export function assertParity(a = en, b = hi, nameA = 'en', nameB = 'hi') {
   const { onlyInFirst, onlyInSecond } = keyDiff(a, b);
   if (onlyInFirst.length || onlyInSecond.length) {
     throw new Error(
-      'i18n: en.json and hi.json disagree.\n' +
-        (onlyInFirst.length ? `  missing in hi.json: ${onlyInFirst.join(', ')}\n` : '') +
-        (onlyInSecond.length ? `  missing in en.json: ${onlyInSecond.join(', ')}\n` : ''),
+      `i18n: ${nameA}.json and ${nameB}.json disagree.\n` +
+        (onlyInFirst.length ? `  missing in ${nameB}.json: ${onlyInFirst.join(', ')}\n` : '') +
+        (onlyInSecond.length ? `  missing in ${nameA}.json: ${onlyInSecond.join(', ')}\n` : ''),
     );
   }
+}
+
+/** Every language against English. */
+export function assertAllParity(dicts = DICTS) {
+  for (const l of LOCALES) if (!dicts[l]) throw new Error(`i18n: ${l} is in LOCALES but has no dictionary in DICTS`);
+  for (const [lang, dict] of Object.entries(dicts)) if (lang !== DEFAULT_LOCALE) assertParity(dicts[DEFAULT_LOCALE], dict, DEFAULT_LOCALE, lang);
 }
 
 /**
@@ -299,5 +299,5 @@ export function assertUniqueMeta(dicts = DICTS) {
   if (problems.length) throw new Error(`i18n: titles/descriptions must be unique:\n  ${problems.join('\n  ')}`);
 }
 
-assertParity();
+assertAllParity();
 assertUniqueMeta();

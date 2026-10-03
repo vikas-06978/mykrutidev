@@ -7,12 +7,10 @@
  * into public/og/; Base.astro points each page at its file with ogImagePath().
  * Both read ogEntries() below, so the two cannot disagree about a file name.
  */
-import en from '../i18n/en.json' with { type: 'json' };
-import hi from '../i18n/hi.json' with { type: 'json' };
+import { DICTS, LOCALES } from '../i18n/index.js';
 import { PAGES, isLive } from './routes.js';
 import { GUIDES, GUIDES_PATH, guidePath } from './guides.js';
 
-const DICTS = { en, hi };
 export const OG_SIZE = { width: 1200, height: 630 };
 
 /** "/" -> "home", "/guides/x" -> "guides--x". */
@@ -38,7 +36,7 @@ const plain = (s) => s.replace(/<[^>]+>/g, '').trim();
 /** Every image to draw: its file, heading and the small line above it. */
 export function ogEntries() {
   const out = [];
-  for (const lang of ['en', 'hi']) {
+  for (const lang of LOCALES) {
     const d = DICTS[lang];
     for (const route of ownImageRoutes()) {
       let title;

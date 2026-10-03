@@ -25,8 +25,11 @@ import { fileURLToPath } from 'node:url';
 import { SITE } from '../src/lib/routes.js';
 import { parseRedirects } from '../scripts/serve-dist.mjs';
 import { GUIDES, guidePath } from '../src/lib/guides.js';
-import en from '../src/i18n/en.json' with { type: 'json' };
-import hi from '../src/i18n/hi.json' with { type: 'json' };
+import { DICTS, LOCALES, LOCALE_META } from '../src/i18n/index.js';
+
+const { en, hi } = DICTS;
+/** Each language's home page: "/", "/hi/", "/bn/", ... */
+const HOMES = LOCALES.map((l) => (l === 'en' ? '/' : `/${l}/`));
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 
@@ -171,7 +174,7 @@ describe('links', () => {
       }
       return seen;
     };
-    const reached = new Set([...near('/'), ...near('/hi/')]);
+    const reached = new Set(HOMES.flatMap((h) => [...near(h)]));
     // A page that canonicalises to another (the hub that repeats the home
     // page's converter) counts as reached when its canonical is.
     const far = indexable.filter((u) => {
@@ -179,7 +182,7 @@ describe('links', () => {
       const canonical = attr(linkRel(pages.get(u), 'canonical')[0] ?? '', 'href');
       return !(canonical && canonical !== abs(u) && reached.has(pathOf(canonical)));
     });
-    assert.deepEqual(far, [], 'more than two clicks from / (English) or /hi/ (Hindi)');
+    assert.deepEqual(far, [], 'more than two clicks from its language\'s home page');
   });
 });
 
@@ -215,7 +218,9 @@ describe('sitemap, canonical and hreflang', () => {
     });
     for (const u of want) assert.ok(sitemap.has(abs(u)), `${u} is missing from the sitemap`);
     for (const url of sitemap) assert.ok(want.includes(pathOf(url)), `sitemap lists ${url}, which is not an indexable page`);
-    assert.ok(want.some((u) => u.startsWith('/hi/')), 'no Hindi pages in the sitemap');
+    for (const l of LOCALES.filter((x) => x !== 'en')) {
+      assert.ok(want.some((u) => u.startsWith(`/${l}/`)), `no ${l} pages in the sitemap`);
+    }
   });
 
   test('every page has one absolute, trailing-slash canonical that exists', () => {
@@ -229,14 +234,15 @@ describe('sitemap, canonical and hreflang', () => {
     }
   });
 
-  test('hreflang: en, hi and x-default on every page, each pair pointing at each other', () => {
+  test('hreflang: every language and x-default on every page, each set pointing at each other', () => {
+    const codes = LOCALES.map((l) => LOCALE_META[l].hreflang);
     for (const [u, html] of pages) {
       if (u === '/404.html') continue;
       const alt = Object.fromEntries(linkRel(html, 'alternate').map((t) => [attr(t, 'hreflang'), attr(t, 'href')]));
-      assert.deepEqual(Object.keys(alt).sort(), ['en', 'hi', 'x-default'], u);
+      assert.deepEqual(Object.keys(alt).sort(), [...codes, 'x-default'].sort(), u);
       assert.equal(alt['x-default'], alt.en, `${u}: x-default`);
-      assert.ok([alt.en, alt.hi].includes(abs(u)), `${u}: its own URL is not one of its alternates`);
-      for (const lang of ['en', 'hi']) {
+      assert.ok(codes.some((c) => alt[c] === abs(u)), `${u}: its own URL is not one of its alternates`);
+      for (const lang of codes) {
         const twin = pathOf(alt[lang]);
         assert.ok(pages.has(twin), `${u}: hreflang ${lang} ${alt[lang]} was not built`);
         const back = Object.fromEntries(
@@ -295,12 +301,12 @@ describe('sharing previews and structured data', () => {
   });
 
   test('Organization and WebSite on the home pages; Article on every guide', () => {
-    for (const u of ['/', '/hi/']) {
+    for (const u of HOMES) {
       const types = jsonLd(pages.get(u)).map((d) => d['@type']);
       assert.ok(types.includes('Organization') && types.includes('WebSite'), `${u}: ${types}`);
     }
     for (const g of GUIDES) {
-      for (const u of [`${guidePath(g)}/`, `/hi${guidePath(g)}/`]) {
+      for (const u of LOCALES.map((l) => `${l === 'en' ? '' : `/${l}`}${guidePath(g)}/`)) {
         const article = jsonLd(pages.get(u)).find((d) => d['@type'] === 'Article');
         assert.ok(article, `${u}: no Article`);
         assert.equal(article.dateModified, g.updated, u);
@@ -331,7 +337,7 @@ describe('sharing previews and structured data', () => {
 
   test('visible breadcrumbs on every page but the home pages and the 404', () => {
     for (const [u, html] of pages) {
-      const home = u === '/' || u === '/hi/' || u === '/404.html';
+      const home = HOMES.includes(u) || u === '/404.html';
       assert.equal(/<nav\b[^>]*\sdata-breadcrumbs\b/.test(html), !home, u);
     }
   });
@@ -362,12 +368,16 @@ describe('content length', () => {
     '/how-to-type-hindi-in-ms-word',
   ];
 
+  // Word counts are an English and Hindi yardstick: Tamil or Bengali says the
+  // same in fewer, longer words, so the other languages are held to the
+  // structure only.
   test('search landing pages: 600-1000 words below the tool, with problems, FAQ and how-to', () => {
-    for (const [lang, d] of [['en', en], ['hi', hi]]) {
+    for (const lang of LOCALES) {
+      const d = DICTS[lang];
       for (const path of LANDING) {
         const p = d.pages[path];
         const n = below(p);
-        assert.ok(n >= 600 && n <= 1000, `${lang} ${path}: ${n} words`);
+        if (lang === 'en' || lang === 'hi') assert.ok(n >= 600 && n <= 1000, `${lang} ${path}: ${n} words`);
         assert.ok(p.howTo?.steps?.length === 3, `${lang} ${path}: how to use`);
         assert.ok(p.problems?.length >= 3, `${lang} ${path}: problems & fixes`);
         assert.ok(p.faq?.length >= 3, `${lang} ${path}: FAQ`);
@@ -398,7 +408,8 @@ describe('content length', () => {
       for (let i = 0; i + 5 <= w.length; i++) g.add(w.slice(i, i + 5).join(' '));
       return g;
     };
-    for (const [lang, d] of [['en', en], ['hi', hi]]) {
+    for (const lang of LOCALES) {
+      const d = DICTS[lang];
       const texts = new Map([
         ...LANDING.map((p) => [p, helpOf(d.pages[p]).map(clean).join(' ')]),
         ...GUIDES.map((g) => [`guide ${g.slug}`, helpOf(d.articles[g.slug]).map(clean).join(' ')]),
@@ -426,7 +437,8 @@ describe('content length', () => {
     }
   });
 
-  test('guides: at least 550 words of article each, in both languages', () => {
+  // English and Hindi only, for the reason given above the landing-page test.
+  test('guides: at least 550 words of article each, in English and Hindi', () => {
     for (const [lang, d] of [['en', en], ['hi', hi]]) {
       for (const g of GUIDES) assert.ok(below(d.articles[g.slug]) >= 550, `${lang} ${g.slug}: ${below(d.articles[g.slug])}`);
     }

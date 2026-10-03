@@ -298,7 +298,7 @@ const strings = {
   const form = document.querySelector<HTMLFormElement>('[data-lk-form]');
   if (form) {
     const L = JSON.parse(form.dataset.i18n ?? '{}');
-    const lang = form.lang === 'hi' ? 'hi' : 'en';
+    const lang = form.lang || 'en';
     const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
     const idea = $<HTMLInputElement>('#lk-idea');
     const details = $<HTMLTextAreaElement>('#lk-details');

@@ -1,17 +1,18 @@
 ---
 /**
  * The page a static host serves for any URL that does not exist - one file
- * for both languages, so it speaks both: English, then Hindi, each with the
- * tools people most often came for. Never indexed, no canonical.
+ * for every language, so it speaks all of them: English, then each of the
+ * others, each with the tools people most often came for. Never indexed, no
+ * canonical.
  */
 import Base from '../layouts/Base.astro';
 import { getPage, isLive } from '../lib/routes.js';
 import { GUIDES_PATH } from '../lib/guides.js';
-import { useT } from '../i18n/index.js';
+import { useT, LOCALES } from '../i18n/index.js';
 
 const TOP = ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/hindi-typing-test', '/english-to-hindi-typing', '/hindi-keyboard'];
 const tools = TOP.map(getPage).filter((p) => p && isLive(p));
-const langs = (['en', 'hi'] as const).map((lang) => ({ lang, ...useT(lang) }));
+const langs = LOCALES.map((lang) => ({ lang, ...useT(lang) }));
 const en = langs[0];
 ---
 

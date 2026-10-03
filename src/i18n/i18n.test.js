@@ -4,6 +4,9 @@ import assert from 'node:assert/strict';
 import {
   DICTS,
   LOCALES,
+  LOCALE_META,
+  DEFAULT_LOCALE,
+  assertAllParity,
   t,
   raw,
   fill,
@@ -28,6 +31,44 @@ import * as docConvert from '../lib/docConvert.js';
 
 const { en, hi } = DICTS;
 const RE_DEVA = /[ऀ-ॿ]/;
+
+// ---------------------------------------------------------------------------
+// The language registry (locales.js)
+// ---------------------------------------------------------------------------
+
+describe('languages', () => {
+  test('English is the default and comes first; every language has a dictionary and its markup', () => {
+    assert.equal(DEFAULT_LOCALE, 'en');
+    assert.equal(LOCALES[0], 'en');
+    assert.deepEqual(Object.keys(DICTS).sort(), [...LOCALES].sort());
+    for (const l of LOCALES) {
+      const m = LOCALE_META[l];
+      assert.ok(m, `${l}: no LOCALE_META`);
+      for (const k of ['htmlLang', 'hreflang', 'ogLocale', 'label', 'english', 'dateLocale', 'script']) assert.ok(m[k], `${l}.${k}`);
+      assert.match(m.ogLocale, /^[a-z]{2}_IN$/);
+    }
+  });
+
+  test('every language holds exactly the keys of English', () => {
+    assert.doesNotThrow(() => assertAllParity());
+    const ok = Object.fromEntries(LOCALES.map((l) => [l, { a: '1' }]));
+    assert.throws(() => assertAllParity({ ...ok, xx: {} }), /missing in xx\.json: a/);
+  });
+
+  test('a language with no dictionary cannot be published', () => {
+    assert.throws(() => assertAllParity({ en }), /in LOCALES but has no dictionary/);
+  });
+
+  test('the language paths: every language but English under its own code', () => {
+    for (const l of LOCALES) {
+      assert.equal(localizePath('/hindi-keyboard', l), l === 'en' ? '/hindi-keyboard/' : `/${l}/hindi-keyboard/`);
+      assert.deepEqual(splitLocale(localizePath('/x', l)), { lang: l, path: '/x' });
+      assert.equal(routeOf(localizePath('/hindi-keyboard', l)), '/hindi-keyboard');
+    }
+    // A language that is not published is not a prefix.
+    assert.deepEqual(splitLocale('/zz/x'), { lang: 'en', path: '/zz/x' });
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Hindi font names in the nav and in lists of pages

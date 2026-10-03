@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { precachePlan, urlOf } from '../pwa/integration.mjs';
+import { LOCALES } from '../i18n/locales.js';
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
 
@@ -84,14 +85,14 @@ describe('what the first visit downloads', () => {
 });
 
 describe('manifests', () => {
-  for (const [file, lang, start] of [
-    ['../../public/manifest.json', 'en', '/'],
-    ['../../public/hi/manifest.json', 'hi', '/hi'],
-  ]) {
-    test(`${lang}: installable, with the Hindi short name and 192/512 icons`, () => {
+  // One per language: Base.astro links /<lang>/manifest.json on its pages.
+  for (const [file, lang, start] of LOCALES.map((l) =>
+    l === 'en' ? ['../../public/manifest.json', 'en', '/'] : [`../../public/${l}/manifest.json`, l, `/${l}`],
+  )) {
+    test(`${lang}: installable, with a short name in an Indian script and 192/512 icons`, () => {
       const m = JSON.parse(read(file));
       assert.equal(m.name, 'MyKrutiDev');
-      assert.match(m.short_name, /[ऀ-ॿ]/);
+      assert.match(m.short_name, /[\u0900-\u0BFF]/);
       assert.equal(m.lang, lang);
       assert.equal(m.start_url, start);
       assert.equal(m.display, 'standalone');
@@ -103,4 +104,24 @@ describe('manifests', () => {
       for (const i of m.icons) assert.ok(readFileSync(new URL(`../../public${i.src}`, import.meta.url)).length > 0);
     });
   }
+});
+
+describe('first-visit download and the other languages', () => {
+  test('English and Hindi converter pages are kept up front; other languages only when opened', () => {
+    const files = {
+      'index.html': CONVERTER,
+      'hi/index.html': CONVERTER,
+      'bn/index.html': CONVERTER,
+      'bn/unicode-to-kruti-dev/index.html': CONVERTER,
+      'ta/index.html': CONVERTER,
+    };
+    const plan = precachePlan(Object.keys(files), (p) => files[p] ?? null);
+    assert.ok(plan.includes('index.html') && plan.includes('hi/index.html'));
+    // Only languages in LOCALES are "other languages"; until Bengali or Tamil
+    // is published, bn/ and ta/ are just folders and the rule must not care.
+    for (const l of ['bn', 'ta']) {
+      const kept = plan.some((p) => p.startsWith(`${l}/`));
+      assert.equal(kept, !LOCALES.includes(l), `${l}: ${plan}`);
+    }
+  });
 });
