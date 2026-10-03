@@ -6,11 +6,13 @@ every style of a font (Normal, Bold, Italic, Wide...). Like everything in
 
 ## How to upload
 
-1. On GitHub, open this folder and choose **Add file -> Upload files**.
-2. Drag in the font files, or a whole folder per font (GitHub keeps the
-   folder name, e.g. `LMG Arun/LMG-Arun.ttf`). Loose files are fine too:
-   they get sorted into one folder per font when the map is built.
+1. On GitHub, open this folder, then the font's own folder (one is ready
+   for each font listed below).
+2. Choose **Add file -> Upload files** and drag in the font files.
 3. Commit straight to `main`.
+
+A font with no folder yet: upload it here, as a whole folder named after
+the font or as loose files. It gets sorted when its map is built.
 
 A real Word document typed in the font (personal details removed) helps a
 lot: it is the only way a converter leaves Beta. Put it next to the font,
