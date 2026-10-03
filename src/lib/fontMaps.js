@@ -748,6 +748,61 @@ const AJAY = krutiVariant({
   },
 });
 
+// Aman (vendor/fonts/Aman/, Condensed, Italic, Thin and Wide; no regular).
+// Drawn key by key beside Krishna Condensed: the same letter on every key of
+// the Krishna map, in a calligraphic design, except that १-४ on 0x8D-0x90
+// are missing. (Both fonts also repeat letters on Mac Roman slots - ƒ ˆ ∆ ∏
+// ≈ ... - which Windows documents never contain.)
+const AMAN = Object.fromEntries(
+  Object.entries(KRISHNA).map(([which, m]) => [
+    which,
+    Object.fromEntries(Object.entries(m).filter(([k]) => !/[\u008d-\u0090]/.test(k))),
+  ]),
+);
+
+// Agra (vendor/fonts/Agra/AGRA.TTF). Kruti Dev's ASCII keys in an italic
+// design, but `=` is HALF त्र (`=k` त्र) and `¿ À` are ( ). It has none of
+// Kruti Dev's upper-range conjuncts; its own upper range is Krishna's: Hindi
+// digits (१-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •, ० on Œ), आ ख ण थ ॠ ऌ ऍ on
+// `Á Â Æ É Ç È Ê`, क्त on `Ÿ`, ह्न on `Ð œ`, ी on `Ë`, ि on `£`, िं and ीं on
+// `¯ °`. Left out: `²` and `×` (not read with certainty).
+const AGRA = krutiVariant({
+  drop: '=¾ÞßñÛ«Ö÷ÜèÒ¥ÌíÍêÎëÏìÔïðàáâãæéóôùÓî®åƒ„†‡ˆ‰Š‹ŸËÁ£ÆÇÉÈÊ',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '¿': '(',
+    'À': ')',
+    'Á': 'आ',
+    'Â': 'ख',
+    'Æ': 'ण',
+    'É': 'थ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Ê': 'ऍ',
+    'Ÿ': 'क्त',
+    'Ð': 'ह्न',
+    'œ': 'ह्न',
+    'Ë': 'ी',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '°': 'ीं',
+    '¢': 'ः',
+    'µ': '–',
+    '∙': 'ऽ',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
+
 /** The 0x80-0x9F block, where DevLys 010 and Kruti Dev 010 draw different glyphs. */
 export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 
@@ -2143,6 +2198,34 @@ export const FONTS = {
     ...AJAY,
     // Read off the font file key by key against Kruti Dev (see the note above
     // AJAY). `beta` until a real Ajay document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  aman: {
+    key: 'aman',
+    label: 'Aman',
+    kind: 'legacy',
+    ...AMAN,
+    // Krishna's layout, checked key by key (see the note above AMAN). `beta`
+    // until a real Aman document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  agra: {
+    key: 'agra',
+    label: 'Agra',
+    kind: 'legacy',
+    ...AGRA,
+    // Read off the font file key by key against Kruti Dev and Krishna (see the
+    // note above AGRA). `beta` until a real Agra document has been run through it.
     accurate: true,
     beta: true,
     warnUnmapped: true,

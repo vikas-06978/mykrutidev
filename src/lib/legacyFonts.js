@@ -79,6 +79,8 @@ export const PREVIEW_FONTS = {
   ruchi: preview('Ruchi-Normal', 'ruchi.woff'),
   'devlys-020': preview('DevLys 020', 'devlys-020.woff'),
   ajay: preview('Ajay Normal', 'ajay.woff'),
+  aman: preview('Aman Condensed', 'aman.woff'),
+  agra: preview('Agra', 'agra.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

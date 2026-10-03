@@ -164,3 +164,19 @@
     url('/fonts/ajay.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD Aman Condensed';
+  src:
+    local('Aman Condensed'),
+    url('/fonts/aman.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Agra';
+  src:
+    local('Agra'),
+    url('/fonts/agra.woff') format('woff');
+  font-display: swap;
+}
