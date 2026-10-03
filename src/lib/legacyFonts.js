@@ -81,6 +81,13 @@ export const PREVIEW_FONTS = {
   ajay: preview('Ajay Normal', 'ajay.woff'),
   aman: preview('Aman Condensed', 'aman.woff'),
   agra: preview('Agra', 'agra.woff'),
+  himalaya: preview('HIMALAYA TT FONT', 'himalaya.woff'),
+  akshar: preview('Akshar', 'akshar.woff'),
+  dina: preview('DINA-A', 'dina.woff'),
+  'devanagari-bold': preview('DevanagariBold', 'devanagari-bold.woff'),
+  narad: preview('Narad', 'narad.woff'),
+  aakriti: preview('Aakriti', 'aakriti.woff'),
+  anjali: preview('Anjali', 'anjali.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

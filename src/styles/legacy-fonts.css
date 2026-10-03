@@ -180,3 +180,59 @@
     url('/fonts/agra.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD HIMALAYA TT FONT';
+  src:
+    local('HIMALAYA TT FONT'),
+    url('/fonts/himalaya.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Akshar';
+  src:
+    local('Akshar'),
+    url('/fonts/akshar.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DINA-A';
+  src:
+    local('DINA-A'),
+    url('/fonts/dina.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DevanagariBold';
+  src:
+    local('DevanagariBold'),
+    url('/fonts/devanagari-bold.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Narad';
+  src:
+    local('Narad'),
+    url('/fonts/narad.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Aakriti';
+  src:
+    local('Aakriti'),
+    url('/fonts/aakriti.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Anjali';
+  src:
+    local('Anjali'),
+    url('/fonts/anjali.woff') format('woff');
+  font-display: swap;
+}

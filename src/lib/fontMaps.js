@@ -2024,6 +2024,148 @@ const PREETI_REV = {
 };
 
 // ============================================================================
+// Fonts on the Preeti keyboard, with some keys moved
+// ============================================================================
+// Himalaya, Akshar, DINA and the rest are Preeti with a few keys swapped or
+// redrawn. Each was drawn key by key beside Preeti and the differences read
+// by eye. `swap` renames keys (Himalaya's number row: Preeti's `1` ज्ञ is its
+// `!`), `drop` removes the Preeti keys the font draws differently or not at
+// all, `add` is the font's own keys. The reverse table is Preeti's, renamed.
+function preetiVariant({ swap = {}, drop = '', add = {} }) {
+  const bad = new Set(drop);
+  const rename = (k) => [...k].map((c) => swap[c] ?? c).join('');
+  const ok = (k) => ![...k].some((c) => bad.has(c));
+  const map = {};
+  for (const [k, v] of Object.entries(PREETI)) if (ok(k)) map[rename(k)] = v;
+  Object.assign(map, add);
+  const reverse = {};
+  for (const [u, k] of Object.entries(PREETI_REV)) if (ok(k)) reverse[u] = rename(k);
+  for (const [k, u] of Object.entries(add)) if (!(u in reverse)) reverse[u] = k;
+  return { map, reverse };
+}
+
+// The number row swapped: digits on 0-9, Preeti's letters on the shifted row.
+const NUMBER_ROW_SWAP = Object.fromEntries(
+  [...'0123456789'].flatMap((d, n) => [[d, ')!@#$%^&*('[n]], [')!@#$%^&*('[n], d]]),
+);
+
+// Himalaya (vendor/fonts/Himalaya/HIMALAYA.TTF). Preeti with the number row
+// swapped (0-9 are the digits, ! @ # ... ) the letters), `'` and `"` swapped
+// (ू and ु), ा on `F` as well as `f`, and ँ moved to `¤`. Its own keys: ह on
+// `Ù`, हृ on `X` (Preeti's ह्), क्ष ष ङ on `Ô í ñ`. Preeti's upper-range
+// conjuncts are not in the font. Left out: `é` (ङ्ग or ड़्ग, not certain), `ø`.
+const HIMALAYA = preetiVariant({
+  swap: { ...NUMBER_ROW_SWAP, "'": '"', '"': "'", F: '¤' },
+  drop: '›„ÌÝ•ËÍÎ‹Å‰ˆ˜Þ‘ÛÜ±Ö…–—X',
+  add: { F: 'ा', 'Ù': 'ह', X: 'हृ', 'Ô': 'क्ष', 'í': 'ष', 'ñ': 'ङ' },
+});
+
+/** A font that is another font with a few keys changed: drop, then add. */
+function variantOf(base, { drop = '', add = {} }) {
+  const bad = new Set(drop);
+  const ok = (k) => ![...k].some((c) => bad.has(c));
+  const map = Object.fromEntries(Object.entries(base.map).filter(([k]) => ok(k)));
+  Object.assign(map, add);
+  const reverse = Object.fromEntries(Object.entries(base.reverse).filter(([, k]) => ok(k)));
+  for (const [k, u] of Object.entries(add)) if (!(u in reverse)) reverse[u] = k;
+  return { map, reverse };
+}
+
+// Akshar (vendor/fonts/Akshar/Akshar Normal.ttf). Himalaya, drawn key by key
+// beside it, with these keys changed: फ on `F`, झ on `X` (and `µ`), ँ on `~`,
+// a hyphen on ```, ञ on `½` (half on `¾`), हृ on `›`; no ह क्ष ष ङ on
+// `Ù Ô í ñ`. Its upper slots carry the ASCII punctuation the letter keys took:
+// { } [ ] on 0x8D-0x90, ! % # * on ‘ ’ “ ”, ÷ ; × = ~ / + on • ‹ ™ – — Œ ˜.
+const AKSHAR = variantOf(HIMALAYA, {
+  drop: '`~¤FXÙÔíñ÷',
+  add: {
+    'F': 'फ',
+    'X': 'झ',
+    'µ': 'झ',
+    '~': 'ँ',
+    '`': '-',
+    '½': 'ञ',
+    '¾': 'ञ्',
+    '›': 'हृ',
+    '\u008d': '{',
+    '\u008e': '}',
+    '\u008f': '[',
+    '\u0090': ']',
+    '‘': '!',
+    '’': '%',
+    '“': '#',
+    '”': '*',
+    '•': '÷',
+    '‹': ';',
+    '™': '×',
+    '–': '=',
+    '—': '~',
+    'Œ': '/',
+    '˜': '+',
+  },
+});
+
+// DINA (vendor/fonts/DINA/DINA-A.ttf). Preeti for every letter key, drawn key
+// by key beside it; the upper range is its own: ्र (the caret) on ```, च on
+// `˜`, झ on `•`, द्म on `£`, ङ on `„`, ट्ट on `‘`, ङ्क on `¤`, रू on `™`, ॐ on
+// `‰ ›`, / on `¡`, + on `ˆ`. Preeti's other upper-range conjuncts are not in
+// the font. Left out: `‹ … – — œ ‚ ƒ` (conjuncts not read with certainty).
+const DINA = preetiVariant({
+  drop: '`¡åߢ›„ÌݧˆËÍÎ‹Åª¿Ø´«ÞçÛÙܱÖ÷æÆ…Ú–—‘˜•‰°¶£',
+  add: {
+    '`': '्र',
+    '˜': 'च',
+    '•': 'झ',
+    '£': 'द्म',
+    '„': 'ङ',
+    '‘': 'ट्ट',
+    '¤': 'ङ्क',
+    '™': 'रू',
+    '‰': 'ॐ',
+    '›': 'ॐ',
+    '¡': '/',
+    'ˆ': '+',
+  },
+});
+
+// Devanagari Bold (vendor/fonts/Devanagari Bold/Devanagari_Bold.ttf). Preeti
+// on every key it shares, in a bold design, drawn key by key beside it. It
+// lacks Preeti's ¡ ¢ „ Ì • ° ‹ Ø Þ ˜ Ü, draws ऽ on `›` (Preeti's द्र) and adds
+// फ on `©`, ह्य on `Ã`. Left out: `Î`, `ˇ`, `“`, `®` (not read with certainty).
+const DEVANAGARI_BOLD = preetiVariant({
+  drop: '¡¢„Ì•°‹ØÞ˜Ü›Î',
+  add: { '›': 'ऽ', '©': 'फ', 'Ã': 'ह्य' },
+});
+
+// Narad (vendor/fonts/Narad/Narad.ttf). Preeti on every letter key, in a bold
+// design, drawn key by key beside it. It lacks most of Preeti's upper-range
+// conjuncts (¡ ß ¢ › „ Ì Ý ¶ ° Ë Í Î ‹ Å Ø ´ Þ ˜ Ù Ü … Ú —), draws a full झ on
+// `‰` (Preeti's half झ) and swaps the curly quotes on `æ Æ`.
+const NARAD = preetiVariant({
+  drop: '¡ß¢›„ÌݶˋËÍÎ‹ÅØ´Þ˜ÙÜ…Ú—‰‘æÆ°',
+  add: { '‰': 'झ', 'æ': '”', 'Æ': '“' },
+});
+
+// Aakriti (vendor/fonts/Aakriti/Aakriti.ttf). Preeti on every letter key, in a
+// decorative design, drawn key by key beside it. It lacks Preeti's ¢ › „ Ì §
+// Ý ¶ • Ë Í Î ‹ Å Ø Þ Ù ± Ö, draws ळ on `˜` (Preeti's ऽ) and adds ष on `È`.
+// Left out: `· ø Œ œ ¸ …` and its Mac Roman repeats (not read with certainty).
+const AAKRITI = preetiVariant({
+  drop: '¢›„Ì§Ý¶•ËÍÎ‹ÅØÞÙ±Ö˜…Ú',
+  add: { '˜': 'ळ', 'È': 'ष' },
+});
+
+// Anjali (vendor/fonts/Anjali/Anjali Regular.ttf). Preeti on every letter key,
+// in a heavy display design, drawn key by key beside it, except ा on `F`
+// (Preeti's ँ) and य on `Ø` (Preeti's च). It lacks Preeti's upper-range
+// conjuncts and adds ङ्क on `° ·`, फ on `˚`, ॐ on `π`. Left out: `ø ı ł Œ œ`
+// and the punctuation on `• ‘ “ æ Æ …` (not read with certainty).
+const ANJALI = preetiVariant({
+  drop: '›„ÌÝËÍÎ‹Å‰ˆÞ˜çÛÙÜÖÚ•‘æÆ…FØ°',
+  add: { F: 'ा', 'Ø': 'य', '°': 'ङ्क', '·': 'ङ्क', '˚': 'फ', 'π': 'ॐ' },
+});
+
+// ============================================================================
 // Font registry - adding a font is adding one entry.
 // ============================================================================
 //
@@ -2336,6 +2478,120 @@ export const FONTS = {
     reverse: PREETI_REV,
     warnUnmapped: true,
     // Raw keys in the input box, as pasted. The real font previews the output.
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  himalaya: {
+    key: 'himalaya',
+    label: 'Himalaya',
+    lang: 'ne',
+    kind: 'legacy',
+    ...HIMALAYA,
+    // Preeti's map, re-keyed after drawing every key beside Preeti (see the
+    // note above HIMALAYA). `beta` until a real Himalaya document has been run
+    // through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'g]kfn ;"Gb/ b]z xf] .',
+    placeholder: 'g]kfn  (example)',
+  },
+  akshar: {
+    key: 'akshar',
+    label: 'Akshar',
+    lang: 'ne',
+    kind: 'legacy',
+    ...AKSHAR,
+    // Himalaya's map, re-keyed after drawing every key beside Himalaya (see
+    // the note above AKSHAR). `beta` until a real Akshar document has been
+    // run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'g]kfn ;"Gb/ b]z xf] .',
+    placeholder: 'g]kfn  (example)',
+  },
+  dina: {
+    key: 'dina',
+    label: 'DINA',
+    lang: 'ne',
+    kind: 'legacy',
+    ...DINA,
+    // Preeti's map, re-keyed after drawing every key beside Preeti (see the
+    // note above DINA). `beta` until a real DINA document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  'devanagari-bold': {
+    key: 'devanagari-bold',
+    label: 'Devanagari Bold',
+    lang: 'ne',
+    kind: 'legacy',
+    ...DEVANAGARI_BOLD,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // DEVANAGARI_BOLD). `beta` until a real document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  narad: {
+    key: 'narad',
+    label: 'Narad',
+    lang: 'ne',
+    kind: 'legacy',
+    ...NARAD,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // NARAD). `beta` until a real Narad document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  aakriti: {
+    key: 'aakriti',
+    label: 'Aakriti',
+    lang: 'ne',
+    kind: 'legacy',
+    ...AAKRITI,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // AAKRITI). `beta` until a real Aakriti document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  anjali: {
+    key: 'anjali',
+    label: 'Anjali',
+    lang: 'ne',
+    kind: 'legacy',
+    ...ANJALI,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // ANJALI). `beta` until a real Anjali document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
     css: 'monospace',
     sample: "g]kfn ;'Gb/ b]z xf] .",
     placeholder: 'g]kfn  (example)',
