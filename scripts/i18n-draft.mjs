@@ -73,7 +73,7 @@ function nest(pairs) {
     let node = out;
     parts.forEach((p, i) => {
       if (i === parts.length - 1) node[p] = v;
-      else node = node[p] ??= /^\d+$/.test(parts[i + 1]) ? [] : {};
+      else node = node[p] ??= Array.isArray(get(en, parts.slice(0, i + 1).join('.'))) ? [] : {};
     });
   }
   return out;
@@ -109,6 +109,11 @@ if (cmd === 'next') {
       continue;
     }
     for (const p of checkValue(key, source, value)) problems.push(`${key}: ${p}`);
+    // What search engines show, as tests/seo.test.js checks on the built pages.
+    if (/^(pages|articles)\.[^.]+\.title$/.test(key) && value.length > 70) problems.push(`${key}: title is ${value.length} characters, at most 70`);
+    if (/^(pages|articles)\.[^.]+\.description$/.test(key) && (value.length < 50 || value.length > 160)) {
+      problems.push(`${key}: description is ${value.length} characters, 50 to 160`);
+    }
     // The same as English, with real words in it: probably left untranslated.
     if (value === source && /[A-Za-z]{4,}\s+[A-Za-z]{3,}/.test(source.replace(/<[^>]+>/g, ''))) warnings.push(key);
   }
