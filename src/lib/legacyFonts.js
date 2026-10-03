@@ -76,6 +76,9 @@ export const PREVIEW_FONTS = {
   kundli: preview('Kundli', 'kundli.woff'),
   krishna: preview('Krishna', 'krishna.woff'),
   'new-delhi': preview('NewDelhi', 'new-delhi.woff'),
+  ruchi: preview('Ruchi-Normal', 'ruchi.woff'),
+  'devlys-020': preview('DevLys 020', 'devlys-020.woff'),
+  ajay: preview('Ajay Normal', 'ajay.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

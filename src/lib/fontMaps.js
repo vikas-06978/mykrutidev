@@ -360,6 +360,7 @@ const KRUTI_EXTENDED = {
   'è': 'ध्',
   'º': 'ह्',
   // Full letters
+  'Á': 'प्र',
   '£': 'ख्र',
   '¶': 'फ',
   'Ò': 'भ',
@@ -485,7 +486,7 @@ function krutiVariant({ drop, add }) {
 // Read and left out: `§` (a ि-like sign that is not one certain matra), `Ð`,
 // `å`, `¥` and `«` (marks, not letters).
 const ARJUN = krutiVariant({
-  drop: '=Û«÷ŸË£Ò¥ÃÄÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  drop: '=ÁÛ«÷ŸË£Ò¥ÃÄÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
   add: {
     '=k': 'त्र',
     '=': 'त्र्',
@@ -626,7 +627,7 @@ const KRISHNA = krutiVariant({
 // the reph and ं on `²`. No Hindi digits. Left out: `§ ˉ ±` (signs not read
 // with certainty), `Œ` and the marks on `¤ ¥ « ‘ Ú`.
 const NEW_DELHI = krutiVariant({
-  drop: "=`'«÷ŸË£Ò¥ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ±®·åƒ„†‡ˆ‰Š‹",
+  drop: "=`'Á«÷ŸË£Ò¥ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ±®·åƒ„†‡ˆ‰Š‹",
   add: {
     '=k': 'त्र',
     '=': 'त्र्',
@@ -650,6 +651,100 @@ const NEW_DELHI = krutiVariant({
     'µ': '–',
     '¹': '*',
     '•': 'ऽ',
+  },
+});
+
+// Ruchi (vendor/fonts/Ruchi/Ruchi.ttf). Kruti Dev's ASCII keys in a slanted
+// design (the number keys draw Hindi digits). Its own upper range: ऐ ऍ आ ॠ ऌ
+// on `Ë Ê Á Ç È`, full ख क्ष ष श ण थ on `Â Õ Ô Ó Æ É`, ष्ट ह्न ह्व ह्ल on
+// `þ õ à ù`, ि with the reph on `£`, ैं on `®`, ळ on `”`, ः on `¢`. No ( or =
+// on `¼ ¾`. Many upper-range glyphs are small signs or conjuncts that are not
+// one certain letter, and are left out: `« Ö Ü Ÿ ¶ Ì Ð ë Ï ð î å ö ø ú û ü ÿ
+// Œ œ š ˉ “ •`.
+const RUCHI = krutiVariant({
+  drop: '¼¾«Ö÷ÜŸË¶ÒÌÍÎëÏÔðÝàùÓîÆÇÉÈÊ®·åƒ„†‡ˆ‰Š‹£¥³',
+  add: {
+    'Ë': 'ऐ',
+    'Ê': 'ऍ',
+    'Á': 'आ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Â': 'ख',
+    'Õ': 'क्ष',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Æ': 'ण',
+    'É': 'थ',
+    'þ': 'ष्ट',
+    'õ': 'ह्न',
+    'à': 'ह्व',
+    'ù': 'ह्ल',
+    'ò': 'स्त्र',
+    '£': 'ि' + PRE_REPH,
+    '®': 'ैं',
+    '”': 'ळ',
+    '¢': 'ः',
+    'µ': '—',
+    '∙': 'ऽ',
+  },
+});
+
+// DevLys 020 (vendor/fonts/DevLys 020/DevLys 020.ttf). DevLys 010's keys,
+// except that every number key draws a Hindi digit, so even 0-9 are script
+// (`asciiIsScript`), and the Alt-code digits sit one slot later than in Kruti
+// Dev (१ on „ ... ८ on ‹, ९ on Œ and å). Also: ध on `Ä` (not घ), स्त्र on `Û`,
+// ह्व on `à`, हृ on `‚`, ॉ on `ƒ`. Left out: `Ô ï` (ड्ड or ड्ढ, not certain).
+const DEVLYS_020 = krutiVariant({
+  drop: 'ÛàÄÔïƒ„†‡ˆ‰Š‹å',
+  add: {
+    'Ä': 'ध',
+    'Û': 'स्त्र',
+    'à': 'ह्व',
+    '‚': 'हृ',
+    'ƒ': 'ॉ',
+    '„': '१',
+    '…': '२',
+    '†': '३',
+    '‡': '४',
+    'ˆ': '५',
+    '‰': '६',
+    'Š': '७',
+    '‹': '८',
+    'Œ': '९',
+    'å': '९',
+  },
+});
+
+// Ajay (vendor/fonts/Ajay/AJAY_normal.TTF). Kruti Dev's ASCII keys in a bold
+// design, but `=` is HALF त्र (`=k` त्र) and `´` is HALF ञ (as is `×`). Its
+// own upper range: ि with the reph on `£` (and ं on `²`), िं on `¯ ˉ`, ीं on
+// `°`, ैं on `®`, ॉ on `¦`, ॠ ॐ द्ध दृ स्त्र ः. No Hindi digits. Left out:
+// `à` (a second ह), `Ð`, `§` and the marks on `¤ ¥ « Ú`.
+const AJAY = krutiVariant({
+  drop: '=ÛÁ«÷ŸË£Ò¥´ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '´k': 'ञ',
+    '´': 'ञ्',
+    '×k': 'ञ',
+    '×': 'ञ्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'å': 'दृ',
+    'Ç': 'ॠ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '¯': PRE_I_NASAL,
+    'ˉ': PRE_I_NASAL,
+    '°': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '∙': 'ऽ',
   },
 });
 
@@ -1955,6 +2050,22 @@ export const FONTS = {
     sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
     placeholder: 'fgUnh Hkkjr  (example)',
   },
+  'devlys-020': {
+    key: 'devlys-020',
+    label: 'DevLys 020',
+    kind: 'legacy',
+    ...DEVLYS_020,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // DEVLYS_020). `beta` until a real DevLys 020 document has been run through it.
+    accurate: true,
+    beta: true,
+    // Its number keys draw Hindi digits: there are no "numbers" to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky; 2024',
+    placeholder: 'Hkkjr  (example)',
+  },
   arjun: {
     key: 'arjun',
     label: 'Arjun',
@@ -2009,6 +2120,34 @@ export const FONTS = {
     warnUnmapped: true,
     css: 'monospace',
     sample: 'Hkkjr ljdkj] fo’ofo|ky; ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  ruchi: {
+    key: 'ruchi',
+    label: 'Ruchi',
+    kind: 'legacy',
+    ...RUCHI,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // RUCHI). `beta` until a real Ruchi document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  ajay: {
+    key: 'ajay',
+    label: 'Ajay',
+    kind: 'legacy',
+    ...AJAY,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // AJAY). `beta` until a real Ajay document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
     placeholder: 'Hkkjr  (example)',
   },
   chanakya: {

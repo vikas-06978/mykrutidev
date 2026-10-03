@@ -140,3 +140,27 @@
     url('/fonts/new-delhi.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD Ruchi-Normal';
+  src:
+    local('Ruchi-Normal'),
+    url('/fonts/ruchi.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DevLys 020';
+  src:
+    local('DevLys 020'),
+    url('/fonts/devlys-020.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Ajay Normal';
+  src:
+    local('Ajay Normal'),
+    url('/fonts/ajay.woff') format('woff');
+  font-display: swap;
+}
