@@ -13,7 +13,7 @@
  */
 
 /** The languages the site is published in. English first: it is the default. */
-export const LOCALES = /** @type {const} */ (['en', 'hi']);
+export const LOCALES = /** @type {const} */ (['en', 'hi', 'bn']);
 export const DEFAULT_LOCALE = 'en';
 
 /**

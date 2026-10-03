@@ -32,7 +32,9 @@ test.describe('language menu', () => {
     await page.keyboard.press('Escape');
     await expect(menu).not.toHaveAttribute('open', '');
     await menu.locator('summary').click();
-    await page.locator('h1').click();
+    // Tap low on the page: on a phone the open menu covers the heading.
+    const { height } = page.viewportSize();
+    await page.mouse.click(8, height - 8);
     await expect(menu).not.toHaveAttribute('open', '');
   });
 });

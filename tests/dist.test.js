@@ -783,7 +783,7 @@ describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
   // Cloudflare with the real one, usually unset on a laptop.
   const pay = readSupport(process.env);
   const upiId = pay?.upiId;
-  const support = () => ({ en: pages.get('/support'), hi: pages.get('/hi/support') });
+  const support = () => Object.fromEntries(LOCALES.map((l) => [l, pages.get(inLocale('/support', l))]));
 
   /** Read the QR on the page back as a phone would, from the SVG the build drew. */
   const scanPage = (html) => {
@@ -820,7 +820,8 @@ describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
       assert.ok(html.includes(`>${upiId}</code>`), 'UPI ID not shown');
     }
     for (const [path, html] of pages) {
-      const href = path === '/hi' || path.startsWith('/hi/') ? '/hi/support/' : '/support/';
+      const l = localeOf(path);
+      const href = l === 'en' ? '/support/' : `/${l}/support/`;
       assert.ok(html.includes(`href="${href}"`) && html.includes('data-support-link'), `${path}: no footer link to ${href}`);
     }
   });
@@ -834,7 +835,7 @@ describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
 });
 
 describe('the ToolMitra links page (/links)', () => {
-  const links = () => ({ en: pages.get('/links'), hi: pages.get('/hi/links') });
+  const links = () => Object.fromEntries(LOCALES.map((l) => [l, pages.get(inLocale('/links', l))]));
 
   test('exists in both languages, is never indexed and is in no sitemap', () => {
     const sitemaps = readdirSync(DIST).filter((f) => /^sitemap.*\.xml$/.test(f));
@@ -863,7 +864,7 @@ describe('the ToolMitra links page (/links)', () => {
           assert.match(tag, /\sdata-soon[\s>]/);
         } else {
           assert.equal(el, 'a', `${lang}: ${id} is out but not a link`);
-          const want = link.startsWith('/') ? slash(lang === 'hi' ? hindiOf(link) : link) : link;
+          const want = link.startsWith('/') ? slash(inLocale(link, lang)) : link;
           assert.equal(attr(tag, 'href'), want, `${lang}: ${id}`);
         }
       }
@@ -879,7 +880,7 @@ describe('the ToolMitra links page (/links)', () => {
         lang,
       );
       for (const [p, href] of hrefs) {
-        const want = slash(lang === 'hi' ? hindiOf(p) : p);
+        const want = slash(inLocale(p, lang));
         assert.equal(href, want, `${lang}: ${p}`);
         assert.ok(pages.has(want === '/' ? '/' : want.replace(/\/$/, '')), `${lang}: ${href} is not a page`);
       }

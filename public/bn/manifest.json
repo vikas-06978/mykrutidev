@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MyKrutiDev",
+  "short_name": "কৃতিদেব",
+  "description": "Kruti Dev আর ইউনিকোড কনভার্টার, হিন্দি টাইপিং টিউটর আর হিন্দি কিবোর্ড। বিনামূল্যে, আর কনভার্টারগুলো ইন্টারনেট ছাড়াও চলে।",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/bn",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
