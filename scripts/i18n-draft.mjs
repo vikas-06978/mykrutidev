@@ -109,6 +109,13 @@ if (cmd === 'next') {
       continue;
     }
     for (const p of checkValue(key, source, value)) problems.push(`${key}: ${p}`);
+    // Two Indian scripts inside one word is a slip, never intended (हिंदी-তে is
+    // fine: the hyphen separates them).
+    const block = (c) => Math.floor((c.codePointAt(0) - 0x900) / 0x80);
+    // The danda (। ॥) is shared by the scripts, so it never counts.
+    for (const w of value.replace(/<[^>]+>|[।॥]/g, ' ').split(/[^\u0900-\u0DFF]+/)) {
+      if (w && new Set([...w].map(block)).size > 1) problems.push(`${key}: "${w}" mixes two scripts in one word`);
+    }
     // What search engines show, as tests/seo.test.js checks on the built pages.
     if (/^(pages|articles)\.[^.]+\.title$/.test(key) && value.length > 70) problems.push(`${key}: title is ${value.length} characters, at most 70`);
     if (/^(pages|articles)\.[^.]+\.description$/.test(key) && (value.length < 50 || value.length > 160)) {
