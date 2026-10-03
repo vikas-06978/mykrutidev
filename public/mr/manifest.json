@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MyKrutiDev",
+  "short_name": "कृतिदेव",
+  "description": "Kruti Dev आणि युनिकोड कन्व्हर्टर, हिंदी टायपिंग ट्यूटर आणि हिंदी कीबोर्ड. मोफत, आणि कन्व्हर्टर इंटरनेटशिवायही चालतात.",
+  "lang": "mr",
+  "dir": "ltr",
+  "start_url": "/mr",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -117,8 +117,8 @@ if (cmd === 'next') {
       if (w && new Set([...w].map(block)).size > 1) problems.push(`${key}: "${w}" mixes two scripts in one word`);
     }
     // What search engines show, as tests/seo.test.js checks on the built pages.
-    if (/^(pages|articles)\.[^.]+\.title$/.test(key) && value.length > 70) problems.push(`${key}: title is ${value.length} characters, at most 70`);
-    if (/^(pages|articles)\.[^.]+\.description$/.test(key) && (value.length < 50 || value.length > 160)) {
+    if (/^((pages|articles)\.[^.]+|guidesIndex|notFound)\.title$/.test(key) && value.length > 70) problems.push(`${key}: title is ${value.length} characters, at most 70`);
+    if (/^((pages|articles)\.[^.]+|guidesIndex|notFound)\.description$/.test(key) && (value.length < 50 || value.length > 160)) {
       problems.push(`${key}: description is ${value.length} characters, 50 to 160`);
     }
     // The same as English, with real words in it: probably left untranslated.
