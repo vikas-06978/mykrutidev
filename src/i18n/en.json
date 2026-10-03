@@ -58,7 +58,8 @@
     "Other scripts": "Other scripts",
     "More": "More",
     "Marathi": "Marathi",
-    "More Hindi fonts": "More Hindi fonts"
+    "More Hindi fonts": "More Hindi fonts",
+    "Gujarati": "Gujarati"
   },
   "fontNames": {
     "Abbasi Chanakya New": "Abbasi Chanakya New",
@@ -96,7 +97,9 @@
     "aakriti": "Aakriti",
     "anjali": "Anjali",
     "shusha02": "Shusha02",
-    "shivaji02": "Shivaji02"
+    "shivaji02": "Shivaji02",
+    "lmg-arun": "LMG Arun",
+    "terafont": "Terafont Varun"
   },
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
@@ -150,6 +153,8 @@
     "copyCode": "Copy {font} code",
     "forWord": "For MS Word / forms",
     "copyUnicode": "Copy as Hindi (Unicode)",
+    "copyUnicodeGu": "Copy as Gujarati (Unicode)",
+    "unicodeGu": "Unicode / Gujarati",
     "forWeb": "For WhatsApp / web",
     "docxTitle": "Word file with the {font} font already applied",
     "unicodeDocx": "Unicode .docx",
@@ -167,7 +172,8 @@
     "hintLatinLead": "This doesn't look like Hindi text. ",
     "hintLatinBody": "Type or paste Hindi in the box, or use the example button to see what this page expects.",
     "fontMissing": "{font} not available",
-    "sharingFirst": "Sharing the first {n} characters"
+    "sharingFirst": "Sharing the first {n} characters",
+    "previewGu": "Preview (Gujarati)"
   },
   "doc": {
     "title": "Convert a document",
@@ -183,6 +189,7 @@
     "groupHindi": "Hindi fonts",
     "groupNepali": "Nepali fonts",
     "groupMarathi": "Marathi fonts",
+    "groupGujarati": "Gujarati fonts",
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
@@ -474,7 +481,8 @@
       "preeti": "Preeti (Nepali)",
       "marathi": "Marathi",
       "shivaji": "Shivaji",
-      "shusha": "Shusha"
+      "shusha": "Shusha",
+      "gujarati": "Gujarati"
     }
   },
   "pages": {
@@ -2071,17 +2079,45 @@
       }
     },
     "/gujarati-font-converter": {
-      "nav": "Gujarati",
-      "h1": "Gujarati Font Converter",
-      "title": "Gujarati Font Converter | Legacy Gujarati Fonts to Unicode (Planned)",
-      "description": "A planned Gujarati font converter for legacy Gujarati DTP fonts to Unicode Gujarati.",
-      "note": "Planned. Gujarati is a different script from Devanagari, so none of the current engine applies. It needs its own character map built from scratch.",
-      "lede": "Planned: a Gujarati font converter for legacy Gujarati DTP fonts to Unicode Gujarati.",
+      "nav": "Terafont → Unicode (Gujarati)",
+      "h1": "Gujarati Font Converter: Terafont and LMG Arun to Unicode",
+      "title": "Gujarati Font Converter | Terafont Varun, LMG Arun to Unicode",
+      "description": "Convert Terafont Varun and LMG Arun Gujarati to Unicode for portals, WhatsApp and Word. Read off the font files, with digits and conjuncts put right. Free.",
+      "betaNote": "For Gujarati typed in Terafont (Varun, Ganesh, Indra and the rest) or in LMG Arun, Laxmi and Rupen.",
+      "lede": "Paste Gujarati typed in Terafont or LMG Arun on the left and get Unicode Gujarati on the right, ready for any website, portal, email or phone.",
       "body": [
-        "<h2>Planned, not started</h2>",
-        "<p>Gujarati uses its own script, not Devanagari. That means none of the current character maps apply and none of the Devanagari-specific reordering rules do either. A Gujarati converter is a new map and a new set of rules, not an extra table bolted onto this one.</p>",
-        "<p>The route exists so the work has somewhere to land. It will be switched on only after a keyword check and a mapping tested against real Gujarati documents. See <a href=\"/all-converters\">all converters</a> for what is working today.</p>"
-      ]
+        "<h2>What Terafont text is</h2>",
+        "<p>Terafont Varun and LMG Arun are the fonts most Gujarat offices, courts and presses typed in. Neither stores Gujarati. They store English keyboard characters and draw Gujarati letters on top of them, so on a computer without the font <strong lang=\"gu\">ગુજરાત</strong> shows up as <code>U]HZFT</code>. This page turns those characters into real Unicode Gujarati, which works on every phone, portal and computer.</p>",
+        "<h2>What the conversion has to get right</h2>",
+        "<ul><li><strong>The typewriter keyboard.</strong> Both fonts follow the old Gujarati typewriter, so the number keys are letters: <code>5</code> is પ and <code>0</code> is ડ. That is why this page has no \"keep numbers\" box.</li><li><strong>૨ and ૫ share keys with ર and પ.</strong> They look the same, so the typewriter never gave them keys of their own. The converter reads them as digits when they stand among digits: <code>Z_Z$</code> is <strong lang=\"gu\">૨૦૨૪</strong>, and <code>5Z</code> is still the word <strong lang=\"gu\">પર</strong>.</li><li><strong>The i-sign and the reph.</strong> િ is typed before its letter and the reph after its syllable, so <code>SD&quot;RFZL</code> has to be reordered into <strong lang=\"gu\">કર્મચારી</strong>.</li><li><strong>Vowels built on અ.</strong> આ, એ, ઓ and ઔ are typed as અ and the sign (<code>VF</code> is <strong lang=\"gu\">આ</strong>) and come out as the single Unicode letter.</li></ul>",
+        "<p>It reads Terafont Varun, Ganesh, Indra, Kinnari, Parth, Suraj and Trilochan, and LMG Arun, Laxmi and Rupen in every style: one keyboard for all of them. For the other direction use <a href=\"/unicode-to-terafont-varun\">Unicode to Terafont Varun</a>. LMG Arun has three ready-made conjuncts of its own, and <a href=\"/lmg-arun-to-unicode\">LMG Arun to Unicode</a> reads those too.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Terafont Varun and LMG Arun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Do Shruti or other Unicode Gujarati fonts need converting?",
+          "a": "No. Shruti, Nirmala UI, Hind Vadodara and the other Unicode Gujarati fonts already hold real Gujarati text. If your text reads correctly on a phone, it is already Unicode."
+        },
+        {
+          "q": "A few characters came out as English letters. Why?",
+          "a": "Some rare keys, mostly stacked and nasal conjuncts, have not been read with certainty yet. They are left as they are rather than guessed, so please check those spots by hand."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Gujarati out of your Terafont or LMG Arun document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Terafont Varun</strong> box. Unicode Gujarati appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste it into the portal, email or document. In Word, set it in Shruti or Nirmala UI."
+        ],
+        "tip": "Dates are the quickest check: <code>Z5q_(qZ_Z$</code> should come out as <strong lang=\"gu\">૨૫/૦૮/૨૦૨૪</strong>."
+      }
     },
     "/tamil-font-converter": {
       "nav": "Tamil",
@@ -4588,6 +4624,120 @@
           "Paste into Word and set the font to <strong>Shivaji02</strong>, or use <strong>Download .docx</strong>, which sets it for you."
         ],
         "tip": "Before you paste a whole page, check a line with <strong lang=\"hi\">हृदय</strong> in the preview. Shivaji02 types it as <code>(dya</code> and Shivaji01 as <code>)dya</code>, so it shows at once that the right font was picked."
+      }
+    },
+    "/unicode-to-terafont-varun": {
+      "nav": "Unicode → Terafont (Gujarati)",
+      "h1": "Unicode to Terafont Varun Converter (Gujarati)",
+      "title": "Unicode to Terafont Varun Converter | Gujarati Unicode to Terafont",
+      "description": "Convert Unicode Gujarati into Terafont Varun code for office templates, DTP and print, with િ, the reph and the digits where the typewriter has them. Free.",
+      "betaNote": "For documents that will be set in Terafont Varun or any other Terafont.",
+      "lede": "Type or paste Gujarati on the left and get Terafont Varun code on the right, ready to paste into Word and set in TERAFONT-VARUN.",
+      "body": [
+        "<h2>When you need Terafont</h2>",
+        "<p>Many Gujarat offices and presses still keep their templates in Terafont. Gujarati typed on a phone or copied from a website is Unicode, and it shows the wrong letters once set in Terafont. This page writes it out again as the keys Terafont expects, in the order the font draws them: <strong lang=\"gu\">પ્રમાણપત્ર</strong> becomes <code>5=DF65+</code>.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>િ before its letter</strong> and <strong>the reph after its syllable</strong>, as the font draws them.</li><li><strong>Rakar under the letter.</strong> <strong lang=\"gu\">પ્ર</strong> is <code>5=</code>, the letter and the rakar key, as typists type it.</li><li><strong>Digits on the typewriter keys.</strong> ૨ and ૫ go on the keys of ર and પ, which draw them: <strong lang=\"gu\">૨૦૨૫</strong> is <code>Z_Z5</code>.</li></ul>",
+        "<p>To go back, use <a href=\"/gujarati-font-converter\">the Gujarati font converter</a>. For a template set in LMG Arun, use <a href=\"/unicode-to-lmg-arun\">Unicode to LMG Arun</a> instead.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Terafont Varun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Terafont code. Press <strong>Preview (Gujarati)</strong> to see it in Terafont Varun here, or set the font to <strong>TERAFONT-VARUN</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Terafont has no key for a few characters, such as ૠ. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Gujarati that has to go into a Terafont document.",
+          "Press <strong>Copy Terafont code</strong>.",
+          "Paste into Word and set the font to <strong>TERAFONT-VARUN</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Check a line with <strong lang=\"gu\">કીર્તિ</strong> in the preview: the reph has to sit over તિ, not over કી."
+      }
+    },
+    "/lmg-arun-to-unicode": {
+      "nav": "LMG Arun → Unicode",
+      "h1": "LMG Arun to Unicode Converter (Gujarati)",
+      "title": "LMG Arun to Unicode Converter | LMG Arun Gujarati Font to Unicode",
+      "description": "Convert LMG Arun, LMG Laxmi and LMG Rupen Gujarati to Unicode for portals, email and Word. Read off the LMG font files key by key. Free, nothing uploaded.",
+      "betaNote": "For Gujarati typed in LMG Arun, LMG Laxmi or LMG Rupen.",
+      "lede": "Paste LMG Arun text on the left and get Unicode Gujarati on the right, ready for any website, portal or phone.",
+      "body": [
+        "<h2>LMG Arun and Terafont</h2>",
+        "<p>LMG Arun types on the same Gujarati typewriter keyboard as Terafont Varun, key for key. It adds three ready-made conjuncts that Terafont draws differently: <strong lang=\"gu\">ત્ય</strong> on <code>À</code>, <strong lang=\"gu\">ક્ત</strong> on <code>É</code> and a second ૂ on <code>Ö</code>. This page reads them the LMG way. For Terafont text use <a href=\"/gujarati-font-converter\">the Gujarati font converter</a>, which leaves those three keys alone.</p>",
+        "<h2>Every LMG style</h2>",
+        "<p>LMG Laxmi and LMG Rupen are LMG Arun redrawn, and the Bold, Italic, Condensed, Thin and Wide styles of all three were checked key by key. Word files in any of them convert with <strong>Upload Word file</strong>, with bold and tables kept. For the other direction use <a href=\"/unicode-to-lmg-arun\">Unicode to LMG Arun</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the LMG Arun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "What happens to numbers?",
+          "a": "LMG Arun keeps Gujarati digits on its keys, and its number keys are letters, so everything is converted. ૨ and ૫ are typed with ર and પ, and are read as digits when they stand among digits."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Gujarati out of your LMG Arun, Laxmi or Rupen document.",
+          "Paste it into the <strong>LMG Arun</strong> box. Unicode Gujarati appears on the right.",
+          "Press <strong>Copy text</strong>, paste it where it is needed and set it in a Unicode Gujarati font such as Shruti."
+        ],
+        "tip": "Try a word with a reph first: <code>SD&quot;RFZL</code> should read <strong lang=\"gu\">કર્મચારી</strong>."
+      }
+    },
+    "/unicode-to-lmg-arun": {
+      "nav": "Unicode → LMG Arun",
+      "h1": "Unicode to LMG Arun Converter (Gujarati)",
+      "title": "Unicode to LMG Arun Converter | Gujarati Unicode to LMG Arun Font",
+      "description": "Convert Unicode Gujarati into LMG Arun font code for office files and DTP, with ready-made conjuncts like ત્ય and ક્ત where LMG has them. Free and private.",
+      "betaNote": "For documents that will be set in LMG Arun, LMG Laxmi or LMG Rupen.",
+      "lede": "Type or paste Gujarati on the left and get LMG Arun code on the right, ready to paste into Word and set in LMG-Arun.",
+      "body": [
+        "<h2>When you need LMG Arun</h2>",
+        "<p>A template kept in LMG Arun shows the wrong letters when Unicode Gujarati is pasted into it. This page writes the Gujarati out as the keys LMG Arun expects, in the order the font draws them: <strong lang=\"gu\">ગુજરાત</strong> becomes <code>U]HZFT</code>.</p>",
+        "<h2>What it uses</h2>",
+        "<ul><li><strong>LMG's own conjuncts</strong>, such as <strong lang=\"gu\">ત્ય</strong> on <code>À</code>, where Terafont has none.</li><li><strong>આ, એ, ઓ and ઔ as અ and the sign</strong>, the way the font builds them.</li><li><strong>A note for anything with no key</strong>, such as ૠ, which is left as it is rather than swapped for a wrong letter.</li></ul>",
+        "<p>To go back, use <a href=\"/lmg-arun-to-unicode\">LMG Arun to Unicode</a>. For a Terafont template, use <a href=\"/unicode-to-terafont-varun\">Unicode to Terafont Varun</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the LMG Arun font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Will it work with LMG Laxmi or Rupen?",
+          "a": "Yes. They draw the same letter on every key as LMG Arun. Set the pasted code in whichever of the three your template uses."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Gujarati that has to go into an LMG Arun document.",
+          "Press <strong>Copy LMG Arun code</strong>.",
+          "Paste into Word and set the font to <strong>LMG-Arun</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Preview a line with <strong lang=\"gu\">પ્રધાનમંત્રી</strong> first: the rakar should sit under પ."
       }
     }
   },

@@ -822,19 +822,54 @@ export const PAGES = [
     related: ['/shivaji02-to-unicode', '/unicode-to-shivaji', '/unicode-to-kruti-dev'],
     beta: true,
   },
+  // ---- Gujarati: Terafont and LMG Arun, one typewriter keyboard, read off the
+  // font files. The broad "Gujarati font converter" search is answered with
+  // Terafont's map, which LMG Arun text reads correctly with too (LMG only
+  // adds three keys). Beta until a real document in each has been run through.
+  {
+    path: '/gujarati-font-converter',
+    ready: true,
+    kind: 'converter',
+    from: 'terafont',
+    to: 'unicode',
+    group: 'Gujarati',
+    related: ['/unicode-to-terafont-varun', '/lmg-arun-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-terafont-varun',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'terafont',
+    group: 'Gujarati',
+    related: ['/gujarati-font-converter', '/unicode-to-lmg-arun', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/lmg-arun-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'lmg-arun',
+    to: 'unicode',
+    group: 'Gujarati',
+    related: ['/unicode-to-lmg-arun', '/gujarati-font-converter', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-lmg-arun',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'lmg-arun',
+    group: 'Gujarati',
+    related: ['/lmg-arun-to-unicode', '/unicode-to-terafont-varun', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
   // ==========================================================================
   // PLANNED - other Indic scripts. Routes only, no mapping work started.
   // Activate only after a keyword-volume check AND a tested mapping.
   // ==========================================================================
-  {
-    path: '/gujarati-font-converter',
-    ready: false,
-    kind: 'converter',
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/all-converters'],
-  },
   {
     path: '/tamil-font-converter',
     ready: false,
@@ -1242,9 +1277,9 @@ export const NAV_MENUS = [
       '/kruti-dev-to-mangal',
       '/mangal-to-kruti-dev',
       '/devlys-to-unicode',
-      '/unicode-to-devlys',
       '/preeti-to-unicode',
       '/marathi-font-converter',
+      '/gujarati-font-converter',
     ],
   },
   {
@@ -1390,6 +1425,7 @@ export const FONT_LINKS = [
   { key: 'marathi', path: '/marathi-font-converter', fonts: ['dvtt'] },
   { key: 'shivaji', path: '/shivaji-to-unicode', fonts: ['shivaji'] },
   { key: 'shusha', path: '/shusha-to-unicode', fonts: ['shusha'] },
+  { key: 'gujarati', path: '/gujarati-font-converter', fonts: ['terafont', 'lmg-arun'] },
 ];
 
 /** FONT_LINKS for one page: live targets only, minus the fonts it converts. */

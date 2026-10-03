@@ -2194,6 +2194,111 @@ const SHIVAJI02 = variantOf(SHUSHA02, { drop: '.†‰', add: { '.': '.' } });
 SHIVAJI02.reverse['.'] = '.';
 
 // ============================================================================
+// Gujarati: LMG Arun, LMG Laxmi, LMG Rupen and the Terafont family
+// ============================================================================
+// One keyboard: the Gujarati typewriter's. LMG Arun (vendor/fonts/Gujarati/
+// LMG Arun/LMG-Arun.ttf) was read key by key, each key drawn alone, after ક
+// and before ા (a half letter + ા draws the full letter), and the look-alikes
+// beside Noto Sans Gujarati. LMG Laxmi and Rupen are the same font redrawn, and
+// Terafont Varun, Ganesh, Indra, Kinnari, Parth, Suraj and Trilochan draw the
+// same letter on every key but À É Ö, which they draw differently.
+//
+// The digits: ૦ ૧ ૩ ૪ ૬ ૭ ૮ ૯ have keys of their own (all one width, as digits
+// are), but ૨ and ૫ do not: the typewriter types them with ર (`Z`) and પ (`5`),
+// which they look exactly like. gujLogical() reads them back as digits when
+// they stand among digits.
+//
+// Left out, not read with certainty: `c` (a quote mark?), `«` (જી?), `½`
+// (ખ્ત?), `º` (ત્મ?), `£ ä å` (દ્વ or દ્ધ), `Û Ð Ñ`, `ç è` (ઇ or ઈ), `¨ Ü`
+// (an old ઝ, or ઞ), and the stacked and nasal conjuncts on `ñ ô õ ö ø ù ú û`.
+// Like the reph of Kruti Dev, `"` is typed after its syllable, and િ (`l`)
+// before its letter.
+const LMG_ARUN = {
+  // Digits.
+  _: '૦', '!': '૧', '#': '૩', $: '૪', '&': '૬', '*': '૭', '(': '૮', ')': '૯',
+  // Vowels.
+  V: 'અ', '>': 'ઇ', '.': 'ઈ', '®': 'ઈ', p: 'ઉ', 'µ': 'ઊ', 'é': 'ઊ', k: 'ઋ',
+  'ë': 'ઉં', 'ê': 'ઊં',
+  // Consonants.
+  S: 'ક', B: 'ખ', U: 'ગ', 3: 'ઘ', '¢': 'ઙ', R: 'ચ', K: 'છ', H: 'જ', 'ß': 'જ',
+  h: 'ઝ', 8: 'ટ', 9: 'ઠ', 0: 'ડ', '-': 'ઢ', 6: 'ણ', T: 'ત', Y: 'થ', N: 'દ',
+  W: 'ધ', G: 'ન', 5: 'પ', O: 'ફ', A: 'બ', E: 'ભ', D: 'મ', I: 'ય', Z: 'ર',
+  ',': 'લ', J: 'વ', X: 'શ', 'Ø': 'ષ', ';': 'સ', C: 'હ', '/': 'ળ',
+  // Half letters: the full letter without its bar.
+  b: 'ખ્', u: 'ગ્', r: 'ચ્', '^': 'ણ્', t: 'ત્', y: 'થ્', w: 'ધ્', g: 'ન્',
+  'þ': 'ન્', '%': 'પ્', a: 'બ્', e: 'ભ્', d: 'મ્', i: 'ય્', '<': 'લ્', j: 'વ્',
+  '`': 'શ્', x: 'શ્', Q: 'ષ્', ':': 'સ્', '?': 'ળ્',
+  // Conjuncts drawn as one glyph.
+  'Ù': 'ક્ષ', 1: 'ક્ષ્', '©': 'ક્ષ્', 'Ó': 'ક્ષ્ય', 7: 'જ્ઞ', '+': 'ત્ર', z: 'શ્ર',
+  'Æ': 'શ્ર', 'Ç': 'શ્ર', 'Þ': 'ક્ક', 'É': 'ક્ત', 'Ê': 'ક્ર', 'Ì': 'ક્ર', '¤': 'ક્લ',
+  'Ë': 'ફ્ર', '±': 'જ્ય', 'Ô': 'જા', 'Î': 'ટ્ટ', 'ª': 'ણુ', '»': 'ડુ', '¿': 'ત્ત',
+  'À': 'ત્ય', 'È': 'ન્ય', '¡': 'દ્દ', 'â': 'દ્ધ', n: 'દ્ય', '§': 'દ્ર', 'ã': 'દ્ર',
+  'Í': 'દ્મ', 'Ï': 'દૃ', 'Ú': 'ષ્ટ', 'à': 'સ્ત્ર', 'ü': 'શ્ચ', 'æ': 'હ્ય', 'ì': 'હૃ',
+  'í': 'હ્લ', 'î': 'હ્ન', 'ï': 'હ્મ', 'ð': 'હ્વ', '~': 'રૂ',
+  // Signs. `=` is the rakar drawn under its letter (ક્ર is `S=`).
+  F: 'ા', l: 'િ', 'Â': 'િ', L: 'ી', ']': 'ુ', 'Õ': 'ુ', '}': 'ૂ', 'Ö': 'ૂ',
+  "'": 'ૃ', '[': 'ે', '{': 'ૈ', M: 'ો', 'Á': 'ૌ', '¶': 'ૅ', '\\': 'ં', '¥': 'ઁ',
+  '|': '્', '=': '્ર', '"': REPH, 'Å': REPH + 'ં', 'Ã': PRE_I_NASAL, 'Ä': 'ીં',
+  // Punctuation, moved off the keys the letters took.
+  P: '.', 4: ',', o: ':', '¸': ';', m: '?', q: '/', s: '(', f: ')', 'ò': '[',
+  'ó': ']', v: '-', '@': '%', '´': '+', 2: '×', 'á': '卐',
+};
+
+// Terafont: the same keys, minus the three it draws differently.
+const TERAFONT = Object.fromEntries(Object.entries(LMG_ARUN).filter(([k]) => !'ÀÉÖ'.includes(k)));
+
+// Writing: the first key of each letter, and ૨ ૫ on the letters they share.
+// A consonant with rakar is the consonant's key and `=` (પ્ર is `5=`), unless
+// the font has the pair as one glyph (ક્ર, ફ્ર, દ્ર).
+function gujReverse(map) {
+  const rev = { ...firstKeyReverse(map), '૨': 'Z', '૫': '5' };
+  // આ એ ઐ ઓ ઔ ઍ ઑ: અ's key and the sign's.
+  for (const [m, v] of Object.entries(GUJ_A_VOWELS)) {
+    rev[v] = rev['અ'] + (m === 'ૉ' ? rev['ા'] + rev['ૅ'] : rev[m]);
+  }
+  for (const [k, u] of Object.entries(map)) {
+    if (/^[\u0A95-\u0AB9]$/.test(u) && !(u + '્ર' in rev)) rev[u + '્ર'] = k + '=';
+  }
+  return rev;
+}
+
+// Gujarati sits 0x180 above Devanagari in Unicode, letter for letter (ક U+0A95
+// is क U+0915 + 0x180, િ is ि + 0x180, and so on), so the Kruti Dev reorder
+// passes serve it unchanged: shift down, reorder, shift back up.
+const GUJ_SHIFT = 0x180;
+const GUJ_A_VOWELS = { 'ા': 'આ', 'ે': 'એ', 'ૈ': 'ઐ', 'ો': 'ઓ', 'ૌ': 'ઔ', 'ૅ': 'ઍ', 'ૉ': 'ઑ' };
+const gujToDeva = (s) => s.replace(/[઀-૿]/g, (c) => String.fromCharCode(c.charCodeAt(0) - GUJ_SHIFT));
+const devaToGuj = (s) => s.replace(/[ऀ-ॿ]/g, (c) => String.fromCharCode(c.charCodeAt(0) + GUJ_SHIFT));
+
+// ર and પ standing among digits are ૨ and ૫. A number - ર પ ૦-૯, perhaps
+// split by . / : - as in a date - with no other Gujarati around it, holding at
+// least one real digit: 2024 is typed `Z_Z$`, 25/08 `Z5q_(`. The word પર
+// stays a word.
+const RE_GUJ_NUMBER = /(?<![઀-૿])[રપ૦-૯]+(?:[./:-][રપ૦-૯]+)*(?![઀-૿])/g;
+const gujDigits = (s) =>
+  s.replace(RE_GUJ_NUMBER, (m) => (/[૦-૯]/.test(m) ? m.replace(/ર/g, '૨').replace(/પ/g, '૫') : m));
+
+/** Gujarati legacy keys (visual order) -> Unicode Gujarati. */
+function gujLogical(s) {
+  // The bar completes a half letter: `%` is પ્, `%F` is પ (as `S` + `F` is કા).
+  s = s.replace(/્ા/g, '');
+  s = devaToGuj(toLogicalOrder(gujToDeva(s)));
+  // આ એ ઐ ઓ ઔ ઍ ઑ are written અ + the sign, and typed so: આ is `VF`.
+  s = s.replace(/અ([ાેૈોૌૅૉ])/g, (_, m) => GUJ_A_VOWELS[m]);
+  return gujDigits(s);
+}
+
+/** Unicode Gujarati -> visual order, for the keys. Other text is left alone. */
+function gujVisual(s) {
+  return s.replace(/[઀-૿]+/g, (run) =>
+    devaToGuj(toVisualOrder(gujToDeva(run)))
+      // The font has ો and ૌ as one key each: keep them whole.
+      .replace(/ાે/g, 'ો')
+      .replace(/ાૈ/g, 'ૌ'),
+  );
+}
+
+// ============================================================================
 // Font registry - adding a font is adding one entry.
 // ============================================================================
 //
@@ -2496,6 +2601,47 @@ export const FONTS = {
     css: 'monospace',
     sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
     placeholder: 'marazI  (example)',
+  },
+  'lmg-arun': {
+    key: 'lmg-arun',
+    label: 'LMG Arun',
+    lang: 'gu',
+    kind: 'legacy',
+    map: LMG_ARUN,
+    reverse: gujReverse(LMG_ARUN),
+    toLogical: gujLogical,
+    toVisual: gujVisual,
+    // Read off the font file key by key (see the note above LMG_ARUN). `beta`
+    // until a real LMG Arun document has been run through it.
+    accurate: true,
+    beta: true,
+    // Its number keys are letters (`5` is પ, `0` is ડ): there are no numbers to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'U]HZFT ;ZSFZ4 lXÙF lJEFU',
+    placeholder: 'U]HZFT  (example)',
+  },
+  terafont: {
+    key: 'terafont',
+    label: 'Terafont Varun',
+    shortLabel: 'Terafont',
+    lang: 'gu',
+    kind: 'legacy',
+    map: TERAFONT,
+    reverse: gujReverse(TERAFONT),
+    toLogical: gujLogical,
+    toVisual: gujVisual,
+    // LMG Arun's keys, which every Terafont draws the same but for À É Ö (see
+    // the note above LMG_ARUN). `beta` until a real Terafont document has been
+    // run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'U]HZFT ;ZSFZ4 lXÙF lJEFU',
+    placeholder: 'U]HZFT  (example)',
   },
   dvtt: {
     key: 'dvtt',
@@ -3003,7 +3149,7 @@ function splitProtected(text, re) {
 // Direction implementations
 // ============================================================================
 
-export function legacyToUnicode(text, map, { keepEnglish = true } = {}) {
+export function legacyToUnicode(text, map, { keepEnglish = true, toLogical = toLogicalOrder } = {}) {
   if (!text) return '';
   const trie = trieFor(map);
   const parts = splitProtected(
@@ -3014,10 +3160,10 @@ export function legacyToUnicode(text, map, { keepEnglish = true } = {}) {
   const out = parts
     .map(({ skip, v }) => {
       if (skip) return v;
-      if (!keepEnglish) return toLogicalOrder(transliterate(v, trie));
+      if (!keepEnglish) return toLogical(transliterate(v, trie));
       // Token level, so one English word cannot desync the rest of the line.
       return v.replace(/\S+/g, (token) => {
-        const decoded = toLogicalOrder(transliterate(token, trie));
+        const decoded = toLogical(transliterate(token, trie));
         return looksEnglish(token, decoded) ? token : decoded;
       });
     })
@@ -3126,8 +3272,11 @@ export function convert(text, fromKey, toKey, opts = {}) {
   // Unicode, rendered in Mangal".
   if (from.kind === 'unicode' && to.kind === 'unicode') return text;
 
+  // A font with its own reorder (Gujarati) passes it in.
+  const readOpts = from.toLogical ? { ...opts, toLogical: from.toLogical } : opts;
+
   if (from.kind === 'legacy' && to.kind === 'unicode') {
-    return legacyToUnicode(text, from.readMap ?? from.map, opts);
+    return legacyToUnicode(text, from.readMap ?? from.map, readOpts);
   }
   if (from.kind === 'unicode' && to.kind === 'legacy') {
     return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
@@ -3138,7 +3287,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.layout && from.layout === to.layout) return text;
 
   // legacy -> legacy routes through Unicode.
-  return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, opts), to.map, {
+  return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, readOpts), to.map, {
     ...opts,
     ...reverseOpts(to),
   });
