@@ -71,6 +71,25 @@ export const PREVIEW_FONTS = {
   // Converted from vendor/fonts/DV-TTSurekh/DV-TTSurekh.ttf, the file the
   // DV-TT map was read from.
   dvtt: preview('DV-TTSurekh', 'dvtt-surekh.woff'),
+  // Converted from the files in vendor/fonts/ their maps were read from.
+  arjun: preview('Arjun', 'arjun.woff'),
+  kundli: preview('Kundli', 'kundli.woff'),
+  krishna: preview('Krishna', 'krishna.woff'),
+  'new-delhi': preview('NewDelhi', 'new-delhi.woff'),
+  ruchi: preview('Ruchi-Normal', 'ruchi.woff'),
+  'devlys-020': preview('DevLys 020', 'devlys-020.woff'),
+  ajay: preview('Ajay Normal', 'ajay.woff'),
+  aman: preview('Aman Condensed', 'aman.woff'),
+  agra: preview('Agra', 'agra.woff'),
+  himalaya: preview('HIMALAYA TT FONT', 'himalaya.woff'),
+  akshar: preview('Akshar', 'akshar.woff'),
+  dina: preview('DINA-A', 'dina.woff'),
+  'devanagari-bold': preview('DevanagariBold', 'devanagari-bold.woff'),
+  narad: preview('Narad', 'narad.woff'),
+  aakriti: preview('Aakriti', 'aakriti.woff'),
+  anjali: preview('Anjali', 'anjali.woff'),
+  shusha02: preview('Shusha02', 'shusha02.woff'),
+  shivaji02: preview('Shivaji02', 'shivaji02.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

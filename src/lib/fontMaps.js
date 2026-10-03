@@ -326,6 +326,99 @@ const KRUTI_DEV = {
   'Û': '•',
 };
 
+// The upper range of Kruti Dev 010: ready-made conjuncts, full and half
+// letters, combined signs and the Hindi digits typists reach with Alt codes.
+// Each was read off public/fonts/KRDEV010.woff glyph by glyph, every key drawn
+// before the bar `k` to tell a half letter from a full one, and DevLys 010
+// draws the same glyph on every one of them. Left out, because the glyph is
+// not one certain character: ¢ ¤ § Ú ö ˜ õ ›. The curly quotes and dashes
+// (‘ ’ “ ” – —) and … (३) carry letters in the font too, but stay
+// punctuation here, as they are in any English text pasted alongside.
+//
+// They are for READING only (the registry's `readMap`): KRUTI_DEV itself, which
+// writes Unicode back as Kruti Dev and draws the typing charts, keeps the keys
+// typists are taught (`n~n` for द्द, not `Ì`).
+const KRUTI_EXTENDED = {
+  // Half letters, completed by the bar like the ASCII ones
+  '«k': 'त्र',
+  '«': 'त्र्',
+  '¸k': 'य',
+  '¸': 'य्',
+  'Ök': 'झ',
+  'Ö': 'झ्',
+  '÷k': 'झ',
+  '÷': 'झ्',
+  'Ük': 'श',
+  'Ü': 'श्',
+  'Ùk': 'त्त',
+  'Ù': 'त्त्',
+  'Ÿk': 'त्त',
+  'Ÿ': 'त्त्',
+  'Ëk': 'ध',
+  'Ë': 'ध्',
+  'èk': 'ध',
+  'è': 'ध्',
+  'º': 'ह्',
+  // Full letters
+  'Á': 'प्र',
+  '£': 'ख्र',
+  '¶': 'फ',
+  'Ò': 'भ',
+  '¥': 'ञ',
+  '´': 'ञ',
+  '³': 'ङ',
+  'Ã': 'ई',
+  'Ä': 'घ',
+  // Ready-made conjuncts
+  'Ì': 'द्द',
+  'í': 'द्द',
+  'Í': 'ट्ट',
+  'ê': 'ट्ट',
+  'Î': 'ट्ठ',
+  'ë': 'ट्ठ',
+  'Ï': 'ड्ड',
+  'ì': 'ड्ड',
+  'Ô': 'ड्ढ',
+  'ï': 'ड्ढ',
+  'ð': 'ठ्ठ',
+  'Ý': 'फ्र',
+  'à': 'ह्न',
+  'á': 'ह्य',
+  'â': 'हृ',
+  'ã': 'ह्म',
+  'ä': 'क्त',
+  'æ': 'द्र',
+  'é': 'न्न',
+  'ó': 'स्त्र',
+  'ô': 'क्क',
+  'ù': 'द्म',
+  // ्य drawn to join the letter before it: `dÓ` is क्य
+  'Ó': '्य',
+  'î': '्य',
+  // Signs with something built in. `Æ` is ि with the reph of the cluster
+  // after it, `Ç` is िं, `É` both; they are typed before the cluster.
+  'Æ': 'ि' + PRE_REPH,
+  'Ç': PRE_I_NASAL,
+  'É': PRE_I_NASAL + PRE_REPH,
+  'È': 'ीं',
+  'Ê': 'ी' + REPH,
+  '±': REPH + 'ं',
+  '¨': 'ो',
+  '®': 'ो',
+  '©': 'ौ',
+  '·': 'ऽ',
+  // Hindi digits
+  'å': '०',
+  'ƒ': '१',
+  '„': '२',
+  '†': '४',
+  '‡': '५',
+  'ˆ': '६',
+  '‰': '७',
+  'Š': '८',
+  '‹': '९',
+};
+
 // ============================================================================
 // DevLys 010 - VERIFIED to share the Kruti Dev 010 layout on every mapped key
 // ============================================================================
@@ -363,6 +456,357 @@ const KRUTI_DEV = {
 //   fo|ky;         -> विद्यालय
 //   gS] rks        -> है, तो
 const DEVLYS = { ...KRUTI_DEV };
+
+// ============================================================================
+// Fonts on the Kruti Dev keyboard, with some keys of their own
+// ============================================================================
+// Arjun, Kundli, Krishna and the rest type the same ASCII keys as Kruti Dev
+// for almost everything, but each draws a few keys differently and fills the
+// upper range its own way. Each is checked the same way: every key of the
+// Kruti Dev reading map drawn in both fonts side by side (scripts kept in
+// docs/FONTS.md), the keys that differ read by eye, and every glyph the font
+// has on a key Kruti Dev does not use read by eye too.
+//
+// `drop` lists the characters whose key means something else (or nothing) in
+// the font: every Kruti Dev key containing one is removed. `add` is the font's
+// own keys. As for Kruti Dev, `map` writes (taught keys only) and `readMap`
+// also reads the upper-range keys.
+
+/** @param {{ drop: string, add: Record<string,string> }} spec */
+function krutiVariant({ drop, add }) {
+  const bad = new Set(drop);
+  const keep = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => ![...k].some((c) => bad.has(c))));
+  return { map: { ...keep(KRUTI_DEV), ...add }, readMap: { ...keep(KRUTI_DEV), ...keep(KRUTI_EXTENDED), ...add } };
+}
+
+// Arjun (vendor/fonts/Arjun/ARJUN.TTF). Every ASCII key is Kruti Dev's but
+// `=`, which is HALF त्र here: `=k` is त्र. The upper range is its own: Hindi
+// digits on the bytes 0x8C-0x95 (० Œ, १-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •),
+// ि with the reph (`£`), िं (`¯`), ीं (`°`), both (`²`), ॠ ऌ ॐ, ञ् द्ध स्त्र.
+// Read and left out: `§` (a ि-like sign that is not one certain matra), `Ð`,
+// `å`, `¥` and `«` (marks, not letters).
+const ARJUN = krutiVariant({
+  drop: '=ÁÛ«÷ŸË£Ò¥ÃÄÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '×k': 'ञ',
+    '×': 'ञ्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '¯': PRE_I_NASAL,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '°': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '—',
+    '¹': '*',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
+
+// Kundli (vendor/fonts/Kundli/Kundli Hindi Normal.ttf). Every ASCII key draws
+// Kruti Dev's letter in a rounder design. The upper range is its own: `Ñ` is
+// औ (not कृ), `Ë` ऐ, `Ê` ऍ, `Á` आ, full ख ष श ण थ ध क्ष on `Â Ô Ó Æ É Ì Õ`,
+// half त्र on `×`, ि with the reph on `£` (and ं on `²`), िं on 0x80. It has
+// no Hindi digits. Left out: `å` `ö` (a द conjunct that is not one certain
+// letter), `Ð`, `Œ`, `§`, `ÿ` and the marks on `¢ ¤ ¥ « ‘`.
+const KUNDLI = krutiVariant({
+  drop: 'Ñ«÷ŸË£¥ÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    'Ñ': 'औ',
+    'Ë': 'ऐ',
+    'Ê': 'ऍ',
+    'Á': 'आ',
+    'Âk': 'खा',
+    'Â': 'ख',
+    'Õ': 'क्ष',
+    'Ì': 'ध',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Æ': 'ण',
+    'É': 'थ',
+    '×k': 'त्र',
+    '×': 'त्र्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'õ': 'ह्न',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '\u0080': PRE_I_NASAL,
+    '®': 'ैं',
+    'ƒ': 'ॉ',
+    '“': 'ः',
+    '∙': 'ऽ',
+  },
+});
+
+// Krishna (vendor/fonts/Krishna/Krishna.ttf). Kruti Dev's ASCII keys, its own
+// upper range: Hindi digits as in Arjun (१-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •,
+// ० on Œ), vowels आ आँ ओ औ ऋ ऍ ॠ ऌ on `Á Í Î Ï Û Ê Ç È`, full ख ण थ ध ष श
+// on `Â Æ É Ì Ô Ó`, conjuncts क्ष ह्न ह्व श्च श्व स्त्र दृ, ॥ on `«`, small ु
+// signs on `÷ ù ×`, ी on `Ë`, ि on `£`, िं and ीं on `¯ °` (and `ö`).
+// Left out: `²` (िं or ि with a reph, not certain), the small marks on
+// `¤ ¦ § ø ú û ü`, `þ š ›` (conjuncts not read with certainty) and `¥ ˜ —`.
+const KRISHNA = krutiVariant({
+  drop: 'Û«÷ŸË£¥ÌÍÎÏÔðàùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    'Á': 'आ',
+    'Í': 'आँ',
+    'Î': 'ओ',
+    'Ï': 'औ',
+    'Û': 'ऋ',
+    'Ê': 'ऍ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Â': 'ख',
+    'Æ': 'ण',
+    'É': 'थ',
+    'Ì': 'ध',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Õ': 'क्ष',
+    'Ð': 'ह्न',
+    'œ': 'ह्न',
+    'à': 'ह्व',
+    'õ': 'श्च',
+    'ý': 'श्व',
+    'ò': 'स्त्र',
+    'Ÿ': 'क्त',
+    'ð': 'द्ध',
+    'å': 'दृ',
+    '«': '॥',
+    '¬': 'ॐ',
+    '÷': 'ु',
+    'ù': 'ु',
+    '×': 'ु',
+    'Ë': 'ी',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '°': 'ीं',
+    'ö': 'ीं',
+    '®': 'ैं',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '∙': 'ऽ',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
+
+// New Delhi (vendor/fonts/New Delhi/New_Delhi.ttf). Kruti Dev's ASCII keys,
+// except: `=` is HALF त्र (`=k` त्र), there is no glyph on `'` - the half श is
+// on `’`, which Word types for ' - and none on ``` (ृ). Upper range as in
+// Krishna for ह्न ह्व द्ध स्त्र दृ ॐ ॠ ऌ, ि on `£`, िं on `¯`, ीं on `˚`, ि with
+// the reph and ं on `²`. No Hindi digits. Left out: `§ ˉ ±` (signs not read
+// with certainty), `Œ` and the marks on `¤ ¥ « ‘ Ú`.
+const NEW_DELHI = krutiVariant({
+  drop: "=`'Á«÷ŸË£Ò¥ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ±®·åƒ„†‡ˆ‰Š‹",
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '’k': 'श',
+    '’': 'श्',
+    'Ð': 'ह्न',
+    'à': 'ह्व',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'å': 'दृ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '˚': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '•': 'ऽ',
+  },
+});
+// New Delhi Bold and Bold Italic (the same family in Word) draw half श on
+// `'` as Kruti Dev does, where the regular style has no glyph at all. So `'`
+// reads as श, and writing keeps `’`, which all four styles draw.
+NEW_DELHI.readMap["'k"] = 'श';
+NEW_DELHI.readMap["'"] = 'श्';
+
+// Ruchi (vendor/fonts/Ruchi/Ruchi.ttf). Kruti Dev's ASCII keys in a slanted
+// design, and the number keys draw Hindi digits (`asciiIsScript`). Its own
+// upper range: ऐ ऍ आ ॠ ऌ on `Ë Ê Á Ç È`, full ख क्ष ष श ण थ on
+// `Â Õ Ô Ó Æ É`, ष्ट ह्न ह्व ह्ल on `þ õ à ù`, ि with the reph on `£`, ैं on
+// `®`, ळ on `”`, ः on `¢`. No ( or = on `¼ ¾`. Many upper-range glyphs are small signs or conjuncts that are not
+// one certain letter, and are left out: `« Ö Ü Ÿ ¶ Ì Ð ë Ï ð î å ö ø ú û ü ÿ
+// Œ œ š ˉ “ •`.
+const RUCHI = krutiVariant({
+  drop: '¼¾«Ö÷ÜŸË¶ÒÌÍÎëÏÔðÝàùÓîÆÇÉÈÊ®·åƒ„†‡ˆ‰Š‹£¥³',
+  add: {
+    'Ë': 'ऐ',
+    'Ê': 'ऍ',
+    'Á': 'आ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Â': 'ख',
+    'Õ': 'क्ष',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Æ': 'ण',
+    'É': 'थ',
+    'þ': 'ष्ट',
+    'õ': 'ह्न',
+    'à': 'ह्व',
+    'ù': 'ह्ल',
+    'ò': 'स्त्र',
+    '£': 'ि' + PRE_REPH,
+    '®': 'ैं',
+    '”': 'ळ',
+    '¢': 'ः',
+    'µ': '—',
+    '∙': 'ऽ',
+  },
+});
+
+// DevLys 020 (vendor/fonts/DevLys 020/DevLys 020.ttf). DevLys 010's keys,
+// except that every number key draws a Hindi digit, so even 0-9 are script
+// (`asciiIsScript`), and the Alt-code digits sit one slot later than in Kruti
+// Dev (१ on „ ... ८ on ‹, ९ on Œ and å). Also: ध on `Ä` (not घ), स्त्र on `Û`,
+// ह्व on `à`, हृ on `‚`, ॉ on `ƒ`. Left out: `Ô ï` (ड्ड or ड्ढ, not certain).
+const DEVLYS_020 = krutiVariant({
+  drop: 'ÛàÄÔïƒ„†‡ˆ‰Š‹å',
+  add: {
+    'Ä': 'ध',
+    'Û': 'स्त्र',
+    'à': 'ह्व',
+    '‚': 'हृ',
+    'ƒ': 'ॉ',
+    '„': '१',
+    '…': '२',
+    '†': '३',
+    '‡': '४',
+    'ˆ': '५',
+    '‰': '६',
+    'Š': '७',
+    '‹': '८',
+    'Œ': '९',
+    'å': '९',
+  },
+});
+
+// Ajay (vendor/fonts/Ajay/AJAY_normal.TTF). Kruti Dev's ASCII keys in a bold
+// design, but `=` is HALF त्र (`=k` त्र) and `´` is HALF ञ (as is `×`). Its
+// own upper range: ि with the reph on `£` (and ं on `²`), िं on `¯ ˉ`, ीं on
+// `°`, ैं on `®`, ॉ on `¦`, ॠ ॐ द्ध दृ स्त्र ः. No Hindi digits. Left out:
+// `à` (a second ह), `Ð`, `§` and the marks on `¤ ¥ « Ú`.
+const AJAY = krutiVariant({
+  drop: '=ÛÁ«÷ŸË£Ò¥´ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '´k': 'ञ',
+    '´': 'ञ्',
+    '×k': 'ञ',
+    '×': 'ञ्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'å': 'दृ',
+    'Ç': 'ॠ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '¯': PRE_I_NASAL,
+    'ˉ': PRE_I_NASAL,
+    '°': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '∙': 'ऽ',
+  },
+});
+
+// Aman (vendor/fonts/Aman/, Condensed, Italic, Thin and Wide; no regular).
+// Drawn key by key beside Krishna Condensed: the same letter on every key of
+// the Krishna map, in a calligraphic design, except that १-४ on 0x8D-0x90
+// are missing. (Both fonts also repeat letters on Mac Roman slots - ƒ ˆ ∆ ∏
+// ≈ ... - which Windows documents never contain.)
+const AMAN = Object.fromEntries(
+  Object.entries(KRISHNA).map(([which, m]) => [
+    which,
+    Object.fromEntries(Object.entries(m).filter(([k]) => !/[\u008d-\u0090]/.test(k))),
+  ]),
+);
+
+// Agra (vendor/fonts/Agra/AGRA.TTF). Kruti Dev's ASCII keys in an italic
+// design, but `=` is HALF त्र (`=k` त्र) and `¿ À` are ( ). It has none of
+// Kruti Dev's upper-range conjuncts; its own upper range is Krishna's: Hindi
+// digits (१-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •, ० on Œ), आ ख ण थ ॠ ऌ ऍ on
+// `Á Â Æ É Ç È Ê`, क्त on `Ÿ`, ह्न on `Ð œ`, ी on `Ë`, ि on `£`, िं and ीं on
+// `¯ °`. Left out: `²` and `×` (not read with certainty).
+const AGRA = krutiVariant({
+  drop: '=¾ÞßñÛ«Ö÷ÜèÒ¥ÌíÍêÎëÏìÔïðàáâãæéóôùÓî®åƒ„†‡ˆ‰Š‹ŸËÁ£ÆÇÉÈÊ',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '¿': '(',
+    'À': ')',
+    'Á': 'आ',
+    'Â': 'ख',
+    'Æ': 'ण',
+    'É': 'थ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Ê': 'ऍ',
+    'Ÿ': 'क्त',
+    'Ð': 'ह्न',
+    'œ': 'ह्न',
+    'Ë': 'ी',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '°': 'ीं',
+    '¢': 'ः',
+    'µ': '–',
+    '∙': 'ऽ',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
 
 /** The 0x80-0x9F block, where DevLys 010 and Kruti Dev 010 draw different glyphs. */
 export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
@@ -675,7 +1119,6 @@ const CHANAKYA = {
   'å': '०',
   'ƒ': '१',
   '„': '२',
-  '…': '३',
   '†': '४',
   '‡': '५',
   'ˆ': '६',
@@ -1121,8 +1564,9 @@ const DVTT = {
   '¨É': 'म',
   '©É': 'म्र',
   'ªÉ': 'य',
-  // `¬` is a य whose left hook joins the letter before it (`S¬É` च्या).
-  '¬': 'य',
+  // `¬` is ्य drawn to join the letter before it: `ºÉ¬É` स्या. After a half
+  // letter (`S¬É` च्या) the doubled halant collapses.
+  '¬': '्य',
   '«É': 'य्र',
   '±É': 'ल',
   '´É': 'व',
@@ -1585,6 +2029,171 @@ const PREETI_REV = {
 };
 
 // ============================================================================
+// Fonts on the Preeti keyboard, with some keys moved
+// ============================================================================
+// Himalaya, Akshar, DINA and the rest are Preeti with a few keys swapped or
+// redrawn. Each was drawn key by key beside Preeti and the differences read
+// by eye. `swap` renames keys (Himalaya's number row: Preeti's `1` ज्ञ is its
+// `!`), `drop` removes the Preeti keys the font draws differently or not at
+// all, `add` is the font's own keys. The reverse table is Preeti's, renamed.
+function preetiVariant({ swap = {}, drop = '', add = {} }) {
+  const bad = new Set(drop);
+  const rename = (k) => [...k].map((c) => swap[c] ?? c).join('');
+  const ok = (k) => ![...k].some((c) => bad.has(c));
+  const map = {};
+  for (const [k, v] of Object.entries(PREETI)) if (ok(k)) map[rename(k)] = v;
+  Object.assign(map, add);
+  const reverse = {};
+  for (const [u, k] of Object.entries(PREETI_REV)) if (ok(k)) reverse[u] = rename(k);
+  for (const [k, u] of Object.entries(add)) if (!(u in reverse)) reverse[u] = k;
+  return { map, reverse };
+}
+
+// The number row swapped: digits on 0-9, Preeti's letters on the shifted row.
+const NUMBER_ROW_SWAP = Object.fromEntries(
+  [...'0123456789'].flatMap((d, n) => [[d, ')!@#$%^&*('[n]], [')!@#$%^&*('[n], d]]),
+);
+
+// Himalaya (vendor/fonts/Himalaya/HIMALAYA.TTF). Preeti with the number row
+// swapped (0-9 are the digits, ! @ # ... ) the letters), `'` and `"` swapped
+// (ू and ु), ा on `F` as well as `f`, and ँ moved to `¤`. Its own keys: ह on
+// `Ù`, हृ on `X` (Preeti's ह्), क्ष ष ङ on `Ô í ñ`. Preeti's upper-range
+// conjuncts are not in the font. Left out: `é` (ङ्ग or ड़्ग, not certain), `ø`.
+const HIMALAYA = preetiVariant({
+  swap: { ...NUMBER_ROW_SWAP, "'": '"', '"': "'", F: '¤' },
+  drop: '›„ÌÝ•ËÍÎ‹Å‰ˆ˜Þ‘ÛÜ±Ö…–—X',
+  add: { F: 'ा', 'Ù': 'ह', X: 'हृ', 'Ô': 'क्ष', 'í': 'ष', 'ñ': 'ङ' },
+});
+
+/** Unicode -> key, first key wins: buildReverse() without its cache. */
+function firstKeyReverse(map) {
+  const rev = {};
+  for (const [k, u] of Object.entries(map)) if (u !== '' && !(u in rev)) rev[u] = k;
+  return rev;
+}
+
+/** A font that is another font with a few keys changed: drop, then add. */
+function variantOf(base, { drop = '', add = {} }) {
+  const bad = new Set(drop);
+  const ok = (k) => ![...k].some((c) => bad.has(c));
+  const map = Object.fromEntries(Object.entries(base.map).filter(([k]) => ok(k)));
+  Object.assign(map, add);
+  const baseRev = base.reverse ?? firstKeyReverse(base.map);
+  const reverse = Object.fromEntries(Object.entries(baseRev).filter(([, k]) => ok(k)));
+  for (const [k, u] of Object.entries(add)) if (!(u in reverse)) reverse[u] = k;
+  return { map, reverse };
+}
+
+// Akshar (vendor/fonts/Akshar/Akshar Normal.ttf). Himalaya, drawn key by key
+// beside it, with these keys changed: फ on `F`, झ on `X` (and `µ`), ँ on `~`,
+// a hyphen on ```, ञ on `½` (half on `¾`), हृ on `›`; no ह क्ष ष ङ on
+// `Ù Ô í ñ`. Its upper slots carry the ASCII punctuation the letter keys took:
+// { } [ ] on 0x8D-0x90, ! % # * on ‘ ’ “ ”, ÷ ; × = ~ / + on • ‹ ™ – — Œ ˜.
+const AKSHAR = variantOf(HIMALAYA, {
+  drop: '`~¤FXÙÔíñ÷',
+  add: {
+    'F': 'फ',
+    'X': 'झ',
+    'µ': 'झ',
+    '~': 'ँ',
+    '`': '-',
+    '½': 'ञ',
+    '¾': 'ञ्',
+    '›': 'हृ',
+    '\u008d': '{',
+    '\u008e': '}',
+    '\u008f': '[',
+    '\u0090': ']',
+    '‘': '!',
+    '’': '%',
+    '“': '#',
+    '”': '*',
+    '•': '÷',
+    '‹': ';',
+    '™': '×',
+    '–': '=',
+    '—': '~',
+    'Œ': '/',
+    '˜': '+',
+  },
+});
+
+// DINA (vendor/fonts/DINA/DINA-A.ttf). Preeti for every letter key, drawn key
+// by key beside it; the upper range is its own: ्र (the caret) on ```, च on
+// `˜`, झ on `•`, द्म on `£`, ङ on `„`, ट्ट on `‘`, ङ्क on `¤`, रू on `™`, ॐ on
+// `‰ ›`, / on `¡`, + on `ˆ`. Preeti's other upper-range conjuncts are not in
+// the font. Left out: `‹ … – — œ ‚ ƒ` (conjuncts not read with certainty).
+const DINA = preetiVariant({
+  drop: '`¡åߢ›„ÌݧˆËÍÎ‹Åª¿Ø´«ÞçÛÙܱÖ÷æÆ…Ú–—‘˜•‰°¶£',
+  add: {
+    '`': '्र',
+    '˜': 'च',
+    '•': 'झ',
+    '£': 'द्म',
+    '„': 'ङ',
+    '‘': 'ट्ट',
+    '¤': 'ङ्क',
+    '™': 'रू',
+    '‰': 'ॐ',
+    '›': 'ॐ',
+    '¡': '/',
+    'ˆ': '+',
+  },
+});
+
+// Devanagari Bold (vendor/fonts/Devanagari Bold/Devanagari_Bold.ttf). Preeti
+// on every key it shares, in a bold design, drawn key by key beside it. It
+// lacks Preeti's ¡ ¢ „ Ì • ° ‹ Ø Þ ˜ Ü, draws ऽ on `›` (Preeti's द्र) and adds
+// फ on `©`, ह्य on `Ã`. Left out: `Î`, `ˇ`, `“`, `®` (not read with certainty).
+const DEVANAGARI_BOLD = preetiVariant({
+  drop: '¡¢„Ì•°‹ØÞ˜Ü›Î',
+  add: { '›': 'ऽ', '©': 'फ', 'Ã': 'ह्य' },
+});
+
+// Narad (vendor/fonts/Narad/Narad.ttf). Preeti on every letter key, in a bold
+// design, drawn key by key beside it. It lacks most of Preeti's upper-range
+// conjuncts (¡ ß ¢ › „ Ì Ý ¶ ° Ë Í Î ‹ Å Ø ´ Þ ˜ Ù Ü … Ú —), draws a full झ on
+// `‰` (Preeti's half झ) and swaps the curly quotes on `æ Æ`.
+const NARAD = preetiVariant({
+  drop: '¡ß¢›„ÌݶˋËÍÎ‹ÅØ´Þ˜ÙÜ…Ú—‰‘æÆ°',
+  add: { '‰': 'झ', 'æ': '”', 'Æ': '“' },
+});
+
+// Aakriti (vendor/fonts/Aakriti/Aakriti.ttf). Preeti on every letter key, in a
+// decorative design, drawn key by key beside it. It lacks Preeti's ¢ › „ Ì §
+// Ý ¶ • Ë Í Î ‹ Å Ø Þ Ù ± Ö, draws ळ on `˜` (Preeti's ऽ) and adds ष on `È`.
+// Left out: `· ø Œ œ ¸ …` and its Mac Roman repeats (not read with certainty).
+const AAKRITI = preetiVariant({
+  drop: '¢›„Ì§Ý¶•ËÍÎ‹ÅØÞÙ±Ö˜…Ú',
+  add: { '˜': 'ळ', 'È': 'ष' },
+});
+
+// Anjali (vendor/fonts/Anjali/Anjali Regular.ttf). Preeti on every letter key,
+// in a heavy display design, drawn key by key beside it, except ा on `F`
+// (Preeti's ँ) and य on `Ø` (Preeti's च). It lacks Preeti's upper-range
+// conjuncts and adds ङ्क on `° ·`, फ on `˚`, ॐ on `π`. Left out: `ø ı ł Œ œ`
+// and the punctuation on `• ‘ “ æ Æ …` (not read with certainty).
+const ANJALI = preetiVariant({
+  drop: '›„ÌÝËÍÎ‹Å‰ˆÞ˜çÛÙÜÖÚ•‘æÆ…FØ°',
+  add: { F: 'ा', 'Ø': 'य', '°': 'ङ्क', '·': 'ङ्क', '˚': 'फ', 'π': 'ॐ' },
+});
+
+// Shusha02 (vendor/fonts/Shusha/Shusha02.ttf) and Shivaji02. Shusha in a
+// heavier design, drawn key by key beside it, with four keys changed: `~` is
+// HALF त्र (`~a` त्र), `(` is हृ (Shusha's ह्य), `)` is HALF थ (Shusha's हृ),
+// `Ù` is HALF न्न. `œ` is left out. Shivaji02 is Shusha02 with the full stop
+// on `.` and † ‰ drawing themselves, exactly as Shivaji01 is to Shusha.
+// (Shusha05 and Shivaji05 are redrawn Shusha and Shivaji01 with the same
+// keys; wordFonts.js reads them with those maps.)
+const SHUSHA02 = variantOf({ map: SHUSHA }, {
+  drop: '~()Ùœ',
+  add: { '~a': 'त्र', '~': 'त्र्', '(': 'हृ', ')a': 'थ', ')': 'थ्', 'Ùa': 'न्न', 'Ù': 'न्न्' },
+});
+const SHIVAJI02 = variantOf(SHUSHA02, { drop: '.†‰', add: { '.': '.' } });
+// Shusha's `º` is a full stop too, but Shivaji01 writes `.`: so does Shivaji02.
+SHIVAJI02.reverse['.'] = '.';
+
+// ============================================================================
 // Font registry - adding a font is adding one entry.
 // ============================================================================
 //
@@ -1611,6 +2220,8 @@ export const FONTS = {
     shortLabel: 'Kruti',
     kind: 'legacy',
     map: KRUTI_DEV,
+    // Kruti Dev -> Unicode also reads the upper-range keys (KRUTI_EXTENDED).
+    readMap: { ...KRUTI_DEV, ...KRUTI_EXTENDED },
     // Same keyboard layout as DevLys (see the note above DEVLYS): text moving
     // between the two is passed through untouched rather than via Unicode.
     layout: 'kruti',
@@ -1654,6 +2265,7 @@ export const FONTS = {
     label: 'DevLys',
     kind: 'legacy',
     map: DEVLYS,
+    readMap: { ...DEVLYS, ...KRUTI_EXTENDED },
     layout: 'kruti',
     // Verified by comparing glyph outlines against Kruti Dev 010 - see the note
     // above DEVLYS. Every codepoint this map uses draws the same letter in both
@@ -1662,6 +2274,136 @@ export const FONTS = {
     css: '"DevLys 010", "DevLys", monospace',
     sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
     placeholder: 'fgUnh Hkkjr  (example)',
+  },
+  'devlys-020': {
+    key: 'devlys-020',
+    label: 'DevLys 020',
+    kind: 'legacy',
+    ...DEVLYS_020,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // DEVLYS_020). `beta` until a real DevLys 020 document has been run through it.
+    accurate: true,
+    beta: true,
+    // Its number keys draw Hindi digits: there are no "numbers" to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky; 2024',
+    placeholder: 'Hkkjr  (example)',
+  },
+  arjun: {
+    key: 'arjun',
+    label: 'Arjun',
+    kind: 'legacy',
+    ...ARJUN,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // ARJUN). `beta` until a real Arjun document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  kundli: {
+    key: 'kundli',
+    label: 'Kundli',
+    kind: 'legacy',
+    ...KUNDLI,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // KUNDLI). `beta` until a real Kundli document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  krishna: {
+    key: 'krishna',
+    label: 'Krishna',
+    kind: 'legacy',
+    ...KRISHNA,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // KRISHNA). `beta` until a real Krishna document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  'new-delhi': {
+    key: 'new-delhi',
+    label: 'New Delhi',
+    kind: 'legacy',
+    ...NEW_DELHI,
+    // Read off the font file key by key against Kruti Dev and Krishna (see the
+    // note above NEW_DELHI). `beta` until a real document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] fo’ofo|ky; ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  ruchi: {
+    key: 'ruchi',
+    label: 'Ruchi',
+    kind: 'legacy',
+    ...RUCHI,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // RUCHI). `beta` until a real Ruchi document has been run through it.
+    accurate: true,
+    beta: true,
+    // Its number keys draw Hindi digits, as in DevLys 020.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  ajay: {
+    key: 'ajay',
+    label: 'Ajay',
+    kind: 'legacy',
+    ...AJAY,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // AJAY). `beta` until a real Ajay document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  aman: {
+    key: 'aman',
+    label: 'Aman',
+    kind: 'legacy',
+    ...AMAN,
+    // Krishna's layout, checked key by key (see the note above AMAN). `beta`
+    // until a real Aman document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  agra: {
+    key: 'agra',
+    label: 'Agra',
+    kind: 'legacy',
+    ...AGRA,
+    // Read off the font file key by key against Kruti Dev and Krishna (see the
+    // note above AGRA). `beta` until a real Agra document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
+    placeholder: 'Hkkjr  (example)',
   },
   chanakya: {
     key: 'chanakya',
@@ -1729,6 +2471,32 @@ export const FONTS = {
     sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
     placeholder: 'marazI  (example)',
   },
+  shusha02: {
+    key: 'shusha02',
+    label: 'Shusha02',
+    kind: 'legacy',
+    ...SHUSHA02,
+    // Shusha's map with four keys changed (see the note above SHUSHA02).
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Baart sarkar¸ raYT/Iya iSaxaa naIit.',
+    placeholder: 'Baart  (example)',
+  },
+  shivaji02: {
+    key: 'shivaji02',
+    label: 'Shivaji02',
+    lang: 'mr',
+    kind: 'legacy',
+    ...SHIVAJI02,
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
+    placeholder: 'marazI  (example)',
+  },
   dvtt: {
     key: 'dvtt',
     label: 'DV-TT Surekh',
@@ -1766,6 +2534,120 @@ export const FONTS = {
     reverse: PREETI_REV,
     warnUnmapped: true,
     // Raw keys in the input box, as pasted. The real font previews the output.
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  himalaya: {
+    key: 'himalaya',
+    label: 'Himalaya',
+    lang: 'ne',
+    kind: 'legacy',
+    ...HIMALAYA,
+    // Preeti's map, re-keyed after drawing every key beside Preeti (see the
+    // note above HIMALAYA). `beta` until a real Himalaya document has been run
+    // through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'g]kfn ;"Gb/ b]z xf] .',
+    placeholder: 'g]kfn  (example)',
+  },
+  akshar: {
+    key: 'akshar',
+    label: 'Akshar',
+    lang: 'ne',
+    kind: 'legacy',
+    ...AKSHAR,
+    // Himalaya's map, re-keyed after drawing every key beside Himalaya (see
+    // the note above AKSHAR). `beta` until a real Akshar document has been
+    // run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'g]kfn ;"Gb/ b]z xf] .',
+    placeholder: 'g]kfn  (example)',
+  },
+  dina: {
+    key: 'dina',
+    label: 'DINA',
+    lang: 'ne',
+    kind: 'legacy',
+    ...DINA,
+    // Preeti's map, re-keyed after drawing every key beside Preeti (see the
+    // note above DINA). `beta` until a real DINA document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  'devanagari-bold': {
+    key: 'devanagari-bold',
+    label: 'Devanagari Bold',
+    lang: 'ne',
+    kind: 'legacy',
+    ...DEVANAGARI_BOLD,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // DEVANAGARI_BOLD). `beta` until a real document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  narad: {
+    key: 'narad',
+    label: 'Narad',
+    lang: 'ne',
+    kind: 'legacy',
+    ...NARAD,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // NARAD). `beta` until a real Narad document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  aakriti: {
+    key: 'aakriti',
+    label: 'Aakriti',
+    lang: 'ne',
+    kind: 'legacy',
+    ...AAKRITI,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // AAKRITI). `beta` until a real Aakriti document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: "g]kfn ;'Gb/ b]z xf] .",
+    placeholder: 'g]kfn  (example)',
+  },
+  anjali: {
+    key: 'anjali',
+    label: 'Anjali',
+    lang: 'ne',
+    kind: 'legacy',
+    ...ANJALI,
+    // Preeti's map, after drawing every key beside Preeti (see the note above
+    // ANJALI). `beta` until a real Anjali document has been run through it.
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
     css: 'monospace',
     sample: "g]kfn ;'Gb/ b]z xf] .",
     placeholder: 'g]kfn  (example)',
@@ -2245,7 +3127,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.kind === 'unicode' && to.kind === 'unicode') return text;
 
   if (from.kind === 'legacy' && to.kind === 'unicode') {
-    return legacyToUnicode(text, from.map, opts);
+    return legacyToUnicode(text, from.readMap ?? from.map, opts);
   }
   if (from.kind === 'unicode' && to.kind === 'legacy') {
     return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
@@ -2256,7 +3138,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.layout && from.layout === to.layout) return text;
 
   // legacy -> legacy routes through Unicode.
-  return unicodeToLegacy(legacyToUnicode(text, from.map, opts), to.map, {
+  return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, opts), to.map, {
     ...opts,
     ...reverseOpts(to),
   });

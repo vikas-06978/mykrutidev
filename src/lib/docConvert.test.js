@@ -717,11 +717,37 @@ describe('documents in every font', async () => {
     assert.deepEqual(textOf(xml), ['मराठी']);
   });
 
-  test('a later cut whose keys differ is not read as the checked font', async () => {
-    const doc = makeDocx({ document: body(p(r(font('Shusha02'), 'Baart'))) });
-    const { text, stats } = await run(doc, { from: 'shusha', to: 'unicode' });
-    assert.deepEqual(textOf(text('word/document.xml')), ['Baart']);
+  test('a later cut whose keys differ is read with its own map, not the page\'s', async () => {
+    // `pa~a` is पात्र in Shusha02 and पात्रा in Shusha.
+    const doc = makeDocx({ document: body(p(r(font('Shusha02'), 'pa~a'))) });
+    const { text } = await run(doc, { from: 'shusha', to: 'unicode' });
+    assert.deepEqual(textOf(text('word/document.xml')), ['पात्र']);
+  });
+
+  test('each run converts from the font it is typed in, whatever the page', async () => {
+    // A Kruti Dev letter with an Arjun paragraph and a Preeti line in it:
+    // `=` is त्र in Kruti Dev and half त्र in Arjun.
+    const doc = makeDocx({
+      document: body(
+        p(r(KRUTI, 'i=')) + p(r(font('Arjun'), 'i=k', '<w:b/>')) + p(r(font('Preeti'), 'g]kfn')),
+      ),
+    });
+    const { text } = await run(doc, 'to-unicode');
+    assert.deepEqual(textOf(text('word/document.xml')), ['पत्र', 'पत्र', 'नेपाल']);
+  });
+
+  test('a style whose keys were not checked is left as it is', async () => {
+    // Agra Wide types त्र on `=` as Kruti Dev does, unlike Agra.
+    const doc = makeDocx({ document: body(p(r(font('Agra Wide'), 'i='))) });
+    const { text, stats } = await run(doc, { from: 'agra', to: 'unicode' });
+    assert.deepEqual(textOf(text('word/document.xml')), ['i=']);
     assert.equal(stats.convertedChars, 0);
+  });
+
+  test('a run already in the target font is left alone', async () => {
+    const doc = makeDocx({ document: body(p(r(KRUTI, 'Hkkjr')) + p(r(font('Arjun'), 'i=k'))) });
+    const { text } = await run(doc, { from: 'kruti-dev', to: 'arjun' });
+    assert.deepEqual(runsOf(text('word/document.xml')), [[['Hkkjr', 'Arjun']], [['i=k', 'Arjun']]]);
   });
 
   test('a .txt converts between any two fonts', () => {

@@ -232,7 +232,8 @@ export function useT(lang) {
 export function listTitle(s, lang) {
   const names = raw(lang, 'fontNames');
   const keys = Object.keys(names).sort((a, b) => b.length - a.length);
-  const re = new RegExp(`(?<![\\w-])(${keys.map(esc).join('|')})(?![\\w])`, 'g');
+  // A version number may follow the name: "Shusha02" is शुषा02.
+  const re = new RegExp(`(?<![\\w-])(${keys.map(esc).join('|')})(?![^\\W\\d])`, 'g');
   return s.replace(re, (m) => names[m]);
 }
 

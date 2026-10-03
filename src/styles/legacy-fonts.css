@@ -106,3 +106,149 @@
     url('/fonts/dvtt-surekh.woff') format('woff');
   font-display: swap;
 }
+
+/* Kruti Dev layout variants: Arjun, Kundli, Krishna, New Delhi. Each map was
+   read off the file its face is made from (vendor/fonts/). */
+@font-face {
+  font-family: 'MKD Arjun';
+  src:
+    local('Arjun'),
+    url('/fonts/arjun.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Kundli';
+  src:
+    local('Kundli'),
+    url('/fonts/kundli.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Krishna';
+  src:
+    local('Krishna'),
+    url('/fonts/krishna.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD NewDelhi';
+  src:
+    local('NewDelhi'),
+    url('/fonts/new-delhi.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Ruchi-Normal';
+  src:
+    local('Ruchi-Normal'),
+    url('/fonts/ruchi.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DevLys 020';
+  src:
+    local('DevLys 020'),
+    url('/fonts/devlys-020.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Ajay Normal';
+  src:
+    local('Ajay Normal'),
+    url('/fonts/ajay.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Aman Condensed';
+  src:
+    local('Aman Condensed'),
+    url('/fonts/aman.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Agra';
+  src:
+    local('Agra'),
+    url('/fonts/agra.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD HIMALAYA TT FONT';
+  src:
+    local('HIMALAYA TT FONT'),
+    url('/fonts/himalaya.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Akshar';
+  src:
+    local('Akshar'),
+    url('/fonts/akshar.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DINA-A';
+  src:
+    local('DINA-A'),
+    url('/fonts/dina.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD DevanagariBold';
+  src:
+    local('DevanagariBold'),
+    url('/fonts/devanagari-bold.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Narad';
+  src:
+    local('Narad'),
+    url('/fonts/narad.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Aakriti';
+  src:
+    local('Aakriti'),
+    url('/fonts/aakriti.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Anjali';
+  src:
+    local('Anjali'),
+    url('/fonts/anjali.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Shusha02';
+  src:
+    local('Shusha02'),
+    url('/fonts/shusha02.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Shivaji02';
+  src:
+    local('Shivaji02'),
+    url('/fonts/shivaji02.woff') format('woff');
+  font-display: swap;
+}

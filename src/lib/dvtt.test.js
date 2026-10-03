@@ -70,6 +70,7 @@ describe('DV-TT Surekh', () => {
     assert.equal(toU('E²'), 'कळ');
     assert.equal(toU('+ì{É'), 'ॲप');
     assert.equal(toU('S¬É'), 'च्या');
+    assert.equal(toU('ºÉ¬É'), 'स्या');
     assert.equal(toU('®ÉVªÉÉSªÉÉ'), 'राज्याच्या');
   });
 

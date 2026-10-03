@@ -31,12 +31,19 @@ const id = `doc-${from}-${to}`;
 // "Convert to": every font the FROM text can be converted into - Unicode in
 // each offered font, and every verified legacy font other than the source.
 // The page's own target is picked to begin with.
+// Grouped by language, so the list stays readable with two dozen fonts.
 const beta = (k: string) => (FONTS[k]?.beta ? ` (${t('page.beta')})` : '');
-const targets = [
-  ...(fromUnicode ? [] : UNICODE_FONTS.map((f) => ({ value: `unicode|${f}`, label: t('doc.unicodeIn', { font: f }) }))),
-  ...Object.entries(WORD_FONTS)
-    .filter(([k]) => k !== from && FONTS[k]?.accurate)
-    .map(([k, w]) => ({ value: `${k}|${w.name}`, label: `${w.name}${beta(k)}` })),
+const legacy = Object.entries(WORD_FONTS)
+  .filter(([k]) => k !== from && FONTS[k]?.accurate)
+  .map(([k, w]) => ({ value: `${k}|${w.name}`, label: `${w.name}${beta(k)}`, lang: FONTS[k].lang ?? 'hi' }));
+const LANG_GROUP: Record<string, string> = { hi: 'doc.groupHindi', ne: 'doc.groupNepali', mr: 'doc.groupMarathi' };
+const targetGroups = [
+  ...(fromUnicode
+    ? []
+    : [{ label: t('doc.groupUnicode'), options: UNICODE_FONTS.map((f) => ({ value: `unicode|${f}`, label: t('doc.unicodeIn', { font: f }) })) }]),
+  ...Object.entries(LANG_GROUP)
+    .map(([lang, key]) => ({ label: t(key), options: legacy.filter((o) => o.lang === lang) }))
+    .filter((g) => g.options.length > 0),
 ];
 const selected = isUnicodeKey(to) ? `unicode|${to === 'mangal' ? 'Mangal' : UNICODE_FONTS[0]}` : `${to}|${WORD_FONTS[to].name}`;
 const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from: docLabel(from, strings) });
@@ -71,7 +78,11 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         class="max-w-full rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5 text-ink"
         translate="no"
       >
-        {targets.map((o) => <option value={o.value} selected={o.value === selected}>{o.label}</option>)}
+        {targetGroups.map((g) => (
+          <optgroup label={g.label}>
+            {g.options.map((o) => <option value={o.value} selected={o.value === selected}>{o.label}</option>)}
+          </optgroup>
+        ))}
       </select>
     </div>
 
