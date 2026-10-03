@@ -19,21 +19,33 @@ same letters as a font that already has a verified map). Many legacy fonts
 LOOK alike and differ on a handful of keys, which is exactly the error that
 produces believable but wrong Hindi.
 
+## Other languages
+
+Hindi, Marathi and Nepali fonts sit directly in this folder, one folder per
+family. Fonts for other scripts go in their language's folder, each with a
+README on how to upload:
+
+| Folder | For | Site page |
+| :-- | :-- | :-- |
+| `Gujarati/` | Gujarati (LMG Arun, Saumil, Gopika, Vakil...) | /gujarati-font-converter |
+| `Punjabi/` | Punjabi in Gurmukhi (AnmolLipi, Asees, Joy...) | /punjabi-font-converter |
+| `Bengali/` | Bengali (SutonnyMJ and the Bijoy fonts) | /bengali-font-converter |
+| `Tamil/` | Tamil (Bamini, TSCII, TAB...) | /tamil-font-converter |
+| `Other/` | any other language | - |
+
 ## Status
 
 | Folder | Layout | Status |
 | :-- | :-- | :-- |
 | DevLys 010 | Kruti Dev 010 | **Live**. All styles draw the same letter on every key Kruti Dev uses. |
 | Abbasi Chanakya New | its own | **Live (Beta)** |
-| DevLys 020 | Kruti Dev 010, except `Û`, and Hindi digits on the number keys | Being checked |
-| Arjun | Kruti Dev 010, except `=` (half त्र, full त्र is `=k`) | Being checked |
-| Kundli | close to Kruti Dev 010, `Ñ` draws औ | Being checked |
-| Akshar, Aakriti, DINA, Himalaya, Narad, Devanagari Bold, Anjali | close to Preeti (Nepali) | Being checked |
-| Shusha, Shivaji | one layout. Shivaji01 is Shusha with a full stop for the danda | **Live (Beta)** for Shusha and Shivaji01. Shusha02/05 and Shivaji02/05 change some keys and are not covered yet |
-| Vakil | close to Shusha | Map to be built |
-| Krishna, New Delhi, Ruchi | close to each other | Map to be built |
-| Agra, Aman, Maya, Ajay | their own layouts | Map to be built |
+| Arjun, Kundli, Krishna, New Delhi, Ruchi, DevLys 020, Ajay, Aman, Agra | Kruti Dev 010 with keys of their own (see `src/lib/fontMaps.js`) | **Live (Beta)**. Styles covered are listed in `docs/FONTS.md`: not Krishna Italic, Agra Bold/Wide/Thin |
+| Himalaya, Akshar, DINA, Devanagari Bold, Narad, Aakriti, Anjali | Preeti (Nepali) with keys of their own | **Live (Beta)**. Not DINA30 |
+| Shusha, Shivaji | one layout. Shivaji01 is Shusha with a full stop for the danda | **Live (Beta)**, Shusha05 and Shivaji05 included |
+| Shusha02, Shivaji02 | Shusha with four keys changed | **Live (Beta)** |
 | DV-TTSurekh, DV-TTYogesh | DV-TT (Marathi). Yogesh draws the same letter as Surekh on every key, the EN styles differ only in drawing English digits | **Live (Beta)** on /marathi-font-converter |
+| Gujarati/Vakil | Gujarati letters on a Shusha-like keyboard | Map to be built (Gujarati) |
+| Maya | its own layout | Map to be built |
 | DV-TTGanesh, DV-Divyae | their own layouts, not DV-TT Surekh's | Map to be built |
 | Millennium (Varun, Shailesh, Mogara, Priya, Gauri, Shridhar, Deepak) | Millennium | Map to be built |
 | Chanakya, Patrika | newspaper Chanakya: conjuncts on the lowercase keys, letters in the upper range | Needs real documents typed in it |
