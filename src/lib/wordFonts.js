@@ -17,8 +17,9 @@ export const WORD_FONTS = {
   devlys: { name: 'DevLys 010', label: 'DevLys', match: /^devlys\s*010/i },
   'abbasi-chanakya': { name: 'Abbasi Chanakya New', label: 'Abbasi Chanakya', match: /abbasi/i },
   preeti: { name: 'Preeti', label: 'Preeti', match: /^preeti\b/i },
-  shusha: { name: 'Shusha', label: 'Shusha', match: /^shusha$/i },
-  shivaji: { name: 'Shivaji01', label: 'Shivaji', match: /^shivaji0?1$/i },
+  // Shusha05 and Shivaji05 are redrawn Shusha and Shivaji01 on the same keys.
+  shusha: { name: 'Shusha', label: 'Shusha', match: /^shusha(05)?$/i },
+  shivaji: { name: 'Shivaji01', label: 'Shivaji', match: /^shivaji0?[15]$/i },
   dvtt: { name: 'DV-TTSurekh', label: 'DV-TT', match: /^dv-?tt\s*(surekh|yogesh)/i },
 };
 

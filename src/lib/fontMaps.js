@@ -2060,13 +2060,21 @@ const HIMALAYA = preetiVariant({
   add: { F: 'ा', 'Ù': 'ह', X: 'हृ', 'Ô': 'क्ष', 'í': 'ष', 'ñ': 'ङ' },
 });
 
+/** Unicode -> key, first key wins: buildReverse() without its cache. */
+function firstKeyReverse(map) {
+  const rev = {};
+  for (const [k, u] of Object.entries(map)) if (u !== '' && !(u in rev)) rev[u] = k;
+  return rev;
+}
+
 /** A font that is another font with a few keys changed: drop, then add. */
 function variantOf(base, { drop = '', add = {} }) {
   const bad = new Set(drop);
   const ok = (k) => ![...k].some((c) => bad.has(c));
   const map = Object.fromEntries(Object.entries(base.map).filter(([k]) => ok(k)));
   Object.assign(map, add);
-  const reverse = Object.fromEntries(Object.entries(base.reverse).filter(([, k]) => ok(k)));
+  const baseRev = base.reverse ?? firstKeyReverse(base.map);
+  const reverse = Object.fromEntries(Object.entries(baseRev).filter(([, k]) => ok(k)));
   for (const [k, u] of Object.entries(add)) if (!(u in reverse)) reverse[u] = k;
   return { map, reverse };
 }
@@ -2164,6 +2172,19 @@ const ANJALI = preetiVariant({
   drop: '›„ÌÝËÍÎ‹Å‰ˆÞ˜çÛÙÜÖÚ•‘æÆ…FØ°',
   add: { F: 'ा', 'Ø': 'य', '°': 'ङ्क', '·': 'ङ्क', '˚': 'फ', 'π': 'ॐ' },
 });
+
+// Shusha02 (vendor/fonts/Shusha/Shusha02.ttf) and Shivaji02. Shusha in a
+// heavier design, drawn key by key beside it, with four keys changed: `~` is
+// HALF त्र (`~a` त्र), `(` is हृ (Shusha's ह्य), `)` is HALF थ (Shusha's हृ),
+// `Ù` is HALF न्न. `œ` is left out. Shivaji02 is Shusha02 with the full stop
+// on `.` and † ‰ drawing themselves, exactly as Shivaji01 is to Shusha.
+// (Shusha05 and Shivaji05 are redrawn Shusha and Shivaji01 with the same
+// keys; wordFonts.js reads them with those maps.)
+const SHUSHA02 = variantOf({ map: SHUSHA }, {
+  drop: '~()Ùœ',
+  add: { '~a': 'त्र', '~': 'त्र्', '(': 'हृ', ')a': 'थ', ')': 'थ्', 'Ùa': 'न्न', 'Ù': 'न्न्' },
+});
+const SHIVAJI02 = variantOf(SHUSHA02, { drop: '.†‰', add: { '.': '.' } });
 
 // ============================================================================
 // Font registry - adding a font is adding one entry.
@@ -2434,6 +2455,32 @@ export const FONTS = {
     lang: 'mr',
     kind: 'legacy',
     map: SHIVAJI,
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
+    placeholder: 'marazI  (example)',
+  },
+  shusha02: {
+    key: 'shusha02',
+    label: 'Shusha02',
+    kind: 'legacy',
+    ...SHUSHA02,
+    // Shusha's map with four keys changed (see the note above SHUSHA02).
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Baart sarkar¸ raYT/Iya iSaxaa naIit.',
+    placeholder: 'Baart  (example)',
+  },
+  shivaji02: {
+    key: 'shivaji02',
+    label: 'Shivaji02',
+    lang: 'mr',
+    kind: 'legacy',
+    ...SHIVAJI02,
     accurate: true,
     beta: true,
     warnUnmapped: true,

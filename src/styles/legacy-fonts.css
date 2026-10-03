@@ -236,3 +236,19 @@
     url('/fonts/anjali.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD Shusha02';
+  src:
+    local('Shusha02'),
+    url('/fonts/shusha02.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Shivaji02';
+  src:
+    local('Shivaji02'),
+    url('/fonts/shivaji02.woff') format('woff');
+  font-display: swap;
+}

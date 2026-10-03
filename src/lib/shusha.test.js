@@ -77,3 +77,34 @@ describe('registry and pages', () => {
     }
   });
 });
+
+describe('Shusha02 and Shivaji02', () => {
+  const toU = (s, f) => convert(s, f, 'unicode', { keepEnglish: false });
+
+  test('the four keys that differ from Shusha, as drawn in Shusha02.ttf', () => {
+    assert.equal(toU('pa~a', 'shusha02'), 'पात्र');
+    assert.equal(toU('(dya', 'shusha02'), 'हृदय');
+    assert.equal(toU(')a', 'shusha02'), 'थ');
+    assert.equal(toU('Ùa', 'shusha02'), 'न्न');
+    assert.equal(toU('pa~a', 'shusha'), 'पात्रा');
+  });
+
+  test('every other word reads as in Shusha', () => {
+    for (const { s, u } of fixture.words) {
+      if (/[~()Ùœ]/.test(s)) continue;
+      assert.equal(toU(s, 'shusha02'), u, s);
+    }
+  });
+
+  test('writing Shusha02 uses its own keys', () => {
+    assert.equal(convert('पात्र', 'unicode', 'shusha02'), 'pa~a');
+    assert.equal(convert('हृदय', 'unicode', 'shusha02'), '(dya');
+  });
+
+  test('Shivaji02 has the full stop on `.`', () => {
+    assert.equal(toU('marazI.', 'shivaji02'), 'मराठी.');
+    assert.equal(toU('pa~a', 'shivaji02'), 'पात्र');
+    assert.equal(previewFontFor('shusha02').file, 'shusha02.woff');
+    assert.equal(previewFontFor('shivaji02').file, 'shivaji02.woff');
+  });
+});

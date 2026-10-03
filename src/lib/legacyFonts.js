@@ -88,6 +88,8 @@ export const PREVIEW_FONTS = {
   narad: preview('Narad', 'narad.woff'),
   aakriti: preview('Aakriti', 'aakriti.woff'),
   anjali: preview('Anjali', 'anjali.woff'),
+  shusha02: preview('Shusha02', 'shusha02.woff'),
+  shivaji02: preview('Shivaji02', 'shivaji02.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */
