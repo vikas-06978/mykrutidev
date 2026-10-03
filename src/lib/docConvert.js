@@ -132,7 +132,8 @@ export function outputName(name, direction, ext) {
 // Scripts
 // ---------------------------------------------------------------------------
 
-// Devanagari, and Gujarati (U+0A80-0AFF) and Tamil (U+0B80-0BFF) for their fonts.
+// Devanagari, and Gujarati (U+0A80-0AFF), Tamil (U+0B80-0BFF) and Bengali
+// (U+0980-09FF) for their fonts.
 const DEVANAGARI = /[ऀ-ॿ\u0A80-\u0AFF\u0B80-\u0BFF]/;
 const DEVANAGARI_G = /[ऀ-ॿ\u0A80-\u0AFF\u0B80-\u0BFF]/g;
 const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
@@ -487,8 +488,8 @@ export function splitsSyllable(a, b, from = 'kruti-dev') {
   const last = a.slice(-1);
   if (last) {
     const u = legacyToUnicode(last, from);
-    // A sign typed before its letter: ि, િ, and Tamil's ெ ே ை.
-    if (/^[िિ]/.test(u) || /[्્]$/.test(u) || /[ெேை]$/.test(u)) return true;
+    // A sign typed before its letter: ि, િ, ি, Tamil's ெ ே ை and Bengali's ে ৈ.
+    if (/^[िિি]/.test(u) || /[्્্]$/.test(u) || /[ெேைেৈ]$/.test(u)) return true;
   }
   const first = b[0];
   if (!first) return false;

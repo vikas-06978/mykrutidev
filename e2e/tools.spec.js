@@ -116,9 +116,9 @@ for (const url of CONVERTERS) {
 
     const input = root.locator('textarea[data-role="input"]');
     await input.fill('');
-    // Devanagari and Gujarati cannot be typed key by key on a US layout; insertText is what
-    // an IME or a paste delivers, and fires the same input event.
-    if (/[ऀ-ॿ\u0A80-\u0AFF]/.test(sample)) {
+    // Indic text, and legacy keys such as SutonnyMJ's `†`, cannot be typed key by key on a US
+    // layout; insertText is what an IME or a paste delivers, and fires the same input event.
+    if (/[^\x00-\x7F]/.test(sample)) {
       await input.focus();
       await page.keyboard.insertText(sample);
     } else {

@@ -8,7 +8,7 @@
  * converter.copyUnicode<suffix> and converter.preview<suffix>.
  */
 import { FONTS } from './fontMaps.js';
-import { UNICODE_FONTS, UNICODE_FONTS_GU, UNICODE_FONTS_TA } from './wordFonts.js';
+import { UNICODE_FONTS, UNICODE_FONTS_GU, UNICODE_FONTS_TA, UNICODE_FONTS_BN } from './wordFonts.js';
 
 export const SCRIPTS = {
   deva: { lang: 'hi', cls: 'deva', css: null, wordFont: 'Mangal', unicodeFonts: UNICODE_FONTS, suffix: '' },
@@ -32,9 +32,19 @@ export const SCRIPTS = {
     placeholder: 'தமிழ்  (example)',
     suffix: 'Ta',
   },
+  bn: {
+    lang: 'bn',
+    cls: 'ben',
+    css: 'var(--font-ben)',
+    wordFont: 'Vrinda',
+    unicodeFonts: UNICODE_FONTS_BN,
+    sample: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার, শিক্ষা মন্ত্রণালয়।',
+    placeholder: 'বাংলা  (example)',
+    suffix: 'Bn',
+  },
 };
 
-/** The script of a font: its own for Gujarati and Tamil, else Devanagari. */
+/** The script of a font: its own for Gujarati, Tamil and Bengali, else Devanagari. */
 export const scriptOfFont = (key) => (FONTS[key]?.lang in SCRIPTS && FONTS[key].lang !== 'hi' ? FONTS[key].lang : 'deva');
 
 /** The script of a page converting `from` -> `to`. */

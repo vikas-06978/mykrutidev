@@ -60,7 +60,8 @@
     "Marathi": "Marathi",
     "More Hindi fonts": "More Hindi fonts",
     "Gujarati": "Gujarati",
-    "Tamil": "Tamil"
+    "Tamil": "Tamil",
+    "Bengali": "Bengali"
   },
   "fontNames": {
     "Abbasi Chanakya New": "Abbasi Chanakya New",
@@ -101,7 +102,8 @@
     "shivaji02": "Shivaji02",
     "lmg-arun": "LMG Arun",
     "terafont": "Terafont Varun",
-    "bamini": "Bamini"
+    "bamini": "Bamini",
+    "sutonny": "SutonnyMJ"
   },
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
@@ -158,7 +160,9 @@
     "copyUnicodeGu": "Copy as Gujarati (Unicode)",
     "unicodeGu": "Unicode / Gujarati",
     "copyUnicodeTa": "Copy as Tamil (Unicode)",
+    "copyUnicodeBn": "Copy as Bengali (Unicode)",
     "unicodeTa": "Unicode / Tamil",
+    "unicodeBn": "Unicode / Bengali",
     "forWeb": "For WhatsApp / web",
     "docxTitle": "Word file with the {font} font already applied",
     "unicodeDocx": "Unicode .docx",
@@ -178,7 +182,8 @@
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
     "previewGu": "Preview (Gujarati)",
-    "previewTa": "Preview (Tamil)"
+    "previewTa": "Preview (Tamil)",
+    "previewBn": "Preview (Bengali)"
   },
   "doc": {
     "title": "Convert a document",
@@ -196,6 +201,7 @@
     "groupMarathi": "Marathi fonts",
     "groupGujarati": "Gujarati fonts",
     "groupTamil": "Tamil fonts",
+    "groupBengali": "Bengali fonts",
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
@@ -489,7 +495,8 @@
       "shivaji": "Shivaji",
       "shusha": "Shusha",
       "gujarati": "Gujarati",
-      "tamil": "Tamil"
+      "tamil": "Tamil",
+      "bengali": "Bengali"
     }
   },
   "pages": {
@@ -2168,17 +2175,45 @@
       }
     },
     "/bengali-font-converter": {
-      "nav": "Bengali",
-      "h1": "Bengali Font Converter",
-      "title": "Bengali Font Converter | Bijoy and Legacy Bengali Fonts to Unicode",
-      "description": "A planned Bengali font converter for Bijoy and other legacy Bengali fonts to Unicode Bengali.",
-      "note": "Planned. Bijoy uses its own script and layout, and Bengali conjuncts are more elaborate than Devanagari ones. It needs its own map and its own tests.",
-      "lede": "Planned: a Bengali font converter for Bijoy and other legacy Bengali fonts to Unicode Bengali.",
+      "nav": "SutonnyMJ → Unicode (Bengali)",
+      "h1": "Bengali Font Converter: SutonnyMJ (Bijoy) to Unicode",
+      "title": "Bengali Font Converter | SutonnyMJ Bijoy to Unicode Online",
+      "description": "Convert SutonnyMJ (Bijoy) Bengali to Unicode for portals, Facebook and Word, with ি ে ৈ, reph and conjuncts put in order. Read off the font file. Free.",
+      "betaNote": "For Bengali typed in SutonnyMJ with the Bijoy keyboard.",
+      "lede": "Paste SutonnyMJ text on the left and get Unicode Bengali on the right, ready for any website, portal, email or phone.",
       "body": [
-        "<h2>Planned, not started</h2>",
-        "<p>Bijoy is the legacy Bengali font most older documents were typed in, and the conversion problem is the same shape as the Hindi one: glyphs stored on ASCII codepoints, in visual rather than logical order.</p>",
-        "<p>The script is not. Bengali has its own character set and a more elaborate conjunct system than Devanagari, so it needs its own map and its own test documents. The route is scaffolded so the work has somewhere to go. It will be switched on only after a keyword check and a tested mapping.</p>"
-      ]
+        "<h2>What SutonnyMJ text is</h2>",
+        "<p>SutonnyMJ is the Bijoy font that most offices, courts, schools and newspapers in Bangladesh have typed in for years. It does not store Bengali. It stores English keyboard characters and draws Bengali letters on top of them, so on a computer without the font <strong lang=\"bn\">বাংলাদেশ</strong> shows up as <code>evsjv‡`k</code>. This page turns those characters into real Unicode Bengali, which works on every phone and computer.</p>",
+        "<h2>What the conversion has to get right</h2>",
+        "<ul><li><strong>Signs typed before their letter.</strong> ি, ে and ৈ are typed before the consonant or conjunct they belong to, so <code>†mvbvi</code> has to be reordered into <strong lang=\"bn\">সোনার</strong>.</li><li><strong>Two-part vowels.</strong> ো and ৌ are typed as ে before the letter and া or ৗ after it, and come out as the single Unicode vowel sign: <code>†KŠkj</code> is <strong lang=\"bn\">কৌশল</strong>.</li><li><strong>Reph and conjuncts.</strong> The reph is typed after its syllable and moved back in front of it, and conjuncts drawn as one glyph or as a half letter over a lower part are spelt out: <code>gš¿Yvjq</code> is <strong lang=\"bn\">মন্ত্রণালয়</strong>.</li></ul>",
+        "<p>The number keys draw Bengali digits, so <code>2024</code> comes out as <strong lang=\"bn\">২০২৪</strong>. For the other direction use <a href=\"/unicode-to-sutonnymj\">Unicode to SutonnyMJ</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the SutonnyMJ font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Do Kalpurush, SolaimanLipi or Vrinda need converting?",
+          "a": "No. Kalpurush, SolaimanLipi, Vrinda, Nirmala UI and the other Unicode Bengali fonts already hold real Bengali text. If your text reads correctly on a phone, it is already Unicode."
+        },
+        {
+          "q": "Does it work for other Bijoy fonts?",
+          "a": "It is built and checked for SutonnyMJ and SutonnyOMJ. Other MJ fonts use the same Bijoy keyboard, but a few rare keys are drawn differently, so read the result before you rely on it."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Bengali out of your SutonnyMJ document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>SutonnyMJ</strong> box. Unicode Bengali appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste it where it is needed. In Word, set it in Vrinda, Nirmala UI or Kalpurush."
+        ],
+        "tip": "Words with ো or ৌ are the quickest check: <code>†mvbvi</code> should read <strong lang=\"bn\">সোনার</strong>, not ে, স, া."
+      }
     },
     "/punjabi-font-converter": {
       "nav": "Punjabi",
@@ -4810,6 +4845,43 @@
           "Paste into Word and set the font to <strong>Bamini</strong>, or use <strong>Download .docx</strong>, which sets it for you."
         ],
         "tip": "Preview a line with <strong lang=\"ta\">கொ</strong> or <strong lang=\"ta\">கோ</strong> first: the sign before the letter and ா after it should join into one vowel."
+      }
+    },
+    "/unicode-to-sutonnymj": {
+      "nav": "Unicode → SutonnyMJ (Bengali)",
+      "h1": "Unicode to SutonnyMJ Converter (Bijoy Bengali)",
+      "title": "Unicode to SutonnyMJ Converter | Bengali Unicode to Bijoy",
+      "description": "Convert Unicode Bengali into SutonnyMJ (Bijoy) font code for office templates and print, with ি ে ৈ typed before their letter as Bijoy expects. Free.",
+      "betaNote": "For documents that will be set in the SutonnyMJ font.",
+      "lede": "Type or paste Bengali on the left and get SutonnyMJ code on the right, ready to paste into Word and set in SutonnyMJ.",
+      "body": [
+        "<h2>When you need SutonnyMJ</h2>",
+        "<p>Many offices, courts and presses in Bangladesh still keep their templates in SutonnyMJ. Bengali typed on a phone or copied from a website is Unicode, and it shows the wrong letters once set in SutonnyMJ. This page writes it out again as the keys Bijoy expects, in the order the font draws them: <strong lang=\"bn\">শিক্ষা মন্ত্রণালয়</strong> becomes <code>wk¶v gš¿Yvjq</code>.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>ি ে ৈ before their letter</strong>, and ো ৌ split into their two parts, as the Bijoy keyboard types them.</li><li><strong>The reph after its syllable</strong>, and conjuncts written with the glyph SutonnyMJ draws for them.</li><li><strong>A note for anything with no key</strong>, which is left as it is rather than swapped for a wrong letter.</li></ul>",
+        "<p>To go back, use <a href=\"/bengali-font-converter\">the Bengali font converter</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the SutonnyMJ font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is SutonnyMJ code. Press <strong>Preview (Bengali)</strong> to see it in SutonnyMJ here, or set the font to <strong>SutonnyMJ</strong> in Word."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Bengali that has to go into a SutonnyMJ document.",
+          "Press <strong>Copy SutonnyMJ code</strong>.",
+          "Paste into Word and set the font to <strong>SutonnyMJ</strong>, or use <strong>Download .docx</strong>, which puts it in SutonnyMJ for you."
+        ],
+        "tip": "Preview a line with a conjunct such as <strong lang=\"bn\">মন্ত্রী</strong> first: the half ন and the lower ত্র should sit together as one letter."
       }
     }
   },

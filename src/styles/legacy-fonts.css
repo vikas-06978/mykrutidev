@@ -276,3 +276,14 @@
     url('/fonts/bamini.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD SutonnyMJ';
+  src:
+    local('SutonnyMJ'),
+    url('/fonts/sutonnymj.woff') format('woff');
+  font-display: swap;
+  /* SutonnyMJ draws its letters small on the em: scaled up to sit level
+     with the Unicode Bengali beside it. */
+  size-adjust: 135%;
+}

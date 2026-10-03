@@ -93,6 +93,7 @@ export const PREVIEW_FONTS = {
   'lmg-arun': preview('LMG-Arun', 'lmg-arun.woff'),
   terafont: preview('TERAFONT-VARUN', 'terafont-varun.woff'),
   bamini: preview('Ë ghkpdp jkpo;', 'bamini.woff'),
+  sutonny: preview('SutonnyMJ', 'sutonnymj.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

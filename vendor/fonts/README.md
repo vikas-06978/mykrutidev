@@ -48,7 +48,7 @@ README on how to upload:
 | Gujarati/Terafont-Varun (Varun, Ganesh, Indra, Kinnari, Parth, Suraj, Trilo) | LMG Arun's keys but À É Ö | **Live (Beta)** on /gujarati-font-converter. Not TERAVRUN (Varuna "Fat and Thin") or -IND1: symbol fonts |
 | Gujarati/Vakil | Gujarati letters on a Shusha-like keyboard | Map to be built (Gujarati) |
 | Tamil/Bamini | the Tamil typewriter keyboard | **Live (Beta)** on /tamil-font-converter |
-| Bengali/SutonnyMJ | Bijoy | Map to be built |
+| Bengali/SutonnyMJ | Bijoy | **Live (Beta)** on /bengali-font-converter and /unicode-to-sutonnymj |
 | Bengali/Kalpurush, SolaimanLipi | already Unicode (the uploaded files hold the Unicode Bengali block), need no converter | - |
 | Chanakya/Chanakya Regular.ttf | the same file as Chanakya.ttf (newspaper Chanakya), not Walkman-Chanakya 905 | Needs real documents, or the Walkman-Chanakya 905 font |
 | Gujarati/Saumil, Gopika, Avantika, Shree768, Gujrati Saral 1, Krishna | each its own keyboard | Map to be built (Gujarati) |

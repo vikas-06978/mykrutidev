@@ -80,6 +80,29 @@
     url('../../node_modules/@fontsource/noto-sans-tamil/files/noto-sans-tamil-tamil-600-normal.woff') format('woff');
 }
 
+/* Noto Sans Bengali for Unicode Bengali, on the Bengali converters only, on
+   the same terms as Hind Vadodara above. */
+@font-face {
+  font-family: 'Noto Sans Bengali';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0980-09FF, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-400-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-400-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Noto Sans Bengali';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0980-09FF, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-600-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-600-normal.woff') format('woff');
+}
+
 /* Kruti Dev / DevLys faces for the output preview. Self-hosted from
    /public/fonts (owner-supplied) with local() first, so the preview degrades
    to raw ASCII rather than breaking when a file is absent. */
@@ -195,6 +218,9 @@
     system-ui, sans-serif;
   --font-tam:
     'Noto Sans Tamil', Latha, 'Nirmala UI', ui-sans-serif, system-ui, sans-serif;
+  --font-ben:
+    'Noto Sans Bengali', Vrinda, 'Nirmala UI', ui-sans-serif, system-ui,
+    sans-serif;
 
   /* Radius ladder: 6px functional chrome, 12px cards, 16px panels, pill CTAs */
   --radius-chrome: 6px;
@@ -291,6 +317,12 @@
   [lang='ta'],
   .tam {
     font-family: var(--font-tam);
+    line-height: 1.85;
+  }
+
+  [lang='bn'],
+  .ben {
+    font-family: var(--font-ben);
     line-height: 1.85;
   }
 }

@@ -442,7 +442,7 @@ describe('font registry', () => {
     for (const [key, f] of Object.entries(FONTS)) {
       if (f.kind !== 'legacy' || !f.sample) continue;
       const out = convert(f.sample, key, 'unicode');
-      const script = { gu: /[\u0A80-\u0AFF]/, ta: /[\u0B80-\u0BFF]/ }[f.lang] ?? /[ऀ-ॿ]/;
+      const script = { gu: /[\u0A80-\u0AFF]/, ta: /[\u0B80-\u0BFF]/, bn: /[\u0980-\u09FF]/ }[f.lang] ?? /[ऀ-ॿ]/;
       assert.match(out, script, `${key} sample did not decode: ${out}`);
       assert.doesNotMatch(out, /[A-Za-z]/, `${key} sample left Latin letters: ${out}`);
     }

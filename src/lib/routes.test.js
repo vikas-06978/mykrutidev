@@ -136,7 +136,7 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
   });
 
   test('a converter page with no font pair can never be live', () => {
-    const pretend = { ...getPage('/bengali-font-converter'), ready: true };
+    const pretend = { ...getPage('/punjabi-font-converter'), ready: true };
     assert.equal(isLive(pretend), false);
   });
 
