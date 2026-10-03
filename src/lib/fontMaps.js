@@ -2299,6 +2299,57 @@ function gujVisual(s) {
 }
 
 // ============================================================================
+// Tamil: Bamini
+// ============================================================================
+// Bamini (vendor/fonts/Tamil/Bamini/Bamini PB Regular.ttf), the Tamil
+// typewriter layout. Read key by key: each key drawn alone, after க (`f`) and
+// before it, and the look-alikes (னு ஞ ணு, மூ ழூ டூ, மு ழு, டீ டி) beside Noto
+// Sans Tamil. Its accented keys hold symbols and Sinhala-style ornaments, not
+// Tamil, so the whole layout is on the plain keys. The number keys draw Latin
+// digits and are kept as they are.
+//
+// Tamil joins ு and ூ to each consonant in its own way, so the typewriter has
+// a key per joined form (`F` கு, `$` கூ) and `+` as the ூ of the rest. ெ ே ை
+// (`n N i`) are typed before their consonant, and ொ ோ ௌ are those signs with
+// ா (`h`) or ௗ (`_`) after it: கொ is `nfh`.
+const BAMINI = {
+  // Vowels.
+  m: 'அ', M: 'ஆ', ',': 'இ', '<': 'ஈ', c: 'உ', C: 'ஊ', v: 'எ', V: 'ஏ', I: 'ஐ',
+  x: 'ஒ', X: 'ஓ',
+  // Consonants.
+  f: 'க', q: 'ங', r: 'ச', Q: 'ஞ', l: 'ட', z: 'ண', j: 'த', e: 'ந', g: 'ப',
+  k: 'ம', a: 'ய', u: 'ர', y: 'ல', t: 'வ', o: 'ழ', s: 'ள', w: 'ற', d: 'ன',
+  '[': 'ஜ', '\\': 'ஷ', ']': 'ஸ', '`': 'ஹ', '=': 'ஸ்ரீ',
+  // Consonants with ு, ூ, ி, ீ drawn as one glyph.
+  F: 'கு', R: 'சு', L: 'டு', Z: 'ணு', J: 'து', E: 'நு', G: 'பு', K: 'மு', A: 'யு',
+  U: 'ரு', Y: 'லு', T: 'வு', O: 'ழு', S: 'ளு', W: 'று', D: 'னு',
+  $: 'கூ', '#': 'சூ', '^': 'டூ', '%': 'மூ', '*': 'ரூ', '&': 'ழூ',
+  b: 'டி', B: 'டீ', H: 'ர்',
+  // Signs.
+  h: 'ா', p: 'ி', P: 'ீ', '+': 'ூ', n: 'ெ', N: 'ே', i: 'ை', _: 'ௗ', ';': '்',
+  // Punctuation and symbols moved off the keys the letters took.
+  "'": '%', '>': ',', '@': ';', '|': '=', '"': '°', '}': 'ரூபா.', '~': '∴',
+  // And the ones it draws on their own keys.
+  '.': '.', '-': '-', '/': '/', ':': ':', '?': '?', '(': '(', ')': ')', '!': '!',
+};
+
+const TA_CONSONANT = '[க-ஹ]';
+const RE_TA_PRE_FWD = new RegExp(`([ெேை])(${TA_CONSONANT}(?:்ஷ)?)`, 'g');
+const RE_TA_PRE_REV = new RegExp(`(${TA_CONSONANT}(?:்ஷ)?)([ெேை])`, 'g');
+
+/** Bamini keys (visual order) -> Unicode Tamil. */
+function tamilLogical(s) {
+  // ெ ே ை go after the consonant they were typed before (க்ஷ counts as one);
+  // NFC then joins ெ/ே + ா into ொ/ோ and ெ + ௗ into ௌ.
+  return s.replace(RE_TA_PRE_FWD, '$2$1').normalize('NFC');
+}
+
+/** Unicode Tamil -> visual order, for the keys. Other text is left alone. */
+function tamilVisual(s) {
+  return s.replace(/[஀-௿]+/g, (run) => run.normalize('NFD').replace(RE_TA_PRE_REV, '$2$1'));
+}
+
+// ============================================================================
 // Font registry - adding a font is adding one entry.
 // ============================================================================
 //
@@ -2601,6 +2652,25 @@ export const FONTS = {
     css: 'monospace',
     sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
     placeholder: 'marazI  (example)',
+  },
+  bamini: {
+    key: 'bamini',
+    label: 'Bamini',
+    lang: 'ta',
+    kind: 'legacy',
+    map: BAMINI,
+    toLogical: tamilLogical,
+    toVisual: tamilVisual,
+    // Read off the font file key by key (see the note above BAMINI). `beta`
+    // until a real Bamini document has been run through it.
+    accurate: true,
+    beta: true,
+    // Every letter key is a Tamil letter: there are no English words to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'jkpo;ehL muR> fy;tpj; Jiw',
+    placeholder: 'jkpo;  (example)',
   },
   'lmg-arun': {
     key: 'lmg-arun',

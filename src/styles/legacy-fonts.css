@@ -268,3 +268,11 @@
     url('/fonts/terafont-varun.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD Ë ghkpdp jkpo;';
+  src:
+    local('Ë ghkpdp jkpo;'),
+    url('/fonts/bamini.woff') format('woff');
+  font-display: swap;
+}

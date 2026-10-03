@@ -59,7 +59,8 @@
     "More": "More",
     "Marathi": "Marathi",
     "More Hindi fonts": "More Hindi fonts",
-    "Gujarati": "Gujarati"
+    "Gujarati": "Gujarati",
+    "Tamil": "Tamil"
   },
   "fontNames": {
     "Abbasi Chanakya New": "Abbasi Chanakya New",
@@ -99,7 +100,8 @@
     "shusha02": "Shusha02",
     "shivaji02": "Shivaji02",
     "lmg-arun": "LMG Arun",
-    "terafont": "Terafont Varun"
+    "terafont": "Terafont Varun",
+    "bamini": "Bamini"
   },
   "footer": {
     "tagline": "Hindi legacy font conversion that gets matras and conjuncts right. The converters run in your browser, and your text and files are never uploaded.",
@@ -155,6 +157,8 @@
     "copyUnicode": "Copy as Hindi (Unicode)",
     "copyUnicodeGu": "Copy as Gujarati (Unicode)",
     "unicodeGu": "Unicode / Gujarati",
+    "copyUnicodeTa": "Copy as Tamil (Unicode)",
+    "unicodeTa": "Unicode / Tamil",
     "forWeb": "For WhatsApp / web",
     "docxTitle": "Word file with the {font} font already applied",
     "unicodeDocx": "Unicode .docx",
@@ -173,7 +177,8 @@
     "hintLatinBody": "Type or paste Hindi in the box, or use the example button to see what this page expects.",
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
-    "previewGu": "Preview (Gujarati)"
+    "previewGu": "Preview (Gujarati)",
+    "previewTa": "Preview (Tamil)"
   },
   "doc": {
     "title": "Convert a document",
@@ -190,6 +195,7 @@
     "groupNepali": "Nepali fonts",
     "groupMarathi": "Marathi fonts",
     "groupGujarati": "Gujarati fonts",
+    "groupTamil": "Tamil fonts",
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
@@ -482,7 +488,8 @@
       "marathi": "Marathi",
       "shivaji": "Shivaji",
       "shusha": "Shusha",
-      "gujarati": "Gujarati"
+      "gujarati": "Gujarati",
+      "tamil": "Tamil"
     }
   },
   "pages": {
@@ -2120,17 +2127,45 @@
       }
     },
     "/tamil-font-converter": {
-      "nav": "Tamil",
-      "h1": "Tamil Font Converter",
-      "title": "Tamil Font Converter | Bamini and Legacy Tamil Fonts to Unicode",
-      "description": "A planned Tamil font converter for Bamini and other legacy Tamil fonts to Unicode Tamil.",
-      "note": "Planned. Bamini and the other legacy Tamil fonts use a different script with different reordering rules, so this needs its own engine work, not just a new table.",
-      "lede": "Planned: a Tamil font converter for Bamini and other legacy Tamil fonts to Unicode Tamil.",
+      "nav": "Bamini → Unicode (Tamil)",
+      "h1": "Tamil Font Converter: Bamini to Unicode",
+      "title": "Tamil Font Converter | Bamini to Unicode Tamil Online",
+      "description": "Convert Bamini Tamil to Unicode for portals, WhatsApp and Word, with ெ ே ை and ொ ோ ௌ put in the right order. Read off the Bamini font file. Free.",
+      "betaNote": "For Tamil typed in the Bamini font.",
+      "lede": "Paste Bamini text on the left and get Unicode Tamil on the right, ready for any website, portal, email or phone.",
       "body": [
-        "<h2>Planned, not started</h2>",
-        "<p>Bamini is the Tamil equivalent of Kruti Dev: the legacy font that a great deal of older Tamil typing was done in, still sitting inside documents that now need to go into Unicode systems.</p>",
-        "<p>Tamil script works differently from Devanagari. It has its own vowel-sign behaviour and its own rules about which signs move where, so this needs its own engine work rather than a new lookup table. The route is scaffolded. It will be built only after a keyword check and a mapping tested against real Tamil documents.</p>"
-      ]
+        "<h2>What Bamini text is</h2>",
+        "<p>Bamini is the Tamil typewriter font that offices, schools and presses in Sri Lanka and Tamil Nadu typed in for years. It does not store Tamil. It stores English keyboard characters and draws Tamil letters on top of them, so on a computer without the font <strong lang=\"ta\">தமிழ்நாடு</strong> shows up as <code>jkpo;ehL</code>. This page turns those characters into real Unicode Tamil, which works on every phone and computer.</p>",
+        "<h2>What the conversion has to get right</h2>",
+        "<ul><li><strong>Signs typed before their letter.</strong> ெ, ே and ை are typed before the consonant they belong to, so <code>nfhOk;G</code> has to be reordered into <strong lang=\"ta\">கொழும்பு</strong>.</li><li><strong>Two-part vowels.</strong> ொ, ோ and ௌ are typed as the sign before the letter and ா or ௗ after it, and come out as the single Unicode vowel sign.</li><li><strong>Joined u and uu.</strong> Tamil joins ு and ூ to each consonant in its own way, so Bamini has a key for each joined form: <code>F</code> is <strong lang=\"ta\">கு</strong> and <code>$</code> is <strong lang=\"ta\">கூ</strong>.</li></ul>",
+        "<p>The number keys draw ordinary digits, so numbers are kept as they are. For the other direction use <a href=\"/unicode-to-bamini\">Unicode to Bamini</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Bamini font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Do Latha or other Unicode Tamil fonts need converting?",
+          "a": "No. Latha, Nirmala UI, Noto Sans Tamil and the other Unicode Tamil fonts already hold real Tamil text. If your text reads correctly on a phone, it is already Unicode."
+        },
+        {
+          "q": "Does it work for other Tamil fonts such as TAM or TSCII?",
+          "a": "No. Those use other keyboards. This page is for Bamini only."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Tamil out of your Bamini document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Bamini</strong> box. Unicode Tamil appears on the right. For a whole Word file with its bold, italic and tables, use <strong>Upload Word file</strong> instead.",
+          "Press <strong>Copy text</strong> and paste it where it is needed. In Word, set it in Latha or Nirmala UI."
+        ],
+        "tip": "Words with ொ or ோ are the quickest check: <code>Nfhtpy;</code> should read <strong lang=\"ta\">கோவில்</strong>."
+      }
     },
     "/bengali-font-converter": {
       "nav": "Bengali",
@@ -4738,6 +4773,43 @@
           "Paste into Word and set the font to <strong>LMG-Arun</strong>, or use <strong>Download .docx</strong>, which sets it for you."
         ],
         "tip": "Preview a line with <strong lang=\"gu\">પ્રધાનમંત્રી</strong> first: the rakar should sit under પ."
+      }
+    },
+    "/unicode-to-bamini": {
+      "nav": "Unicode → Bamini (Tamil)",
+      "h1": "Unicode to Bamini Converter (Tamil)",
+      "title": "Unicode to Bamini Converter | Tamil Unicode to Bamini Font",
+      "description": "Convert Unicode Tamil into Bamini font code for office templates and print, with ெ ே ை typed before their letter as Bamini expects. Free and private.",
+      "betaNote": "For documents that will be set in the Bamini font.",
+      "lede": "Type or paste Tamil on the left and get Bamini code on the right, ready to paste into Word and set in Bamini.",
+      "body": [
+        "<h2>When you need Bamini</h2>",
+        "<p>Many offices and presses still keep their templates in Bamini. Tamil typed on a phone or copied from a website is Unicode, and it shows the wrong letters once set in Bamini. This page writes it out again as the keys Bamini expects, in the order the font draws them: <strong lang=\"ta\">முதலமைச்சர்</strong> becomes <code>Kjyikr;rH</code>.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>ெ ே ை before their letter</strong>, and ொ ோ ௌ split into their two parts, as the typewriter types them.</li><li><strong>The joined u and uu keys</strong>, such as <code>F</code> for <strong lang=\"ta\">கு</strong>, wherever Bamini has one.</li><li><strong>A note for anything with no key</strong>, which is left as it is rather than swapped for a wrong letter.</li></ul>",
+        "<p>To go back, use <a href=\"/tamil-font-converter\">the Tamil font converter</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the Bamini font file and read by eye, and converted sentences were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Bamini code. Press <strong>Preview (Tamil)</strong> to see it in Bamini here, or set the font to <strong>Bamini</strong> in Word."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Tamil that has to go into a Bamini document.",
+          "Press <strong>Copy Bamini code</strong>.",
+          "Paste into Word and set the font to <strong>Bamini</strong>, or use <strong>Download .docx</strong>, which sets it for you."
+        ],
+        "tip": "Preview a line with <strong lang=\"ta\">கொ</strong> or <strong lang=\"ta\">கோ</strong> first: the sign before the letter and ா after it should join into one vowel."
       }
     }
   },
