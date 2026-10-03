@@ -90,6 +90,8 @@ export const PREVIEW_FONTS = {
   anjali: preview('Anjali', 'anjali.woff'),
   shusha02: preview('Shusha02', 'shusha02.woff'),
   shivaji02: preview('Shivaji02', 'shivaji02.woff'),
+  'lmg-arun': preview('LMG-Arun', 'lmg-arun.woff'),
+  terafont: preview('TERAFONT-VARUN', 'terafont-varun.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

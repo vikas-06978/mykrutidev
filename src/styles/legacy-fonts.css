@@ -252,3 +252,19 @@
     url('/fonts/shivaji02.woff') format('woff');
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'MKD LMG-Arun';
+  src:
+    local('LMG-Arun'),
+    url('/fonts/lmg-arun.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD TERAFONT-VARUN';
+  src:
+    local('TERAFONT-VARUN'),
+    url('/fonts/terafont-varun.woff') format('woff');
+  font-display: swap;
+}

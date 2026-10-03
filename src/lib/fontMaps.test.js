@@ -438,11 +438,12 @@ describe('font registry', () => {
     }
   });
 
-  test('every legacy sample decodes to Devanagari, not gibberish', () => {
+  test('every legacy sample decodes to its script, not gibberish', () => {
     for (const [key, f] of Object.entries(FONTS)) {
       if (f.kind !== 'legacy' || !f.sample) continue;
-      const out = legacyToUnicode(f.sample, f.map);
-      assert.match(out, /[ऀ-ॿ]/, `${key} sample did not decode: ${out}`);
+      const out = convert(f.sample, key, 'unicode');
+      assert.match(out, f.lang === 'gu' ? /[\u0A80-\u0AFF]/ : /[ऀ-ॿ]/, `${key} sample did not decode: ${out}`);
+      assert.doesNotMatch(out, /[A-Za-z]/, `${key} sample left Latin letters: ${out}`);
     }
   });
 
