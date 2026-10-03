@@ -866,28 +866,54 @@ export const PAGES = [
     related: ['/lmg-arun-to-unicode', '/unicode-to-terafont-varun', '/unicode-to-kruti-dev'],
     beta: true,
   },
+  // ---- Tamil: Bamini, the Tamil typewriter layout, read off the font file.
+  // Beta until a real Bamini document has been run through it.
+  {
+    path: '/tamil-font-converter',
+    ready: true,
+    kind: 'converter',
+    from: 'bamini',
+    to: 'unicode',
+    group: 'Tamil',
+    related: ['/unicode-to-bamini', '/gujarati-font-converter', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-bamini',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'bamini',
+    group: 'Tamil',
+    related: ['/tamil-font-converter', '/unicode-to-terafont-varun', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  // ---- Bengali: SutonnyMJ, the Bijoy layout, read off the font file. Beta
+  // until a real SutonnyMJ document has been run through it.
+  {
+    path: '/bengali-font-converter',
+    ready: true,
+    kind: 'converter',
+    from: 'sutonny',
+    to: 'unicode',
+    group: 'Bengali',
+    related: ['/unicode-to-sutonnymj', '/tamil-font-converter', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-sutonnymj',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'sutonny',
+    group: 'Bengali',
+    related: ['/bengali-font-converter', '/unicode-to-bamini', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
   // ==========================================================================
   // PLANNED - other Indic scripts. Routes only, no mapping work started.
   // Activate only after a keyword-volume check AND a tested mapping.
   // ==========================================================================
-  {
-    path: '/tamil-font-converter',
-    ready: false,
-    kind: 'converter',
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/all-converters'],
-  },
-  {
-    path: '/bengali-font-converter',
-    ready: false,
-    kind: 'converter',
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/all-converters'],
-  },
   {
     path: '/punjabi-font-converter',
     ready: false,
@@ -1426,6 +1452,8 @@ export const FONT_LINKS = [
   { key: 'shivaji', path: '/shivaji-to-unicode', fonts: ['shivaji'] },
   { key: 'shusha', path: '/shusha-to-unicode', fonts: ['shusha'] },
   { key: 'gujarati', path: '/gujarati-font-converter', fonts: ['terafont', 'lmg-arun'] },
+  { key: 'tamil', path: '/tamil-font-converter', fonts: ['bamini'] },
+  { key: 'bengali', path: '/bengali-font-converter', fonts: ['sutonny'] },
 ];
 
 /** FONT_LINKS for one page: live targets only, minus the fonts it converts. */

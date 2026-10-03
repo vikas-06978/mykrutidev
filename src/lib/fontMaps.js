@@ -2299,6 +2299,164 @@ function gujVisual(s) {
 }
 
 // ============================================================================
+// Tamil: Bamini
+// ============================================================================
+// Bamini (vendor/fonts/Tamil/Bamini/Bamini PB Regular.ttf), the Tamil
+// typewriter layout. Read key by key: each key drawn alone, after க (`f`) and
+// before it, and the look-alikes (னு ஞ ணு, மூ ழூ டூ, மு ழு, டீ டி) beside Noto
+// Sans Tamil. Its accented keys hold symbols and Sinhala-style ornaments, not
+// Tamil, so the whole layout is on the plain keys. The number keys draw Latin
+// digits and are kept as they are.
+//
+// Tamil joins ு and ூ to each consonant in its own way, so the typewriter has
+// a key per joined form (`F` கு, `$` கூ) and `+` as the ூ of the rest. ெ ே ை
+// (`n N i`) are typed before their consonant, and ொ ோ ௌ are those signs with
+// ா (`h`) or ௗ (`_`) after it: கொ is `nfh`.
+const BAMINI = {
+  // Vowels.
+  m: 'அ', M: 'ஆ', ',': 'இ', '<': 'ஈ', c: 'உ', C: 'ஊ', v: 'எ', V: 'ஏ', I: 'ஐ',
+  x: 'ஒ', X: 'ஓ',
+  // Consonants.
+  f: 'க', q: 'ங', r: 'ச', Q: 'ஞ', l: 'ட', z: 'ண', j: 'த', e: 'ந', g: 'ப',
+  k: 'ம', a: 'ய', u: 'ர', y: 'ல', t: 'வ', o: 'ழ', s: 'ள', w: 'ற', d: 'ன',
+  '[': 'ஜ', '\\': 'ஷ', ']': 'ஸ', '`': 'ஹ', '=': 'ஸ்ரீ',
+  // Consonants with ு, ூ, ி, ீ drawn as one glyph.
+  F: 'கு', R: 'சு', L: 'டு', Z: 'ணு', J: 'து', E: 'நு', G: 'பு', K: 'மு', A: 'யு',
+  U: 'ரு', Y: 'லு', T: 'வு', O: 'ழு', S: 'ளு', W: 'று', D: 'னு',
+  $: 'கூ', '#': 'சூ', '^': 'டூ', '%': 'மூ', '*': 'ரூ', '&': 'ழூ',
+  b: 'டி', B: 'டீ', H: 'ர்',
+  // Signs.
+  h: 'ா', p: 'ி', P: 'ீ', '+': 'ூ', n: 'ெ', N: 'ே', i: 'ை', _: 'ௗ', ';': '்',
+  // Punctuation and symbols moved off the keys the letters took.
+  "'": '%', '>': ',', '@': ';', '|': '=', '"': '°', '}': 'ரூபா.', '~': '∴',
+  // And the ones it draws on their own keys.
+  '.': '.', '-': '-', '/': '/', ':': ':', '?': '?', '(': '(', ')': ')', '!': '!',
+};
+
+const TA_CONSONANT = '[க-ஹ]';
+const RE_TA_PRE_FWD = new RegExp(`([ெேை])(${TA_CONSONANT}(?:்ஷ)?)`, 'g');
+const RE_TA_PRE_REV = new RegExp(`(${TA_CONSONANT}(?:்ஷ)?)([ெேை])`, 'g');
+
+/** Bamini keys (visual order) -> Unicode Tamil. */
+function tamilLogical(s) {
+  // ெ ே ை go after the consonant they were typed before (க்ஷ counts as one);
+  // NFC then joins ெ/ே + ா into ொ/ோ and ெ + ௗ into ௌ.
+  return s.replace(RE_TA_PRE_FWD, '$2$1').normalize('NFC');
+}
+
+/** Unicode Tamil -> visual order, for the keys. Other text is left alone. */
+function tamilVisual(s) {
+  return s.replace(/[஀-௿]+/g, (run) => run.normalize('NFD').replace(RE_TA_PRE_REV, '$2$1'));
+}
+
+// ============================================================================
+// Bengali: SutonnyMJ (the Bijoy keyboard)
+// ============================================================================
+// SutonnyMJ (vendor/fonts/Bengali/SutonnyMJ/), the font of the Bijoy layout.
+// Read key by key: each key drawn alone, after ক (`K`) and before it, and the
+// conjuncts and signs beside Noto Sans Bengali. The u-signs were drawn large
+// to tell them apart: `y z –` are ু, `~ ‚` are ূ, `„ …` are ৃ.
+//
+// ি (`w`), ে (`† ‡`) and ৈ (`ˆ ‰`) are typed before their cluster; ো is ে, the
+// letter and া (`†Kv`), ৌ is ে, the letter and ৗ (`†KŠ`); the reph (`©`) after
+// its syllable; আ is অ and া (`Av`). The number keys draw Bengali digits.
+//
+// The small glyphs are halves: `¯ š › ¤ ®` are half স ন ন ম ষ, and `Í ’ ¿ ‹ ¢
+// œ` the lower parts ত থ ত্র ক ভ ন that go under a half or a full letter. Each
+// pair was drawn beside the Noto conjunct (স্ত স্থ স্ন স্প স্ম ন্ত ন্ত্র ন্থ ন্দ ন্ন
+// ম্প ম্ব ম্ভ ম্ম স্ক স্ত্র ষ্ক ষ্প).
+//
+// Left out, not read with certainty: `@ £ Ê Ð æ è ø Œ ƒ ‘ “ • ™`.
+// Note `’` is the lower part of থ, not an apostrophe: SutonnyMJ's quote marks
+// are `Ò Ó Ô Õ`.
+const SUTONNY = {
+  // Digits.
+  0: '০', 1: '১', 2: '২', 3: '৩', 4: '৪', 5: '৫', 6: '৬', 7: '৭', 8: '৮', 9: '৯',
+  // Vowels.
+  A: 'অ', B: 'ই', C: 'ঈ', D: 'উ', E: 'ঊ', F: 'ঋ', G: 'এ', H: 'ঐ', I: 'ও', J: 'ঔ',
+  // Consonants.
+  K: 'ক', L: 'খ', M: 'গ', N: 'ঘ', O: 'ঙ', P: 'চ', Q: 'ছ', R: 'জ', S: 'ঝ', T: 'ঞ',
+  U: 'ট', V: 'ঠ', W: 'ড', X: 'ঢ', Y: 'ণ', Z: 'ত', _: 'থ', '`': 'দ', a: 'ধ', b: 'ন',
+  c: 'প', d: 'ফ', e: 'ব', f: 'ভ', g: 'ম', h: 'য', i: 'র', j: 'ল', k: 'শ', l: 'ষ',
+  m: 'স', n: 'হ', o: 'ড়', p: 'ঢ়', q: 'য়', r: 'ৎ',
+  // The same letters drawn another way.
+  'Ÿ': 'ব', '˜': 'দ', 'ú': 'প', '”': 'চ', '—': 'ড়',
+  // Conjuncts drawn as one glyph.
+  '°': 'ক্ক', '±': 'ক্ট', '³': 'ক্ত', '´': 'ক্ম', 'µ': 'ক্র', '¶': 'ক্ষ', 'ÿ': 'ক্ষ',
+  '²': 'ক্ষ্ম', '·': 'ক্স', '¸': 'গু', '¹': 'গ্ন', 'º': 'গ্দ', '»': 'গ্ধ', '¼': 'ঙ্ক',
+  '½': 'ঙ্গ', '¾': 'জ্জ', 'À': 'জ্ঝ', 'Á': 'জ্ঞ', 'Â': 'ঞ্চ', 'Ã': 'ঞ্ছ', 'Ä': 'ঞ্জ',
+  'Å': 'ঞ্ঝ', 'Æ': 'ট্ট', 'Ç': 'ড্ড', 'È': 'ণ্ট', 'É': 'ণ্ঠ', '−': 'ণ্ড', 'Ë': 'ত্ত',
+  'Ì': 'ত্থ', 'Î': 'ত্র', 'Ï': 'দ্দ', '×': 'দ্ধ', 'Ø': 'দ্ব', 'Ù': 'দ্ম', 'Ú': 'ন্ঠ',
+  'Û': 'ন্ড', 'Ü': 'ন্ধ', 'Ý': 'ন্স', 'Þ': 'প্ট', 'ß': 'প্ত', 'à': 'প্প', 'á': 'প্স',
+  'â': 'ব্জ', 'ã': 'ব্দ', 'ä': 'ব্ধ', 'å': 'ভ্র', 'ç': 'ম্ফ', 'é': 'ল্ক', 'ê': 'ল্গ',
+  'ë': 'ল্ট', 'ì': 'ল্ড', 'í': 'ল্প', 'î': 'ল্ফ', 'ï': 'শু', 'ð': 'শ্চ', 'ñ': 'শ্ছ',
+  'ò': 'ষ্ণ', 'ó': 'ষ্ট', 'ô': 'ষ্ঠ', 'õ': 'ষ্ফ', 'ö': 'স্খ', '÷': 'স্ট', 'ù': 'স্ফ',
+  'û': 'হু', 'ü': 'হৃ', 'ý': 'হ্ন', 'þ': 'হ্ম',
+  // Joined forms, after their letter.
+  '¨': '্য', 'ª': '্র', '«': '্র', '^': '্ব', '¦': '্ব', '¡': '্ব', '§': '্ম', '¥': '্ন',
+  '¬': '্ল', 'œ': '্ন',
+  // The ra-phala hook drawn apart, for the letters with a stem on the right:
+  // `cÖ` প্র, `MÖ` গ্র. Read only: `ª` writes the same thing.
+  'Ö': '্র',
+  // Half letters, and the lower halves they take: `¯Í` is স্ত, `š¿` ন্ত্র,
+  // `¤ú` ম্প (the doubled hasant of half + joined form collapses to one).
+  '¯': 'স্', 'š': 'ন্', '›': 'ন্', '¤': 'ম্', '®': 'ষ্',
+  'Í': '্ত', '’': '্থ', '¿': '্ত্র', '‹': '্ক', '¢': '্ভ',
+  // Signs.
+  v: 'া', w: 'ি', x: 'ী', y: 'ু', z: 'ু', '–': 'ু', '~': 'ূ', '‚': 'ূ', '„': 'ৃ',
+  '…': 'ৃ', '†': 'ে', '‡': 'ে', 'ˆ': 'ৈ', '‰': 'ৈ', 'Š': 'ৗ', s: 'ং', t: 'ঃ', u: 'ঁ',
+  '&': '্', '©': REPH,
+  // Punctuation.
+  '|': '।', '\\': '॥', $: '৳', 'Ñ': '–', 'Ò': '“', 'Ó': '”', 'Ô': '‘', 'Õ': '’',
+  '.': '.', ',': ',', '-': '-', '/': '/', ':': ':', ';': ';', '?': '?', '!': '!',
+  '(': '(', ')': ')', '[': '[', ']': ']', '{': '{', '}': '}', '%': '%', '+': '+',
+  '=': '=', '*': '*',
+};
+
+// Bengali sits 0x80 above Devanagari, letter for letter, so the Kruti Dev
+// passes serve it too, as for Gujarati. Not ৎ, which has no Devanagari twin
+// (its slot there is a vowel sign), and not the danda, which both share.
+const bnToDeva = (s) =>
+  s.replace(/[ঀ-৿]/g, (c) => (c === 'ৎ' ? c : String.fromCharCode(c.charCodeAt(0) - 0x80)));
+const devaToBn = (s) =>
+  s.replace(/[ऀ-ॿ]/g, (c) => (c === '।' || c === '॥' ? c : String.fromCharCode(c.charCodeAt(0) + 0x80)));
+const BN_CLUSTER = '[ক-হড়ঢ়য়](?:্[ক-হড়ঢ়য়])*';
+const RE_BN_PRE_FWD = new RegExp(`([েৈ])(${BN_CLUSTER})`, 'g');
+const RE_BN_PRE_REV = new RegExp(`(${BN_CLUSTER})([েৈ])`, 'g');
+
+/**
+ * Writing: the first key of each letter, আ as `Av`, and every half letter with
+ * every lower part it takes (`¯Í` for স্ত), unless the pair has a glyph of its
+ * own (স্ট is `÷`).
+ */
+function sutonnyReverse() {
+  const rev = { ...firstKeyReverse(SUTONNY), 'আ': 'Av' };
+  const halves = Object.entries(SUTONNY).filter(([k, u]) => k.length === 1 && /^.\u09CD$/.test(u) && u !== '\u09CD');
+  const lowers = Object.entries(SUTONNY).filter(([k, u]) => k.length === 1 && u.startsWith('\u09CD') && u.length > 1);
+  for (const [hk, hu] of halves) {
+    if (rev[hu] !== hk) continue;
+    for (const [lk, lu] of lowers) if (!(hu + lu.slice(1) in rev)) rev[hu + lu.slice(1)] = hk + lk;
+  }
+  return rev;
+}
+
+/** SutonnyMJ keys (visual order) -> Unicode Bengali. */
+function bnLogical(s) {
+  // ে ৈ go after their cluster, then the Kruti Dev passes place the reph and
+  // ি; NFC joins ে + া into ো and ে + ৗ into ৌ.
+  s = s.replace(RE_BN_PRE_FWD, '$2$1');
+  s = devaToBn(toLogicalOrder(bnToDeva(s))).normalize('NFC');
+  return s.replace(/অা/g, 'আ');
+}
+
+/** Unicode Bengali -> visual order, for the keys. Other text is left alone. */
+function bnVisual(s) {
+  return s.replace(/[ঀ-৿]+/g, (run) =>
+    devaToBn(toVisualOrder(bnToDeva(run.normalize('NFD')))).replace(RE_BN_PRE_REV, '$2$1'),
+  );
+}
+
+// ============================================================================
 // Font registry - adding a font is adding one entry.
 // ============================================================================
 //
@@ -2601,6 +2759,46 @@ export const FONTS = {
     css: 'monospace',
     sample: 'maharaYT/ Saasana¸ marazI BaaYaa ivaBaaga.',
     placeholder: 'marazI  (example)',
+  },
+  sutonny: {
+    key: 'sutonny',
+    label: 'SutonnyMJ',
+    shortLabel: 'SutonnyMJ',
+    lang: 'bn',
+    kind: 'legacy',
+    map: SUTONNY,
+    reverse: sutonnyReverse(),
+    toLogical: bnLogical,
+    toVisual: bnVisual,
+    // Read off the font file key by key (see the note above SUTONNY). `beta`
+    // until a real SutonnyMJ document has been run through it.
+    accurate: true,
+    beta: true,
+    // The number keys draw Bengali digits and every letter key is Bengali.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Avgvi †mvbvi evsjv',
+    placeholder: 'evsjv‡`k  (example)',
+  },
+  bamini: {
+    key: 'bamini',
+    label: 'Bamini',
+    lang: 'ta',
+    kind: 'legacy',
+    map: BAMINI,
+    toLogical: tamilLogical,
+    toVisual: tamilVisual,
+    // Read off the font file key by key (see the note above BAMINI). `beta`
+    // until a real Bamini document has been run through it.
+    accurate: true,
+    beta: true,
+    // Every letter key is a Tamil letter: there are no English words to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'jkpo;ehL muR> fy;tpj; Jiw',
+    placeholder: 'jkpo;  (example)',
   },
   'lmg-arun': {
     key: 'lmg-arun',

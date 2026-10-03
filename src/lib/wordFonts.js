@@ -46,6 +46,12 @@ export const WORD_FONTS = {
   // draws Terafont Varun's letters. Not TERAFONT-VARUNA "Fat and Thin" or
   // TERAFONT-INDUSTRY: symbol fonts, whose text is stored in another range.
   'lmg-arun': { name: 'LMG-Arun', label: 'LMG Arun', match: /^lmg-?\s*(arun|laxmi|rupen)/i },
+  // Tamil. The supplied Bamini PB names itself in Bamini code ("பாமினி தமிழ்"
+  // typed as `Ë ghkpdp jkpo;`); the classic font is plain "Bamini".
+  bamini: { name: 'Bamini', label: 'Bamini', match: /^(bamini|ë ghkpdp jkpo;|ghkpdpjkpo;)/i },
+  // Bengali. SutonnyMJ, the Bijoy font used across Bangladesh's offices; the
+  // OMJ cut draws the same keys.
+  sutonny: { name: 'SutonnyMJ', label: 'SutonnyMJ', match: /^sutonny\s*o?mj/i },
   terafont: {
     name: 'TERAFONT-VARUN',
     label: 'Terafont',
@@ -74,6 +80,15 @@ export const UNICODE_FONTS_GU = [
   'Shrikhand',
   'Kumar One',
 ];
+
+/** And for Tamil: Latha and Nirmala UI come with Windows. */
+export const UNICODE_FONTS_TA = ['Latha', 'Nirmala UI', 'Noto Sans Tamil'];
+
+/**
+ * And for Bengali: Vrinda and Nirmala UI come with Windows. Kalpurush and
+ * SolaimanLipi are the free Unicode fonts most used in Bangladesh.
+ */
+export const UNICODE_FONTS_BN = ['Vrinda', 'Nirmala UI', 'Kalpurush', 'SolaimanLipi', 'Noto Sans Bengali'];
 
 /** Mangal is Unicode drawn in Mangal: the same text as "unicode". */
 export const isUnicodeKey = (key) => key === 'unicode' || key === 'mangal';

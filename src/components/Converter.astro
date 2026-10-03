@@ -1,5 +1,6 @@
 ---
 import { FONTS, boxLabel, codeLabel } from '../lib/fontMaps.js';
+import { SCRIPTS, scriptOfPage } from '../lib/scripts.js';
 import { previewFontFor } from '../lib/legacyFonts.js';
 import { langOf, useT } from '../i18n/index.js';
 import RecentStrip from './RecentStrip.astro';
@@ -23,21 +24,22 @@ const { t, render } = useT(langOf(Astro.url));
 // font ("Kruti Dev", "Mangal"), and the everyday word where it is a kind of
 // text rather than a font ("Unicode / Hindi" -> "यूनिकोड / हिंदी").
 // i18n.test.js checks the English column is exactly boxLabel().
-// On a Gujarati page the Unicode box holds Gujarati, not Hindi.
-const gujaratiBox = FONTS[from].lang === 'gu' || FONTS[to].lang === 'gu';
+// On a Gujarati or Tamil page the Unicode box holds that script, not Hindi:
+// its own label, font, lang, example and Word font (src/lib/scripts.js).
+const scriptKey = scriptOfPage(from, to);
+const script = SCRIPTS[scriptKey];
+const otherScript = scriptKey !== 'deva';
 const boxName = (k: string) =>
-  gujaratiBox && FONTS[k].kind === 'unicode' ? t('converter.unicodeGu') : t(`fontBox.${k}`);
+  otherScript && FONTS[k].kind === 'unicode' ? t(`converter.unicode${script.suffix}`) : t(`fontBox.${k}`);
 const fromLabel = boxName(from);
 const toLabel = boxName(to);
 void boxLabel;
 
 // A legacy placeholder is a real code sample plus "(example)". The code stays
 // as it is in every language - only the word "example" is translated.
-// A Unicode box on a Gujarati page is Gujarati, so its example is too.
-const gujaratiPage = fromFont.lang === 'gu' || toFont.lang === 'gu';
-const unicodeGujarati = fromFont.kind === 'unicode' && gujaratiPage;
-const inputSample = unicodeGujarati ? 'ગુજરાત સરકાર, શિક્ષણ વિભાગ, ગાંધીનગર.' : fromFont.sample;
-const placeholder = (unicodeGujarati ? 'ગુજરાત  (example)' : (fromFont.placeholder ?? '')).replace('(example)', t('converter.example'));
+const unicodeOther = fromFont.kind === 'unicode' && otherScript;
+const inputSample = unicodeOther ? script.sample : fromFont.sample;
+const placeholder = (unicodeOther ? script.placeholder : (fromFont.placeholder ?? '')).replace('(example)', t('converter.example'));
 
 // Every string the script below shows, in this page's language.
 const strings = {
@@ -103,14 +105,12 @@ const offlineOnVisit = !(fromFont.core && toFont.core) || (fromFont.kind === 'le
 // page does not offer it. It stays in the DOM because the script reads it.
 const asciiIsScript = Boolean(fromFont.asciiIsScript || toFont.asciiIsScript);
 
-// The Unicode side is Gujarati on the Gujarati converters: its own font, its
-// own lang, and Shruti (Windows' Gujarati font) in the Unicode .docx rather
-// than Mangal, which has no Gujarati.
-const gujarati = fromFont.lang === 'gu' || toFont.lang === 'gu';
-const unicodeLang = gujarati ? 'gu' : 'hi';
-const scriptClass = gujarati ? 'guj' : 'deva';
-const unicodeWordFont = gujarati ? 'Shruti' : 'Mangal';
-const inputCss = inputIsUnicode && gujarati ? 'var(--font-guj)' : fromFont.css;
+// Mangal has no Gujarati or Tamil: the Unicode .docx takes the script's own
+// Windows font (Shruti, Latha).
+const unicodeLang = script.lang;
+const scriptClass = script.cls;
+const unicodeWordFont = script.wordFont;
+const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
 ---
 
 {/*
@@ -130,7 +130,7 @@ const inputCss = inputIsUnicode && gujarati ? 'var(--font-guj)' : fromFont.css;
   data-i18n={JSON.stringify(strings)}
   data-view="preview"
   data-unicode-font={unicodeWordFont}
-  style={`--cv-preview:${!outputIsLegacy && gujarati ? 'var(--font-guj)' : previewStack}`}
+  style={`--cv-preview:${!outputIsLegacy && otherScript ? script.css : previewStack}`}
 >
   <div class="grid md:grid-cols-2 md:divide-x md:divide-hairline">
     {/* Input */}
@@ -193,7 +193,7 @@ const inputCss = inputIsUnicode && gujarati ? 'var(--font-guj)' : fromFont.css;
                 {t('converter.view')}
               </span>
               <button type="button" data-view="preview" aria-pressed="true">
-                {gujarati ? t('converter.previewGu') : t('converter.preview')}
+                {t(`converter.preview${script.suffix}`)}
               </button>
               <button type="button" data-view="raw" aria-pressed="false">
                 {t('converter.raw')}
@@ -247,7 +247,7 @@ const inputCss = inputIsUnicode && gujarati ? 'var(--font-guj)' : fromFont.css;
                 </div>
                 <div class="cv-copy">
                   <button type="button" data-role="copy-unicode" class="btn btn-outline">
-                    <span data-label>{t(gujaratiBox ? 'converter.copyUnicodeGu' : 'converter.copyUnicode')}</span>
+                    <span data-label>{t(`converter.copyUnicode${script.suffix}`)}</span>
                   </button>
                   <span class="cv-sub">{t('converter.forWeb')}</span>
                 </div>

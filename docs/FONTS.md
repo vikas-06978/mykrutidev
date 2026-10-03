@@ -49,6 +49,8 @@ published with the site, so it lives here instead.
 | `shivaji02.woff` | Shivaji02 | WOFF | **preview on its own two pages** (the map was read off this file) |
 | `lmg-arun.woff` | LMG-Arun | WOFF | **preview on the LMG Arun pages** (the map was read off this file) |
 | `terafont-varun.woff` | TERAFONT-VARUN | WOFF | **preview on the Gujarati / Terafont pages** |
+| `bamini.woff` | Bamini PB | WOFF | **preview on the Tamil (Bamini) pages** (the map was read off this file) |
+| `sutonnymj.woff` | SutonnyMJ | WOFF | **preview on the Bengali (SutonnyMJ) pages** (the map was read off this file) |
 
 The numbered Kruti Dev variants used to fill a dropdown in the output box. That
 picker is gone: the variants share one keyboard layout and differ only in

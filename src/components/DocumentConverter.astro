@@ -9,7 +9,8 @@
  */
 import { langOf, useT, raw } from '../i18n/index.js';
 import { FONTS } from '../lib/fontMaps.js';
-import { WORD_FONTS, UNICODE_FONTS, UNICODE_FONTS_GU, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
+import { WORD_FONTS, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
+import { SCRIPTS, scriptOfFont, scriptOfPage } from '../lib/scripts.js';
 
 interface Props {
   /** The page's fonts: the document is read as FROM, converted to TO by default. */
@@ -33,9 +34,9 @@ const id = `doc-${from}-${to}`;
 // The page's own target is picked to begin with.
 // Grouped by language, so the list stays readable with two dozen fonts.
 // Only fonts of the same script: Gujarati text has no Kruti Dev keys.
-const gujarati = FONTS[from]?.lang === 'gu' || FONTS[to]?.lang === 'gu';
-const sameScript = (k: string) => (FONTS[k]?.lang === 'gu') === gujarati;
-const unicodeFonts = gujarati ? UNICODE_FONTS_GU : UNICODE_FONTS;
+const pageScript = scriptOfPage(from, to);
+const sameScript = (k: string) => scriptOfFont(k) === pageScript;
+const unicodeFonts = SCRIPTS[pageScript].unicodeFonts;
 const beta = (k: string) => (FONTS[k]?.beta ? ` (${t('page.beta')})` : '');
 const legacy = Object.entries(WORD_FONTS)
   .filter(([k]) => k !== from && FONTS[k]?.accurate && sameScript(k))
@@ -45,6 +46,8 @@ const LANG_GROUP: Record<string, string> = {
   ne: 'doc.groupNepali',
   mr: 'doc.groupMarathi',
   gu: 'doc.groupGujarati',
+  ta: 'doc.groupTamil',
+  bn: 'doc.groupBengali',
 };
 const targetGroups = [
   ...(fromUnicode

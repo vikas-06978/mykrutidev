@@ -132,9 +132,10 @@ export function outputName(name, direction, ext) {
 // Scripts
 // ---------------------------------------------------------------------------
 
-// Devanagari, and Gujarati (U+0A80-0AFF) for the Gujarati fonts.
-const DEVANAGARI = /[ऀ-ॿ\u0A80-\u0AFF]/;
-const DEVANAGARI_G = /[ऀ-ॿ\u0A80-\u0AFF]/g;
+// Devanagari, and Gujarati (U+0A80-0AFF), Tamil (U+0B80-0BFF) and Bengali
+// (U+0980-09FF) for their fonts.
+const DEVANAGARI = /[ऀ-ॿ\u0A80-\u0AFF\u0B80-\u0BFF]/;
+const DEVANAGARI_G = /[ऀ-ॿ\u0A80-\u0AFF\u0B80-\u0BFF]/g;
 const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
 
 /**
@@ -149,7 +150,7 @@ const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
  * @returns {{ hindi: boolean, s: string }[]}
  */
 export function splitScripts(text) {
-  const cls = (ch) => (/[ऀ-ॿ\u0A80-\u0AFF‌‍]/.test(ch) ? 'D' : /[A-Za-z]/.test(ch) ? 'L' : 'N');
+  const cls = (ch) => (/[ऀ-ॿ\u0A80-\u0AFF\u0B80-\u0BFF‌‍]/.test(ch) ? 'D' : /[A-Za-z]/.test(ch) ? 'L' : 'N');
   const tokens = [];
   for (const ch of text) {
     const c = cls(ch);
@@ -474,7 +475,7 @@ const formatKey = (rPr) =>
     .replace(/\s+/g, '');
 
 /** Combining marks: a run starting with one belongs to the syllable before. */
-const MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ\u0A81-\u0A83\u0ABC\u0ABE-\u0ACD\u0AE2\u0AE3]/;
+const MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ\u0A81-\u0A83\u0ABC\u0ABE-\u0ACD\u0AE2\u0AE3\u0B82\u0BBE-\u0BCD\u0BD7]/;
 
 /**
  * Does the boundary between two runs in a legacy font fall inside a syllable?
@@ -487,7 +488,8 @@ export function splitsSyllable(a, b, from = 'kruti-dev') {
   const last = a.slice(-1);
   if (last) {
     const u = legacyToUnicode(last, from);
-    if (/^[िિ]/.test(u) || /[्્]$/.test(u)) return true;
+    // A sign typed before its letter: ि, િ, ি, Tamil's ெ ே ை and Bengali's ে ৈ.
+    if (/^[िિি]/.test(u) || /[्્্]$/.test(u) || /[ெேைেৈ]$/.test(u)) return true;
   }
   const first = b[0];
   if (!first) return false;
