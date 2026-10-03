@@ -19,6 +19,7 @@ import {
   markNoTranslate,
   listTitle,
 } from './index.js';
+import { checkValue } from './check.js';
 import { localizeDocMessage, localizeSummary, TOO_LARGE_EN, ONLY_TYPES_EN } from './docMessages.js';
 import { PAGES, getPage, isIndexable, routeOf, SITE } from '../lib/routes.js';
 import { FONTS, boxLabel } from '../lib/fontMaps.js';
@@ -184,6 +185,15 @@ describe('en.json and hi.json', () => {
 // ---------------------------------------------------------------------------
 // What must NOT be translated
 // ---------------------------------------------------------------------------
+
+describe('every language keeps what must not be translated (check.js)', () => {
+  for (const lang of LOCALES.filter((l) => l !== 'en')) {
+    test(`${lang}: code, samples, links, placeholders, tags, brand and Word font names intact`, () => {
+      const problems = flatKeys(en).flatMap((key) => checkValue(key, raw('en', key), raw(lang, key)).map((x) => `${key}: ${x}`));
+      assert.deepEqual(problems, []);
+    });
+  }
+});
 
 describe('code examples and Unicode output survive translation untouched', () => {
   /** The contents of every <code> and every lang="hi" element in a string. */
