@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { allGroups, getPage, isLive, liveToolCount } from '../lib/routes.js';
 import { TOOL_PATHS, TYPING_PATHS } from '../lib/toolPages.js';
-import { langOf, useT, t as tIn } from '../i18n/index.js';
+import { langOf, useT, t as tIn, LOCALES } from '../i18n/index.js';
 import SoonBadge from './SoonBadge.astro';
 
 /**
@@ -30,9 +30,10 @@ const TOOLS = live(TOOL_PATHS);
 const total = liveToolCount();
 const body: string[] = raw('allConverters.body');
 
-// Words a search can match: the page's nav label and h1 in both languages.
+// Words a search can match: the page's nav label and h1 in every language,
+// so a name typed in any script finds its tool.
 const keywords = (path: string) =>
-  ['en', 'hi']
+  LOCALES
     .flatMap((l) => [tIn(l, `pages.${path}.nav`), tIn(l, `pages.${path}.h1`)])
     .join(' ')
     .replace(/<[^>]+>/g, ' ')

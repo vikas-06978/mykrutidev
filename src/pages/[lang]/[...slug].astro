@@ -1,0 +1,29 @@
+---
+/**
+ * Every page, in every language but English, at /<lang> + the English slug:
+ * /hi/hindi-keyboard, /bn/hindi-keyboard, ...
+ *
+ * One route rather than a copy of each page file: the page is the same
+ * PageView with the same structure from routes.js, and only its words differ
+ * (src/i18n/<lang>.json). The language comes from the URL, so nothing here has
+ * to pass it on. A new entry in routes.js gets its page in every language
+ * automatically - and fails the build until each dictionary has its text.
+ */
+import PageView from '../../components/PageView.astro';
+import { PAGES } from '../../lib/routes.js';
+import { PREFIXED_LOCALES } from '../../i18n/locales.js';
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.flatMap((lang) =>
+    PAGES.map((p) => ({
+      // "/" -> /hi, "/hindi-keyboard" -> /hi/hindi-keyboard
+      params: { lang, slug: p.path === '/' ? undefined : p.path.slice(1) },
+      props: { path: p.path },
+    })),
+  );
+}
+
+const { path } = Astro.props;
+---
+
+<PageView path={path} />

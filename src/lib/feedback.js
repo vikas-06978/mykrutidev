@@ -15,6 +15,8 @@
  */
 
 /** 1 = 😞 … 4 = 😍 */
+import { LOCALES } from '../i18n/locales.js';
+
 export const RATINGS = [1, 2, 3, 4];
 export const RATING_EMOJI = { 1: '😞', 2: '😐', 3: '🙂', 4: '😍' };
 
@@ -81,7 +83,8 @@ export const SENT_KEY = 'mkd-feedback-sent';
 /** Rate limit: this many POSTs per IP per window. The IP itself is never stored. */
 export const RATE = { max: 5, windowSeconds: 3600 };
 
-export const LANGS = ['en', 'hi'];
+/** Every language the site is published in (src/i18n/locales.js). */
+export const LANGS = [...LOCALES];
 export const THEMES = ['light', 'white', 'dark', 'reading', 'contrast'];
 export const DEVICES = ['mobile', 'desktop'];
 export const BROWSERS = ['Chrome', 'Edge', 'Firefox', 'Safari', 'Samsung', 'Opera', 'UC', 'Other'];

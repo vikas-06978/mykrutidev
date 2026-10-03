@@ -1,0 +1,9 @@
+---
+// Every language but English. The words live in src/i18n/<lang>.json under `links`.
+import LinksPage from '../../components/LinksPage.astro';
+import { PREFIXED_LOCALES } from '../../i18n/locales.js';
+
+export const getStaticPaths = () => PREFIXED_LOCALES.map((lang) => ({ params: { lang } }));
+---
+
+<LinksPage />

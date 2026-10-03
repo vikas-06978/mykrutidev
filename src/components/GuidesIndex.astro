@@ -11,7 +11,7 @@ import { langOf, useT, LOCALE_META } from '../i18n/index.js';
 const lang = langOf(Astro.url);
 const { t, render, path: to } = useT(lang);
 const date = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString(LOCALE_META[lang].htmlLang === 'hi' ? 'hi-IN' : 'en-IN', {
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString(LOCALE_META[lang].dateLocale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

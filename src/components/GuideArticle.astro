@@ -32,7 +32,7 @@ const primary = tools[0];
 const others = GUIDES.filter((g) => g.slug !== slug);
 
 const updated = new Date(`${guide.updated}T00:00:00Z`);
-const updatedText = updated.toLocaleDateString(LOCALE_META[lang].htmlLang === 'hi' ? 'hi-IN' : 'en-IN', {
+const updatedText = updated.toLocaleDateString(LOCALE_META[lang].dateLocale, {
   day: 'numeric',
   month: 'long',
   year: 'numeric',

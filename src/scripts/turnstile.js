@@ -41,7 +41,9 @@ export async function challenge(el, lang) {
   const state = { token: null };
   const id = window.turnstile.render(el, {
     sitekey,
-    language: lang,
+    // Turnstile speaks English and Hindi but not Bengali, Tamil, ...: for
+    // those it picks from the browser.
+    language: lang === 'en' || lang === 'hi' ? lang : 'auto',
     appearance: 'interaction-only',
     'refresh-expired': 'auto',
     callback: (t) => (state.token = t),

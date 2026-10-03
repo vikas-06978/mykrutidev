@@ -1,0 +1,15 @@
+---
+// One guide per entry in src/lib/guides.js, in every language but English;
+// the words are in src/i18n/<lang>.json under articles.<slug>.
+import GuideArticle from '../../../components/GuideArticle.astro';
+import { GUIDES } from '../../../lib/guides.js';
+import { PREFIXED_LOCALES } from '../../../i18n/locales.js';
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.flatMap((lang) => GUIDES.map((g) => ({ params: { lang, slug: g.slug } })));
+}
+
+const { slug } = Astro.params;
+---
+
+<GuideArticle slug={slug} />

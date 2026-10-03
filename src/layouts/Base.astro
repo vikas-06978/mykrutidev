@@ -52,7 +52,7 @@ const {
 } = Astro.props;
 
 // The locale comes from the URL, so a page never has to be told which one it
-// is in: /hi/... is Hindi, everything else is English.
+// is in: /hi/... is Hindi, /bn/... Bengali, everything unprefixed English.
 const { lang, path } = splitLocale(Astro.url.pathname);
 const { t } = useT(lang);
 const meta = LOCALE_META[lang];
@@ -105,7 +105,7 @@ const organization = {
   url: `${SITE}/`,
   logo: abs('/og/logo.png'),
   email: CONTACT_EMAIL,
-  contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: CONTACT_EMAIL, availableLanguage: ['en', 'hi'] },
+  contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: CONTACT_EMAIL, availableLanguage: [...LOCALES] },
 };
 const website = {
   '@context': 'https://schema.org',
@@ -134,7 +134,8 @@ const app = {
   operatingSystem: 'Any',
   browserRequirements: 'Requires JavaScript',
   description,
-  inLanguage: ['hi', 'en'],
+  // The language the page is written in; the tool itself works on Indian scripts.
+  inLanguage: meta.htmlLang,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
 };
 
@@ -272,8 +273,8 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    {/* Installable app. The Hindi manifest opens the app on /hi. */}
-    <link rel="manifest" href={lang === 'hi' ? '/hi/manifest.json' : '/manifest.json'} />
+    {/* Installable app. Each language's manifest opens the app in that language. */}
+    <link rel="manifest" href={lang === DEFAULT_LOCALE ? '/manifest.json' : `/${lang}/manifest.json`} />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 

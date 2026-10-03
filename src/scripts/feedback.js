@@ -12,7 +12,7 @@
 // ?inline: the CSS travels inside this lazy chunk. A plain import would be
 // hoisted by Astro into every page's inline stylesheet.
 import css from '../styles/feedback.css?inline';
-import { LIMITS, QUIET_DAYS, SENT_KEY, THEMES, browserName } from '../lib/feedback.js';
+import { LANGS, LIMITS, QUIET_DAYS, SENT_KEY, THEMES, browserName } from '../lib/feedback.js';
 import { challenge } from './turnstile.js';
 
 const ENDPOINT = '/api/feedback';
@@ -44,7 +44,7 @@ export function context() {
   const path = location.pathname.replace(/\/+$/, '') || '/';
   return {
     page: /^\/[a-z0-9\-/]*$/.test(path) ? path.slice(0, 200) : '/',
-    lang: root.lang === 'hi' ? 'hi' : 'en',
+    lang: LANGS.includes(root.lang) ? root.lang : 'en',
     theme: THEMES.includes(theme) ? theme : 'light',
     device: matchMedia('(max-width: 767px), (pointer: coarse)').matches ? 'mobile' : 'desktop',
     width: Math.max(0, Math.min(10000, Math.round(innerWidth))),
@@ -117,7 +117,7 @@ function build(btn) {
   const left = $('[data-fb-left]');
   const email = $('#fb-email');
   const sendBtn = $('[data-fb-send]');
-  const lang = node.getAttribute('lang') === 'hi' ? 'hi' : 'en';
+  const lang = LANGS.includes(node.getAttribute('lang')) ? node.getAttribute('lang') : 'en';
 
   const state = { step: 1, rating: null, busy: false };
 

@@ -103,6 +103,29 @@
     url('../../node_modules/@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-600-normal.woff') format('woff');
 }
 
+/* Noto Sans Gurmukhi for the Punjabi pages, on the same terms as Hind
+   Vadodara above: only fetched where Gurmukhi is on screen. */
+@font-face {
+  font-family: 'Noto Sans Gurmukhi';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0A00-0A7F, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-gurmukhi/files/noto-sans-gurmukhi-gurmukhi-400-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-gurmukhi/files/noto-sans-gurmukhi-gurmukhi-400-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Noto Sans Gurmukhi';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0A00-0A7F, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/noto-sans-gurmukhi/files/noto-sans-gurmukhi-gurmukhi-600-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/noto-sans-gurmukhi/files/noto-sans-gurmukhi-gurmukhi-600-normal.woff') format('woff');
+}
+
 /* Kruti Dev / DevLys faces for the output preview. Self-hosted from
    /public/fonts (owner-supplied) with local() first, so the preview degrades
    to raw ASCII rather than breaking when a file is absent. */
@@ -221,6 +244,9 @@
   --font-ben:
     'Noto Sans Bengali', Vrinda, 'Nirmala UI', ui-sans-serif, system-ui,
     sans-serif;
+  --font-guru:
+    'Noto Sans Gurmukhi', Raavi, 'Nirmala UI', ui-sans-serif, system-ui,
+    sans-serif;
 
   /* Radius ladder: 6px functional chrome, 12px cards, 16px panels, pill CTAs */
   --radius-chrome: 6px;
@@ -301,8 +327,10 @@
     border-radius: 2px;
   }
 
-  /* Devanagari needs more leading than Latin at the same size. */
+  /* Indian scripts need more leading than Latin at the same size. Marathi is
+     written in Devanagari too. */
   [lang='hi'],
+  [lang='mr'],
   .deva {
     font-family: var(--font-deva);
     line-height: 1.85;
@@ -325,24 +353,38 @@
     font-family: var(--font-ben);
     line-height: 1.85;
   }
+
+  [lang='pa'],
+  .guru {
+    font-family: var(--font-guru);
+    line-height: 1.85;
+  }
 }
 
-/* --- Hindi pages ----------------------------------------------------------- */
-/* A whole page of Devanagari needs more room than the Latin defaults give it:
-   matras rise above and below the line, and headings set tight clip into
-   each other. Unlayered on purpose, so it outranks the line-height that
-   Tailwind's text-* utilities attach to the h1 and h2s. English pages are
-   untouched. */
-html[lang='hi'] body {
+/* --- Pages in an Indian language ------------------------------------------ */
+/* A whole page of Devanagari (or Bengali, Tamil, ...) needs more room than
+   the Latin defaults give it: matras rise above and below the line, and
+   headings set tight clip into each other. Unlayered on purpose, so it
+   outranks the line-height that Tailwind's text-* utilities attach to the h1
+   and h2s. English pages are untouched. */
+:is(html[lang='hi'], html[lang='mr'], html[lang='bn'], html[lang='ta'], html[lang='gu'], html[lang='pa']) body {
   line-height: 1.7;
 }
-html[lang='hi'] :is(h1, h2, h3, h4) {
+:is(html[lang='hi'], html[lang='mr'], html[lang='bn'], html[lang='ta'], html[lang='gu'], html[lang='pa'])
+  :is(h1, h2, h3, h4) {
   line-height: 1.35;
 }
 /* The h1 (or the row holding it and the tour's "?") and the intro paragraph
    (or the Beta note) under it. */
-html[lang='hi'] :is(h1, .title-row) + p {
+:is(html[lang='hi'], html[lang='mr'], html[lang='bn'], html[lang='ta'], html[lang='gu'], html[lang='pa'])
+  :is(h1, .title-row)
+  + p {
   margin-top: 1rem;
+}
+/* Tamil words run long: let a heading break inside one rather than push the
+   page sideways on a phone. */
+html[lang='ta'] :is(h1, h2) {
+  overflow-wrap: anywhere;
 }
 
 /* --- Custom utilities (v4 uses @utility, not @layer components) ----------- */

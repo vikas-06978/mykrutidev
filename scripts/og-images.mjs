@@ -15,6 +15,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ogEntries, OG_SIZE } from '../src/lib/og.js';
+import { LOCALES } from '../src/i18n/locales.js';
 
 // Cloudflare Pages builds have no Chromium to draw with, so there the files
 // already committed in public/ are used as they are (CF_PAGES is set only in
@@ -30,6 +31,10 @@ const FONT = (pkg, file) => join(root, 'node_modules', '@fontsource', pkg, 'file
 const FONTS = {
   '/deva-700.woff2': FONT('noto-sans-devanagari', 'noto-sans-devanagari-devanagari-700-normal.woff2'),
   '/deva-latin-700.woff2': FONT('noto-sans-devanagari', 'noto-sans-devanagari-latin-700-normal.woff2'),
+  '/beng-700.woff2': FONT('noto-sans-bengali', 'noto-sans-bengali-bengali-700-normal.woff2'),
+  '/taml-700.woff2': FONT('noto-sans-tamil', 'noto-sans-tamil-tamil-700-normal.woff2'),
+  '/gujr-700.woff2': FONT('hind-vadodara', 'hind-vadodara-gujarati-700-normal.woff2'),
+  '/guru-700.woff2': FONT('noto-sans-gurmukhi', 'noto-sans-gurmukhi-gurmukhi-700-normal.woff2'),
   '/latin-600.woff2': FONT('noto-sans', 'noto-sans-latin-600-normal.woff2'),
   '/latin-700.woff2': FONT('noto-sans', 'noto-sans-latin-700-normal.woff2'),
 };
@@ -40,18 +45,22 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, 
 const STYLE = `
 @font-face { font-family: Deva; font-weight: 700; src: url(/deva-700.woff2) format('woff2'); unicode-range: U+0900-097F, U+1CD0-1CFF, U+200C-200D, U+25CC, U+A830-A83F, U+A8E0-A8FF; }
 @font-face { font-family: Deva; font-weight: 700; src: url(/deva-latin-700.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2013-2014, U+2018-201F, U+2192; }
+@font-face { font-family: Beng; font-weight: 700; src: url(/beng-700.woff2) format('woff2'); unicode-range: U+0980-09FF, U+200C-200D, U+25CC; }
+@font-face { font-family: Taml; font-weight: 700; src: url(/taml-700.woff2) format('woff2'); unicode-range: U+0B80-0BFF, U+200C-200D, U+25CC; }
+@font-face { font-family: Gujr; font-weight: 700; src: url(/gujr-700.woff2) format('woff2'); unicode-range: U+0A80-0AFF, U+200C-200D, U+25CC; }
+@font-face { font-family: Guru; font-weight: 700; src: url(/guru-700.woff2) format('woff2'); unicode-range: U+0A00-0A7F, U+200C-200D, U+25CC; }
 @font-face { font-family: Latin; font-weight: 600; src: url(/latin-600.woff2) format('woff2'); }
 @font-face { font-family: Latin; font-weight: 700; src: url(/latin-700.woff2) format('woff2'); }
 * { box-sizing: border-box; margin: 0; }
 html, body { width: ${OG_SIZE.width}px; height: ${OG_SIZE.height}px; }
-body { background: #faf7f2; color: #1a2744; font-family: Latin, Deva, sans-serif; position: relative; overflow: hidden; }
+body { background: #faf7f2; color: #1a2744; font-family: Latin, Deva, Beng, Taml, Gujr, Guru, sans-serif; position: relative; overflow: hidden; }
 .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 22px; background: #a8442a; }
 .glyph { position: absolute; right: -40px; bottom: -150px; font: 700 560px/1 Deva; color: #a8442a; opacity: 0.08; }
 .card { position: absolute; left: 90px; right: 110px; top: 70px; bottom: 70px; display: flex; flex-direction: column; }
 .kicker { font: 600 30px/1.2 Latin, Deva; letter-spacing: 0.02em; color: #a8442a; text-transform: uppercase; }
-.kicker[lang=hi] { text-transform: none; font-family: Deva; font-weight: 700; }
+.kicker:not([lang=en]) { text-transform: none; font-family: Deva, Beng, Taml, Gujr, Guru; font-weight: 700; }
 .title { margin-top: 26px; font-weight: 700; color: #1a2744; line-height: 1.18; }
-.title[lang=hi] { font-family: Deva; line-height: 1.42; }
+.title:not([lang=en]) { font-family: Deva, Beng, Taml, Gujr, Guru; line-height: 1.42; }
 .foot { margin-top: auto; display: flex; align-items: baseline; justify-content: space-between; font: 600 32px/1 Latin; color: #46536b; }
 .brand { font: 700 44px/1 Latin; color: #1a2744; }
 .brand b { color: #a8442a; font-weight: 700; }
@@ -143,7 +152,7 @@ try {
 
   // Images for pages that no longer exist.
   const want = new Set([...entries.map((e) => e.file.replace(/\\/g, '/')), 'logo.png']);
-  for (const lang of ['en', 'hi']) {
+  for (const lang of LOCALES) {
     const dir = join(OUT, lang);
     if (!existsSync(dir)) continue;
     for (const f of readdirSync(dir)) {

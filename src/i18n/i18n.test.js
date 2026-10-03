@@ -4,6 +4,9 @@ import assert from 'node:assert/strict';
 import {
   DICTS,
   LOCALES,
+  LOCALE_META,
+  DEFAULT_LOCALE,
+  assertAllParity,
   t,
   raw,
   fill,
@@ -16,6 +19,7 @@ import {
   markNoTranslate,
   listTitle,
 } from './index.js';
+import { checkValue } from './check.js';
 import { localizeDocMessage, localizeSummary, TOO_LARGE_EN, ONLY_TYPES_EN } from './docMessages.js';
 import { PAGES, getPage, isIndexable, routeOf, SITE } from '../lib/routes.js';
 import { FONTS, boxLabel } from '../lib/fontMaps.js';
@@ -28,6 +32,44 @@ import * as docConvert from '../lib/docConvert.js';
 
 const { en, hi } = DICTS;
 const RE_DEVA = /[ऀ-ॿ]/;
+
+// ---------------------------------------------------------------------------
+// The language registry (locales.js)
+// ---------------------------------------------------------------------------
+
+describe('languages', () => {
+  test('English is the default and comes first; every language has a dictionary and its markup', () => {
+    assert.equal(DEFAULT_LOCALE, 'en');
+    assert.equal(LOCALES[0], 'en');
+    assert.deepEqual(Object.keys(DICTS).sort(), [...LOCALES].sort());
+    for (const l of LOCALES) {
+      const m = LOCALE_META[l];
+      assert.ok(m, `${l}: no LOCALE_META`);
+      for (const k of ['htmlLang', 'hreflang', 'ogLocale', 'label', 'english', 'dateLocale', 'script']) assert.ok(m[k], `${l}.${k}`);
+      assert.match(m.ogLocale, /^[a-z]{2}_IN$/);
+    }
+  });
+
+  test('every language holds exactly the keys of English', () => {
+    assert.doesNotThrow(() => assertAllParity());
+    const ok = Object.fromEntries(LOCALES.map((l) => [l, { a: '1' }]));
+    assert.throws(() => assertAllParity({ ...ok, xx: {} }), /missing in xx\.json: a/);
+  });
+
+  test('a language with no dictionary cannot be published', () => {
+    assert.throws(() => assertAllParity({ en }), /in LOCALES but has no dictionary/);
+  });
+
+  test('the language paths: every language but English under its own code', () => {
+    for (const l of LOCALES) {
+      assert.equal(localizePath('/hindi-keyboard', l), l === 'en' ? '/hindi-keyboard/' : `/${l}/hindi-keyboard/`);
+      assert.deepEqual(splitLocale(localizePath('/x', l)), { lang: l, path: '/x' });
+      assert.equal(routeOf(localizePath('/hindi-keyboard', l)), '/hindi-keyboard');
+    }
+    // A language that is not published is not a prefix.
+    assert.deepEqual(splitLocale('/zz/x'), { lang: 'en', path: '/zz/x' });
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Hindi font names in the nav and in lists of pages
@@ -143,6 +185,15 @@ describe('en.json and hi.json', () => {
 // ---------------------------------------------------------------------------
 // What must NOT be translated
 // ---------------------------------------------------------------------------
+
+describe('every language keeps what must not be translated (check.js)', () => {
+  for (const lang of LOCALES.filter((l) => l !== 'en')) {
+    test(`${lang}: code, samples, links, placeholders, tags, brand and Word font names intact`, () => {
+      const problems = flatKeys(en).flatMap((key) => checkValue(key, raw('en', key), raw(lang, key)).map((x) => `${key}: ${x}`));
+      assert.deepEqual(problems, []);
+    });
+  }
+});
 
 describe('code examples and Unicode output survive translation untouched', () => {
   /** The contents of every <code> and every lang="hi" element in a string. */

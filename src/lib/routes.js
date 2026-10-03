@@ -38,6 +38,7 @@
 
 import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
+import { PREFIXED_LOCALES } from '../i18n/locales.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
 import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
@@ -1382,16 +1383,17 @@ export const indexableUrls = () =>
 
 /**
  * The route path behind a URL path, with any language prefix removed:
- * "/hi/hindi-keyboard/" -> "/hindi-keyboard", "/hi" -> "/". The Hindi pages
- * are the same routes as the English ones, so every rule here applies to both.
+ * "/hi/hindi-keyboard/" -> "/hindi-keyboard", "/bn" -> "/". Every language's
+ * pages are the same routes as the English ones, so every rule here applies
+ * to all of them.
  */
 export function routeOf(urlPath) {
   const clean = urlPath.replace(/\/$/, '') || '/';
-  const m = clean.match(/^\/hi(\/.*)?$/);
-  return m ? m[1] || '/' : clean;
+  const m = clean.match(/^\/([a-z]{2})(\/.*)?$/);
+  return m && PREFIXED_LOCALES.includes(m[1]) ? m[2] || '/' : clean;
 }
 
-/** Used by the sitemap integration's `filter()`. English and /hi alike. */
+/** Used by the sitemap integration's `filter()`. Every language alike. */
 export function isIndexable(absoluteUrl) {
   const path = routeOf(new URL(absoluteUrl).pathname);
   if (GUIDE_ROUTES.has(path)) return true;

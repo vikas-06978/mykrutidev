@@ -24,8 +24,15 @@ import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
 import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
+import { LOCALES, PREFIXED_LOCALES, LOCALE_META } from '../src/i18n/locales.js';
+import { DICTS } from '../src/i18n/index.js';
 
-const isHiPath = (p) => p === '/hi' || p.startsWith('/hi/');
+/** The language of a built page path: "/bn/x" -> "bn", "/x" -> "en". */
+const localeOf = (p) => {
+  const m = p.match(/^\/([a-z]{2})(?:\/|$)/);
+  return m && PREFIXED_LOCALES.includes(m[1]) ? m[1] : 'en';
+};
+const isHiPath = (p) => localeOf(p) === 'hi';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const FIXTURES = JSON.parse(
@@ -63,26 +70,29 @@ before(() => {
   notFound = readFileSync(join(DIST, '404.html'), 'utf8');
 });
 
-const english = () => [...pages.keys()].filter((p) => p !== '/hi' && !p.startsWith('/hi/'));
-const hindiOf = (p) => (p === '/' ? '/hi' : `/hi${p}`);
+const english = () => [...pages.keys()].filter((p) => localeOf(p) === 'en');
+/** An English page path in another language: ("/x", "bn") -> "/bn/x". */
+const inLocale = (p, l) => (l === 'en' ? p : p === '/' ? `/${l}` : `/${l}${p}`);
+const hindiOf = (p) => inLocale(p, 'hi');
 /** A page path in its published form: "/x" -> "/x/", "/hi" -> "/hi/". */
 const slash = (p) => (p === '/' ? '/' : `${p.replace(/\/$/, '')}/`);
 /** The published URL of a page: absolute, with the trailing slash. */
 const abs = (p) => new URL(p === '/' ? '/' : `${p.replace(/\/$/, '')}/`, SITE).href;
 
-describe('every page exists in both languages', () => {
-  test('each English page has a /hi twin, and nothing else lives under /hi', () => {
+describe('every page exists in every language', () => {
+  test('each English page has a twin in every language, and nothing else lives under a prefix', () => {
     const en = english();
-    const hi = [...pages.keys()].filter((p) => p === '/hi' || p.startsWith('/hi/'));
     assert.ok(en.length >= PAGES.length, `expected ${PAGES.length} English pages, found ${en.length}`);
-    for (const p of en) assert.ok(pages.has(hindiOf(p)), `${p} has no Hindi page at ${hindiOf(p)}`);
-    assert.equal(hi.length, en.length, 'Hindi pages that have no English twin');
+    for (const l of PREFIXED_LOCALES) {
+      const theirs = [...pages.keys()].filter((p) => localeOf(p) === l);
+      for (const p of en) assert.ok(pages.has(inLocale(p, l)), `${p} has no ${l} page at ${inLocale(p, l)}`);
+      assert.equal(theirs.length, en.length, `${l} pages that have no English twin`);
+    }
   });
 
-  test('every route in routes.js was built in both languages', () => {
+  test('every route in routes.js was built in every language', () => {
     for (const p of PAGES) {
-      assert.ok(pages.has(p.path), `missing ${p.path}`);
-      assert.ok(pages.has(hindiOf(p.path)), `missing ${hindiOf(p.path)}`);
+      for (const l of LOCALES) assert.ok(pages.has(inLocale(p.path, l)), `missing ${inLocale(p.path, l)}`);
     }
   });
 });
@@ -90,17 +100,22 @@ describe('every page exists in both languages', () => {
 describe('language and SEO tags', () => {
   test('<html lang>, og:locale and og:locale:alternate match the language', () => {
     for (const [p, html] of pages) {
-      const isHi = p === '/hi' || p.startsWith('/hi/');
-      assert.match(html, new RegExp(`<html lang="${isHi ? 'hi' : 'en'}"`), p);
-      assert.match(html, new RegExp(`property="og:locale" content="${isHi ? 'hi_IN' : 'en_IN'}"`), p);
-      assert.match(html, new RegExp(`property="og:locale:alternate" content="${isHi ? 'en_IN' : 'hi_IN'}"`), p);
+      const l = localeOf(p);
+      assert.match(html, new RegExp(`<html lang="${LOCALE_META[l].htmlLang}"`), p);
+      assert.match(html, new RegExp(`property="og:locale" content="${LOCALE_META[l].ogLocale}"`), p);
+      const alts = [...html.matchAll(/property="og:locale:alternate" content="([^"]+)"/g)].map((m) => m[1]).sort();
+      assert.deepEqual(alts, LOCALES.filter((x) => x !== l).map((x) => LOCALE_META[x].ogLocale).sort(), p);
     }
   });
 
-  test('hreflang en, hi and x-default on every page, pointing at the twin pair', () => {
+  test('hreflang for every language and x-default on every page, pointing at the same set', () => {
     for (const p of english()) {
-      const want = { en: abs(p), hi: abs(hindiOf(p)), 'x-default': abs(p) };
-      for (const q of [p, hindiOf(p)]) {
+      const want = {
+        ...Object.fromEntries(LOCALES.map((l) => [LOCALE_META[l].hreflang, abs(inLocale(p, l))])),
+        'x-default': abs(p),
+      };
+      for (const l of LOCALES) {
+        const q = inLocale(p, l);
         const links = [...pages.get(q).matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"/g)];
         const got = Object.fromEntries(links.map((m) => [m[1], m[2]]));
         assert.deepEqual(got, want, q);
@@ -112,30 +127,42 @@ describe('language and SEO tags', () => {
     for (const p of english()) {
       const page = PAGES.find((x) => x.path === p);
       const target = page?.canonical ?? p;
-      assert.match(pages.get(p), new RegExp(`rel="canonical" href="${abs(target)}"`), p);
-      assert.match(pages.get(hindiOf(p)), new RegExp(`rel="canonical" href="${abs(hindiOf(target))}"`), hindiOf(p));
+      for (const l of LOCALES) {
+        const q = inLocale(p, l);
+        assert.match(pages.get(q), new RegExp(`rel="canonical" href="${abs(inLocale(target, l))}"`), q);
+      }
     }
   });
 
-  test('every Hindi page has a Hindi <title> and meta description', () => {
+  test('every page in an Indian language has its <title> and meta description in that script', () => {
+    const SCRIPT = {
+      deva: /[ऀ-ॿ]/,
+      beng: /[\u0980-\u09FF]/,
+      taml: /[\u0B80-\u0BFF]/,
+      gujr: /[\u0A80-\u0AFF]/,
+      guru: /[\u0A00-\u0A7F]/,
+    };
+    for (const l of PREFIXED_LOCALES) {
+      const re = SCRIPT[LOCALE_META[l].script];
+      for (const p of english()) {
+        const q = inLocale(p, l);
+        const html = pages.get(q);
+        assert.match(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '', re, `${q} title`);
+        assert.match(html.match(/name="description" content="([^"]*)"/)?.[1] ?? '', re, `${q} description`);
+      }
+    }
+  });
+
+  test('noindex is the same in every language', () => {
     for (const p of english()) {
-      const html = pages.get(hindiOf(p));
-      assert.match(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '', RE_DEVA, `${hindiOf(p)} title`);
-      assert.match(html.match(/name="description" content="([^"]*)"/)?.[1] ?? '', RE_DEVA, `${hindiOf(p)} description`);
+      const want = pages.get(p).includes('name="robots" content="noindex');
+      for (const l of PREFIXED_LOCALES) {
+        assert.equal(pages.get(inLocale(p, l)).includes('name="robots" content="noindex'), want, inLocale(p, l));
+      }
     }
   });
 
-  test('noindex is the same in both languages', () => {
-    for (const p of english()) {
-      assert.equal(
-        pages.get(hindiOf(p)).includes('name="robots" content="noindex'),
-        pages.get(p).includes('name="robots" content="noindex'),
-        p,
-      );
-    }
-  });
-
-  test('the sitemap lists every indexable page in both languages, with hreflang', () => {
+  test('the sitemap lists every indexable page in every language, with hreflang', () => {
     const xml = readdirSync(DIST)
       .filter((f) => /^sitemap-\d+\.xml$/.test(f))
       .map((f) => readFileSync(join(DIST, f), 'utf8'))
@@ -143,25 +170,25 @@ describe('language and SEO tags', () => {
     const locs = new Set([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/\/$/, '')));
     for (const p of PAGES) {
       const inSitemap = (u) => locs.has(abs(u).replace(/\/$/, ''));
-      assert.equal(inSitemap(p.path), isIndexable(abs(p.path)), `en ${p.path}`);
-      assert.equal(inSitemap(hindiOf(p.path)), isIndexable(abs(p.path)), `hi ${p.path}`);
+      for (const l of LOCALES) assert.equal(inSitemap(inLocale(p.path, l)), isIndexable(abs(p.path)), `${l} ${p.path}`);
     }
-    assert.match(xml, /hreflang="hi"/);
-    assert.match(xml, /hreflang="en"/);
+    for (const l of LOCALES) assert.match(xml, new RegExp(`hreflang="${LOCALE_META[l].hreflang}"`));
   });
 });
 
 describe('links', () => {
   const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
 
-  test('internal links on a Hindi page go to Hindi pages', () => {
-    for (const p of english()) {
-      const q = hindiOf(p);
-      for (const [tag] of pages.get(q).matchAll(/<a\b[^>]*>/g)) {
-        const href = attr(tag, 'href');
-        if (!href?.startsWith('/') || href.startsWith('//') || NOT_A_PAGE.test(href)) continue;
-        if (tag.includes('data-lang-switch')) continue;
-        assert.ok(href === '/hi' || href.startsWith('/hi/') || href.startsWith('/hi#'), `${q} links to ${href}`);
+  test('internal links on a page in another language stay in that language', () => {
+    for (const l of PREFIXED_LOCALES) {
+      for (const p of english()) {
+        const q = inLocale(p, l);
+        for (const [tag] of pages.get(q).matchAll(/<a\b[^>]*>/g)) {
+          const href = attr(tag, 'href');
+          if (!href?.startsWith('/') || href.startsWith('//') || NOT_A_PAGE.test(href)) continue;
+          if (tag.includes('data-lang-switch')) continue;
+          assert.ok(href === `/${l}` || href.startsWith(`/${l}/`) || href.startsWith(`/${l}#`), `${q} links to ${href}`);
+        }
       }
     }
   });
@@ -171,25 +198,29 @@ describe('links', () => {
       for (const [tag] of pages.get(p).matchAll(/<a\b[^>]*>/g)) {
         const href = attr(tag, 'href');
         if (!href?.startsWith('/') || tag.includes('data-lang-switch')) continue;
-        assert.ok(!(href === '/hi' || href.startsWith('/hi/')), `${p} links to ${href}`);
+        assert.equal(localeOf(href.split('#')[0]), 'en', `${p} links to ${href}`);
       }
     }
   });
 
-  test('the switch links to the SAME page in the other language', () => {
+  test('the switch links to the SAME page in every other language', () => {
     for (const p of english()) {
-      const q = hindiOf(p);
-      const toHi = [...pages.get(p).matchAll(/<a\b[^>]*data-lang-switch="hi"[^>]*>/g)].map((m) => attr(m[0], 'href'));
-      const toEn = [...pages.get(q).matchAll(/<a\b[^>]*data-lang-switch="en"[^>]*>/g)].map((m) => attr(m[0], 'href'));
-      assert.ok(toHi.length > 0 && toHi.every((h) => h === slash(q)), `${p} -> ${toHi}`);
-      assert.ok(toEn.length > 0 && toEn.every((h) => h === slash(p)), `${q} -> ${toEn}`);
+      for (const from of LOCALES) {
+        const q = inLocale(p, from);
+        for (const to of LOCALES) {
+          if (to === from) continue;
+          const re = new RegExp(`<a\\b[^>]*data-lang-switch="${to}"[^>]*>`, 'g');
+          const hrefs = [...pages.get(q).matchAll(re)].map((m) => attr(m[0], 'href'));
+          assert.ok(hrefs.length > 0 && hrefs.every((h) => h === slash(inLocale(p, to))), `${q} -> ${to}: ${hrefs}`);
+        }
+      }
     }
   });
 
-  test('the "available in Hindi" banner is on English pages only, and never redirects', () => {
+  test('the "available in your language" banner is on English pages only, and never redirects', () => {
     for (const p of english()) {
-      assert.match(pages.get(p), /data-lang-banner/, p);
-      assert.doesNotMatch(pages.get(hindiOf(p)), /data-lang-banner/, hindiOf(p));
+      for (const l of PREFIXED_LOCALES) assert.match(pages.get(p), new RegExp(`data-lang-banner="${l}"`), p);
+      for (const l of PREFIXED_LOCALES) assert.doesNotMatch(pages.get(inLocale(p, l)), /data-lang-banner/, inLocale(p, l));
     }
     for (const html of pages.values()) {
       assert.doesNotMatch(html, /http-equiv="refresh"/i);
@@ -200,8 +231,7 @@ describe('links', () => {
 
 describe('"Soon" badges come from the status flag, everywhere, in both languages', () => {
   const BADGE = /<span\b[^>]*\bdata-soon-badge\b[^>]*>([^<]*)<\/span>/g;
-  const TEXT = { en: 'Soon', hi: 'जल्द' };
-  const langOf = (p) => (p === '/hi' || p.startsWith('/hi/') ? 'hi' : 'en');
+  const langOf = localeOf;
 
   /** Every listed route on a page: [{ route, html }], nav rows and cards alike. */
   const rows = (html) =>
@@ -222,7 +252,7 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
         if (statusOf(page) === 'soon') {
           soon++;
           assert.equal(badges.length, 1, `${p}: ${r.route} is coming soon but has ${badges.length} badges`);
-          assert.equal(badges[0][1].trim(), TEXT[langOf(p)], `${p}: ${r.route} badge text`);
+          assert.equal(badges[0][1].trim(), DICTS[langOf(p)].nav.soon, `${p}: ${r.route} badge text`);
         } else {
           live++;
           assert.equal(badges.length, 0, `${p}: live ${r.route} shows a Soon badge`);
@@ -439,15 +469,17 @@ describe('printable charts and PDFs', () => {
       for (const pr of PRINTABLES) assert.ok(pages.get(p).includes(pdfHref(pr, lang)), `${p}: ${pr.pdf}`);
     }
     for (const [p, html] of pages) {
-      const prefix = isHiPath(p) ? '/hi' : '';
+      const prefix = localeOf(p) === 'en' ? '' : `/${localeOf(p)}`;
       assert.ok(html.includes(`href="${prefix}/kruti-dev-keyboard/"`), `${p}: no menu link to the printables`);
     }
   });
 });
 
 describe('SEO basics', () => {
-  const isHi = (p) => p === '/hi' || p.startsWith('/hi/');
-  const routeOf = (p) => (p === '/hi' ? '/' : isHi(p) ? p.slice(3) : p);
+  const routeOf = (p) => {
+    const l = localeOf(p);
+    return l === 'en' ? p : p.slice(l.length + 1) || '/';
+  };
   const pageOf = (p) => PAGES.find((x) => x.path === routeOf(p));
   const jsonLd = (html) =>
     [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
@@ -463,14 +495,14 @@ describe('SEO basics', () => {
   });
 
   test('titles and descriptions are unique per language across all built pages', () => {
-    for (const lang of ['en', 'hi']) {
+    for (const lang of LOCALES) {
       for (const [field, re] of [
         ['title', /<title>([^<]*)<\/title>/],
         ['description', /name="description" content="([^"]*)"/],
       ]) {
         const seen = new Map();
         for (const [p, html] of pages) {
-          if (isHi(p) !== (lang === 'hi')) continue;
+          if (localeOf(p) !== lang) continue;
           const v = html.match(re)?.[1];
           assert.ok(v, `${p}: no ${field}`);
           assert.ok(!seen.has(v), `${p} and ${seen.get(v)} share a ${field}`);
@@ -501,10 +533,10 @@ describe('SEO basics', () => {
   });
 
   test('no two pages share a "How to use" step or tip (duplicate text hurts ranking)', () => {
-    for (const lang of ['en', 'hi']) {
+    for (const lang of LOCALES) {
       const seen = new Map();
       for (const [p, html] of pages) {
-        if (isHi(p) !== (lang === 'hi')) continue;
+        if (localeOf(p) !== lang) continue;
         const block = html.match(/<section aria-labelledby="howto-heading"[\s\S]*?<\/section>/)?.[0];
         if (!block) continue;
         const items = [...block.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g), ...block.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/g)]
