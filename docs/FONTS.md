@@ -29,6 +29,24 @@ published with the site, so it lives here instead.
 | `shusha.woff`        | Shusha          | WOFF              | **preview on the Shusha pages** (the map was read off this file) |
 | `shivaji01.woff`     | Shivaji01       | WOFF              | **preview on the Shivaji pages** (the map was read off this file) |
 | `dvtt-surekh.woff`   | DV-TTSurekh     | WOFF              | **preview on the Marathi (DV-TT) pages** (the map was read off this file) |
+| `arjun.woff` | Arjun | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `kundli.woff` | Kundli | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `krishna.woff` | Krishna | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `new-delhi.woff` | NewDelhi | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `ruchi.woff` | Ruchi-Normal | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `devlys-020.woff` | DevLys 020 | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `ajay.woff` | Ajay Normal | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `aman.woff` | Aman Condensed | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `agra.woff` | Agra | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `himalaya.woff` | HIMALAYA TT FONT | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `akshar.woff` | Akshar | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `dina.woff` | DINA-A | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `devanagari-bold.woff` | DevanagariBold | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `narad.woff` | Narad | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `aakriti.woff` | Aakriti | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `anjali.woff` | Anjali | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `shusha02.woff` | Shusha02 | WOFF | **preview on its own two pages** (the map was read off this file) |
+| `shivaji02.woff` | Shivaji02 | WOFF | **preview on its own two pages** (the map was read off this file) |
 
 The numbered Kruti Dev variants used to fill a dropdown in the output box. That
 picker is gone: the variants share one keyboard layout and differ only in
@@ -67,6 +85,32 @@ Two things to know about that table:
 `/fonts/...` filename referenced anywhere in `src/` matches byte for byte
 (including case), and sniffs each file's magic bytes
 against its declared format.
+
+## Fonts on another font's keyboard
+
+Arjun, Kundli, Krishna, New Delhi, Ruchi, DevLys 020, Ajay, Aman and Agra type
+on the Kruti Dev keyboard, the Nepali fonts (Himalaya, Akshar, DINA, Devanagari
+Bold, Narad, Aakriti, Anjali) on Preeti's, Shusha02 and Shivaji02 on Shusha's.
+Each map in `src/lib/fontMaps.js` is the base map with the keys that differ
+dropped and the font's own keys added. Each was checked the same way:
+
+1. Every key of the base map drawn in both fonts side by side, and the keys
+   that differ read by eye. Every glyph the font has on a key the base does not
+   use was read too. Anything not read with certainty is left out (each map's
+   comment lists what).
+2. A sentence converted from Unicode into the font, drawn in the font file
+   itself and read back (`src/lib/fontVariants.test.js` keeps those sentences).
+3. The same sentence drawn in **every style file** of the family, because a
+   Bold or Wide cut is sometimes another layout. The Word upload
+   (`src/lib/wordFonts.js`) only recognises the styles that passed:
+
+| Family | Styles read with the map | Left out (other keys) |
+| ------ | ------------------------ | --------------------- |
+| Krishna | Krishna, Condensed, Wide, Bold Italic | Krishna Italic (another layout) |
+| NewDelhi | Normal, Bold, Italic, Bold Italic (Bold draws श on `'`, which is read too) | |
+| Agra | Agra | Agra Bold, Wide, Thin (त्र on `=`, as in Kruti Dev) |
+| DINA | DINA-A, Dina Outline, DINA27 | DINA30 Outline (not read) |
+| DevLys 020, Aman, Ajay, Ruchi, Akshar, Narad, Aakriti | every style supplied | |
 
 ## Adding or replacing a font
 
