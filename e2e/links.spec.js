@@ -98,8 +98,23 @@ test('a refused email is shown next to the form, and nothing is lost', async ({ 
 test('no accessibility violations, in both languages', async ({ page }) => {
   for (const path of ['/links/', '/hi/links/']) {
     await page.goto(path);
+    await feedbackButtonSettled(page);
     // The same standard as the site-wide check in seo.spec.js: WCAG 2 A and AA.
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(violations.map((v) => `${v.id}: ${v.help}`), path).toEqual([]);
   }
 });
+
+/**
+ * The feedback button starts see-through and fades in (150 ms) once its corner
+ * is known to be clear - the first IntersectionObserver report, a frame or two
+ * after load. Caught mid-fade its label fails color-contrast, so wait out the
+ * report and the fade before checking.
+ */
+async function feedbackButtonSettled(page) {
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.waitForFunction(() => {
+    const btn = document.querySelector('.fb-btn');
+    return !btn || btn.getAnimations().length === 0;
+  });
+}

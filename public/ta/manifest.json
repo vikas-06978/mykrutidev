@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MyKrutiDev",
+  "short_name": "கிருதிதேவ்",
+  "description": "Kruti Dev, யூனிகோட் மாற்றிகள், இந்தி தட்டச்சுப் பயிற்றுநர், இந்தி விசைப்பலகை. இலவசம், மாற்றிகள் இணையம் இல்லாமலும் வேலை செய்யும்.",
+  "lang": "ta",
+  "dir": "ltr",
+  "start_url": "/ta",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

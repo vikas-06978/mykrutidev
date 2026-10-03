@@ -21,13 +21,14 @@ import en from './en.json' with { type: 'json' };
 import hi from './hi.json' with { type: 'json' };
 import bn from './bn.json' with { type: 'json' };
 import mr from './mr.json' with { type: 'json' };
+import ta from './ta.json' with { type: 'json' };
 import { fill } from './fill.js';
 import { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES, isLocale } from './locales.js';
 
 export { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES };
 
 /** One dictionary per language in LOCALES (see locales.js to add one). */
-export const DICTS = { en, hi, bn, mr };
+export const DICTS = { en, hi, bn, mr, ta };
 
 /** Where the visitor's explicit language choice is remembered. */
 export const LANG_PREF_KEY = 'mkd-lang';
