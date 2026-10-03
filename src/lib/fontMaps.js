@@ -655,10 +655,10 @@ const NEW_DELHI = krutiVariant({
 });
 
 // Ruchi (vendor/fonts/Ruchi/Ruchi.ttf). Kruti Dev's ASCII keys in a slanted
-// design (the number keys draw Hindi digits). Its own upper range: ऐ ऍ आ ॠ ऌ
-// on `Ë Ê Á Ç È`, full ख क्ष ष श ण थ on `Â Õ Ô Ó Æ É`, ष्ट ह्न ह्व ह्ल on
-// `þ õ à ù`, ि with the reph on `£`, ैं on `®`, ळ on `”`, ः on `¢`. No ( or =
-// on `¼ ¾`. Many upper-range glyphs are small signs or conjuncts that are not
+// design, and the number keys draw Hindi digits (`asciiIsScript`). Its own
+// upper range: ऐ ऍ आ ॠ ऌ on `Ë Ê Á Ç È`, full ख क्ष ष श ण थ on
+// `Â Õ Ô Ó Æ É`, ष्ट ह्न ह्व ह्ल on `þ õ à ù`, ि with the reph on `£`, ैं on
+// `®`, ळ on `”`, ः on `¢`. No ( or = on `¼ ¾`. Many upper-range glyphs are small signs or conjuncts that are not
 // one certain letter, and are left out: `« Ö Ü Ÿ ¶ Ì Ð ë Ï ð î å ö ø ú û ü ÿ
 // Œ œ š ˉ “ •`.
 const RUCHI = krutiVariant({
@@ -2185,6 +2185,8 @@ const SHUSHA02 = variantOf({ map: SHUSHA }, {
   add: { '~a': 'त्र', '~': 'त्र्', '(': 'हृ', ')a': 'थ', ')': 'थ्', 'Ùa': 'न्न', 'Ù': 'न्न्' },
 });
 const SHIVAJI02 = variantOf(SHUSHA02, { drop: '.†‰', add: { '.': '.' } });
+// Shusha's `º` is a full stop too, but Shivaji01 writes `.`: so does Shivaji02.
+SHIVAJI02.reverse['.'] = '.';
 
 // ============================================================================
 // Font registry - adding a font is adding one entry.
@@ -2349,6 +2351,8 @@ export const FONTS = {
     // RUCHI). `beta` until a real Ruchi document has been run through it.
     accurate: true,
     beta: true,
+    // Its number keys draw Hindi digits, as in DevLys 020.
+    asciiIsScript: true,
     warnUnmapped: true,
     css: 'monospace',
     sample: 'Hkkjr ljdkj] x`g ea=ky;',
