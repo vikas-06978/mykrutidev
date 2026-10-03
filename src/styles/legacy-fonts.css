@@ -106,3 +106,37 @@
     url('/fonts/dvtt-surekh.woff') format('woff');
   font-display: swap;
 }
+
+/* Kruti Dev layout variants: Arjun, Kundli, Krishna, New Delhi. Each map was
+   read off the file its face is made from (vendor/fonts/). */
+@font-face {
+  font-family: 'MKD Arjun';
+  src:
+    local('Arjun'),
+    url('/fonts/arjun.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Kundli';
+  src:
+    local('Kundli'),
+    url('/fonts/kundli.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Krishna';
+  src:
+    local('Krishna'),
+    url('/fonts/krishna.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD NewDelhi';
+  src:
+    local('NewDelhi'),
+    url('/fonts/new-delhi.woff') format('woff');
+  font-display: swap;
+}

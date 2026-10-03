@@ -71,6 +71,11 @@ export const PREVIEW_FONTS = {
   // Converted from vendor/fonts/DV-TTSurekh/DV-TTSurekh.ttf, the file the
   // DV-TT map was read from.
   dvtt: preview('DV-TTSurekh', 'dvtt-surekh.woff'),
+  // Converted from the files in vendor/fonts/ their maps were read from.
+  arjun: preview('Arjun', 'arjun.woff'),
+  kundli: preview('Kundli', 'kundli.woff'),
+  krishna: preview('Krishna', 'krishna.woff'),
+  'new-delhi': preview('NewDelhi', 'new-delhi.woff'),
 };
 
 /** The preview font for a font key, or null when it needs none. */

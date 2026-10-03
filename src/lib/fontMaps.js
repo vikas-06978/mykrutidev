@@ -456,6 +456,203 @@ const KRUTI_EXTENDED = {
 //   gS] rks        -> है, तो
 const DEVLYS = { ...KRUTI_DEV };
 
+// ============================================================================
+// Fonts on the Kruti Dev keyboard, with some keys of their own
+// ============================================================================
+// Arjun, Kundli, Krishna and the rest type the same ASCII keys as Kruti Dev
+// for almost everything, but each draws a few keys differently and fills the
+// upper range its own way. Each is checked the same way: every key of the
+// Kruti Dev reading map drawn in both fonts side by side (scripts kept in
+// docs/FONTS.md), the keys that differ read by eye, and every glyph the font
+// has on a key Kruti Dev does not use read by eye too.
+//
+// `drop` lists the characters whose key means something else (or nothing) in
+// the font: every Kruti Dev key containing one is removed. `add` is the font's
+// own keys. As for Kruti Dev, `map` writes (taught keys only) and `readMap`
+// also reads the upper-range keys.
+
+/** @param {{ drop: string, add: Record<string,string> }} spec */
+function krutiVariant({ drop, add }) {
+  const bad = new Set(drop);
+  const keep = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => ![...k].some((c) => bad.has(c))));
+  return { map: { ...keep(KRUTI_DEV), ...add }, readMap: { ...keep(KRUTI_DEV), ...keep(KRUTI_EXTENDED), ...add } };
+}
+
+// Arjun (vendor/fonts/Arjun/ARJUN.TTF). Every ASCII key is Kruti Dev's but
+// `=`, which is HALF त्र here: `=k` is त्र. The upper range is its own: Hindi
+// digits on the bytes 0x8C-0x95 (० Œ, १-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •),
+// ि with the reph (`£`), िं (`¯`), ीं (`°`), both (`²`), ॠ ऌ ॐ, ञ् द्ध स्त्र.
+// Read and left out: `§` (a ि-like sign that is not one certain matra), `Ð`,
+// `å`, `¥` and `«` (marks, not letters).
+const ARJUN = krutiVariant({
+  drop: '=Û«÷ŸË£Ò¥ÃÄÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '×k': 'ञ',
+    '×': 'ञ्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '¯': PRE_I_NASAL,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '°': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '—',
+    '¹': '*',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
+
+// Kundli (vendor/fonts/Kundli/Kundli Hindi Normal.ttf). Every ASCII key draws
+// Kruti Dev's letter in a rounder design. The upper range is its own: `Ñ` is
+// औ (not कृ), `Ë` ऐ, `Ê` ऍ, `Á` आ, full ख ष श ण थ ध क्ष on `Â Ô Ó Æ É Ì Õ`,
+// half त्र on `×`, ि with the reph on `£` (and ं on `²`), िं on 0x80. It has
+// no Hindi digits. Left out: `å` `ö` (a द conjunct that is not one certain
+// letter), `Ð`, `Œ`, `§`, `ÿ` and the marks on `¢ ¤ ¥ « ‘`.
+const KUNDLI = krutiVariant({
+  drop: 'Ñ«÷ŸË£¥ÌÍÎÏÔðùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    'Ñ': 'औ',
+    'Ë': 'ऐ',
+    'Ê': 'ऍ',
+    'Á': 'आ',
+    'Âk': 'खा',
+    'Â': 'ख',
+    'Õ': 'क्ष',
+    'Ì': 'ध',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Æ': 'ण',
+    'É': 'थ',
+    '×k': 'त्र',
+    '×': 'त्र्',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'õ': 'ह्न',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि' + PRE_REPH,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '\u0080': PRE_I_NASAL,
+    '®': 'ैं',
+    'ƒ': 'ॉ',
+    '“': 'ः',
+    '∙': 'ऽ',
+  },
+});
+
+// Krishna (vendor/fonts/Krishna/Krishna.ttf). Kruti Dev's ASCII keys, its own
+// upper range: Hindi digits as in Arjun (१-४ on 0x8D-0x90, ५-९ on ‘ ’ “ ” •,
+// ० on Œ), vowels आ आँ ओ औ ऋ ऍ ॠ ऌ on `Á Í Î Ï Û Ê Ç È`, full ख ण थ ध ष श
+// on `Â Æ É Ì Ô Ó`, conjuncts क्ष ह्न ह्व श्च श्व स्त्र दृ, ॥ on `«`, small ु
+// signs on `÷ ù ×`, ी on `Ë`, ि on `£`, िं and ीं on `¯ °` (and `ö`).
+// Left out: `²` (िं or ि with a reph, not certain), the small marks on
+// `¤ ¦ § ø ú û ü`, `þ š ›` (conjuncts not read with certainty) and `¥ ˜ —`.
+const KRISHNA = krutiVariant({
+  drop: 'Û«÷ŸË£¥ÌÍÎÏÔðàùÓÆÇÉÈÊ®åƒ„†‡ˆ‰Š‹',
+  add: {
+    'Á': 'आ',
+    'Í': 'आँ',
+    'Î': 'ओ',
+    'Ï': 'औ',
+    'Û': 'ऋ',
+    'Ê': 'ऍ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    'Â': 'ख',
+    'Æ': 'ण',
+    'É': 'थ',
+    'Ì': 'ध',
+    'Ô': 'ष',
+    'Ó': 'श',
+    'Õ': 'क्ष',
+    'Ð': 'ह्न',
+    'œ': 'ह्न',
+    'à': 'ह्व',
+    'õ': 'श्च',
+    'ý': 'श्व',
+    'ò': 'स्त्र',
+    'Ÿ': 'क्त',
+    'ð': 'द्ध',
+    'å': 'दृ',
+    '«': '॥',
+    '¬': 'ॐ',
+    '÷': 'ु',
+    'ù': 'ु',
+    '×': 'ु',
+    'Ë': 'ी',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '°': 'ीं',
+    'ö': 'ीं',
+    '®': 'ैं',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '∙': 'ऽ',
+    'Œ': '०',
+    '\u008d': '१',
+    '\u008e': '२',
+    '\u008f': '३',
+    '\u0090': '४',
+    '‘': '५',
+    '’': '६',
+    '“': '७',
+    '”': '८',
+    '•': '९',
+  },
+});
+
+// New Delhi (vendor/fonts/New Delhi/New_Delhi.ttf). Kruti Dev's ASCII keys,
+// except: `=` is HALF त्र (`=k` त्र), there is no glyph on `'` - the half श is
+// on `’`, which Word types for ' - and none on ``` (ृ). Upper range as in
+// Krishna for ह्न ह्व द्ध स्त्र दृ ॐ ॠ ऌ, ि on `£`, िं on `¯`, ीं on `˚`, ि with
+// the reph and ं on `²`. No Hindi digits. Left out: `§ ˉ ±` (signs not read
+// with certainty), `Œ` and the marks on `¤ ¥ « ‘ Ú`.
+const NEW_DELHI = krutiVariant({
+  drop: "=`'«÷ŸË£Ò¥ÃÄÌÍÎÏÔðàùÓÆÇÉÈÊ±®·åƒ„†‡ˆ‰Š‹",
+  add: {
+    '=k': 'त्र',
+    '=': 'त्र्',
+    '’k': 'श',
+    '’': 'श्',
+    'Ð': 'ह्न',
+    'à': 'ह्व',
+    'ð': 'द्ध',
+    'ò': 'स्त्र',
+    'å': 'दृ',
+    'Ç': 'ॠ',
+    'È': 'ऌ',
+    '¬': 'ॐ',
+    '£': 'ि',
+    '¯': PRE_I_NASAL,
+    '²': PRE_I_NASAL + PRE_REPH,
+    '˚': 'ीं',
+    '®': 'ैं',
+    '¦': 'ॉ',
+    '¢': 'ः',
+    'µ': '–',
+    '¹': '*',
+    '•': 'ऽ',
+  },
+});
+
 /** The 0x80-0x9F block, where DevLys 010 and Kruti Dev 010 draw different glyphs. */
 export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 
@@ -1757,6 +1954,62 @@ export const FONTS = {
     css: '"DevLys 010", "DevLys", monospace',
     sample: 'fgUnh Hkkjr dh jkt/kkuh Hkk"kk gSA',
     placeholder: 'fgUnh Hkkjr  (example)',
+  },
+  arjun: {
+    key: 'arjun',
+    label: 'Arjun',
+    kind: 'legacy',
+    ...ARJUN,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // ARJUN). `beta` until a real Arjun document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=kky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  kundli: {
+    key: 'kundli',
+    label: 'Kundli',
+    kind: 'legacy',
+    ...KUNDLI,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // KUNDLI). `beta` until a real Kundli document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  krishna: {
+    key: 'krishna',
+    label: 'Krishna',
+    kind: 'legacy',
+    ...KRISHNA,
+    // Read off the font file key by key against Kruti Dev (see the note above
+    // KRISHNA). `beta` until a real Krishna document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] x`g ea=ky;',
+    placeholder: 'Hkkjr  (example)',
+  },
+  'new-delhi': {
+    key: 'new-delhi',
+    label: 'New Delhi',
+    kind: 'legacy',
+    ...NEW_DELHI,
+    // Read off the font file key by key against Kruti Dev and Krishna (see the
+    // note above NEW_DELHI). `beta` until a real document has been run through it.
+    accurate: true,
+    beta: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'Hkkjr ljdkj] fo’ofo|ky; ea=kky;',
+    placeholder: 'Hkkjr  (example)',
   },
   chanakya: {
     key: 'chanakya',
