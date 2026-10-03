@@ -132,8 +132,9 @@ export function outputName(name, direction, ext) {
 // Scripts
 // ---------------------------------------------------------------------------
 
-const DEVANAGARI = /[ऀ-ॿ]/;
-const DEVANAGARI_G = /[ऀ-ॿ]/g;
+// Devanagari, and Gujarati (U+0A80-0AFF) for the Gujarati fonts.
+const DEVANAGARI = /[ऀ-ॿ\u0A80-\u0AFF]/;
+const DEVANAGARI_G = /[ऀ-ॿ\u0A80-\u0AFF]/g;
 const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
 
 /**
@@ -148,7 +149,7 @@ const countDeva = (s) => (s.match(DEVANAGARI_G) || []).length;
  * @returns {{ hindi: boolean, s: string }[]}
  */
 export function splitScripts(text) {
-  const cls = (ch) => (/[ऀ-ॿ‌‍]/.test(ch) ? 'D' : /[A-Za-z]/.test(ch) ? 'L' : 'N');
+  const cls = (ch) => (/[ऀ-ॿ\u0A80-\u0AFF‌‍]/.test(ch) ? 'D' : /[A-Za-z]/.test(ch) ? 'L' : 'N');
   const tokens = [];
   for (const ch of text) {
     const c = cls(ch);
@@ -473,7 +474,7 @@ const formatKey = (rPr) =>
     .replace(/\s+/g, '');
 
 /** Combining marks: a run starting with one belongs to the syllable before. */
-const MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ]/;
+const MARK = /^[ऀ-ःऺ-ॏ॑-ॗॢॣ\u0A81-\u0A83\u0ABC\u0ABE-\u0ACD\u0AE2\u0AE3]/;
 
 /**
  * Does the boundary between two runs in a legacy font fall inside a syllable?
@@ -486,7 +487,7 @@ export function splitsSyllable(a, b, from = 'kruti-dev') {
   const last = a.slice(-1);
   if (last) {
     const u = legacyToUnicode(last, from);
-    if (u.startsWith('ि') || u.endsWith('्')) return true;
+    if (/^[िિ]/.test(u) || /[्્]$/.test(u)) return true;
   }
   const first = b[0];
   if (!first) return false;

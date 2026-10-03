@@ -33,6 +33,30 @@
     url('../../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-600-normal.woff') format('woff');
 }
 
+/* Hind Vadodara for Unicode Gujarati, on the Gujarati converters only. No
+   preload: no other page draws Gujarati, so `swap` costs nothing elsewhere and
+   the device's own Gujarati font (Shruti, Nirmala UI) shows until it loads. */
+@font-face {
+  font-family: 'Hind Vadodara';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0A80-0AFF, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/hind-vadodara/files/hind-vadodara-gujarati-400-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/hind-vadodara/files/hind-vadodara-gujarati-400-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Hind Vadodara';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0A80-0AFF, U+200C-200D, U+25CC;
+  src:
+    url('../../node_modules/@fontsource/hind-vadodara/files/hind-vadodara-gujarati-600-normal.woff2') format('woff2'),
+    url('../../node_modules/@fontsource/hind-vadodara/files/hind-vadodara-gujarati-600-normal.woff') format('woff');
+}
+
 /* Kruti Dev / DevLys faces for the output preview. Self-hosted from
    /public/fonts (owner-supplied) with local() first, so the preview degrades
    to raw ASCII rather than breaking when a file is absent. */
@@ -143,6 +167,9 @@
   --font-deva:
     'Noto Sans Devanagari', 'Nirmala UI', Mangal, ui-sans-serif, system-ui,
     sans-serif;
+  --font-guj:
+    'Hind Vadodara', 'Nirmala UI', Shruti, 'Noto Sans Gujarati', ui-sans-serif,
+    system-ui, sans-serif;
 
   /* Radius ladder: 6px functional chrome, 12px cards, 16px panels, pill CTAs */
   --radius-chrome: 6px;
@@ -227,6 +254,12 @@
   [lang='hi'],
   .deva {
     font-family: var(--font-deva);
+    line-height: 1.85;
+  }
+
+  [lang='gu'],
+  .guj {
+    font-family: var(--font-guj);
     line-height: 1.85;
   }
 }

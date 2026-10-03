@@ -44,7 +44,10 @@ README on how to upload:
 | Shusha, Shivaji | one layout. Shivaji01 is Shusha with a full stop for the danda | **Live (Beta)**, Shusha05 and Shivaji05 included |
 | Shusha02, Shivaji02 | Shusha with four keys changed | **Live (Beta)** |
 | DV-TTSurekh, DV-TTYogesh | DV-TT (Marathi). Yogesh draws the same letter as Surekh on every key, the EN styles differ only in drawing English digits | **Live (Beta)** on /marathi-font-converter |
+| Gujarati/LMG Arun, LMG Laxmi, LMG Rupen | the Gujarati typewriter keyboard | **Live (Beta)** on /lmg-arun-to-unicode, every style |
+| Gujarati/Terafont-Varun (Varun, Ganesh, Indra, Kinnari, Parth, Suraj, Trilo) | LMG Arun's keys but À É Ö | **Live (Beta)** on /gujarati-font-converter. Not TERAVRUN (Varuna "Fat and Thin") or -IND1: symbol fonts |
 | Gujarati/Vakil | Gujarati letters on a Shusha-like keyboard | Map to be built (Gujarati) |
+| Gujarati/Saumil, Gopika, Avantika, Shree768, Gujrati Saral 1, Krishna | each its own keyboard | Map to be built (Gujarati) |
 | Maya | its own layout | Map to be built |
 | DV-TTGanesh, DV-Divyae | their own layouts, not DV-TT Surekh's | Map to be built |
 | Millennium (Varun, Shailesh, Mogara, Priya, Gauri, Shridhar, Deepak) | Millennium | Map to be built |

@@ -9,7 +9,7 @@
  */
 import { langOf, useT, raw } from '../i18n/index.js';
 import { FONTS } from '../lib/fontMaps.js';
-import { WORD_FONTS, UNICODE_FONTS, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
+import { WORD_FONTS, UNICODE_FONTS, UNICODE_FONTS_GU, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
 
 interface Props {
   /** The page's fonts: the document is read as FROM, converted to TO by default. */
@@ -32,20 +32,29 @@ const id = `doc-${from}-${to}`;
 // each offered font, and every verified legacy font other than the source.
 // The page's own target is picked to begin with.
 // Grouped by language, so the list stays readable with two dozen fonts.
+// Only fonts of the same script: Gujarati text has no Kruti Dev keys.
+const gujarati = FONTS[from]?.lang === 'gu' || FONTS[to]?.lang === 'gu';
+const sameScript = (k: string) => (FONTS[k]?.lang === 'gu') === gujarati;
+const unicodeFonts = gujarati ? UNICODE_FONTS_GU : UNICODE_FONTS;
 const beta = (k: string) => (FONTS[k]?.beta ? ` (${t('page.beta')})` : '');
 const legacy = Object.entries(WORD_FONTS)
-  .filter(([k]) => k !== from && FONTS[k]?.accurate)
+  .filter(([k]) => k !== from && FONTS[k]?.accurate && sameScript(k))
   .map(([k, w]) => ({ value: `${k}|${w.name}`, label: `${w.name}${beta(k)}`, lang: FONTS[k].lang ?? 'hi' }));
-const LANG_GROUP: Record<string, string> = { hi: 'doc.groupHindi', ne: 'doc.groupNepali', mr: 'doc.groupMarathi' };
+const LANG_GROUP: Record<string, string> = {
+  hi: 'doc.groupHindi',
+  ne: 'doc.groupNepali',
+  mr: 'doc.groupMarathi',
+  gu: 'doc.groupGujarati',
+};
 const targetGroups = [
   ...(fromUnicode
     ? []
-    : [{ label: t('doc.groupUnicode'), options: UNICODE_FONTS.map((f) => ({ value: `unicode|${f}`, label: t('doc.unicodeIn', { font: f }) })) }]),
+    : [{ label: t('doc.groupUnicode'), options: unicodeFonts.map((f) => ({ value: `unicode|${f}`, label: t('doc.unicodeIn', { font: f }) })) }]),
   ...Object.entries(LANG_GROUP)
     .map(([lang, key]) => ({ label: t(key), options: legacy.filter((o) => o.lang === lang) }))
     .filter((g) => g.options.length > 0),
 ];
-const selected = isUnicodeKey(to) ? `unicode|${to === 'mangal' ? 'Mangal' : UNICODE_FONTS[0]}` : `${to}|${WORD_FONTS[to].name}`;
+const selected = isUnicodeKey(to) ? `unicode|${to === 'mangal' ? 'Mangal' : unicodeFonts[0]}` : `${to}|${WORD_FONTS[to].name}`;
 const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from: docLabel(from, strings) });
 ---
 

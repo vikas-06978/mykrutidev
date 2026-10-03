@@ -42,10 +42,38 @@ export const WORD_FONTS = {
   narad: { name: 'Narad', label: 'Narad', match: /^narad$/i },
   aakriti: { name: 'Aakriti', label: 'Aakriti', match: /^aakriti$/i },
   anjali: { name: 'Anjali', label: 'Anjali', match: /^anjali$/i },
+  // Gujarati. LMG Laxmi and Rupen are LMG Arun redrawn; every Terafont design
+  // draws Terafont Varun's letters. Not TERAFONT-VARUNA "Fat and Thin" or
+  // TERAFONT-INDUSTRY: symbol fonts, whose text is stored in another range.
+  'lmg-arun': { name: 'LMG-Arun', label: 'LMG Arun', match: /^lmg-?\s*(arun|laxmi|rupen)/i },
+  terafont: {
+    name: 'TERAFONT-VARUN',
+    label: 'Terafont',
+    match: /^terafont-?\s*(varun(?!a)|ganesh|indra|kinnari|parth|suraj|trilochan)/i,
+  },
 };
 
 /** Unicode output fonts offered for converted Hindi. */
 export const UNICODE_FONTS = ['Mangal', 'Nirmala UI'];
+
+/**
+ * And for Gujarati: Shruti and Nirmala UI come with Windows, so a document set
+ * in them opens right on any office computer. The rest are free Google fonts
+ * (installed from fonts.google.com); the last four are display faces, for
+ * headings.
+ */
+export const UNICODE_FONTS_GU = [
+  'Shruti',
+  'Nirmala UI',
+  'Hind Vadodara',
+  'Mukta Vaani',
+  'Baloo Bhai 2',
+  'Rasa',
+  'Farsan',
+  'Mogra',
+  'Shrikhand',
+  'Kumar One',
+];
 
 /** Mangal is Unicode drawn in Mangal: the same text as "unicode". */
 export const isUnicodeKey = (key) => key === 'unicode' || key === 'mangal';
