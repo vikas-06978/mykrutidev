@@ -91,6 +91,32 @@ Run from the repository root. `wrangler` is a dev dependency (`npm ci`).
    **Download CSV**. It is not in the sitemap and every response is `noindex`.
    From a script: `curl -H "Authorization: Bearer $ADMIN_KEY" "https://mykrutidev.com/admin/feedback?format=csv"`.
 
+## Email to the owner (optional)
+
+Each saved feedback and each tool request can also be emailed to the owner,
+through [Resend](https://resend.com) (`server/notify.js`). It is off until all
+three of these are set in Pages -> Settings -> Variables and Secrets:
+
+| Name | Type | Value |
+|---|---|---|
+| `RESEND_API_KEY` | Secret | an API key from resend.com |
+| `NOTIFY_TO` | Text | where the mail goes, e.g. `you@gmail.com` (comma separated for more) |
+| `NOTIFY_FROM` | Text | `MyKrutiDev <contact@mykrutidev.com>`, an address on the domain verified in Resend |
+
+Setup: create a Resend account, **Domains -> Add domain** `mykrutidev.com`,
+add the DNS records it lists in Cloudflare (it uses a `send.` subdomain, so
+Email Routing keeps working), wait for **Verified**, then **API Keys -> Create**
+(sending access only) and redeploy.
+
+The mail is plain text. The visitor's email, when given, is the Reply-To, so
+replying goes straight to them. The subject never contains visitor-written text.
+The mail is sent after the row is saved, through `waitUntil`, so a Resend
+outage or a wrong key never fails or slows a submission (it only logs in
+Cloudflare). Nothing is sent that is not already in the database.
+
+The privacy policy says this, in every language: change it there too if the
+provider ever changes.
+
 ## Local development
 
 - `astro dev` has no API: pressing Send logs the feedback to the browser
