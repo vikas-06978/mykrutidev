@@ -6,6 +6,15 @@
  * signals and ad personalisation are off: the numbers are for us, not for
  * advertising (the privacy policy says so). The Content-Security-Policy
  * allows Google's addresses for it (src/security/integration.mjs).
+ *
+ * gtag.js is about 70 KB of script that nothing on the page waits for, so it
+ * is fetched once the page has loaded and the browser is idle, not while the
+ * page is still drawing: on a phone it otherwise competes with the first paint
+ * (PageSpeed Insights lists it as unused JavaScript and a long main-thread
+ * task). The visit is still counted, with the same ID and settings: the
+ * config call is queued in dataLayer at once and gtag.js reads it on arrival.
+ * Only a visitor who leaves before the page has finished loading goes
+ * uncounted.
  */
 import { SITE } from './routes.js';
 
@@ -14,7 +23,8 @@ export const GA_ID = 'G-VZZRXNT8TQ';
 
 /**
  * Google's tag, as an inline script for the top of <head>. The same steps as
- * the snippet Google gives, but the gtag.js file is added only on the live host.
+ * the snippet Google gives, but the gtag.js file is added only on the live host,
+ * and only after the page has loaded (see above).
  * @param {string} [site]
  */
 export function analyticsScript(site = SITE) {
@@ -28,10 +38,18 @@ export function analyticsScript(site = SITE) {
         };
         gtag('js', new Date());
         gtag('config', ${id}, { allow_google_signals: false, allow_ad_personalization_signals: false });
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ${id};
-        document.head.appendChild(s);
+        var load = function () {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ${id};
+          document.head.appendChild(s);
+        };
+        var idle = function () {
+          if (window.requestIdleCallback) requestIdleCallback(load, { timeout: 4000 });
+          else setTimeout(load, 2000);
+        };
+        if (document.readyState === 'complete') idle();
+        else addEventListener('load', idle);
       }
     `;
 }
