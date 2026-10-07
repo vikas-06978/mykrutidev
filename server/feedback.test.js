@@ -217,6 +217,105 @@ describe('POST /api/feedback', () => {
   });
 });
 
+describe('the email to the owner', () => {
+  const mailEnv = { RESEND_API_KEY: 're_test_key', NOTIFY_TO: 'owner@example.com', NOTIFY_FROM: 'MyKrutiDev <contact@mykrutidev.com>' };
+  /** A fetch that records what it was asked to send. */
+  const recorder = (status = 200) => {
+    const sent = [];
+    const fetch = async (url, init) => {
+      sent.push({ url, init, body: JSON.parse(init.body) });
+      return new Response('{}', { status });
+    };
+    return { sent, fetch };
+  };
+  const full = { ...good, message: 'Please add PDF conversion', email: 'reader@example.com' };
+
+  test('is sent once per saved feedback, to the owner, replying to the visitor', async () => {
+    const { sent, fetch } = recorder();
+    const r = await post(full, { env: mailEnv, deps: { fetch } });
+    assert.equal(r.status, 201);
+    const { id } = await r.json();
+    assert.equal(sent.length, 1);
+    const [{ url, init, body }] = sent;
+    assert.equal(url, 'https://api.resend.com/emails');
+    assert.equal(init.headers.Authorization, 'Bearer re_test_key');
+    assert.deepEqual(body.to, ['owner@example.com']);
+    assert.equal(body.from, 'MyKrutiDev <contact@mykrutidev.com>');
+    assert.equal(body.reply_to, 'reader@example.com');
+    assert.match(body.subject, new RegExp(`#${id}: Loved it \\(/hindi-keyboard\\)`));
+    assert.match(body.text, /Message: Please add PDF conversion/);
+    assert.match(body.text, /What went wrong: Matra went wrong/);
+    assert.match(body.text, /Used today: Hindi keyboard/);
+    assert.match(body.text, /Wants next: Exam mode \(SSC\/CPCT\/Court\), Something is wrong\/bug/);
+    assert.match(body.text, /Email \(to reply\): reader@example.com/);
+  });
+
+  test('keeps visitor-written text and the secret out of the subject', async () => {
+    const { sent, fetch } = recorder();
+    await post({ ...full, message: 'LEAKME-message', bugText: 'LEAKME-bug' }, { env: mailEnv, deps: { fetch } });
+    assert.doesNotMatch(sent[0].body.subject, /LEAKME|reader@example\.com|re_test_key/);
+    assert.doesNotMatch(sent[0].body.text, /re_test_key/);
+    assert.equal(sent[0].body.subject.includes('\n'), false);
+  });
+
+  test('without an email from the visitor there is no Reply-To', async () => {
+    const { sent, fetch } = recorder();
+    await post(good, { env: mailEnv, deps: { fetch } });
+    assert.equal('reply_to' in sent[0].body, false);
+    assert.match(sent[0].body.text, /Email \(to reply\): not given/);
+  });
+
+  test('is not sent until all three settings are there', async () => {
+    for (const missing of ['RESEND_API_KEY', 'NOTIFY_TO', 'NOTIFY_FROM']) {
+      const { sent, fetch } = recorder();
+      const env = { ...mailEnv };
+      delete env[missing];
+      assert.equal((await post(good, { env, deps: { fetch } })).status, 201, missing);
+      assert.equal(sent.length, 0, missing);
+    }
+  });
+
+  test('is not sent for a refused submission', async () => {
+    const { sent, fetch } = recorder();
+    assert.equal((await post({ ...good, rating: 9 }, { env: mailEnv, deps: { fetch } })).status, 400);
+    assert.equal(sent.length, 0);
+  });
+
+  test('a refusal or a crash on the way never fails the submission, which is saved', async () => {
+    for (const fetch of [
+      async () => new Response('nope', { status: 403 }),
+      async () => {
+        throw new Error('network down');
+      },
+    ]) {
+      const before = (await rows()).length;
+      assert.equal((await post(good, { env: mailEnv, deps: { fetch } })).status, 201);
+      assert.equal((await rows()).length, before + 1);
+    }
+  });
+
+  test('goes through waitUntil when Cloudflare gives one, so the visitor does not wait for it', async () => {
+    const { sent, fetch } = recorder();
+    const pending = [];
+    const r = await post(good, { env: mailEnv, deps: { fetch, waitUntil: (p) => pending.push(p) } });
+    assert.equal(r.status, 201);
+    assert.equal(pending.length, 1);
+    await Promise.all(pending);
+    assert.equal(sent.length, 1);
+  });
+
+  test('a tool request is mailed too, with the idea and the email to reply to', async () => {
+    const { sent, fetch } = recorder();
+    const r = await postRequest({ ...request, email: 'asker@example.com' }, { env: mailEnv, deps: { fetch } });
+    assert.equal(r.status, 201);
+    const { id } = await r.json();
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].body.subject, `MyKrutiDev tool request #${id}`);
+    assert.equal(sent[0].body.reply_to, 'asker@example.com');
+    assert.match(sent[0].body.text, /Tool wanted: PDF to Kruti Dev/);
+  });
+});
+
 describe('GET /api/feedback', () => {
   test('hands the widget the public site key, never the secret', async () => {
     const r = handleConfig({ TURNSTILE_SITE_KEY: 'public-key', TURNSTILE_SECRET_KEY: 'secret' });

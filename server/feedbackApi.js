@@ -14,11 +14,15 @@
  *   TURNSTILE_SITE_KEY    public key, handed to the widget
  *   TURNSTILE_SECRET_KEY  secret; when set, every POST must pass Turnstile
  *   RATE_LIMIT_SALT       optional; salts the rate-limit hash (ADMIN_KEY otherwise)
+ *   RESEND_API_KEY, NOTIFY_TO, NOTIFY_FROM
+ *                         optional; all three turn on an email to the owner for
+ *                         each saved submission (see notify.js)
  *
  * Order of checks: size and type, then the rate limit (so a flood is counted
  * before any work is done for it), then the honeypot, the fields, Turnstile.
  */
 import { LIMITS, RATE, SCHEMA, toRequestRow, toRow, validateFeedback, validateToolRequest } from '../src/lib/feedback.js';
+import { notifyOwner } from './notify.js';
 
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -161,13 +165,21 @@ async function accept(request, env, { scope, validate, verify = verifyTurnstile,
   return { value: checked.value };
 }
 
-/** INSERT one row into `table` and answer 201 with its id. */
-async function insert(db, table, row) {
+/**
+ * INSERT one row into `table`, answer 201 with its id, and email the owner a
+ * copy when that is set up. The mail goes out after the row is saved, through
+ * waitUntil where Cloudflare gives one (so the visitor never waits for it),
+ * and its failure changes nothing for the visitor.
+ */
+async function insert(db, table, row, { env = {}, waitUntil, fetchImpl } = {}) {
   const cols = Object.keys(row);
   const saved = await db
     .prepare(`INSERT INTO ${table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')}) RETURNING id`)
     .bind(...cols.map((c) => row[c]))
     .first();
+  const mail = notifyOwner(env, table, row, saved.id, fetchImpl);
+  if (waitUntil) waitUntil(mail);
+  else await mail;
   return reply(201, { ok: true, id: saved.id });
 }
 
@@ -175,11 +187,14 @@ async function insert(db, table, row) {
  * POST /api/feedback
  * @param {Request} request
  * @param {Record<string, any>} env
- * @param {{ verify?: typeof verifyTurnstile, now?: number }} [deps]  for tests
+ * @param {{ verify?: typeof verifyTurnstile, now?: number, waitUntil?: (p: Promise<unknown>) => void, fetch?: typeof fetch }} [deps]
+ *        waitUntil comes from the Pages Function; the rest are for tests
  */
 export async function handleFeedback(request, env, deps = {}) {
   const got = await accept(request, env, { ...deps, scope: 'feedback', validate: validateFeedback });
-  return got instanceof Response ? got : insert(env.DB, 'feedback', toRow(got.value));
+  return got instanceof Response
+    ? got
+    : insert(env.DB, 'feedback', toRow(got.value), { env, waitUntil: deps.waitUntil, fetchImpl: deps.fetch });
 }
 
 /**
@@ -187,9 +202,11 @@ export async function handleFeedback(request, env, deps = {}) {
  * checks as feedback, with its own rate-limit count.
  * @param {Request} request
  * @param {Record<string, any>} env
- * @param {{ verify?: typeof verifyTurnstile, now?: number }} [deps]  for tests
+ * @param {{ verify?: typeof verifyTurnstile, now?: number, waitUntil?: (p: Promise<unknown>) => void, fetch?: typeof fetch }} [deps]
  */
 export async function handleToolRequest(request, env, deps = {}) {
   const got = await accept(request, env, { ...deps, scope: 'tool-request', validate: validateToolRequest });
-  return got instanceof Response ? got : insert(env.DB, 'tool_requests', toRequestRow(got.value));
+  return got instanceof Response
+    ? got
+    : insert(env.DB, 'tool_requests', toRequestRow(got.value), { env, waitUntil: deps.waitUntil, fetchImpl: deps.fetch });
 }
