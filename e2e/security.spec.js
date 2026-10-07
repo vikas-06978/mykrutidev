@@ -58,6 +58,9 @@ test.describe('the Content-Security-Policy', () => {
   });
 
   test(`all ${PAGES.length} built pages load without a violation`, async ({ page }) => {
+    // Every language adds its pages to this one test, so its time allowance
+    // grows with them: 1 s a page, and never less than the 180 s above.
+    test.setTimeout(Math.max(180_000, PAGES.length * 1_000));
     expect(PAGES.length).toBeGreaterThan(50);
     const found = await watch(page);
     for (const path of PAGES) {
