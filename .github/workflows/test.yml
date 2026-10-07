@@ -1,12 +1,25 @@
-# Every push and pull request: unit tests, the build (with its PDF, image and
-# service-worker steps), the checks on the built site - including the feedback
-# API through `wrangler pages dev`, which may NOT be skipped here (CI=true, see
-# tests/feedback-pages.test.js) - and the browser tests.
+# Every pull request and every push to main: unit tests, the build (with its
+# PDF, image and service-worker steps), the checks on the built site - including
+# the feedback API through `wrangler pages dev`, which may NOT be skipped here
+# (CI=true, see tests/feedback-pages.test.js) - and the browser tests.
+#
+# One run per change, to keep within the Actions minutes of a private repo:
+# a push to a PR branch is tested once, by its pull_request run, not twice;
+# a newer push cancels the run it replaces; and translation drafts, which the
+# site never reads, start no run on their own.
 name: test
 
 on:
   push:
+    branches: [main]
+    paths-ignore: ['i18n-drafts/**']
   pull_request:
+    paths-ignore: ['i18n-drafts/**']
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
