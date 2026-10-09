@@ -196,8 +196,8 @@ export const PAGES = [
 
   // ---- Abbasi Chanakya New: built from the real font file, glyph by glyph ---
   // Filed under "Chanakya" because that is what its visitors call the font, but
-  // it is its own map and its own font key. The generic Chanakya pages below
-  // stay "coming soon": that layout differs from this one in several keys.
+  // it is its own map and its own font key. Walkman-Chanakya 905 has no pages:
+  // its font file was never supplied, so they were removed (public/_redirects).
   {
     path: '/abbasi-chanakya-to-unicode',
     ready: true,
@@ -306,47 +306,6 @@ export const PAGES = [
     beta: true,
   },
 
-  // ==========================================================================
-  // SCAFFOLDED - routes and SEO exist, mapping does not. Coming soon panel.
-  // ==========================================================================
-
-  // ---- Chanakya: a genuinely different vendor layout, map is empty ---------
-  {
-    path: '/chanakya-to-unicode',
-    ready: false,
-    kind: 'converter',
-    from: 'chanakya',
-    to: 'unicode',
-    group: 'Chanakya',
-    related: ['/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/'],
-  },
-  {
-    path: '/unicode-to-chanakya',
-    ready: false,
-    kind: 'converter',
-    from: 'unicode',
-    to: 'chanakya',
-    group: 'Unicode / Hindi',
-    related: ['/chanakya-to-unicode', '/'],
-  },
-  {
-    path: '/kruti-dev-to-chanakya',
-    ready: false,
-    kind: 'converter',
-    from: 'kruti-dev',
-    to: 'chanakya',
-    group: 'Kruti Dev',
-    related: ['/chanakya-to-kruti-dev', '/chanakya-to-unicode', '/'],
-  },
-  {
-    path: '/chanakya-to-kruti-dev',
-    ready: false,
-    kind: 'converter',
-    from: 'chanakya',
-    to: 'kruti-dev',
-    group: 'Chanakya',
-    related: ['/kruti-dev-to-chanakya', '/chanakya-to-unicode'],
-  },
 
   // ---- Shusha and Shivaji: one layout, read off the font files. Shivaji is
   // the Marathi name, with a full stop where Shusha has the danda. Beta until
@@ -910,19 +869,6 @@ export const PAGES = [
     group: 'Bengali',
     related: ['/bengali-font-converter', '/unicode-to-bamini', '/unicode-to-kruti-dev'],
     beta: true,
-  },
-  // ==========================================================================
-  // PLANNED - other Indic scripts. Routes only, no mapping work started.
-  // Activate only after a keyword-volume check AND a tested mapping.
-  // ==========================================================================
-  {
-    path: '/punjabi-font-converter',
-    ready: false,
-    kind: 'converter',
-    from: null,
-    to: null,
-    group: 'Other scripts',
-    related: ['/all-converters'],
   },
 
   // ==========================================================================

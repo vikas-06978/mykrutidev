@@ -28,7 +28,7 @@ README on how to upload:
 | Folder | For | Site page |
 | :-- | :-- | :-- |
 | `Gujarati/` | Gujarati (LMG Arun, Saumil, Gopika, Vakil...) | /gujarati-font-converter |
-| `Punjabi/` | Punjabi in Gurmukhi (AnmolLipi, Asees, Joy...) | /punjabi-font-converter |
+| `Punjabi/` | Punjabi in Gurmukhi (AnmolLipi, Asees, Joy...) | none yet (no font supplied) |
 | `Bengali/` | Bengali (SutonnyMJ and the Bijoy fonts) | /bengali-font-converter |
 | `Tamil/` | Tamil (Bamini, TSCII, TAB...) | /tamil-font-converter |
 | `Other/` | any other language | - |

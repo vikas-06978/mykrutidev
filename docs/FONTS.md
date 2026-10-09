@@ -60,21 +60,23 @@ converter is right for:
 | --- | --- | --- | --- | --- |
 | 010 | — | English digits | Hindi digits, ऊ ङ ञ, conjuncts | ’ श्, “ भ, ‘ ” nothing |
 | 011, 012, 014, 016 | same as 010 (bold, italic) | English digits | same as 010 | ‘ ’ श्, “ ” ष् |
-| 055 | same as 010 | **Hindi digits** | differs (ƒ is घ ...) | ‘ ’ श्, “ ” ष् |
+| 055 | same as 010 | **Hindi digits** | its own: ƒ घ, „ ह्म, ‡ ह्न, ‰ क्त, ‹ श्, … िर्ं (É), 0x90 भ; † ˆ nothing, Š a star, å Œ a stroke | ‘ ’ श्, “ ” ष् |
 | 020 | DevLys 020's layout (ध on Ä) | **Hindi digits** | DevLys 020's | ’ श्, “ भ |
 
 So the Kruti Dev converter reads 010-016 and 055's letters; a Word file names
 its font on every run, and there `krutiWordRun()` (fontMaps.js) reads the
-curly quotes, dashes and 055's digits as that cut draws them, and Kruti Dev
+curly quotes, dashes and 055's digits and Alt codes as that cut draws them
+(`kruti055Keys()`; pasted 055 text has a tick box on the converter), and Kruti Dev
 020 is read with the DevLys 020 map (wordFonts.js). Every font on the Kruti
 Dev keyboard, 010 included, draws its number keys as English digits; Hindi
 digits are Alt codes, which Unicode -> Kruti Dev writes (KRUTI_WRITE_EXTRA).
 
 **There is no Walkman-Chanakya font here, on purpose.** The old `chanakya.woff`
-did not match the Chanakya character map and was removed. The Chanakya pages are
-"coming soon" and load no preview font. When the real Walkman-Chanakya 905 font
-arrives, follow "Adding or replacing a font" below (see the TODO above CHANAKYA
-in `src/lib/fontMaps.js`).
+did not match the Chanakya character map and was removed, and so were the
+Walkman-Chanakya pages (their addresses redirect to /hindi-font-converter).
+When the real Walkman-Chanakya 905 font arrives, add the pages back and follow
+"Adding or replacing a font" below (see the TODO above CHANAKYA in
+`src/lib/fontMaps.js`).
 
 `devlys-010.woff` was converted from the supplied `DevLys 010 Normal.ttf`, which
 is kept out of the served tree in `vendor/fonts/` (the original download folder

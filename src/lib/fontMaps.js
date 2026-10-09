@@ -366,6 +366,7 @@ const KRUTI_SMART_QUOTES = {
  *   ”  ष्  in 011 012 014 016 055; nothing in 010
  *   —  कृ  in every cut                    …  ३  in 010 to 016
  *   0-9  Hindi digits in 055; English digits in every other cut
+ *   and 055's own Alt codes (kruti055Keys below)
  * Kruti Dev 020 is another layout (DevLys 020's) and never comes here.
  *
  * @param {string} text  the run's characters
@@ -375,7 +376,7 @@ export function krutiWordRun(text, fontName) {
   const cut = /(\d{3})/.exec(fontName)?.[1] ?? '010';
   const known = ['010', '011', '012', '014', '016', '055'].includes(cut);
   const quotesAreSha = known && cut !== '010';
-  return text.replace(/[’‘“”–—…0-9]/g, (ch) => {
+  const quotes = text.replace(/[’‘“”–—…]/g, (ch) => {
     switch (ch) {
       case '’':
         return "'";
@@ -392,9 +393,47 @@ export function krutiWordRun(text, fontName) {
       case '…':
         return known && cut !== '055' ? '३' : ch;
       default:
-        return cut === '055' ? String.fromCharCode(0x966 + Number(ch)) : ch;
+        return ch;
     }
   });
+  return cut === '055' ? kruti055Keys(quotes) : quotes;
+}
+
+// Kruti Dev 055 (public/fonts/KRDEV055.woff, drawn glyph by glyph beside
+// KRDEV010.woff): every ASCII letter key is 010's, but the number keys draw
+// Hindi digits, and these Alt codes draw what ANOTHER key draws in 010 (the
+// same glyph, outline for outline): ƒ घ (Ä), „ ह्म (ã), ‡ ह्न (à), ‰ क्त
+// (ä), ‹ श् (Ü), … ि with the reph and ं (É), 0x90 भ (Ò). † and ˆ draw
+// nothing, Š a star (∗, as `*` is a Kruti key). å and Œ draw a stroke that is
+// not a letter: å is ० in 010, so it is read as Œ, which no Kruti key reads.
+const KRUTI_055_AS_010 = {
+  'ƒ': 'Ä',
+  '„': 'ã',
+  '‡': 'à',
+  '‰': 'ä',
+  '‹': 'Ü',
+  '…': 'É',
+  '\u0090': 'Ò',
+  '†': '',
+  'ˆ': '',
+  'Š': '∗',
+  'å': 'Œ',
+};
+const RE_055 = new RegExp(`[0-9${Object.keys(KRUTI_055_AS_010).join('')}]`, 'g');
+
+/**
+ * Text typed in Kruti Dev 055, rewritten as the Kruti Dev 010 keys that draw
+ * the same thing, so the Kruti Dev map reads it: its number keys become Hindi
+ * digits. Web and email addresses are left alone.
+ *
+ * @param {string} text
+ */
+export function kruti055Keys(text) {
+  return splitProtected(text, RE_PROTECT_LINKS)
+    .map(({ skip, v }) =>
+      skip ? v : v.replace(RE_055, (ch) => KRUTI_055_AS_010[ch] ?? String.fromCharCode(0x966 + Number(ch))),
+    )
+    .join('');
 }
 
 // The upper range of Kruti Dev 010: ready-made conjuncts, full and half
@@ -894,8 +933,10 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 // STATUS: accurate: false, and NOT merely because nobody has got round to
 // checking it. The table below is complete and round-trips cleanly. It also
 // did not describe the Chanakya font file this repo used to ship, which is why
-// the pages stay on "coming soon" and why that file has since been removed.
-// The pages load NO preview font until a matching one is supplied (TODO below).
+// that file was removed, and why the font has NO pages: they sat on "coming
+// soon" until October 2026 and were then removed (public/_redirects sends
+// their addresses to /hindi-font-converter). Add them back, with routes and
+// copy, once the real Walkman-Chanakya 905 font is supplied (TODO below).
 //
 // ---------------------------------------------------------------------------
 // WHAT THIS TABLE ACTUALLY IS
@@ -3326,7 +3367,6 @@ const ENGLISH_WORDS = new Set([
   'website','www','year','yours',
 ]);
 
-const RE_LATIN_TOKEN = /^[A-Za-z][A-Za-z'’.-]*$/;
 const RE_ALL_CAPS = /^[A-Z]{2,6}$/;
 const RE_CAPITALISED = /^[A-Z][a-z]+$/;
 
@@ -3395,18 +3435,74 @@ function isConsonantChar(ch) {
  * "Delhi" -> क्मसीप. ("India" decodes cleanly too, but rule 1 catches it - it
  * is in the word list.) The UI says so, and the toggle turns all of this off.
  */
-function looksEnglish(token, decoded) {
-  const bare = token.replace(/[^A-Za-z'’.-]/g, '');
-  if (!RE_LATIN_TOKEN.test(bare)) return false;
-  const word = bare.replace(/[^A-Za-z]/g, '');
-  if (word.length < 2) return false;
+function looksEnglish(token, decoded, ambiguous) {
+  const word = englishWord(token);
+  if (!word) return false;
+  const lower = word.toLowerCase();
+  // Hindi too, in Kruti Dev: decided by the words around it (decideTokens).
+  // In capitals (PAN, US) it is the abbreviation, never the Hindi word.
+  if (ambiguous?.has(lower) && !RE_ALL_CAPS.test(word)) return false;
 
-  if (ENGLISH_WORDS.has(word.toLowerCase())) return true;
-  if (RE_ALL_CAPS.test(word)) return true;
+  if (ENGLISH_WORDS.has(lower)) return true;
+  // GA, VA, AA: a letter and the danda (ळ। ट। ॥), not an abbreviation.
+  if (RE_ALL_CAPS.test(word) && !/^[A-Z]A$/.test(word)) return true;
   if (RE_CAPITALISED.test(word) && !isWellFormedDevanagari(stripMarks(decoded))) {
     return true;
   }
   return false;
+}
+
+/**
+ * English words that are also everyday Hindi in Kruti Dev: `us` is ने, `can`
+ * is बंद, `in` is पद, `pan` is चंद. Kept as English only between two English
+ * words ("Office in India"); anywhere else they are converted, and the page
+ * lists them so a visitor can keep one with a tick.
+ */
+export const AMBIGUOUS_ENGLISH = new Set(['us', 'can', 'in', 'pan']);
+
+/** The fonts typed on Kruti Dev's keys, where AMBIGUOUS_ENGLISH are Hindi. */
+export const KRUTI_KEYBOARD = new Set(['kruti-dev', 'devlys', 'arjun', 'kundli', 'krishna', 'new-delhi', 'ajay', 'aman', 'agra']);
+
+const RE_LEAD_PUNCT = /^[(\[“‘"']+/;
+const RE_TRAIL_PUNCT = /[.,:;!?)\]”’"']+$/;
+/**
+ * The English word in a token, or '' when the token cannot be one. Quotes and
+ * punctuation around it may go; anything else that is not a letter must not
+ * appear INSIDE it, because in Kruti Dev those keys are letters: `i<+s` is
+ * पढ़े and `u;s` is नये, not "is" and "us" with stray marks.
+ */
+export function englishWord(token) {
+  const core = token.replace(RE_LEAD_PUNCT, '').replace(RE_TRAIL_PUNCT, '');
+  if (!/^[A-Za-z]+(?:['’.-][A-Za-z]+)*$/.test(core)) return '';
+  const word = core.replace(/[^A-Za-z]/g, '');
+  return word.length >= 2 ? word : '';
+}
+
+/**
+ * Keep or convert, token by token. `keepWords` and `convertWords` are the
+ * visitor's own choices from the page (exact tokens) and win over the guess.
+ * An ambiguous word (AMBIGUOUS_ENGLISH) is English only with English on both
+ * sides.
+ *
+ * @returns {{ token: string, decoded: string, english: boolean, auto: boolean }[]}
+ */
+function decideTokens(tokens, trie, toLogical, { keepWords, convertWords, ambiguous } = {}) {
+  const items = tokens.map((token) => {
+    const decoded = toLogical(transliterate(token, trie));
+    return { token, decoded, auto: looksEnglish(token, decoded, ambiguous) };
+  });
+  const choose = (it) =>
+    keepWords?.has(it.token) ? true : convertWords?.has(it.token) ? false : it.auto;
+  for (const it of items) it.english = choose(it);
+  // The neighbours' final say, the visitor's ticks included, decides these.
+  items.forEach((it, i) => {
+    const word = englishWord(it.token);
+    if (!it.auto && ambiguous?.has(word.toLowerCase()) && !RE_ALL_CAPS.test(word)) {
+      it.auto = Boolean(items[i - 1]?.english && items[i + 1]?.english);
+      it.english = choose(it);
+    }
+  });
+  return items;
 }
 
 /**
@@ -3435,7 +3531,11 @@ function splitProtected(text, re) {
 // Direction implementations
 // ============================================================================
 
-export function legacyToUnicode(text, map, { keepEnglish = true, toLogical = toLogicalOrder } = {}) {
+export function legacyToUnicode(
+  text,
+  map,
+  { keepEnglish = true, toLogical = toLogicalOrder, keepWords, convertWords, ambiguous } = {},
+) {
   if (!text) return '';
   const trie = trieFor(map);
   const parts = splitProtected(
@@ -3448,10 +3548,17 @@ export function legacyToUnicode(text, map, { keepEnglish = true, toLogical = toL
       if (skip) return v;
       if (!keepEnglish) return toLogical(transliterate(v, trie));
       // Token level, so one English word cannot desync the rest of the line.
-      return v.replace(/\S+/g, (token) => {
-        const decoded = toLogical(transliterate(token, trie));
-        return looksEnglish(token, decoded) ? token : decoded;
-      });
+      const pieces = v.split(/(\s+)/);
+      const tokens = pieces.filter((x, i) => i % 2 === 0 && x);
+      const decided = decideTokens(tokens, trie, toLogical, { keepWords, convertWords, ambiguous });
+      let n = 0;
+      return pieces
+        .map((x, i) => {
+          if (i % 2 === 1 || !x) return x;
+          const it = decided[n++];
+          return it.english ? it.token : it.decoded;
+        })
+        .join('');
     })
     .join('');
 
@@ -3543,7 +3650,7 @@ export function unmappedChars(text, toKey, opts = {}) {
  * @param {string} text
  * @param {string} fromKey key into FONTS
  * @param {string} toKey   key into FONTS
- * @param {{ keepEnglish?: boolean }} [opts]
+ * @param {{ keepEnglish?: boolean, keepWords?: Set<string>, convertWords?: Set<string>, cut055?: boolean }} [opts]
  * @returns {string}
  */
 export function convert(text, fromKey, toKey, opts = {}) {
@@ -3552,6 +3659,10 @@ export function convert(text, fromKey, toKey, opts = {}) {
   const to = FONTS[toKey];
   if (!from || !to) throw new Error(`Unknown font: ${!from ? fromKey : toKey}`);
   opts = scriptOpts(from, to, opts);
+  // Text in Kruti Dev 055 (the visitor says so): its number keys and own Alt
+  // codes are read as the 010 keys that draw the same thing.
+  const cut055 = Boolean(opts.cut055) && fromKey === 'kruti-dev';
+  if (cut055) text = kruti055Keys(text);
 
   // Unicode -> Unicode is identity. This is the whole Mangal story: Mangal is a
   // Unicode font, not an encoding, so "Kruti Dev to Mangal" is "Kruti Dev to
@@ -3559,7 +3670,11 @@ export function convert(text, fromKey, toKey, opts = {}) {
   if (from.kind === 'unicode' && to.kind === 'unicode') return text;
 
   // A font with its own reorder (Gujarati) passes it in.
-  const readOpts = from.toLogical ? { ...opts, toLogical: from.toLogical } : opts;
+  const readOpts = {
+    ...opts,
+    ...(from.toLogical ? { toLogical: from.toLogical } : {}),
+    ambiguous: KRUTI_KEYBOARD.has(fromKey) ? AMBIGUOUS_ENGLISH : null,
+  };
 
   if (from.kind === 'legacy' && to.kind === 'unicode') {
     return legacyToUnicode(text, from.readMap ?? from.map, readOpts);
@@ -3570,13 +3685,50 @@ export function convert(text, fromKey, toKey, opts = {}) {
   // Two fonts on one keyboard layout draw the same letter on every key, so the
   // keys ARE the answer. Going through Unicode would only lose detail it cannot
   // hold, such as which way a quote mark faces (Kruti's Þ and ß both become ").
-  if (from.layout && from.layout === to.layout) return text;
+  // Not for 055 text, whose Hindi digits are no key of the other font.
+  if (from.layout && from.layout === to.layout && !cut055) return text;
 
   // legacy -> legacy routes through Unicode.
   return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, readOpts), to.map, {
     ...opts,
     ...reverseOpts(to),
   });
+}
+
+/**
+ * The words a visitor can tick or untick under a legacy -> Unicode converter:
+ * each one kept as English, and each converted one that may be English (one
+ * of AMBIGUOUS_ENGLISH, or in `candidates`, the page's English word list).
+ * Unique tokens in order of first appearance, at most `limit`.
+ *
+ * @param {string} text
+ * @param {string} fromKey
+ * @param {{ keepWords?: Set<string>, convertWords?: Set<string>, candidates?: Set<string>, cut055?: boolean, limit?: number }} [opts]
+ * @returns {{ token: string, hindi: string, english: boolean }[]}
+ */
+export function englishReport(text, fromKey, { keepWords, convertWords, candidates, cut055, limit = 60 } = {}) {
+  const from = FONTS[fromKey];
+  if (!text || from?.kind !== 'legacy' || from.asciiIsScript) return [];
+  if (cut055 && fromKey === 'kruti-dev') text = kruti055Keys(text);
+  const trie = trieFor(from.readMap ?? from.map);
+  const toLogical = from.toLogical ?? toLogicalOrder;
+  const ambiguous = KRUTI_KEYBOARD.has(fromKey) ? AMBIGUOUS_ENGLISH : null;
+  const seen = new Set();
+  const out = [];
+  for (const { skip, v } of splitProtected(text, RE_PROTECT_ALL)) {
+    if (skip) continue;
+    const tokens = v.split(/\s+/).filter(Boolean);
+    for (const it of decideTokens(tokens, trie, toLogical, { keepWords, convertWords, ambiguous })) {
+      if (seen.has(it.token)) continue;
+      const word = englishWord(it.token).toLowerCase();
+      const maybe = word && (ambiguous?.has(word) || candidates?.has(word));
+      if (!it.english && !maybe && !convertWords?.has(it.token)) continue;
+      seen.add(it.token);
+      out.push({ token: it.token, hindi: it.decoded, english: it.english });
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
 }
 
 /** True when the pair has no mapping at all to convert with (empty map). */

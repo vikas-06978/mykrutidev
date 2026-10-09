@@ -750,6 +750,13 @@ describe('documents in every font', async () => {
     assert.deepEqual(textOf(text('word/document.xml')), ['शक्ति भाषा दृष्टि कृपया', 'शक्ति भारत 2024', 'सन् १९४७']);
   });
 
+  test('Kruti Dev 055\'s own Alt codes are read as that cut draws them', async () => {
+    // ƒ is घ in 055 (१ in 010), ‰ क्त, ‹ श्; † draws nothing.
+    const doc = makeDocx({ document: body(p(r(font('Kruti Dev 055'), 'ƒj Hk‰ ‹kq†'))) });
+    const { text } = await run(doc, 'to-unicode');
+    assert.deepEqual(textOf(text('word/document.xml')), ['घर भक्त शु']);
+  });
+
   test('Kruti Dev 020 is read with DevLys 020\'s keys: ध on Ä, Hindi digits', async () => {
     const doc = makeDocx({ document: body(p(r(font('Kruti Dev 020'), 'Äku 2024'))) });
     const { text } = await run(doc, 'to-unicode');

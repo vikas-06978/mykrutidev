@@ -106,7 +106,7 @@ describe('Hindi font names in the nav and in page lists', () => {
     const h1 = (p) => hi.pages[p].h1;
     assert.equal(listTitle(h1('/devlys-to-unicode'), 'hi'), 'देवलिस से यूनिकोड कन्वर्टर');
     assert.equal(listTitle(h1('/abbasi-chanakya-to-unicode'), 'hi'), 'अब्बासी चाणक्य से यूनिकोड कन्वर्टर');
-    assert.equal(listTitle(h1('/chanakya-to-kruti-dev'), 'hi'), 'चाणक्य से कृतिदेव कन्वर्टर');
+    assert.equal(listTitle(h1('/abbasi-chanakya-to-kruti-dev'), 'hi'), 'अब्बासी चाणक्य से कृतिदेव कन्वर्टर');
     assert.equal(listTitle(h1('/kruti-dev-to-mangal'), 'hi'), 'कृतिदेव से मंगल कन्वर्टर');
     assert.equal(listTitle(h1('/shusha-to-unicode'), 'hi'), 'शुषा से यूनिकोड कन्वर्टर');
     for (const p of Object.keys(hi.pages)) {
