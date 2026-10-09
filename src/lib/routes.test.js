@@ -34,12 +34,12 @@ describe('status: the one flag every "Soon" badge renders from', () => {
     }
   });
 
-  test('both Abbasi Chanakya pages are live; the Walkman-Chanakya ones were removed', () => {
-    assert.equal(statusOf(getPage('/abbasi-chanakya-to-unicode')), 'live');
-    assert.equal(statusOf(getPage('/unicode-to-abbasi-chanakya')), 'live');
-    for (const path of ['/chanakya-to-unicode', '/chanakya-to-kruti-dev', '/unicode-to-chanakya', '/kruti-dev-to-chanakya']) {
-      assert.equal(getPage(path), undefined, path);
+  test('Abbasi and newspaper Chanakya pages are live; the Walkman-Chanakya pairs were removed', () => {
+    for (const path of ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya', '/chanakya-to-unicode', '/unicode-to-chanakya']) {
+      assert.equal(statusOf(getPage(path)), 'live', path);
     }
+    assert.equal(getPage('/chanakya-to-unicode').from, 'chanakya-news');
+    for (const path of ['/chanakya-to-kruti-dev', '/kruti-dev-to-chanakya']) assert.equal(getPage(path), undefined, path);
   });
 });
 import { FONTS } from './fontMaps.js';
@@ -389,11 +389,16 @@ describe('font links under each converter', async () => {
 });
 
 describe('removed pages redirect to a live page', () => {
-  test('Walkman-Chanakya and Punjabi addresses, in every language, with and without the slash', async () => {
+  test('Walkman-Chanakya pairs and Punjabi, in every language, with and without the slash', async () => {
     const { parseRedirects } = await import('../../scripts/serve-dist.mjs');
     const { readFileSync } = await import('node:fs');
     const rules = parseRedirects(readFileSync(new URL('../../public/_redirects', import.meta.url), 'utf8'));
-    const gone = ['/chanakya-to-unicode', '/unicode-to-chanakya', '/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev', '/punjabi-font-converter'];
+    const gone = ['/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev', '/punjabi-font-converter'];
+    // Live again, for the newspaper Chanakya font: never redirected.
+    for (const path of ['/chanakya-to-unicode', '/unicode-to-chanakya']) {
+      assert.ok(isLive(getPage(path)), path);
+      for (const lang of ['', '/hi']) assert.equal(rules.get(`${lang}${path}`), undefined, path);
+    }
     for (const lang of ['', '/hi', '/bn', '/mr', '/ta', '/gu', '/pa']) {
       for (const path of gone) {
         assert.equal(getPage(path), undefined, path);

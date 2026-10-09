@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { inflateSync } from 'node:zlib';
 
 import { FONTS, convert, isAccurate } from './fontMaps.js';
-import { getPage, isLive } from './routes.js';
+import { getPage, isLive, PAGES } from './routes.js';
 import { previewFontFor } from './legacyFonts.js';
 
 const CHANAKYA = FONTS.chanakya.map;
@@ -390,10 +390,9 @@ describe('Chanakya stays behind the accuracy gate', () => {
     assert.equal(isAccurate('chanakya'), false);
   });
 
-  test('it has no pages: they were removed until the Walkman-Chanakya 905 font is supplied', () => {
-    for (const path of ['/chanakya-to-unicode', '/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/kruti-dev-to-chanakya']) {
-      assert.equal(getPage(path), undefined, path);
-    }
+  test('no page uses it until the Walkman-Chanakya 905 font is supplied', () => {
+    // /chanakya-to-unicode is the newspaper Chanakya font (chanakya-news).
+    for (const p of PAGES) assert.ok(p.from !== 'chanakya' && p.to !== 'chanakya', p.path);
   });
 });
 

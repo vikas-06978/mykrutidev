@@ -69,6 +69,25 @@
   font-display: swap;
 }
 
+/* Chanakya (the newspaper font, not Walkman-Chanakya 905) and Patrika:
+   converted from vendor/fonts/Chanakya/Chanakya.ttf and Patrika/Patrika.TTF,
+   the files their maps were read from. */
+@font-face {
+  font-family: 'MKD Chanakya';
+  src:
+    local('Chanakya'),
+    url('/fonts/chanakya.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MKD Patrika';
+  src:
+    local('Patrika'),
+    url('/fonts/patrika.woff') format('woff');
+  font-display: swap;
+}
+
 /* Preeti: previews the output of the Unicode to Preeti page. The map in
    fontMaps.js was read off this very file. */
 @font-face {

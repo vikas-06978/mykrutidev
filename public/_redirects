@@ -7,73 +7,47 @@
 # first, so it sends them to the real one. robots.txt names /sitemap-index.xml.
 /sitemap.xml /sitemap-index.xml 301
 
-# Pages that were never switched on, removed in October 2026: Walkman-Chanakya
-# 905 (its font file was never supplied) and Punjabi (no Gurmukhi font yet).
-# Each goes to the page that lists every font the site does convert.
-/chanakya-to-unicode /hindi-font-converter/ 301
-/chanakya-to-unicode/ /hindi-font-converter/ 301
-/unicode-to-chanakya /hindi-font-converter/ 301
-/unicode-to-chanakya/ /hindi-font-converter/ 301
+# Pages that were never switched on, removed in October 2026: Kruti Dev to and
+# from Walkman-Chanakya 905 (its font file was never supplied) and Punjabi (no
+# Gurmukhi font yet). Each goes to the page that lists every font the site does
+# convert. /chanakya-to-unicode and /unicode-to-chanakya are live again, for the
+# newspaper Chanakya font.
 /kruti-dev-to-chanakya /hindi-font-converter/ 301
 /kruti-dev-to-chanakya/ /hindi-font-converter/ 301
 /chanakya-to-kruti-dev /hindi-font-converter/ 301
 /chanakya-to-kruti-dev/ /hindi-font-converter/ 301
 /punjabi-font-converter /all-converters/ 301
 /punjabi-font-converter/ /all-converters/ 301
-/hi/chanakya-to-unicode /hi/hindi-font-converter/ 301
-/hi/chanakya-to-unicode/ /hi/hindi-font-converter/ 301
-/hi/unicode-to-chanakya /hi/hindi-font-converter/ 301
-/hi/unicode-to-chanakya/ /hi/hindi-font-converter/ 301
 /hi/kruti-dev-to-chanakya /hi/hindi-font-converter/ 301
 /hi/kruti-dev-to-chanakya/ /hi/hindi-font-converter/ 301
 /hi/chanakya-to-kruti-dev /hi/hindi-font-converter/ 301
 /hi/chanakya-to-kruti-dev/ /hi/hindi-font-converter/ 301
 /hi/punjabi-font-converter /hi/all-converters/ 301
 /hi/punjabi-font-converter/ /hi/all-converters/ 301
-/bn/chanakya-to-unicode /bn/hindi-font-converter/ 301
-/bn/chanakya-to-unicode/ /bn/hindi-font-converter/ 301
-/bn/unicode-to-chanakya /bn/hindi-font-converter/ 301
-/bn/unicode-to-chanakya/ /bn/hindi-font-converter/ 301
 /bn/kruti-dev-to-chanakya /bn/hindi-font-converter/ 301
 /bn/kruti-dev-to-chanakya/ /bn/hindi-font-converter/ 301
 /bn/chanakya-to-kruti-dev /bn/hindi-font-converter/ 301
 /bn/chanakya-to-kruti-dev/ /bn/hindi-font-converter/ 301
 /bn/punjabi-font-converter /bn/all-converters/ 301
 /bn/punjabi-font-converter/ /bn/all-converters/ 301
-/mr/chanakya-to-unicode /mr/hindi-font-converter/ 301
-/mr/chanakya-to-unicode/ /mr/hindi-font-converter/ 301
-/mr/unicode-to-chanakya /mr/hindi-font-converter/ 301
-/mr/unicode-to-chanakya/ /mr/hindi-font-converter/ 301
 /mr/kruti-dev-to-chanakya /mr/hindi-font-converter/ 301
 /mr/kruti-dev-to-chanakya/ /mr/hindi-font-converter/ 301
 /mr/chanakya-to-kruti-dev /mr/hindi-font-converter/ 301
 /mr/chanakya-to-kruti-dev/ /mr/hindi-font-converter/ 301
 /mr/punjabi-font-converter /mr/all-converters/ 301
 /mr/punjabi-font-converter/ /mr/all-converters/ 301
-/ta/chanakya-to-unicode /ta/hindi-font-converter/ 301
-/ta/chanakya-to-unicode/ /ta/hindi-font-converter/ 301
-/ta/unicode-to-chanakya /ta/hindi-font-converter/ 301
-/ta/unicode-to-chanakya/ /ta/hindi-font-converter/ 301
 /ta/kruti-dev-to-chanakya /ta/hindi-font-converter/ 301
 /ta/kruti-dev-to-chanakya/ /ta/hindi-font-converter/ 301
 /ta/chanakya-to-kruti-dev /ta/hindi-font-converter/ 301
 /ta/chanakya-to-kruti-dev/ /ta/hindi-font-converter/ 301
 /ta/punjabi-font-converter /ta/all-converters/ 301
 /ta/punjabi-font-converter/ /ta/all-converters/ 301
-/gu/chanakya-to-unicode /gu/hindi-font-converter/ 301
-/gu/chanakya-to-unicode/ /gu/hindi-font-converter/ 301
-/gu/unicode-to-chanakya /gu/hindi-font-converter/ 301
-/gu/unicode-to-chanakya/ /gu/hindi-font-converter/ 301
 /gu/kruti-dev-to-chanakya /gu/hindi-font-converter/ 301
 /gu/kruti-dev-to-chanakya/ /gu/hindi-font-converter/ 301
 /gu/chanakya-to-kruti-dev /gu/hindi-font-converter/ 301
 /gu/chanakya-to-kruti-dev/ /gu/hindi-font-converter/ 301
 /gu/punjabi-font-converter /gu/all-converters/ 301
 /gu/punjabi-font-converter/ /gu/all-converters/ 301
-/pa/chanakya-to-unicode /pa/hindi-font-converter/ 301
-/pa/chanakya-to-unicode/ /pa/hindi-font-converter/ 301
-/pa/unicode-to-chanakya /pa/hindi-font-converter/ 301
-/pa/unicode-to-chanakya/ /pa/hindi-font-converter/ 301
 /pa/kruti-dev-to-chanakya /pa/hindi-font-converter/ 301
 /pa/kruti-dev-to-chanakya/ /pa/hindi-font-converter/ 301
 /pa/chanakya-to-kruti-dev /pa/hindi-font-converter/ 301

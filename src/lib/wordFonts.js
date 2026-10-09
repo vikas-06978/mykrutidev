@@ -18,6 +18,10 @@ export const WORD_FONTS = {
   'kruti-dev': { name: 'Kruti Dev 010', label: 'Kruti Dev', match: /kruti\s*dev(?!\s*020)/i },
   devlys: { name: 'DevLys 010', label: 'DevLys', match: /^devlys\s*010/i },
   'abbasi-chanakya': { name: 'Abbasi Chanakya New', label: 'Abbasi Chanakya', match: /abbasi/i },
+  // The newspaper Chanakya font, named just "Chanakya" (Walkman-Chanakya 905 is
+  // another layout and does not match), and Patrika, on the same keys.
+  'chanakya-news': { name: 'Chanakya', label: 'Chanakya', match: /^chanakya$/i },
+  patrika: { name: 'Patrika', label: 'Patrika', match: /^patrika$/i },
   preeti: { name: 'Preeti', label: 'Preeti', match: /^preeti\b/i },
   // Shusha05 and Shivaji05 are redrawn Shusha and Shivaji01 on the same keys.
   shusha: { name: 'Shusha', label: 'Shusha', match: /^shusha(05)?$/i },

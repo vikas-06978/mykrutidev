@@ -477,7 +477,10 @@ describe('font registry', () => {
   test('codeLabel names the font the button actually hands over', () => {
     assert.equal(codeLabel('kruti-dev'), 'Kruti');
     assert.equal(codeLabel('devlys'), 'DevLys');
-    assert.equal(codeLabel('chanakya'), 'Chanakya');
+    // The newspaper Chanakya font is the "Chanakya" button. Walkman-Chanakya
+    // 905, which has no page, keeps its full name.
+    assert.equal(codeLabel('chanakya-news'), 'Chanakya');
+    assert.equal(codeLabel('chanakya'), 'Walkman-Chanakya');
   });
 
   test('every legacy font can name itself on a copy button', () => {

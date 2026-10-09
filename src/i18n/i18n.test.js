@@ -84,6 +84,7 @@ describe('Hindi font names in the nav and in page lists', () => {
       'Abbasi Chanakya New': 'अब्बासी चाणक्य',
       'Abbasi Chanakya': 'अब्बासी चाणक्य',
       Chanakya: 'चाणक्य',
+      Patrika: 'पत्रिका',
       DevLys: 'देवलिस',
       Shusha: 'शुषा',
       Mangal: 'मंगल',
