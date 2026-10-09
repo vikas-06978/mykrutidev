@@ -50,11 +50,11 @@ README on how to upload:
 | Tamil/Bamini | the Tamil typewriter keyboard | **Live (Beta)** on /tamil-font-converter |
 | Bengali/SutonnyMJ | Bijoy | **Live (Beta)** on /bengali-font-converter and /unicode-to-sutonnymj |
 | Bengali/Kalpurush, SolaimanLipi | already Unicode (the uploaded files hold the Unicode Bengali block), need no converter | - |
-| Chanakya/Chanakya Regular.ttf | the same file as Chanakya.ttf (newspaper Chanakya), not Walkman-Chanakya 905 | Needs real documents, or the Walkman-Chanakya 905 font |
+| Chanakya/Chanakya Regular.ttf | the same file as Chanakya.ttf (newspaper Chanakya), not Walkman-Chanakya 905 | **Live (Beta)** with Chanakya.ttf. Walkman-Chanakya 905 still needs its font file |
 | Gujarati/Saumil, Gopika, Avantika, Shree768, Gujrati Saral 1, Krishna | each its own keyboard | Map to be built (Gujarati) |
 | Maya | its own layout | Map to be built |
 | DV-TTGanesh, DV-Divyae | their own layouts, not DV-TT Surekh's | Map to be built |
 | Millennium (Varun, Shailesh, Mogara, Priya, Gauri, Shridhar, Deepak) | Millennium | Map to be built |
-| Chanakya, Patrika | newspaper Chanakya: conjuncts on the lowercase keys, letters in the upper range | Needs real documents typed in it |
+| Chanakya, Patrika | newspaper Chanakya: conjuncts on the lowercase keys, letters in the upper range. Patrika has digits on `v`-`~` | **Live (Beta)** on /chanakya-to-unicode and /patrika-to-unicode, both directions |
 | BharatVani, Shree-Dev-0708EW, Devanagari New, Fontasy Himali | unknown yet | To be examined |
 | Akshar Unicode | already Unicode, needs no converter | - |

@@ -85,10 +85,13 @@ describe('legacy preview fonts', () => {
     // Walkman-Chanakya: no font until the real 905 file is supplied and
     // verified (TODO in legacyFonts.js). A wrong face would draw wrong letters.
     assert.equal(previewFontFor('chanakya'), null);
+    // The Chanakya-family files loaded are Abbasi Chanakya New and the
+    // newspaper Chanakya font, each the file its own map was read from.
     assert.ok(
-      every.every((f) => !/chanakya/i.test(f.file) || f.file === 'abbasi-chanakya-new.woff'),
-      'the only Chanakya-family file loaded is Abbasi Chanakya New',
+      every.every((f) => !/chanakya/i.test(f.file) || ['abbasi-chanakya-new.woff', 'chanakya.woff'].includes(f.file)),
+      'an unexpected Chanakya-family file is loaded',
     );
+    assert.equal(previewFontFor('chanakya-news').file, 'chanakya.woff');
     // Abbasi Chanakya New is live and keeps its own font.
     assert.equal(previewFontFor('abbasi-chanakya').file, 'abbasi-chanakya-new.woff');
     // Kruti Dev and DevLys unchanged.

@@ -25,6 +25,8 @@ published with the site, so it lives here instead.
 | `KRDEV020.woff`      | Kruti Dev 020   | WOFF              | nothing, kept for later |
 | `KRDEV055.woff`      | Kruti Dev 055   | WOFF              | nothing, kept for later |
 | `abbasi-chanakya-new.woff` | Abbasi Chanakya New | WOFF    | **preview on the Abbasi Chanakya pages** |
+| `chanakya.woff`      | Chanakya (newspaper) | WOFF         | **preview on the Chanakya pages** (the map was read off this file; NOT Walkman-Chanakya 905) |
+| `patrika.woff`       | Patrika         | WOFF              | **preview on the Patrika pages** (the map was read off this file) |
 | `preeti.woff`        | Preeti          | **TrueType**      | **preview on the Preeti pages** (the map was read off this file) |
 | `shusha.woff`        | Shusha          | WOFF              | **preview on the Shusha pages** (the map was read off this file) |
 | `shivaji01.woff`     | Shivaji01       | WOFF              | **preview on the Shivaji pages** (the map was read off this file) |
@@ -72,8 +74,14 @@ Dev keyboard, 010 included, draws its number keys as English digits; Hindi
 digits are Alt codes, which Unicode -> Kruti Dev writes (KRUTI_WRITE_EXTRA).
 
 **There is no Walkman-Chanakya font here, on purpose.** The old `chanakya.woff`
-did not match the Chanakya character map and was removed, and so were the
-Walkman-Chanakya pages (their addresses redirect to /hindi-font-converter).
+did not match the Walkman-Chanakya character map and was removed, and so were
+its Kruti Dev pairs (their addresses redirect to /hindi-font-converter). The
+`chanakya.woff` here now is a different font: the newspaper Chanakya
+(vendor/fonts/Chanakya/Chanakya.ttf), which /chanakya-to-unicode converts.
+Its map (CHANAKYA_NEWS) was read off that file code by code: each code drawn
+beside its reading in a Unicode font, half letters drawn with the bar `æ`,
+signs drawn on प, and converted words drawn back in the font. Patrika is the
+same layout with digits on `v`-`~` and `®`.
 When the real Walkman-Chanakya 905 font arrives, add the pages back and follow
 "Adding or replacing a font" below (see the TODO above CHANAKYA in
 `src/lib/fontMaps.js`).

@@ -46,10 +46,11 @@ const preview = (label, file, format = 'woff') => ({
  * Preeti's character map was read off this same file (see the note above
  * PREETI in fontMaps.js), so the preview shows exactly what the map means.
  *
- * Chanakya (Walkman-Chanakya) deliberately has NO entry: its pages are "coming
- * soon" and must not load any preview font. The file that used to sit here
- * (chanakya.woff) did not match the Chanakya map, so it was removed - see the
- * note above CHANAKYA in fontMaps.js.
+ * Walkman-Chanakya 905 (`chanakya`) deliberately has NO entry: it has no
+ * pages, and no file of it was ever supplied. The chanakya.woff here now is
+ * the NEWSPAPER Chanakya font (`chanakya-news`), converted from the very file
+ * its map was read from - not the file of the same name that was removed
+ * earlier for not matching the Walkman map.
  *
  * @type {Record<string, PreviewFont>}
  */
@@ -63,6 +64,10 @@ export const PREVIEW_FONTS = {
   // Converted from vendor/fonts/Abbasi Chanakya New/Abbasi Chanakya New.ttf,
   // the exact file the mapping was built from. Unrelated to Walkman-Chanakya.
   'abbasi-chanakya': preview('Abbasi Chanakya New', 'abbasi-chanakya-new.woff'),
+  // Converted from vendor/fonts/Chanakya/Chanakya.ttf and Patrika/Patrika.TTF,
+  // the files their maps were read from.
+  'chanakya-news': preview('Chanakya', 'chanakya.woff'),
+  patrika: preview('Patrika', 'patrika.woff'),
   preeti: preview('Preeti', 'preeti.woff', 'truetype'),
   // Converted from vendor/fonts/Shusha/Shusha.ttf and Shivaji/Shivaji01.ttf,
   // the files their maps were read from.

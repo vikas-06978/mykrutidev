@@ -67,6 +67,7 @@
     "Abbasi Chanakya New": "Abbasi Chanakya New",
     "Abbasi Chanakya": "Abbasi Chanakya",
     "Chanakya": "Chanakya",
+    "Patrika": "Patrika",
     "DevLys": "DevLys",
     "Shusha": "Shusha",
     "Mangal": "Mangal"
@@ -77,6 +78,8 @@
     "mangal": "Mangal (Unicode)",
     "devlys": "DevLys",
     "chanakya": "Chanakya",
+    "chanakya-news": "Chanakya",
+    "patrika": "Patrika",
     "abbasi-chanakya": "Abbasi Chanakya New",
     "shusha": "Shusha",
     "preeti": "Preeti",
@@ -1637,6 +1640,166 @@
           "Press <strong>Copy text</strong> and paste wherever Mangal is required."
         ],
         "tip": "Word keeps the old font on pasted text. Select it and set the font to Mangal, or download the .docx instead."
+      }
+    },
+    "/chanakya-to-unicode": {
+      "nav": "Chanakya → Unicode",
+      "h1": "Chanakya to Unicode Converter",
+      "title": "Chanakya to Unicode Converter | Chanakya Hindi Font to Unicode Online",
+      "description": "Convert Chanakya font Hindi to Unicode for portals, email and Word: the i-matra, reph and nukta put right. Built from the Chanakya font itself. Free.",
+      "betaNote": "For text typed in the Chanakya font.",
+      "lede": "Paste Chanakya text on the left and get Unicode Hindi on the right, ready for any website, portal or phone.",
+      "body": [
+        "<h2>Which Chanakya this is</h2>",
+        "<p>This page is for the font that names itself just <strong>Chanakya</strong>, the one newspapers and presses use. It keeps whole Hindi letters on accented keys, so on a computer without the font <strong lang=\"hi\">कार्यालय</strong> shows up as <code>·¤æØæîÜØ</code>. Walkman-Chanakya 905 is a different layout and does not convert here.</p>",
+        "<h2>How Chanakya is read</h2>",
+        "<ul><li><strong>Half letters and the bar.</strong> <code>ƒ</code> is घ् and the bar <code>æ</code> completes it, so <code>ƒæ</code> is घ.</li><li><strong>The same reordering as Kruti Dev.</strong> ि is typed before its letter and the reph after its syllable, so <code>çã¢Îè</code> becomes <strong lang=\"hi\">हिंदी</strong>.</li><li><strong>Conjuncts on the letter keys.</strong> <code>d</code> is स्त्र and <code>Q</code> is क्त, so no English is kept as it is.</li></ul>",
+        "<p>For the other direction use <a href=\"/unicode-to-chanakya\">Unicode to Chanakya</a>. Text in Patrika, which shares these keys, has its own page: <a href=\"/patrika-to-unicode\">Patrika to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "My text is in Walkman-Chanakya 905. Will this work?",
+          "a": "No. Walkman-Chanakya 905 puts its letters on other keys, and its font file has not been supplied to this site, so it has no converter here yet. If Word names the font <strong>Chanakya</strong>, this page is the right one."
+        },
+        {
+          "q": "Why are a few characters left as they were?",
+          "a": "A handful of keys draw a stroke or a mark that is not one certain letter. They are left unchanged rather than guessed, so please check any you see."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Hindi out of your Chanakya document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Chanakya</strong> box. Unicode Hindi appears on the right.",
+          "Press <strong>Copy text</strong> and paste it wherever Unicode Hindi is needed. Your Chanakya document itself is not changed."
+        ],
+        "tip": "Words with a reph, such as कर्मचारी, are the quickest check that the Chanakya text came out in the right order."
+      }
+    },
+    "/unicode-to-chanakya": {
+      "nav": "Unicode → Chanakya",
+      "h1": "Unicode to Chanakya Converter",
+      "title": "Unicode to Chanakya Converter | Hindi Unicode to Chanakya Font Code",
+      "description": "Convert Unicode Hindi into Chanakya font code for DTP and old templates, with ि and the reph placed the way Chanakya draws them. Free, private.",
+      "betaNote": "For documents that will be set in the Chanakya font.",
+      "lede": "Type or paste Hindi on the left and get Chanakya font code on the right, ready to paste into Word or your DTP program.",
+      "body": [
+        "<h2>When you need Chanakya</h2>",
+        "<p>Newspaper and press templates set in Chanakya show the wrong letters when Unicode Hindi is pasted into them. This page writes the Hindi out again as the keys Chanakya expects, in the order the font draws them.</p>",
+        "<h2>What the conversion takes care of</h2>",
+        "<ul><li><strong>ि before its letter</strong> and the <strong>reph after its syllable</strong>.</li><li><strong>Rakar as a stroke.</strong> <strong lang=\"hi\">प्र</strong> is written <code>ÂA</code>, the letter and the stroke, never प and र side by side.</li><li><strong>The space after क.</strong> क is written <code>·¤</code>, so the next letter does not run into it.</li></ul>",
+        "<p>To go back, use <a href=\"/chanakya-to-unicode\">Chanakya to Unicode</a>. For Patrika templates, use <a href=\"/unicode-to-patrika\">Unicode to Patrika</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Chanakya code. Press <strong>Preview (Hindi)</strong> to see it in the Chanakya font here, or set the font to <strong>Chanakya</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Chanakya has no key for a few characters, such as Hindi digits. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Chanakya document.",
+          "Press <strong>Copy Chanakya code</strong>.",
+          "Paste into Word and set the font to <strong>Chanakya</strong>, or use <strong>Download .docx</strong>."
+        ],
+        "tip": "In the preview, check a word with क or प्र: क should not touch the next letter, and the stroke of प्र should sit under प."
+      }
+    },
+    "/patrika-to-unicode": {
+      "nav": "Patrika → Unicode",
+      "h1": "Patrika to Unicode Converter",
+      "title": "Patrika to Unicode Converter | Patrika Hindi Font to Unicode Online",
+      "description": "Convert Patrika font Hindi to Unicode for portals, email and Word: the i-matra, reph and nukta put right. Built from the Patrika font itself. Free.",
+      "betaNote": "For text typed in the Patrika font.",
+      "lede": "Paste Patrika text on the left and get Unicode Hindi on the right, ready for any website, portal or phone.",
+      "body": [
+        "<h2>What Patrika text is</h2>",
+        "<p>Patrika is a newspaper font with the same keys as Chanakya, except that it keeps the digits on <code>v</code> to <code>~</code>. On a computer without the font <strong lang=\"hi\">राजस्थान</strong> shows up as <code>ÚæÁSÍæÙ</code>. This page turns those characters into Unicode Hindi.</p>",
+        "<p>Everything else reads as in Chanakya: half letters completed by the bar <code>æ</code>, ि before its letter and the reph after its syllable. For the other direction use <a href=\"/unicode-to-patrika\">Unicode to Patrika</a>, and for Chanakya text use <a href=\"/chanakya-to-unicode\">Chanakya to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "Why not use the Chanakya page?",
+          "a": "Because Patrika's keys <code>v</code> to <code>~</code> are the digits 1 to 9, where Chanakya has half letters. On the Chanakya page <code>v</code> would come out as क्, here it is 1."
+        },
+        {
+          "q": "Why are a few characters left as they were?",
+          "a": "A handful of keys draw a stroke or a mark that is not one certain letter. They are left unchanged rather than guessed, so please check any you see."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Copy the Hindi out of your Patrika document. It may show as English letters, which is fine.",
+          "Paste it into the <strong>Patrika</strong> box. Unicode Hindi appears on the right.",
+          "Press <strong>Copy text</strong> and paste it wherever Unicode Hindi is needed. Patrika's digit keys come out as ordinary digits."
+        ],
+        "tip": "Words with a reph, such as कर्मचारी, are the quickest check that the Patrika text came out in the right order."
+      }
+    },
+    "/unicode-to-patrika": {
+      "nav": "Unicode → Patrika",
+      "h1": "Unicode to Patrika Converter",
+      "title": "Unicode to Patrika Converter | Hindi Unicode to Patrika Font Code",
+      "description": "Convert Unicode Hindi into Patrika font code for DTP and old templates, with ि and the reph placed the way Patrika draws them. Free, private.",
+      "betaNote": "For documents that will be set in the Patrika font.",
+      "lede": "Type or paste Hindi on the left and get Patrika font code on the right, ready to paste into Word or your DTP program.",
+      "body": [
+        "<h2>When you need Patrika</h2>",
+        "<p>Templates set in Patrika show the wrong letters when Unicode Hindi is pasted into them. This page writes the Hindi out as the keys Patrika expects, in the order the font draws them: ि before its letter, the reph after its syllable and rakar as a stroke.</p>",
+        "<p>Patrika has no half form of क ख फ ब भ म, so those are written as the full letter with ् or with the stroke for य, which the font also draws. To go back, use <a href=\"/patrika-to-unicode\">Patrika to Unicode</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why does it say Beta?",
+          "a": "Every key was drawn from the font file and read by eye, and converted words were drawn back in the font itself to check they read correctly. It has not yet been run on a real office document, so please read anything important before you rely on it."
+        },
+        {
+          "q": "The output looks like English letters. Is that right?",
+          "a": "Yes. That is Patrika code. Press <strong>Preview (Hindi)</strong> to see it in the Patrika font here, or set the font to <strong>Patrika</strong> in Word."
+        },
+        {
+          "q": "Some characters were left as they were. Why?",
+          "a": "Patrika has no key for a few characters, such as Hindi digits. They are left unchanged and a note appears under the output box."
+        },
+        {
+          "q": "Is my text uploaded?",
+          "a": "No. The conversion runs in your browser and nothing is sent anywhere."
+        }
+      ],
+      "howTo": {
+        "steps": [
+          "Type or paste the Hindi that has to go into a Patrika document.",
+          "Press <strong>Copy Patrika code</strong>.",
+          "Paste into Word and set the font to <strong>Patrika</strong>, or use <strong>Download .docx</strong>."
+        ],
+        "tip": "In the preview, check a word like क्या: Patrika has no half क, so it is written as क with the stroke for य."
       }
     },
     "/shusha-to-unicode": {

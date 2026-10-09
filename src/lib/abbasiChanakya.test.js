@@ -162,11 +162,13 @@ describe('the page', () => {
     assert.equal(page.betaNote, 'For text typed in the Abbasi Chanakya New font.');
   });
 
-  test('the generic Chanakya pages stay coming soon', () => {
+  test('Walkman-Chanakya has no live page: /chanakya-to-unicode is the newspaper font', () => {
     assert.equal(isAccurate('chanakya'), false);
-    for (const path of ['/chanakya-to-unicode', '/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/kruti-dev-to-chanakya']) {
-      assert.equal(isLive(getPage(path)), false, path);
+    for (const path of ['/chanakya-to-unicode', '/unicode-to-chanakya']) {
+      const page = getPage(path);
+      assert.ok(page.from === 'chanakya-news' || page.to === 'chanakya-news', path);
     }
+    for (const path of ['/chanakya-to-kruti-dev', '/kruti-dev-to-chanakya']) assert.equal(getPage(path), undefined, path);
   });
 
   test('previews in the Abbasi woff, never the old Chanakya file', () => {

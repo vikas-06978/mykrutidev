@@ -174,14 +174,16 @@ describe('the page', () => {
     const chanakya = allGroups().find((g) => g.name === 'Chanakya');
     const live = chanakya.pages.filter((p) => p.live).map((p) => p.path);
     for (const p of ['/abbasi-chanakya-to-unicode', '/unicode-to-abbasi-chanakya']) assert.ok(live.includes(p), p);
-    // Everything live under "Chanakya" is an Abbasi page: the generic Chanakya
-    // map has no live page anywhere.
+    // Everything live under "Chanakya" is Abbasi, the newspaper Chanakya font
+    // or Patrika: the Walkman-Chanakya map has no live page anywhere.
+    const family = ['abbasi-chanakya', 'chanakya-news', 'patrika'];
     for (const p of live) {
       const { from, to } = getPage(p);
-      assert.ok(from === 'abbasi-chanakya' || to === 'abbasi-chanakya', p);
+      assert.ok(family.includes(from) || family.includes(to), p);
+      assert.ok(from !== 'chanakya' && to !== 'chanakya', p);
     }
-    // The Walkman-Chanakya pages were removed, not left "coming soon".
-    assert.ok(!chanakya.pages.some((p) => p.path === '/chanakya-to-unicode'));
+    // The Walkman-Chanakya pairs were removed, not left "coming soon".
+    assert.ok(!chanakya.pages.some((p) => p.path === '/chanakya-to-kruti-dev'));
   });
 
   test('the two Abbasi pages link to each other', () => {

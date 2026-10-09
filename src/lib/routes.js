@@ -197,7 +197,8 @@ export const PAGES = [
   // ---- Abbasi Chanakya New: built from the real font file, glyph by glyph ---
   // Filed under "Chanakya" because that is what its visitors call the font, but
   // it is its own map and its own font key. Walkman-Chanakya 905 has no pages:
-  // its font file was never supplied, so they were removed (public/_redirects).
+  // its font file was never supplied (its Kruti Dev pairs redirect, see
+  // public/_redirects). The newspaper Chanakya font has its own pages below.
   {
     path: '/abbasi-chanakya-to-unicode',
     ready: true,
@@ -303,6 +304,50 @@ export const PAGES = [
     to: 'mangal',
     group: 'Chanakya',
     related: ['/mangal-to-abbasi-chanakya', '/abbasi-chanakya-to-unicode', '/kruti-dev-to-mangal'],
+    beta: true,
+  },
+
+  // ---- Chanakya, the newspaper font: read off its own font file -------------
+  // Not Walkman-Chanakya 905, whose file was never supplied (see CHANAKYA_NEWS
+  // in fontMaps.js). Patrika draws the same keys, with digits on `v`-`~`.
+  {
+    path: '/chanakya-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'chanakya-news',
+    to: 'unicode',
+    group: 'Chanakya',
+    related: ['/unicode-to-chanakya', '/patrika-to-unicode', '/abbasi-chanakya-to-unicode'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-chanakya',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'chanakya-news',
+    group: 'Chanakya',
+    related: ['/chanakya-to-unicode', '/unicode-to-patrika', '/unicode-to-kruti-dev'],
+    beta: true,
+  },
+  {
+    path: '/patrika-to-unicode',
+    ready: true,
+    kind: 'converter',
+    from: 'patrika',
+    to: 'unicode',
+    group: 'Chanakya',
+    related: ['/unicode-to-patrika', '/chanakya-to-unicode', '/'],
+    beta: true,
+  },
+  {
+    path: '/unicode-to-patrika',
+    ready: true,
+    kind: 'converter',
+    from: 'unicode',
+    to: 'patrika',
+    group: 'Chanakya',
+    related: ['/patrika-to-unicode', '/unicode-to-chanakya', '/unicode-to-kruti-dev'],
     beta: true,
   },
 
@@ -1414,7 +1459,7 @@ export const FONT_LINKS = [
   { key: 'kruti-dev', path: '/', fonts: ['kruti-dev'] },
   { key: 'devlys', path: '/devlys-to-unicode', fonts: ['devlys'] },
   { key: 'mangal', path: '/kruti-dev-to-mangal', fonts: ['mangal'] },
-  { key: 'chanakya', path: '/abbasi-chanakya-to-unicode', fonts: ['abbasi-chanakya'] },
+  { key: 'chanakya', path: '/chanakya-to-unicode', fonts: ['chanakya-news', 'patrika', 'abbasi-chanakya'] },
   { key: 'preeti', path: '/preeti-to-unicode', fonts: ['preeti'] },
   { key: 'marathi', path: '/marathi-font-converter', fonts: ['dvtt'] },
   { key: 'shivaji', path: '/shivaji-to-unicode', fonts: ['shivaji'] },

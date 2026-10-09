@@ -1264,6 +1264,294 @@ const CHANAKYA = {
 };
 
 // ============================================================================
+// Chanakya (the newspaper font) - read off its own font file
+// ============================================================================
+//
+// vendor/fonts/Chanakya/Chanakya.ttf, which names itself "Chanakya" (Summit
+// Information Technologies). NOT Walkman-Chanakya 905 (the table above): this
+// one keeps whole letters in the upper range (क on `·`, प on `Â`) and puts
+// conjuncts on the ASCII letters (`d` is स्त्र), so no ASCII key is English.
+//
+// Every code was drawn in the font, beside its reading drawn in a Unicode
+// font, and read by eye; the half letters were checked by drawing them with
+// the bar `æ` (ƒ + æ draws घ, ‡ + æ draws ण), and the signs by drawing them
+// on प. Left out because they are not one certain letter: `:` and `š` alone
+// (the curl that makes इ into ई, kept as `§:` and `§š`), `h` and `J` (द
+// conjuncts not read with certainty), `²` (a ह-like form), `œ` `£` `Þ` `›`
+// (marks). They pass through unchanged rather than being guessed.
+const CHANAKYA_NEWS = {
+  // -- Independent vowels: अ and ए take the signs, as they are drawn ---------
+  '¥æò': 'ऑ',
+  '¥æ': 'आ',
+  '¥ô': 'ओ',
+  '¥õ': 'औ',
+  '¥': 'अ',
+  '§:': 'ई',
+  '§š': 'ईँ',
+  '§': 'इ',
+  '©': 'उ',
+  'ª': 'ऊ',
+  '«': 'ऋ',
+  '¬': 'ॠ',
+  '°ð': 'ऐ',
+  '°ò': 'ऍ',
+  '°': 'ए',
+
+  // -- Full letters: a glyph of their own, or the half letter and the bar ----
+  '·': 'क',
+  '¹': 'ख',
+  '»': 'ग',
+  'ƒæ': 'घ',
+  '¾': 'ङ',
+  '¿': 'च',
+  'À': 'छ',
+  'Á': 'ज',
+  'Û': 'झ',
+  '†æ': 'ञ',
+  'Å': 'ट',
+  'Æ': 'ठ',
+  'Ç': 'ड',
+  'É': 'ढ',
+  '‡æ': 'ण',
+  'Ì': 'त',
+  'Í': 'थ',
+  'Î': 'द',
+  'Ï': 'ध',
+  'Ù': 'न',
+  'Â': 'प',
+  'È': 'फ',
+  'Õ': 'ब',
+  'Ö': 'भ',
+  '×': 'म',
+  'Ø': 'य',
+  'Ú': 'र',
+  'Ü': 'ल',
+  'ß': 'व',
+  'à': 'श',
+  'á': 'ष',
+  'â': 'स',
+  'ã': 'ह',
+  'Ý': 'ळ',
+  '˜æ': 'त्र',
+  '™æ': 'ज्ञ',
+  'Ÿæ': 'श्र',
+  'óæ': 'न्न',
+  // The same letters drawn a second time.
+  '∙': 'क',
+  '¼': 'द',
+  '¶': 'ल',
+  '−': 'ल',
+  '±': 'ह',
+  'o': 'श',
+
+  // -- Half letters (the bar `æ` completes them) -------------------------------
+  'v': 'क्',
+  'w': 'ख्',
+  '‚': 'ग्',
+  'ƒ': 'घ्',
+  '‘': 'च्',
+  '’': 'ज्',
+  '…': 'ज्',
+  '†': 'ञ्',
+  '‡': 'ण्',
+  'ˆ': 'त्',
+  '}': 'त्',
+  '‰': 'थ्',
+  'g': 'द्',
+  'Š': 'ध्',
+  '‹': 'न्',
+  'Œ': 'प्',
+  'x': 'फ्',
+  'y': 'ब्',
+  'z': 'भ्',
+  '{': 'म्',
+  'Ä': 'य्',
+  'Ë': 'ल्',
+  'Ã': 'व्',
+  '³': 'श्',
+  'c': 'ष्',
+  'S': 'स्',
+  'r': 'ह्',
+  'Ê': 'ज़्',
+  '•': 'ज़्',
+  '˜': 'त्र्',
+  '™': 'ज्ञ्',
+  'Ÿ': 'श्र्',
+  'ó': 'न्न्',
+  '”': 'ज्ज्',
+
+  // -- Conjuncts with a glyph of their own -------------------------------------
+  'ÿæ': 'क्ष',
+  'ÿ': 'क्ष्',
+  'P': 'क्क',
+  '`': 'क्क',
+  'Q': 'क्त',
+  'R': 'क्र',
+  'B': 'क्व',
+  '¯': 'ख्र',
+  'º': 'ख्र',
+  'ˉ': 'ख्र',
+  'V': 'ङ्क',
+  'W': 'ङ्ख',
+  'X': 'ङ्ग',
+  'Y': 'ङ्घ',
+  '–': 'ङ्क्त',
+  '“æ': 'च्च',
+  '“': 'च्च्',
+  '@': 'ञ्च',
+  'T': 'ञ्ज',
+  '\\': 'झ्र',
+  '^': 'ट्ट',
+  '_': 'ट्ठ',
+  'n': 'ठ्ठ',
+  'a': 'ड्ड',
+  'b': 'ड्ढ',
+  '½': 'ड्ट',
+  'G': 'त्त',
+  '%': 'त्न',
+  'e': 'दृ',
+  'f': 'द्ध',
+  'i': 'द्ब',
+  'j': 'द्भ',
+  'k': 'द्म',
+  'l': 'द्य',
+  'm': 'द्व',
+  'I': 'द्ग',
+  'µ': 'द्ब्र',
+  'μ': 'द्ब्र',
+  'E': 'श्व',
+  'p': 'श्च',
+  'C': 'ष्ट',
+  'D': 'ष्ठ',
+  '¦': 'ष्ट्व',
+  '#': 'स्त',
+  'd': 'स्त्र',
+  '|': 'स्त्र',
+  'F': 'स्न',
+  'N': 'हृ',
+  'q': 'ह्न',
+  's': 'ह्य',
+  't': 'ह्ल',
+  'O': 'ह्ल',
+  'u': 'ह्व',
+  'ö': 'ह्ण',
+  '„': 'ल्ल',
+  'L': 'रु',
+  'M': 'रू',
+
+  // -- Signs ---------------------------------------------------------------------
+  'A': '्र',
+  'ý': '्र',
+  'þ': '्र',
+  'K': '्य',
+  'î': REPH, // र् typed after its syllable, as in Kruti Dev
+  'ü': REPH,
+  'Z': REPH + 'ं',
+  'æò': 'ॉ',
+  'æ': 'ा',
+  'ç': 'ि', // typed before its letter, moved by the reorder pass
+  'í': 'ि',
+  'ì': PRE_I_NASAL, // िं, typed before its letter
+  '¨': PRE_I_NASAL,
+  'è': 'ी',
+  'é': 'ु',
+  'ä': 'ु',
+  'ê': 'ू',
+  'å': 'ू',
+  'ë': 'ृ',
+  'ð': 'े',
+  'Ô': 'े',
+  'ñ': 'ै',
+  'ò': 'ॅ',
+  'ô': 'ो',
+  'õ': 'ौ',
+  '¢': 'ं',
+  '´': 'ं',
+  '¡': 'ँ',
+  '¸': '़',
+  '$': '़',
+  '÷': '्',
+  'Ñ': 'ः',
+  'ù': 'ऽ',
+  'ø': '॰',
+  'ú': 'ॐ',
+
+  // -- Punctuation and symbols -------------------------------------------------
+  'Ð': '।',
+  'H': '॥',
+  '"': '卐',
+  "'": '%',
+  '&': '×',
+  'Ò': '‘',
+  'Ó': '’',
+  '~': '-',
+  '‐': '-',
+  // These draw nothing. `¤` is the space after क and फ, whose loop runs into
+  // the next letter without it: क is typed `·¤`.
+  '¤': '',
+  'U': '',
+  '®': '',
+  'ï': '',
+};
+
+/**
+ * Chanakya keys -> logical order. The bar `æ` after a half letter completes
+ * it (ƒ + æ is घ, as Gujarati's `%F` is પ), and so do the signs drawn on the
+ * bar: ी ो ौ. No Unicode text has a halant before a vowel sign, so this never
+ * touches real conjuncts.
+ */
+/** Built on first use: buildReverse() is defined further down. */
+let chanakyaNewsReverse = null;
+/**
+ * Unicode -> Chanakya, as the font draws it (each checked by drawing it):
+ *   - the map's own first keys;
+ *   - क, फ and the क conjuncts with the space `¤` after them (`·¤`);
+ *   - a consonant with ्र as the full letter and the `A` stroke (प्र is `ÂA`),
+ *     never the half letter and र, which draws पर;
+ *   - a letter made of a half letter and the bar (घ is `ƒæ`) takes ी ो ौ on
+ *     the half letter, as those signs draw their own bar (घी is `ƒè`);
+ *   - `-` stays `-` (the font draws it as a dash).
+ */
+function chanakyaNewsReverse_() {
+  if (chanakyaNewsReverse) return chanakyaNewsReverse;
+  const rev = { ...buildReverse(CHANAKYA_NEWS), '-': '-' };
+  for (const uni of ['क', 'फ', 'क्क', 'क्त', 'क्र', 'क्व']) rev[uni] += '¤';
+  for (const [uni, key] of Object.entries({ ...rev })) {
+    if (/^[क-हळ]़?$/.test(uni) && !rev[`${uni}्र`]) rev[`${uni}्र`] = `${key}A`;
+    if (key.length > 1 && key.endsWith('æ') && /्?$/.test(uni)) {
+      const half = key.slice(0, -1);
+      rev[`${uni}ी`] = `${half}è`;
+      rev[`${uni}ो`] = `${half}ô`;
+      rev[`${uni}ौ`] = `${half}õ`;
+    }
+  }
+  return (chanakyaNewsReverse = rev);
+}
+
+function chanakyaLogical(s) {
+  return toLogicalOrder(s.replace(/्([ाीोौ])/g, (_, v) => (v === 'ा' ? '' : v)));
+}
+
+// Patrika (vendor/fonts/Patrika/Patrika.TTF), drawn key by key beside
+// Chanakya: the same letters and signs on the same keys, except that
+// `v w x y z { | } ~` and `®` draw the digits 1-9 and 0 (Chanakya's क् ख् फ्
+// ब् भ् म् स्त्र त् and the dash), and `Ł` is a space. The marks differ only in
+// where they sit.
+const PATRIKA_DIGITS = { v: '1', w: '2', x: '3', y: '4', z: '5', '{': '6', '|': '7', '}': '8', '~': '9', '®': '0' };
+const PATRIKA = {
+  ...Object.fromEntries(Object.entries(CHANAKYA_NEWS).filter(([k]) => ![...k].some((c) => c in PATRIKA_DIGITS))),
+  ...PATRIKA_DIGITS,
+  'Ł': '',
+};
+let patrikaReverse = null;
+/** Chanakya's way of writing, without the keys that are digits here. */
+function patrikaReverse_() {
+  return (patrikaReverse ??= Object.fromEntries(
+    Object.entries(chanakyaNewsReverse_()).filter(([, k]) => ![...k].some((c) => c in PATRIKA_DIGITS)),
+  ));
+}
+
+// ============================================================================
 // Unverified layouts - deliberately EMPTY
 // ============================================================================
 // A half-remembered map would silently corrupt text, which is far worse than
@@ -2800,6 +3088,8 @@ export const FONTS = {
   chanakya: {
     key: 'chanakya',
     label: 'Chanakya',
+    // "Chanakya" on a copy button is the newspaper font (chanakya-news).
+    shortLabel: 'Walkman-Chanakya',
     kind: 'legacy',
     map: CHANAKYA,
     // STILL FALSE ON PURPOSE, even though the map above is complete and green.
@@ -2810,6 +3100,49 @@ export const FONTS = {
     css: '"Chanakya", monospace',
     sample: 'fgUnh Hkkjr Dkh jkTkèkkUkh gSA',
     placeholder: 'fgUnh Hkkjr  (example)',
+  },
+  // The newspaper Chanakya font (CHANAKYA_NEWS), not Walkman-Chanakya 905.
+  'chanakya-news': {
+    key: 'chanakya-news',
+    label: 'Chanakya',
+    kind: 'legacy',
+    map: CHANAKYA_NEWS,
+    // Its letters are on the accented codes: see describeMismatch().
+    upperRangeLetters: true,
+    get reverse() {
+      return chanakyaNewsReverse_();
+    },
+    toLogical: chanakyaLogical,
+    // Read off the font file glyph by glyph, and checked by drawing converted
+    // words in the font itself. `beta` until a real Chanakya document has
+    // been run through it.
+    accurate: true,
+    beta: true,
+    // Every ASCII letter is a conjunct here: there is no English to keep.
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'çã¢Îè ×ð¢ ÂÉ¸æ§: ·è ¹ÕÚ',
+    placeholder: 'çã¢Îè  (example)',
+  },
+  patrika: {
+    key: 'patrika',
+    label: 'Patrika',
+    kind: 'legacy',
+    map: PATRIKA,
+    // Its letters are on the accented codes: see describeMismatch().
+    upperRangeLetters: true,
+    get reverse() {
+      return patrikaReverse_();
+    },
+    toLogical: chanakyaLogical,
+    accurate: true,
+    beta: true,
+    asciiIsScript: true,
+    warnUnmapped: true,
+    css: 'monospace',
+    sample: 'ÚæÁSÍæÙ ÂçÌý·¤æ',
+    placeholder: 'ÚæÁSÍæÙ  (example)',
   },
   'abbasi-chanakya': {
     key: 'abbasi-chanakya',
@@ -3791,5 +4124,13 @@ export function describeMismatch(text, fromKey) {
   // wrong page - this is the single most common misuse.
   if (deva > 0 && deva >= latin) return 'expected-legacy-got-unicode';
   if (looksLikePlainEnglish(t)) return 'expected-legacy-got-english';
+  // Chanakya and Patrika keep their letters on the accented codes (क is `·`),
+  // so text that is mostly plain ASCII letters is Kruti Dev or Walkman-
+  // Chanakya 905 typed on the wrong page.
+  if (from.upperRangeLetters) {
+    const ascii = count(t, /[A-Za-z]/g);
+    const upper = count(t, /[\u00A1-\u02FF\u2013-\u2122\u2212\u2219]/g);
+    if (ascii >= 6 && upper < ascii) return 'expected-legacy-got-english';
+  }
   return null;
 }
