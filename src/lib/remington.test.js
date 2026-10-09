@@ -324,3 +324,14 @@ describe('the typeable spellings really are the same letter', () => {
     assert.match(wholeKeys('प्रश्न'), /^iz/);
   });
 });
+
+describe('the number row', () => {
+  test('Kruti Dev 010 number keys are labelled with the English digit they type', () => {
+    const caps = layout(FONTS['kruti-dev'].map).flat();
+    for (const d of '1234567890') {
+      const cap = caps.find((c) => c.base === d);
+      assert.equal(cap.baseDeva, '', d);
+      assert.equal(cap.baseLabel, d, d);
+    }
+  });
+});

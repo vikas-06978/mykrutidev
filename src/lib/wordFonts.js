@@ -14,7 +14,8 @@
  * docConvert.js and fontMaps.js load only when a file is dropped.
  */
 export const WORD_FONTS = {
-  'kruti-dev': { name: 'Kruti Dev 010', label: 'Kruti Dev', match: /kruti\s*dev/i },
+  // Every Kruti Dev cut but 020, which has DevLys 020's keys (below).
+  'kruti-dev': { name: 'Kruti Dev 010', label: 'Kruti Dev', match: /kruti\s*dev(?!\s*020)/i },
   devlys: { name: 'DevLys 010', label: 'DevLys', match: /^devlys\s*010/i },
   'abbasi-chanakya': { name: 'Abbasi Chanakya New', label: 'Abbasi Chanakya', match: /abbasi/i },
   preeti: { name: 'Preeti', label: 'Preeti', match: /^preeti\b/i },
@@ -25,7 +26,7 @@ export const WORD_FONTS = {
   shusha02: { name: 'Shusha02', label: 'Shusha02', match: /^shusha02$/i },
   shivaji02: { name: 'Shivaji02', label: 'Shivaji02', match: /^shivaji02$/i },
   // On the Kruti Dev keyboard, each with keys of its own.
-  'devlys-020': { name: 'DevLys 020', label: 'DevLys 020', match: /^devlys\s*020/i },
+  'devlys-020': { name: 'DevLys 020', label: 'DevLys 020', match: /^(devlys|kruti\s*dev)\s*020/i },
   arjun: { name: 'Arjun', label: 'Arjun', match: /^arjun$/i },
   kundli: { name: 'Kundli', label: 'Kundli', match: /^kundli/i },
   krishna: { name: 'Krishna', label: 'Krishna', match: /^krishna( condensed| wide)?$/i },

@@ -121,13 +121,15 @@ export const LEVELS = [
     title: 'Level 4 - Number row',
     focus: '1 2 3 4 5 6 7 8 9 0',
     keys: upto(HOME, TOP, BOTTOM, DIGITS),
+    // English digits: Kruti Dev 010 draws its number keys as 1 2 3, not
+    // १ २ ३ (those are Alt-code keys - see the Alt code chart).
     drills: [
-      '१ २ ३ ४ ५ ६ ७ ८ ९ ०',
-      '१२ ३४ ५६ ७८ ९० १०० २००',
-      'सन १९४७ में',
-      '२५ जनवरी को १० बजे',
-      '५ किलो चावल ३ किलो दाल',
-      'कमरा ७ में १५ लोग',
+      '1 2 3 4 5 6 7 8 9 0',
+      '12 34 56 78 90 100 200',
+      'सन 1947 में',
+      '25 जनवरी को 10 बजे',
+      '5 किलो चावल 3 किलो दाल',
+      'कमरा 7 में 15 लोग',
     ],
     threshold: 90,
   },

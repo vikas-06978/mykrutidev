@@ -175,15 +175,14 @@ describe('the Kruti Dev gap is known, exact, and nothing more', () => {
   });
 
   /**
-   * The gap has to stay out of the way of ordinary Hindi. ङ and ञ are the only
-   * two on the default layer, and they are there because a वर्णमाला chart
-   * without them is wrong, not because Hindi prose needs them.
+   * The gap has to stay out of the way of ordinary Hindi: every key on the
+   * default layer, ङ and ञ included (Alt-code keys in Kruti Dev 010), converts.
    */
-  test('only the two varnamala letters are missing from the default layer', () => {
+  test('nothing on the default layer is missing', () => {
     const onBase = BASE_ROWS.flatMap((r) => r.keys)
       .filter((k) => untranslated(k.ins))
       .map((k) => k.ins);
-    assert.deepEqual(onBase, ['ङ', 'ञ']);
+    assert.deepEqual(onBase, []);
   });
 
   /**
@@ -197,9 +196,10 @@ describe('the Kruti Dev gap is known, exact, and nothing more', () => {
     }
   });
 
-  test('the Sanskrit conjunct spellings genuinely do not', () => {
+  test('the conjunct spellings with ङ and ञ convert too, and read back', () => {
     for (const word of ['अङ्क', 'पञ्च']) {
-      assert.match(toKruti(word), /[ऀ-ॿ]/, `${word} now converts - update the note`);
+      assert.doesNotMatch(toKruti(word), /[ऀ-ॿ]/, `${word} did not convert`);
+      assert.equal(convert(toKruti(word), 'kruti-dev', 'unicode', { keepEnglish: false }), word);
     }
   });
 });

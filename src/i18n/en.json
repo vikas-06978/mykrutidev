@@ -171,6 +171,8 @@
     "keepEnglish": "Keep English words and numbers unchanged",
     "keepEnglishHelp": "While this is ticked, dates, numbers and percentages are kept as they are, and English words are detected and kept. URLs and email addresses are never changed. Detection is a best guess: because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still slip through.",
     "review": "<span class=\"font-medium text-body\">Please review the output.</span> Matra order and the common conjuncts (<span lang=\"hi\">क्ष, त्र, ज्ञ, श्र</span>) are handled, but rare characters in very old documents may still differ. Nothing you type is uploaded. This page converts entirely inside your browser.",
+    "worksWithFrom": "Works with text in Kruti Dev 010, 011, 012, 014, 016 and 055, which share one keyboard. From a Word file, Word’s curly quotes and dashes and the Hindi digits of Kruti Dev 055 are read too. Kruti Dev 020 has another layout: use <a href=\"/devlys-020-to-unicode\">DevLys 020 to Unicode</a>.",
+    "worksWithTo": "The result is for Kruti Dev 010, 011, 012, 014 or 016: set one of them as the font in Word. Hindi digits are written with Kruti Dev’s Alt-code characters.",
     "otherDirection": "Need the other direction? {title}",
     "hintUnicodeLead": "This looks like Unicode Hindi, not {from}. ",
     "hintUnicodeBody": "You may want the converter that goes the other way",
@@ -544,7 +546,7 @@
         },
         {
           "q": "Will my English words and numbers be converted too?",
-          "a": "While the checkbox under the panels is ticked (it is by default), dates, numbers and percentages are left untouched and common English words are detected and kept. URLs and email addresses are never changed. Because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still be converted by mistake. Untick the checkbox to convert everything, for example when the digits in your file are Kruti Dev's Hindi numerals."
+          "a": "While the checkbox under the panels is ticked (it is by default), dates, numbers and percentages are left untouched and common English words are detected and kept. URLs and email addresses are never changed. Because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still be converted by mistake. Untick the checkbox to convert everything. Numbers come out the same either way: Kruti Dev 010 draws its number keys as English digits, and its Hindi digits, typed with Alt codes, are always converted."
         }
       ],
       "howTo": {
@@ -613,7 +615,7 @@
         },
         {
           "q": "What happens to English words and numbers?",
-          "a": "Digits are never changed, so an amount keeps its value, and Kruti Dev 010 shows them as Hindi numerals (2024 appears as २०२४). English words, URLs and email addresses stay as typed. With the checkbox under the panels ticked (the default), dates stay exactly as typed too, for text shown in an English font. If everything will be in Kruti Dev, untick it, and 15/08/2024 is written so the font shows १५/०८/२०२४."
+          "a": "English digits are never changed, so an amount keeps its value, and Kruti Dev 010 shows them as English digits too. Hindi digits such as २०२४ are written with the Alt-code characters Kruti Dev 010 draws them on, so they still show as २०२४. English words, URLs and email addresses stay as typed. With the checkbox under the panels ticked (the default), dates stay exactly as typed too, for text shown in an English font. If everything will be in Kruti Dev, untick it, and the / in a date is typed with the Kruti Dev key that draws it."
         }
       ],
       "howTo": {
@@ -731,7 +733,7 @@
         },
         {
           "q": "Will my numbers and dates survive?",
-          "a": "Yes. Every digit is kept as the same key, so an account number or an order date keeps its value. In the Kruti Dev 010 font those keys look like Hindi numerals: 2024 reads २०२४. Words in English, web addresses and email addresses are not touched. By default the checkbox under the panels is ticked, and dates are then left character for character, which suits text that stays in an English font. For a page that will be all Kruti Dev, clear the checkbox: the / in a date is then typed with the Kruti Dev key that draws it, and 15/08/2024 appears as १५/०८/२०२४."
+          "a": "Yes. English digits are kept as they are, so an account number or an order date keeps its value, and Kruti Dev 010 shows them as English digits. Hindi digits such as २०२४ are written with the Alt-code characters Kruti Dev 010 draws them on, so they still read २०२४. Words in English, web addresses and email addresses are not touched. By default the checkbox under the panels is ticked, and dates are then left character for character, which suits text that stays in an English font. For a page that will be all Kruti Dev, clear the checkbox: the / in a date is then typed with the Kruti Dev key that draws it."
         },
         {
           "q": "Does it handle conjuncts and the reph?",
@@ -2893,7 +2895,7 @@
       "h1": "Kruti Dev Alphabet Chart (Hindi Varnamala) - Free PDF",
       "title": "Kruti Dev Alphabet Chart PDF | Keys for Every Hindi Letter (Free)",
       "description": "Free Kruti Dev typing chart PDF: the keys for every Hindi vowel, consonant, half letter and digit on the Remington layout, from अ to ह, on one A4 page.",
-      "lede": "Every vowel, every consonant with its half form, the Hindi digits and the danda, with the exact Kruti Dev 010 keys to press - on one A4 page to keep beside the keyboard.",
+      "lede": "Every vowel, every consonant with its half form, the Hindi digits and the danda, with the exact Kruti Dev 010 keys or Alt codes to press - on one A4 page to keep beside the keyboard.",
       "body": [
         "<h2>How to read the chart</h2>",
         "<p>Under each letter are the keys to press, left to right. <strong>Shift +</strong> means hold Shift while you press the key. Many letters take two keys: आ is अ followed by the aa-matra, and the letters with a standing bar (ख घ झ ण थ ध भ श ष) are their half form followed by the bar, the <code>k</code> key.</p>",
@@ -2905,12 +2907,34 @@
           "a": "ऊ has no key of its own. With Num Lock on, hold Alt and type 0197 on the number pad: Kruti Dev 010 draws ऊ for that character. On a laptop without a number pad, write the text in Unicode and convert it with Unicode to Kruti Dev."
         },
         {
-          "q": "Why are ङ and ञ not on the chart?",
-          "a": "No key of Kruti Dev 010 types them. Hindi usually writes the anusvara in their place: गंगा, not गङ्गा, and चंचल, not चञ्चल."
+          "q": "How do I type ङ and ञ?",
+          "a": "Neither has a key. With Num Lock on, hold Alt and type 0179 on the number pad for ङ, or 0165 for ञ: Kruti Dev 010 draws them on those characters. Hindi often writes the anusvara in their place: गंगा rather than गङ्गा, and चंचल rather than चञ्चल."
         },
         {
-          "q": "Are the Hindi digits on the number row?",
-          "a": "Yes. In Kruti Dev 010 the number keys 1 to 9 and 0 type the Hindi digits १ to ९ and ०, and Shift + a types the danda ।."
+          "q": "Do the number keys type Hindi digits?",
+          "a": "No. In Kruti Dev 010 the number keys 1 to 9 and 0 type English digits. The Hindi digits have Alt codes: Alt+0131 is १, Alt+0132 is २ and so on up to Alt+0139 for ९, and Alt+0229 is ०. Shift + a types the danda ।."
+        }
+      ]
+    },
+    "/kruti-dev-alt-codes": {
+      "nav": "Alt code chart",
+      "h1": "Kruti Dev 010 Alt Code Chart - Free PDF",
+      "title": "Kruti Dev Alt Codes PDF | Hindi Digits, ऊ, ङ, ञ, द्द, ट्ट (Free)",
+      "description": "Free Kruti Dev 010 Alt code chart: the Alt codes for the Hindi digits ० to ९, ऊ, ङ, ञ, ँ and ready-made conjuncts like द्द, ट्ट, ह्न and क्त, on one A4 page.",
+      "lede": "The characters no Kruti Dev 010 key types - the Hindi digits, ऊ, ङ, ञ, ँ and the ready-made conjuncts - each with the Alt code that types it in Word on Windows.",
+      "body": [
+        "<h2>How to type an Alt code</h2>",
+        "<p>Set the text in Kruti Dev 010 and turn on Num Lock. Hold the <strong>Alt</strong> key, type the four digits on the number pad (not the number row above the letters), then let go of Alt. Word puts in a character such as <code>ƒ</code>, and Kruti Dev 010 draws it as <strong lang=\"hi\">१</strong>.</p>",
+        "<p>On a laptop without a number pad, type the text in Hindi and convert it with <a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a>, which writes these characters for you. The ready-made conjuncts can also be typed from the keyboard with half letters: द्द is <code>n~n</code>. Every code on the chart was checked against the Kruti Dev 010 font file, and Kruti Dev 011, 012, 014 and 016 draw the same letters.</p>"
+      ],
+      "faq": [
+        {
+          "q": "Why do I see ƒ instead of १?",
+          "a": "The text is not set in Kruti Dev. ƒ is the character Windows types for Alt+0131: select the text, choose Kruti Dev 010 as the font, and the same character is drawn as १."
+        },
+        {
+          "q": "Do these codes work in every Kruti Dev font?",
+          "a": "In Kruti Dev 010, 011, 012, 014 and 016, yes. Kruti Dev 055 and 020 put other letters on several of these codes, and their number keys already type Hindi digits."
         }
       ]
     },
@@ -4993,6 +5017,7 @@
     "practiseOnline": "Practise online",
     "typeLayout": "Type with this layout",
     "qr": "Scan to practise online",
+    "fontLine": "Font: Kruti Dev 010 · Keyboard: Remington (typewriter) layout · Language: Hindi",
     "pdfOne": "Free PDF, 1 A4 page. No sign-up.",
     "pdfMany": "Free PDF, {n} A4 pages. No sign-up.",
     "listHeading": "Printable charts and practice sheets",
@@ -5047,10 +5072,18 @@
       "intro": "The keys to press for each letter on the Remington (Kruti Dev) layout, left to right. Shift + means hold Shift while you press the key.",
       "vowels": "Vowels (स्वर)",
       "consonants": "Consonants (व्यंजन), with the half form under each",
-      "digits": "Digits and the danda",
+      "digits": "Hindi digits (Alt codes) and the danda",
       "half": "A half form + a full letter makes a conjunct: क् + य = क्य.",
-      "alt": "ऊ: with Num Lock on, hold Alt and type 0197 on the number pad.",
-      "missing": "{letters} have no key in Kruti Dev 010. Hindi writes the anusvara in their place: गंगा, चंचल."
+      "alt": "Alt+0197 and the other Alt codes: with Num Lock on, hold Alt, type the four digits on the number pad, then let go.",
+      "numberKeys": "The number keys 1 2 3 … 0 type English digits in Kruti Dev 010."
+    },
+    "altc": {
+      "intro": "What Kruti Dev 010 draws on characters no key types, with the Alt code that types each one in Word on Windows.",
+      "digits": "Hindi digits",
+      "letters": "Letters and signs",
+      "conjuncts": "Ready-made conjuncts",
+      "how": "How: set the text in Kruti Dev 010, turn on Num Lock, hold Alt, type the four digits on the number pad, then let go.",
+      "also": "The same codes work in Kruti Dev 011, 012, 014 and 016. The conjuncts can also be typed with half letters (द्द is n~n)."
     },
     "log": {
       "intro": "Note every practice session. Speed follows accuracy: aim for 95% before you push the WPM.",
@@ -5066,6 +5099,7 @@
       "sheets": "Practice sheets (11 lessons)",
       "matras": "Matra and conjunct chart",
       "alphabet": "Alphabet chart (varnamala)",
+      "altcodes": "Alt code chart",
       "log": "Progress log"
     },
     "pdfAria": "Download PDF: {name}",

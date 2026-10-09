@@ -21,7 +21,7 @@ import {
   FINGER_TAG,
   LOG_ROWS,
   alphabetRows,
-  ALPHABET_MISSING,
+  altCodeRows,
   QR_PAGE,
   qrUrl,
 } from '../lib/printables.js';
@@ -38,6 +38,7 @@ const pagesNote = p.pages === 1 ? t('print.pdfOne') : fill(t('print.pdfMany'), {
 
 const sheets = p.kind === 'sheets' ? practiceSheets() : [];
 const alphabet = p.kind === 'alphabet' ? alphabetRows() : null;
+const altcodes = p.kind === 'altcodes' ? altCodeRows() : null;
 
 // On paper only: a QR code back to the tutor, with the address written out
 // for anyone without a scanner. A practice sheet's code opens its own lesson.
@@ -85,6 +86,8 @@ const circleBareMarks = (text: string) =>
     <p class="pr-title" set:html={render(title)} />
     {p.kind !== 'sheets' && <QrBlock {...qr()} />}
   </div>
+  {/* Which font, keyboard and language the chart is for: on screen and paper. */}
+  {p.kind !== 'log' && <p class="pr-font" data-font-line set:html={render(t('print.fontLine'))} />}
 
   {
     p.kind === 'keyboard' && (
@@ -245,7 +248,38 @@ const circleBareMarks = (text: string) =>
         <div class="pr-lines pr-alpha-notes">
           <span set:html={render(t('print.alpha.half'))} />
           <span set:html={render(t('print.alpha.alt'))} />
-          <span set:html={render(fill(t('print.alpha.missing'), { letters: ALPHABET_MISSING.join(' ') }))} />
+          <span set:html={render(t('print.alpha.numberKeys'))} />
+        </div>
+      </>
+    )
+  }
+
+  {
+    altcodes && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.altc.intro'))} />
+        </div>
+        {(['digits', 'letters', 'conjuncts'] as const).map((group) => (
+          <>
+            <h2 class="pr-alpha-h">{t(`print.altc.${group}`)}</h2>
+            <ul class="pr-alpha" data-group={group}>
+              {altcodes[group].map((a) => (
+                <li data-letter={a.deva} data-alt={a.alt} data-char={a.ch}>
+                  <span class="pr-pair">
+                    <span class="pr-letter" lang="hi">{a.deva}</span>
+                    <span class="pr-seq" translate="no">
+                      <span class="pr-cap">Alt+{a.alt}</span>
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))}
+        <div class="pr-lines pr-alpha-notes">
+          <span set:html={render(t('print.altc.how'))} />
+          <span set:html={render(t('print.altc.also'))} />
         </div>
       </>
     )

@@ -749,3 +749,8 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
+
+/* Which font, keyboard and language the board draws. */
+.tt-kbd-font {
+  @apply border-t border-hairline px-4 pt-3 text-xs font-semibold text-mute sm:px-5;
+}

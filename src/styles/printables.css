@@ -371,6 +371,13 @@
   margin-top: 1rem;
 }
 
+.pr-font {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-mute);
+}
+
 /* The other printables, as a list of pages and direct downloads. */
 .pr-list {
   display: grid;
@@ -519,6 +526,11 @@
   }
   .pr-screen {
     display: none;
+  }
+  .pr-font {
+    margin: 0 0 1.5mm;
+    font-size: 8.5pt;
+    color: #333;
   }
 
   .pr-alpha-h { margin-top: 3mm; font-size: 10.5pt; }

@@ -156,3 +156,28 @@ describe('pages and Word upload', () => {
     assert.ok(!is('shusha', 'Shusha02') && !is('shusha02', 'Shusha'));
   });
 });
+
+describe('Kruti Dev cuts: digits, Alt-code keys and Word’s AutoCorrect (read off each font file)', () => {
+  test('the number keys are English digits in every Kruti Dev-keyboard font but Ruchi and DevLys 020', () => {
+    const HINDI_DIGITS = ['ruchi', 'devlys-020'];
+    for (const f of ['kruti-dev', 'devlys', ...KRUTI_FAMILY]) {
+      const want = HINDI_DIGITS.includes(f) ? '२०२४' : '2024';
+      assert.equal(convert('2024', f, 'unicode', { keepEnglish: false }), want, f);
+    }
+  });
+
+  test('Hindi digits, ङ and ञ are written with the Alt-code keys Kruti Dev 010 draws them on', () => {
+    assert.equal(toF('२०२४', 'kruti-dev'), '„å„†');
+    assert.equal(toF('१२३४५६७८९०', 'kruti-dev'), 'ƒ„…†‡ˆ‰Š‹å');
+    assert.equal(toF('अङ्क पञ्च', 'kruti-dev'), 'v³~d i¥~p');
+    // ...and read back.
+    assert.equal(toU('„å„† v³~d i¥~p', 'kruti-dev'), '२०२४ अङ्क पञ्च');
+    // English digits stay English digits.
+    assert.equal(toF('सन 1947', 'kruti-dev'), 'lu 1947');
+  });
+
+  test('pasted text: ’ or ‘ before the bar is श; any other quote or dash stays punctuation', () => {
+    assert.equal(toU('’kfDr ‘kfDr', 'kruti-dev'), 'शक्ति शक्ति');
+    assert.equal(convert('It’s “good” – 10…20', 'kruti-dev', 'unicode'), 'It’s “good” – 10…20');
+  });
+});

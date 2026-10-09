@@ -29,6 +29,7 @@ export const TYPING_PATHS = [
   '/remington-hindi-keyboard',
   '/kruti-dev-keyboard',
   '/kruti-dev-alphabet-chart',
+  '/kruti-dev-alt-codes',
   '/hindi-typing-finger-chart',
   '/kruti-dev-matra-chart',
   '/hindi-typing-practice-sheets',

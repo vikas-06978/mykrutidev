@@ -38,6 +38,7 @@ export const PRINTABLES = [
   { path: '/kruti-dev-matra-chart', kind: 'matras', pdf: 'kruti-dev-matra-conjunct-chart', landscape: false, pages: 1 },
   { path: '/hindi-typing-progress-log', kind: 'log', pdf: 'hindi-typing-progress-log', landscape: false, pages: 1 },
   { path: '/kruti-dev-alphabet-chart', kind: 'alphabet', pdf: 'kruti-dev-alphabet-chart', landscape: false, pages: 1 },
+  { path: '/kruti-dev-alt-codes', kind: 'altcodes', pdf: 'kruti-dev-alt-code-chart', landscape: false, pages: 1 },
 ];
 
 export const printableFor = (path) => PRINTABLES.find((p) => p.path === path) ?? null;
@@ -208,26 +209,37 @@ export function matraRows() {
 }
 
 /**
- * The alphabet chart (varnamala): every vowel, consonant, digit and danda
- * with the keys that type it, and each consonant's half form.
- *
- * ङ and ञ are left out on purpose: no key of Kruti Dev 010 types them (the
- * converter passes them through untouched), and Hindi usually writes them
- * as the anusvara (गंगा, चंचल). A letter that has no key but a character of
- * the font's own (ऊ is Å) is typed with its Alt code on the number pad.
+ * The alphabet chart (varnamala): every vowel, consonant, Hindi digit and
+ * danda with the keys that type it in Kruti Dev 010, and each consonant's
+ * half form. A letter with no key on the keyboard (ऊ, ङ, ञ, the Hindi digits)
+ * is drawn by the font on a character typed with its Alt code on the number
+ * pad: ऊ is Alt+0197. The number keys themselves type English digits.
  */
 export const ALPHABET = {
   vowels: ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ऋ', 'ए', 'ऐ', 'ओ', 'औ', 'अं', 'अः'],
   consonants: [
-    ...'क ख ग घ च छ ज झ ट ठ ड ढ ण त थ द ध न प फ ब भ म य र ल व श ष स ह'.split(' '),
+    ...'क ख ग घ ङ च छ ज झ ञ ट ठ ड ढ ण त थ द ध न प फ ब भ म य र ल व श ष स ह'.split(' '),
     'ड़',
     'ढ़',
   ],
   digits: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '।', '॥'],
 };
 
-/** The letters the alphabet chart leaves out, and why: see ALPHABET. */
-export const ALPHABET_MISSING = ['ङ', 'ञ'];
+/**
+ * Windows types a character of its code page with Alt + 0 + the code on the
+ * number pad. Above 0x9F that is the Unicode number; 0x80-0x9F hold these.
+ */
+const CP1252 = {
+  '€': 128, '‚': 130, 'ƒ': 131, '„': 132, '…': 133, '†': 134, '‡': 135, 'ˆ': 136, '‰': 137,
+  'Š': 138, '‹': 139, 'Œ': 140, 'Ž': 142, '‘': 145, '’': 146, '“': 147, '”': 148, '•': 149,
+  '–': 150, '—': 151, '˜': 152, '™': 153, 'š': 154, '›': 155, 'œ': 156, 'ž': 158, 'Ÿ': 159,
+};
+
+/** The Alt code that types `ch` in Word on Windows ("0197"), or null. */
+export function altCode(ch) {
+  const code = CP1252[ch] ?? ch.codePointAt(0);
+  return code >= 0x80 && code <= 0xff ? `0${code}` : null;
+}
 
 /**
  * One keystroke as the visitor presses it: a key (with Shift or not), or,
@@ -236,8 +248,8 @@ export const ALPHABET_MISSING = ['ङ', 'ञ'];
 function stepOf(ch, what) {
   const at = locate(ch);
   if (at) return { ch, cap: at.cap, shift: at.shift };
-  const code = ch.codePointAt(0);
-  if (code >= 0xa0 && code <= 0xff) return { ch, alt: `0${code}` };
+  const alt = altCode(ch);
+  if (alt) return { ch, alt };
   throw new Error(`printables: ${what} needs "${ch}", which no key types`);
 }
 
@@ -245,7 +257,10 @@ function stepOf(ch, what) {
 export function alphabetRows() {
   const item = (deva) => {
     const keys = wholeKeys(deva);
-    if (kruti2unicode(keys) !== deva) throw new Error(`printables: ${keys} does not type ${deva}`);
+    // ३ is the one Alt-code key pasted text does not read back (… stays an
+    // ellipsis there); a Word file in Kruti Dev reads it as ३ (krutiWordRun).
+    const readsBack = kruti2unicode(keys) === deva || (keys === '…' && deva === '३');
+    if (!readsBack) throw new Error(`printables: ${keys} does not type ${deva}`);
     return { deva, keys, steps: [...keys].map((ch) => stepOf(ch, deva)) };
   };
   return {
@@ -254,6 +269,38 @@ export function alphabetRows() {
     consonants: ALPHABET.consonants.map((c) => ({ ...item(c), half: /़/.test(c) ? null : item(`${c}्`) })),
     digits: ALPHABET.digits.map(item),
   };
+}
+
+/**
+ * The Alt-code chart: what Kruti Dev 010 draws on characters no key types,
+ * and the Alt code that types each in Word on Windows. The same glyphs in
+ * 011, 012, 014 and 016 (each drawn side by side, see docs/FONTS.md).
+ */
+export const ALT_CODE_CHART = {
+  digits: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'],
+  letters: ['ऊ', 'ङ', 'ञ', 'ँ', 'ऽ'],
+  conjuncts: [
+    ...'क्र कृ प्र फ्र ख्र द्र द्द द्म ट्ट ट्ठ ठ्ठ ड्ड ड्ढ क्क क्त न्न ह्न ह्म ह्य हृ स्त्र'.split(' '),
+  ],
+};
+
+/**
+ * Each entry with the character the font draws it on and its Alt code. The
+ * character is the first single upper-range key the converter reads as that
+ * text (… for ३, which only a Word file reads - see alphabetRows).
+ */
+export function altCodeRows() {
+  const readMap = FONTS['kruti-dev'].readMap;
+  const item = (deva) => {
+    const ch =
+      deva === '३'
+        ? '…'
+        : Object.keys(readMap).find((k) => [...k].length === 1 && k.charCodeAt(0) > 127 && kruti2unicode(k) === deva);
+    const alt = ch && altCode(ch);
+    if (!alt) throw new Error(`printables: no Alt code types ${deva} in Kruti Dev 010`);
+    return { deva, ch, alt };
+  };
+  return Object.fromEntries(Object.entries(ALT_CODE_CHART).map(([group, list]) => [group, list.map(item)]));
 }
 
 /** Rows on the progress log. */
