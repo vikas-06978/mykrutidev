@@ -170,6 +170,8 @@
     "whatsapp": "WhatsApp",
     "keepEnglish": "Keep English words and numbers unchanged",
     "keepEnglishHelp": "While this is ticked, dates, numbers and percentages are kept as they are, and English words are detected and kept. URLs and email addresses are never changed. Detection is a best guess: because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still slip through.",
+    "wordsKept": "Kept as English (untick a word to convert it):",
+    "wordsMaybe": "May be English (tick a word to keep it):",
     "review": "<span class=\"font-medium text-body\">Please review the output.</span> Matra order and the common conjuncts (<span lang=\"hi\">क्ष, त्र, ज्ञ, श्र</span>) are handled, but rare characters in very old documents may still differ. Nothing you type is uploaded. This page converts entirely inside your browser.",
     "worksWithFrom": "Works with text in Kruti Dev 010, 011, 012, 014, 016 and 055, which share one keyboard. From a Word file, Word’s curly quotes and dashes and the Hindi digits of Kruti Dev 055 are read too. Kruti Dev 020 has another layout: use <a href=\"/devlys-020-to-unicode\">DevLys 020 to Unicode</a>.",
     "worksWithTo": "The result is for Kruti Dev 010, 011, 012, 014 or 016: set one of them as the font in Word. Hindi digits are written with Kruti Dev’s Alt-code characters.",

@@ -213,3 +213,42 @@
 .cv-strip {
   @apply border-t border-hairline px-4 py-3 text-sm sm:px-5;
 }
+
+/* The English / Hindi choice, word by word (Converter.astro). */
+.cv-words {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+.cv-words-label {
+  margin-bottom: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.cv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.cv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.8rem;
+  color: var(--color-ink);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.cv-chip:has(input:checked) {
+  border-color: var(--color-brick);
+}
+.cv-chip-hi {
+  color: var(--color-mute);
+  font-family: var(--font-deva);
+}

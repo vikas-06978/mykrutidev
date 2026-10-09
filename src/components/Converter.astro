@@ -322,6 +322,26 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
         <span class="block text-xs text-mute">{t('converter.keepEnglishHelp')}</span>
       </span>
     </label>
+
+    {/*
+      The words that decision touched, one tick each: kept as English (ticked)
+      and converted words that may be English (unticked). The visitor has the
+      last word on every one; nothing here is guessed silently.
+    */}
+    {
+      fromFont.kind === 'legacy' && !asciiIsScript && (
+        <div data-role="english-words" class="cv-words" hidden>
+          <div data-role="words-kept-wrap" hidden>
+            <p class="cv-words-label">{t('converter.wordsKept')}</p>
+            <div data-role="words-kept" class="cv-chips" translate="no" />
+          </div>
+          <div data-role="words-maybe-wrap" hidden>
+            <p class="cv-words-label">{t('converter.wordsMaybe')}</p>
+            <div data-role="words-maybe" class="cv-chips" translate="no" />
+          </div>
+        </div>
+      )
+    }
   </div>
 
   {/* Which Kruti Dev cuts the result is right for (each checked against its font file). */}
@@ -355,7 +375,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
     with Transliterator.astro so the two tools cannot drift apart visually. */}
 
 <script>
-  import { convert, FONTS, describeMismatch, unmappedChars } from '../lib/fontMaps.js';
+  import { convert, FONTS, describeMismatch, unmappedChars, englishReport, KRUTI_KEYBOARD } from '../lib/fontMaps.js';
   import { previewFontFor } from '../lib/legacyFonts.js';
   import { fill } from '../i18n/fill.js';
   import { workspace } from '../scripts/workspace.js';
@@ -454,10 +474,84 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
      * Never read the output box here. Round-tripping legacy -> unicode ->
      * legacy is where fidelity goes to die.
      */
+    // ----------------------------------------------------------------------
+    // The visitor's own English / Hindi choice, word by word
+    // ----------------------------------------------------------------------
+    const keepWords = new Set<string>();
+    const convertWords = new Set<string>();
+    const wordsPanel = maybe<HTMLElement>('english-words');
+    let candidates: Set<string> | undefined;
+    let candidatesAsked = false;
+
+    /** The list of English words a Kruti Dev page may suggest, fetched once, when first needed. */
+    function askCandidates() {
+      if (candidatesAsked || !KRUTI_KEYBOARD.has(from)) return;
+      candidatesAsked = true;
+      fetch('/data/kruti-english.json')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!d?.words) return;
+          candidates = new Set(d.words);
+          renderWords();
+        })
+        .catch(() => {
+          // Offline or blocked: the kept words still show; suggestions do not.
+        });
+    }
+
+    function chip(token: string, hindi: string, english: boolean) {
+      const label = document.createElement('label');
+      label.className = 'cv-chip';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = english;
+      box.className = 'size-3.5 accent-[var(--color-brick)]';
+      box.addEventListener('change', () => {
+        if (box.checked) {
+          keepWords.add(token);
+          convertWords.delete(token);
+        } else {
+          convertWords.add(token);
+          keepWords.delete(token);
+        }
+        lastConverted = null;
+        flush();
+      });
+      const word = document.createElement('span');
+      word.textContent = token;
+      const deva = document.createElement('span');
+      deva.className = 'cv-chip-hi';
+      deva.lang = 'hi';
+      deva.textContent = `→ ${hindi}`;
+      label.append(box, word, deva);
+      return label;
+    }
+
+    function renderWords() {
+      if (!wordsPanel) return;
+      const report =
+        keepEnglish.checked && input.value
+          ? englishReport(input.value, from, { keepWords, convertWords, candidates })
+          : [];
+      const kept = report.filter((r) => r.english);
+      const maybeEnglish = report.filter((r) => !r.english);
+      const fill_ = (role: string, list: typeof report) => {
+        const box = q<HTMLElement>(role);
+        box.replaceChildren(...list.map((r) => chip(r.token, r.hindi, r.english)));
+        q<HTMLElement>(`${role}-wrap`).hidden = list.length === 0;
+      };
+      fill_('words-kept', kept);
+      fill_('words-maybe', maybeEnglish);
+      wordsPanel.hidden = report.length === 0;
+      if (report.length) askCandidates();
+    }
+
     const unicodeText = () => {
       try {
         return convert(input.value, from, 'unicode', {
           keepEnglish: keepEnglish.checked,
+          keepWords,
+          convertWords,
         });
       } catch (err) {
         console.error(err);
@@ -491,7 +585,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
 
       let result = '';
       try {
-        result = convert(text, from, to, { keepEnglish: keepEnglish.checked });
+        result = convert(text, from, to, { keepEnglish: keepEnglish.checked, keepWords, convertWords });
       } catch (err) {
         console.error(err);
         say(L.conversionFailed);
@@ -511,6 +605,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
           unmappedChars(hindi, to, { keepEnglish: keepEnglish.checked }).length === 0;
       }
       whatsapp.setAttribute('aria-disabled', result ? 'false' : 'true');
+      renderWords();
     }
 
     /** Cheap, synchronous, every keystroke. */
@@ -684,6 +779,8 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
 
     q<HTMLButtonElement>('clear').addEventListener('click', () => {
       input.value = '';
+      keepWords.clear();
+      convertWords.clear();
       flush();
       input.focus();
     });
