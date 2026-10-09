@@ -314,6 +314,63 @@
   height: 2rem;
 }
 
+/* The QR code back to the tutor is for paper: a phone already has the page. */
+.pr-qr {
+  display: none;
+}
+.pr-screen {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* The alphabet chart: one cell per letter, its keys beside it, and for a
+   consonant its half form on a second line. */
+.pr-alpha-h {
+  margin-top: 1.25rem;
+  font-size: 1.05rem;
+}
+.pr-alpha {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.pr-alpha li {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+.pr-pair {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.pr-letter {
+  min-width: 2.2rem;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.pr-seq {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.pr-half {
+  padding-top: 0.3rem;
+  border-top: 1px dashed var(--color-hairline);
+}
+.pr-half .pr-letter {
+  font-size: 1.15rem;
+}
+.pr-alpha-notes {
+  margin-top: 1rem;
+}
+
 /* The other printables, as a list of pages and direct downloads. */
 .pr-list {
   display: grid;
@@ -430,6 +487,52 @@
     font-size: 9.5pt;
     margin-top: 6mm;
   }
+
+  /* The title (and the lines under it) on the left, the QR code on the right. */
+  .pr-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6mm;
+  }
+  .pr-qr {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 2.5mm;
+    font-size: 7.5pt;
+    line-height: 1.3;
+    color: #222;
+  }
+  .pr-qr-text {
+    display: grid;
+    max-width: 48mm;
+    text-align: right;
+  }
+  /* 24 mm: the code has about 50 modules, so each is near half a millimetre,
+     which a phone camera reads from a cheap print or a photocopy. */
+  .pr-qr-code,
+  .pr-qr-code svg {
+    display: block;
+    width: 24mm;
+    height: 24mm;
+  }
+  .pr-screen {
+    display: none;
+  }
+
+  .pr-alpha-h { margin-top: 3mm; font-size: 10.5pt; }
+  /* Five across leaves room for two Shift keys on one line (छ् is Shift+n Shift+`). */
+  .pr-alpha { gap: 1.4mm; margin-top: 1.4mm; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .pr-alpha li { gap: 0.6mm; padding: 0.9mm 1.4mm; border-color: #777; background: #fff; break-inside: avoid; }
+  .pr-alpha [lang='hi'] { line-height: 1.2; }
+  .pr-pair { gap: 1.6mm; }
+  .pr-letter { min-width: 6.5mm; font-size: 13pt; }
+  .pr-half { padding-top: 0.6mm; border-color: #999; }
+  .pr-half .pr-letter { font-size: 10pt; }
+  .pr-seq { flex-wrap: nowrap; gap: 0.8mm; }
+  .pr-alpha .pr-cap { min-width: 4.6mm; height: 4.6mm; padding: 0 0.9mm; font-size: 7pt; border-bottom-width: 1.5px; }
+  .pr-alpha-notes { margin: 2.5mm 0 0; }
 
   /* One practice sheet per page. */
   .pr-sheet {

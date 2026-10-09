@@ -11,6 +11,7 @@ const PRINTABLES = [
   { path: '/hindi-typing-practice-sheets', pdf: 'hindi-typing-practice-sheets', landscape: false, pages: 11 },
   { path: '/kruti-dev-matra-chart', pdf: 'kruti-dev-matra-conjunct-chart', landscape: false, pages: 1 },
   { path: '/hindi-typing-progress-log', pdf: 'hindi-typing-progress-log', landscape: false, pages: 1 },
+  { path: '/kruti-dev-alphabet-chart', pdf: 'kruti-dev-alphabet-chart', landscape: false, pages: 1 },
 ];
 // The printable width of A4 inside the @page margins, in CSS px (96 per inch).
 const MM = 96 / 25.4;
@@ -83,11 +84,11 @@ for (const pr of PRINTABLES) {
   }
 }
 
-test('the Typing Tutor and Hindi Keyboard list all five PDFs, and the menu reaches them', async ({ page }) => {
+test('the Typing Tutor and Hindi Keyboard list every PDF, and the menu reaches them', async ({ page }) => {
   for (const url of ['/hindi-typing-test', '/hindi-keyboard', '/hi/hindi-typing-test']) {
     await page.goto(url);
     await expect(page.locator('#printables-heading')).toBeVisible();
-    await expect(page.locator('section[aria-labelledby="printables-heading"] a[download]')).toHaveCount(5);
+    await expect(page.locator('section[aria-labelledby="printables-heading"] a[download]')).toHaveCount(PRINTABLES.length);
   }
   await page.goto('/');
   await page.locator('#navtrigger-typing').click();
@@ -156,3 +157,24 @@ for (const url of ['/kruti-dev-keyboard', '/hi/kruti-dev-keyboard', '/hindi-typi
     });
   }
 }
+
+// The QR code on a printed sheet opens the tutor at that sheet's lesson.
+test('#lesson-<id> opens that lesson once it is unlocked, and never skips the ladder', async ({ page }) => {
+  const current = () => page.locator('[data-level][aria-pressed="true"]').getAttribute('data-level');
+
+  // A new device: matras is locked, so the first lesson opens.
+  await page.goto('/hindi-typing-test/#lesson-matras');
+  await expect(page.locator('[data-level="home"]')).toHaveAttribute('aria-pressed', 'true');
+  expect(await current()).toBe('home');
+
+  // Lessons 1-5 cleared: matras (lesson 6) is open, and the link opens it.
+  await page.evaluate(() =>
+    localStorage.setItem('mykrutidev:tutor', JSON.stringify({ done: ['home', 'top', 'bottom', 'numbers', 'shift'], best: {} })),
+  );
+  await page.goto('/hi/hindi-typing-test/#lesson-matras');
+  await expect(page.locator('[data-level="matras"]')).toHaveAttribute('aria-pressed', 'true');
+
+  // Still locked further up: the furthest open lesson starts instead.
+  await page.goto('/hindi-typing-test/#lesson-paragraphs');
+  await expect(page.locator('[data-level="matras"]')).toHaveAttribute('aria-pressed', 'true');
+});

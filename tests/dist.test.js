@@ -16,7 +16,7 @@ import { createHash } from 'node:crypto';
 import { SITE, PAGES, isLive, isIndexable, statusOf, navMenus } from '../src/lib/routes.js';
 import { convert, FONTS } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
-import { PRINTABLES, chartRows, practiceSheets, matraRows, pdfFile, pdfHref } from '../src/lib/printables.js';
+import { PRINTABLES, chartRows, practiceSheets, matraRows, alphabetRows, pdfFile, pdfHref, qrUrl, QR_PAGE } from '../src/lib/printables.js';
 import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
@@ -35,6 +35,25 @@ const localeOf = (p) => {
 const isHiPath = (p) => localeOf(p) === 'hi';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
+
+/** Read a QR code SVG the build drew back as a phone would: draw it, then decode it. */
+const scanQr = (svg) => {
+  const size = Number(svg.match(/viewBox="0 0 (\d+) \d+"/)[1]);
+  const scale = 6;
+  const px = size * scale;
+  const data = new Uint8ClampedArray(px * px * 4).fill(255);
+  for (const [, x, y, run] of svg.matchAll(/M(\d+) (\d+)h(\d+)v1h-\3z/g)) {
+    for (let dx = 0; dx < Number(run) * scale; dx++) {
+      for (let dy = 0; dy < scale; dy++) {
+        const i = ((Number(y) * scale + dy) * px + Number(x) * scale + dx) * 4;
+        data[i] = data[i + 1] = data[i + 2] = 0;
+      }
+    }
+  }
+  assert.ok(size > QUIET_ZONE * 2);
+  return jsQR(data, px, px)?.data ?? null;
+};
+
 const FIXTURES = JSON.parse(
   readFileSync(new URL('../src/lib/__fixtures__/kruti-dev.json', import.meta.url), 'utf8'),
 );
@@ -442,6 +461,59 @@ describe('printable charts and PDFs', () => {
     }
   });
 
+  test('the alphabet chart: every letter and half form with the tutor keystrokes', () => {
+    const rows = alphabetRows();
+    const want = [
+      ...rows.vowels.map((r) => [r.deva, r.keys]),
+      ...rows.consonants.map((r) => [r.deva, r.keys]),
+      ...rows.digits.map((r) => [r.deva, r.keys]),
+    ];
+    const halves = rows.consonants.filter((c) => c.half).map((c) => [c.half.deva, c.half.keys]);
+    for (const p of both('/kruti-dev-alphabet-chart')) {
+      const html = pages.get(p);
+      const got = [...html.matchAll(/<li\b(?:[^>"]|"[^"]*")*>/g)].filter(([tag]) => / data-letter="/.test(tag)).map(([tag]) => [attr(tag, 'data-letter'), decode(attr(tag, 'data-keys'))]);
+      assert.deepEqual(got, want, `${p}: letters`);
+      const gotHalf = [...html.matchAll(/<span\b(?:[^>"]|"[^"]*")*>/g)].filter(([tag]) => / data-half="/.test(tag)).map(([tag]) => [attr(tag, 'data-half'), decode(attr(tag, 'data-keys'))]);
+      assert.deepEqual(gotHalf, halves, `${p}: half forms`);
+      for (const [deva, keys] of [...want, ...halves]) assert.equal(convert(keys, 'kruti-dev', 'unicode', { keepEnglish: false }), deva, `${p}: ${keys}`);
+      assert.match(html, />Alt\+0197</, `${p}: ऊ by its Alt code`);
+    }
+  });
+
+  test('every printable carries a QR code that scans to the tutor, at the right lesson, in its language', () => {
+    for (const pr of PRINTABLES) {
+      for (const p of LOCALES.map((l) => inLocale(pr.path, l))) {
+        const html = pages.get(p);
+        const prefix = localeOf(p) === 'en' ? '' : `/${localeOf(p)}`;
+        const tutor = `${prefix}${QR_PAGE}/`;
+        const codes = [...html.matchAll(/<div class="pr-qr" data-qr="([^"]+)"[^>]*>[\s\S]*?(<svg[\s\S]*?<\/svg>)/g)];
+        const sheets = pr.kind === 'sheets' ? practiceSheets() : [null];
+        assert.equal(codes.length, sheets.length, `${p}: one QR per page`);
+        codes.forEach(([, url, svg], i) => {
+          const want = qrUrl(tutor, pr, sheets[i]?.id ?? null);
+          assert.equal(decode(url), want, `${p}: data-qr`);
+          assert.equal(scanQr(svg), want, `${p}: the QR scans to ${want}`);
+          assert.ok(html.includes(`mykrutidev.com${tutor.replace(/\/$/, '')}<`), `${p}: the address is written out`);
+        });
+      }
+    }
+  });
+
+  test('each practice sheet links to its own lesson; the keyboard and alphabet charts to the Remington keyboard', () => {
+    for (const p of both('/hindi-typing-practice-sheets')) {
+      const prefix = isHiPath(p) ? '/hi' : '';
+      for (const s of practiceSheets()) {
+        assert.ok(pages.get(p).includes(`href="${prefix}/hindi-typing-test/#lesson-${s.id}"`), `${p}: lesson ${s.id}`);
+      }
+    }
+    for (const route of ['/kruti-dev-keyboard', '/kruti-dev-alphabet-chart']) {
+      for (const p of both(route)) {
+        const prefix = isHiPath(p) ? '/hi' : '';
+        assert.ok(pages.get(p).includes(`href="${prefix}/remington-hindi-keyboard/"`), `${p}: Type with this layout`);
+      }
+    }
+  });
+
   test('the progress log has 30 rows', () => {
     for (const p of both('/hindi-typing-progress-log')) {
       assert.equal((pages.get(p).match(/data-log-row/g) ?? []).length, 30, p);
@@ -789,20 +861,7 @@ describe('the support option (PUBLIC_UPI_QR / PUBLIC_UPI_ID)', () => {
   const scanPage = (html) => {
     const svg = html.match(/<div class="sp-qr[^"]*"[^>]*>(<svg[\s\S]*?<\/svg>)/)?.[1];
     assert.ok(svg, 'no QR code on the page');
-    const size = Number(svg.match(/viewBox="0 0 (\d+) \d+"/)[1]);
-    const scale = 6;
-    const px = size * scale;
-    const data = new Uint8ClampedArray(px * px * 4).fill(255);
-    for (const [, x, y, run] of svg.matchAll(/M(\d+) (\d+)h(\d+)v1h-\3z/g)) {
-      for (let dx = 0; dx < Number(run) * scale; dx++) {
-        for (let dy = 0; dy < scale; dy++) {
-          const i = ((Number(y) * scale + dy) * px + Number(x) * scale + dx) * 4;
-          data[i] = data[i + 1] = data[i + 2] = 0;
-        }
-      }
-    }
-    assert.ok(size > QUIET_ZONE * 2);
-    return jsQR(data, px, px)?.data ?? null;
+    return scanQr(svg);
   };
 
   test('the page exists in both languages and is never indexed', () => {

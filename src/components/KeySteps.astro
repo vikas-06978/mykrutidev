@@ -1,0 +1,38 @@
+---
+/**
+ * The keys to press, in order, drawn as key caps: "Shift + d  then  k".
+ * A character on no key is shown as its Alt code (Alt + 0197).
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  steps: { ch: string; cap?: string; shift?: boolean; alt?: string }[];
+  /** One cap per keystroke ("Shift+d"), no "then": for the small cells of the alphabet chart. */
+  compact?: boolean;
+}
+const { steps, compact = false } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+---
+
+{
+  compact
+    ? steps.map((s) => (
+        <span class="pr-cap" data-step={s.ch}>
+          {s.alt ? `Alt+${s.alt}` : s.shift ? `Shift+${s.cap}` : s.cap}
+        </span>
+      ))
+    : steps.map((s, i) => (
+    <span class="pr-step">
+      {i > 0 && <span class="pr-then">{t('print.matras.then')}</span>}
+      {(s.alt || s.shift) && (
+        <>
+          <span class="pr-cap">{s.alt ? 'Alt' : 'Shift'}</span>
+          <span class="pr-plus">+</span>
+        </>
+      )}
+      <span class="pr-cap" data-step={s.ch}>
+        {s.alt ?? s.cap}
+      </span>
+    </span>
+  ))
+}

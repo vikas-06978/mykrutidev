@@ -8,6 +8,9 @@
 import { langOf, useT, fill } from '../i18n/index.js';
 import { LEVELS } from '../lib/lessons.js';
 import PrintKeyboard from './PrintKeyboard.astro';
+import KeySteps from './KeySteps.astro';
+import QrBlock from './PrintQr.astro';
+import { qrModules, qrSvg } from '../lib/support.build.js';
 import {
   pdfHref,
   pdfFile,
@@ -17,6 +20,10 @@ import {
   LEGEND_FINGERS,
   FINGER_TAG,
   LOG_ROWS,
+  alphabetRows,
+  ALPHABET_MISSING,
+  QR_PAGE,
+  qrUrl,
 } from '../lib/printables.js';
 
 interface Props {
@@ -30,6 +37,16 @@ const pdf = pdfHref(p, lang);
 const pagesNote = p.pages === 1 ? t('print.pdfOne') : fill(t('print.pdfMany'), { n: p.pages });
 
 const sheets = p.kind === 'sheets' ? practiceSheets() : [];
+const alphabet = p.kind === 'alphabet' ? alphabetRows() : null;
+
+// On paper only: a QR code back to the tutor, with the address written out
+// for anyone without a scanner. A practice sheet's code opens its own lesson.
+const tutor = to(QR_PAGE);
+const shownUrl = `mykrutidev.com${tutor.replace(/\/$/, '')}`;
+const qr = (sheetId: string | null = null) => {
+  const url = qrUrl(tutor, p, sheetId);
+  return { url, shown: shownUrl, svg: qrSvg(qrModules(url), `${t('print.qr')}: ${shownUrl}`) };
+};
 const matras = p.kind === 'matras' ? matraRows() : [];
 // "A dash means the key types nothing" only when a key really does: Kruti Dev
 // 010 draws something for every key, and & DOES type a hyphen.
@@ -52,13 +69,21 @@ const circleBareMarks = (text: string) =>
   <a href={pdf} download={pdfFile(p, lang)} type="application/pdf" class="btn btn-primary" data-pdf-link>{t('print.downloadPdf')}</a>
   <button type="button" class="btn btn-outline" data-print>{t('print.printPage')}</button>
   <a href={to('/hindi-typing-test')} class="btn btn-ghost">{t('print.practiseOnline')}</a>
+  {
+    (p.kind === 'keyboard' || p.kind === 'alphabet') && (
+      <a href={to('/remington-hindi-keyboard')} class="btn btn-ghost" data-type-layout>
+        {t('print.typeLayout')}
+      </a>
+    )
+  }
   <span class="pr-note">{pagesNote}</span>
 </div>
 
 <div class="pr-area" id="tool" data-kind={p.kind} data-wide={p.landscape ? '' : undefined}>
   {/* On paper the page's own h1 and intro are hidden, so the sheet carries its own. */}
-  <div class="pr-only">
+  <div class="pr-only pr-head">
     <p class="pr-title" set:html={render(title)} />
+    {p.kind !== 'sheets' && <QrBlock {...qr()} />}
   </div>
 
   {
@@ -107,7 +132,15 @@ const circleBareMarks = (text: string) =>
     p.kind === 'sheets' &&
       sheets.map((s) => (
         <section class="pr-sheet" data-level={s.id} data-long={isLong(s) ? '' : undefined}>
-          <h2 class="pr-sheet-title">{t(`tutor.levels.${s.id}.title`)}</h2>
+          <div class="pr-head">
+            <h2 class="pr-sheet-title">{t(`tutor.levels.${s.id}.title`)}</h2>
+            <QrBlock {...qr(s.id)} />
+          </div>
+          <p class="pr-screen">
+            <a href={`${tutor}#lesson-${s.id}`} data-lesson-link={s.id}>
+              {t('print.sheets.practise')} →
+            </a>
+          </p>
           <p class="pr-sheet-focus" set:html={render(circleBareMarks(t(`tutor.levels.${s.id}.focus`)))} />
           <p class="pr-sheet-focus" set:html={render(t('print.sheets.howTo'))} />
           <ol class="pr-drills">
@@ -153,26 +186,67 @@ const circleBareMarks = (text: string) =>
                   {m.example}
                 </td>
                 <td translate="no">
-                  {m.steps.map((s, i) => (
-                    <>
-                      {i > 0 && <span class="pr-then">{t('print.matras.then')}</span>}
-                      {s.shift && (
-                        <>
-                          <span class="pr-cap">Shift</span>
-                          <span class="pr-plus">+</span>
-                        </>
-                      )}
-                      <span class="pr-cap" data-step={s.ch}>
-                        {s.cap}
-                      </span>
-                    </>
-                  ))}
+                  <KeySteps steps={m.steps} />
                 </td>
                 <td>{t(`print.matras.notes.${m.id}`)}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      </>
+    )
+  }
+
+  {
+    alphabet && (
+      <>
+        <div class="pr-lines">
+          <span set:html={render(t('print.alpha.intro'))} />
+        </div>
+        <h2 class="pr-alpha-h">{t('print.alpha.vowels')}</h2>
+        <ul class="pr-alpha" data-group="vowels">
+          {alphabet.vowels.map((a) => (
+            <li data-letter={a.deva} data-keys={a.keys}>
+              <span class="pr-pair">
+                <span class="pr-letter" lang="hi">{a.deva}</span>
+                <span class="pr-seq" translate="no"><KeySteps steps={a.steps} compact /></span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <h2 class="pr-alpha-h">{t('print.alpha.consonants')}</h2>
+        <ul class="pr-alpha" data-group="consonants">
+          {alphabet.consonants.map((a) => (
+            <li data-letter={a.deva} data-keys={a.keys}>
+              <span class="pr-pair">
+                <span class="pr-letter" lang="hi">{a.deva}</span>
+                <span class="pr-seq" translate="no"><KeySteps steps={a.steps} compact /></span>
+              </span>
+              {a.half && (
+                <span class="pr-pair pr-half" data-half={a.half.deva} data-keys={a.half.keys}>
+                  <span class="pr-letter" lang="hi">{a.half.deva}</span>
+                  <span class="pr-seq" translate="no"><KeySteps steps={a.half.steps} compact /></span>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+        <h2 class="pr-alpha-h">{t('print.alpha.digits')}</h2>
+        <ul class="pr-alpha" data-group="digits">
+          {alphabet.digits.map((a) => (
+            <li data-letter={a.deva} data-keys={a.keys}>
+              <span class="pr-pair">
+                <span class="pr-letter" lang="hi">{a.deva}</span>
+                <span class="pr-seq" translate="no"><KeySteps steps={a.steps} compact /></span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div class="pr-lines pr-alpha-notes">
+          <span set:html={render(t('print.alpha.half'))} />
+          <span set:html={render(t('print.alpha.alt'))} />
+          <span set:html={render(fill(t('print.alpha.missing'), { letters: ALPHABET_MISSING.join(' ') }))} />
+        </div>
       </>
     )
   }
@@ -211,6 +285,7 @@ const circleBareMarks = (text: string) =>
 </div>
 
 <script>
+  import { track } from '../scripts/track.js';
   // Print: make sure the print font is in before the dialog lays the page out.
   document.querySelector('[data-print]')?.addEventListener('click', async () => {
     try {
@@ -223,6 +298,7 @@ const circleBareMarks = (text: string) =>
     } catch {
       // Printing still works with the fallback font.
     }
+    track('print_chart', { chart: (document.querySelector<HTMLElement>('.pr-area')?.dataset.kind ?? '') });
     window.print();
   });
 </script>
