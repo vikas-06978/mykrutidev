@@ -9,7 +9,7 @@
  * ways to help.
  */
 import Base from '../layouts/Base.astro';
-import { readSupport, qrModules, qrSvg } from '../lib/support.build.js';
+import { readSupport, qrModules, qrSvg, upiNumberOf } from '../lib/support.build.js';
 import { langOf, useT } from '../i18n/index.js';
 
 const { t, render } = useT(langOf(Astro.url));
@@ -17,6 +17,10 @@ const pay = readSupport(import.meta.env);
 const upiId = pay?.upiId ?? null;
 const link = pay?.link ?? null;
 const qr = link ? qrSvg(qrModules(link), t('support.qrLabel')) : null;
+// An ID like 98765432@upi is a UPI number. A UPI app's "Pay to UPI number"
+// box takes only the digits, so pasting the whole ID there fails: the number
+// gets its own copy button.
+const upiNumber = upiNumberOf(upiId);
 ---
 
 <Base title={t('support.title')} description={t('support.description')} noindex crumb={t('support.h1')}>
@@ -45,6 +49,27 @@ const qr = link ? qrSvg(qrModules(link), t('support.qrLabel')) : null;
                   {t('support.copy')}
                 </button>
               </p>
+              <p class="mt-1 text-xs text-mute" set:html={render(t('support.idHint'))} />
+              {
+                upiNumber && (
+                  <>
+                    <p class="mt-4 text-xs font-semibold tracking-wide text-mute uppercase">{t('support.numberLabel')}</p>
+                    <p class="mt-1 flex flex-wrap items-center gap-2">
+                      <code class="text-base text-ink" translate="no" data-upi-number>{upiNumber}</code>
+                      <button
+                        type="button"
+                        class="btn btn-ghost"
+                        data-copy={upiNumber}
+                        data-label={t('support.copy')}
+                        data-done={t('support.copied')}
+                      >
+                        {t('support.copy')}
+                      </button>
+                    </p>
+                    <p class="mt-1 text-xs text-mute" set:html={render(t('support.numberHint'))} />
+                  </>
+                )
+              }
               <a class="btn btn-primary sp-pay mt-4" href={link} data-upi-pay>{t('support.payButton')}</a>
               <ul class="mt-4 space-y-2 text-sm">
                 <li set:html={render(t('support.amount'))} />
@@ -85,7 +110,7 @@ const qr = link ? qrSvg(qrModules(link), t('support.qrLabel')) : null;
 </style>
 
 <script>
-  // Copy the UPI ID, for someone paying from a UPI app on another device.
+  // Copy the UPI ID (or number), for someone paying from a UPI app on another device.
   for (const b of document.querySelectorAll<HTMLButtonElement>('[data-support-upi] [data-copy]')) {
     b.addEventListener('click', async () => {
       try {

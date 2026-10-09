@@ -3791,7 +3791,7 @@ function looksEnglish(token, decoded, ambiguous) {
  * words ("Office in India"); anywhere else they are converted, and the page
  * lists them so a visitor can keep one with a tick.
  */
-export const AMBIGUOUS_ENGLISH = new Set(['us', 'can', 'in', 'pan']);
+export const AMBIGUOUS_ENGLISH = new Set(['us', 'can', 'in', 'pan', 'is']);
 
 /** The fonts typed on Kruti Dev's keys, where AMBIGUOUS_ENGLISH are Hindi. */
 export const KRUTI_KEYBOARD = new Set(['kruti-dev', 'devlys', 'arjun', 'kundli', 'krishna', 'new-delhi', 'ajay', 'aman', 'agra']);

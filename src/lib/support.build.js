@@ -100,6 +100,13 @@ export function readSupport(env) {
 }
 
 /**
+ * The UPI number inside an ID like `98765432@upi` (8 to 10 digits before the
+ * @), or null. A UPI app's "Pay to UPI number" box takes only these digits.
+ * @param {string | null | undefined} upiId
+ */
+export const upiNumberOf = (upiId) => (upiId ? (/^(\d{8,10})@/.exec(upiId)?.[1] ?? null) : null);
+
+/**
  * The standard UPI payment link every UPI app opens: pay this ID, show this
  * name, in rupees. No amount, so the payer chooses it.
  * @param {string} upiId  a value readUpiId() accepted, so it needs no escaping
