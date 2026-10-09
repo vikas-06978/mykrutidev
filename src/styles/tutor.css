@@ -719,3 +719,33 @@
   fill: var(--color-warn-bg);
   stroke: var(--color-brick);
 }
+
+/* --- Highlighting off ------------------------------------------------------
+   Exam style: the passage is plain text, with no right/wrong colours and no
+   caret, and the live accuracy and mistakes read "–" until the result. What
+   was typed shows in its own box below, in Kruti Dev 010, as exam software
+   shows it. */
+.tt[data-highlight='off'] .tt-c[data-s] {
+  color: var(--color-ink);
+  background-color: transparent;
+  text-decoration: none;
+  /* !important: the blinking caret rule is more specific, and with
+     highlighting off there must be no caret at all. */
+  box-shadow: none !important;
+  animation: none !important;
+}
+.tt-typed-wrap {
+  @apply border-t border-hairline px-4 py-3 sm:px-5;
+}
+.tt-typed {
+  min-height: 2.5rem;
+  max-height: 8rem;
+  margin-top: 0.35rem;
+  overflow-y: auto;
+  font-family: 'MKD Kruti Dev 010', var(--font-deva);
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
