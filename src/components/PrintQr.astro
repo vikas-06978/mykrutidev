@@ -1,0 +1,24 @@
+---
+/**
+ * On paper only (inside .pr-only or a sheet head, see printables.css): a QR
+ * code back to the typing tutor, with the address written out under the
+ * words for anyone who would rather type it. Drawn at build time as an SVG.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+interface Props {
+  url: string;
+  svg: string;
+  shown: string;
+}
+const { url, svg, shown } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+---
+
+<div class="pr-qr" data-qr={url}>
+  <span class="pr-qr-text">
+    <b>{t('print.qr')}</b>
+    <span translate="no">{shown}</span>
+  </span>
+  <span class="pr-qr-code" set:html={svg} />
+</div>

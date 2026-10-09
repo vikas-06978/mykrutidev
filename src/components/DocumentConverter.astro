@@ -157,6 +157,7 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
 <script>
   import { localizeDocMessage, localizeSummary } from '../i18n/docMessages.js';
   import { fill } from '../i18n/fill.js';
+  import { track } from '../scripts/track.js';
 
   type Mod = typeof import('../lib/docConvert.js');
   let mod: Promise<Mod> | null = null;
@@ -290,6 +291,8 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         }
         if (run !== busy) return;
         setProgress(1);
+        // The kind of file and the two fonts: never its name or its contents.
+        track('convert_file', { file: checked.kind, from: pair.from, to: pair.to });
 
         // Same stats, same arithmetic as m.summarize(), in this page's words.
         const s = localizeSummary(stats, pair, L);

@@ -17,6 +17,11 @@ import {
   pdfFile,
   chartRows,
   KRUTI_FONT,
+  alphabetRows,
+  ALPHABET,
+  ALPHABET_MISSING,
+  qrUrl,
+  qrLesson,
 } from './printables.js';
 import { glyphChecker } from './fontGlyphs.js';
 
@@ -82,9 +87,9 @@ describe('the printables come from the tutor’s own data', () => {
     assert.deepEqual(rows.find((r) => r.id === 'reph').keys, 'deZ');
   });
 
-  test('five printables, each with its own PDF name and page count', () => {
-    assert.equal(PRINTABLES.length, 5);
-    assert.equal(new Set(PRINTABLES.map((p) => p.pdf)).size, 5);
+  test('six printables, each with its own PDF name and page count', () => {
+    assert.equal(PRINTABLES.length, 6);
+    assert.equal(new Set(PRINTABLES.map((p) => p.pdf)).size, 6);
     assert.equal(PRINTABLES.find((p) => p.kind === 'sheets').pages, LEVELS.length);
     assert.equal(pdfFile(PRINTABLES[0], 'en'), 'mykrutidev-kruti-dev-keyboard-chart.pdf');
     assert.equal(pdfHref(PRINTABLES[0], 'hi'), '/downloads/mykrutidev-kruti-dev-keyboard-chart-hindi.pdf');
@@ -127,5 +132,81 @@ describe('the keyboard chart is read from the Kruti Dev 010 font', () => {
       { '#': 'रु', '@': '/', $: '+', ')': 'द्ध', G: 'ळ', ':': 'रू', Z: 'र्', '/': 'ध्', '}': 'द्व' },
     );
     assert.equal(kruti2unicode('/k'), 'ध');
+  });
+});
+
+describe('the alphabet chart', () => {
+  const kruti2unicode = (keys) => convert(keys, 'kruti-dev', 'unicode', { keepEnglish: false });
+  const rows = alphabetRows();
+  const all = [...rows.vowels, ...rows.consonants, ...rows.consonants.map((c) => c.half).filter(Boolean), ...rows.digits];
+
+  test('every letter of ALPHABET is on it, in order', () => {
+    assert.deepEqual(rows.vowels.map((r) => r.deva), ALPHABET.vowels);
+    assert.deepEqual(rows.consonants.map((r) => r.deva), ALPHABET.consonants);
+    assert.deepEqual(rows.digits.map((r) => r.deva), ALPHABET.digits);
+    assert.equal(rows.vowels.length, 13);
+    assert.equal(rows.consonants.length, 33);
+  });
+
+  test('each sequence is what the tutor uses and types its letter back', () => {
+    for (const r of all) {
+      assert.equal(r.keys, wholeKeys(r.deva), r.deva);
+      assert.equal(kruti2unicode(r.keys), r.deva, r.deva);
+      assert.equal(r.steps.map((s) => s.ch).join(''), r.keys, r.deva);
+    }
+  });
+
+  test('each step is a real key, or the Alt code of a character the font draws', () => {
+    const hasGlyph = glyphChecker(KRUTI_FONT);
+    for (const r of all) {
+      for (const s of r.steps) {
+        const at = locate(s.ch);
+        if (at) assert.deepEqual({ cap: s.cap, shift: s.shift }, { cap: at.cap, shift: at.shift }, `${r.deva} ${s.ch}`);
+        else {
+          assert.equal(s.alt, `0${s.ch.codePointAt(0)}`, r.deva);
+          assert.ok(hasGlyph(s.ch), `${r.deva}: the font has no ${s.ch}`);
+        }
+      }
+    }
+    // The one everybody asks about.
+    assert.deepEqual(rows.vowels.find((r) => r.deva === 'ऊ').steps, [{ ch: 'Å', alt: '0197' }]);
+  });
+
+  test('half forms: every consonant but ड़ ढ़, each the consonant with a halant', () => {
+    for (const c of rows.consonants) {
+      if (/़/.test(c.deva)) assert.equal(c.half, null, c.deva);
+      else assert.equal(c.half.deva, `${c.deva}्`, c.deva);
+    }
+    assert.equal(rows.consonants.find((c) => c.deva === 'क').half.keys, 'D');
+  });
+
+  test('the letters left out really have no key', () => {
+    for (const ch of ALPHABET_MISSING) {
+      assert.ok(!ALPHABET.consonants.includes(ch));
+      assert.equal(convert(ch, 'unicode', 'kruti-dev'), ch, `${ch} now converts - add it to the chart`);
+    }
+  });
+});
+
+describe('the QR code on each printable', () => {
+  test('leads to the tutor in the sheet’s language, tagged for Analytics, at its lesson', () => {
+    const sheets = PRINTABLES.find((p) => p.kind === 'sheets');
+    const matras = PRINTABLES.find((p) => p.kind === 'matras');
+    const log = PRINTABLES.find((p) => p.kind === 'log');
+    assert.equal(
+      qrUrl('/hi/hindi-typing-test/', sheets, 'paragraphs'),
+      'https://mykrutidev.com/hi/hindi-typing-test/?utm_source=pdf&utm_medium=qr&utm_campaign=sheets#lesson-paragraphs',
+    );
+    assert.equal(qrUrl('/hindi-typing-test/', matras), 'https://mykrutidev.com/hindi-typing-test/?utm_source=pdf&utm_medium=qr&utm_campaign=matras#lesson-matras');
+    assert.equal(qrUrl('/hindi-typing-test/', log), 'https://mykrutidev.com/hindi-typing-test/?utm_source=pdf&utm_medium=qr&utm_campaign=log');
+  });
+
+  test('every lesson a QR opens is a real tutor lesson', () => {
+    const ids = new Set(LEVELS.map((l) => l.id));
+    for (const p of PRINTABLES) {
+      const lesson = qrLesson(p);
+      if (lesson) assert.ok(ids.has(lesson), `${p.kind}: ${lesson}`);
+    }
+    for (const s of practiceSheets()) assert.equal(qrLesson(PRINTABLES[2], s.id), s.id);
   });
 });

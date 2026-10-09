@@ -437,6 +437,7 @@ const strings = raw(lang, 'tutor');
   import { fill } from '../i18n/fill.js';
   import { dailyIndex, dayKey } from '../lib/habit.js';
   import { progressPanel, shareResult } from '../scripts/progress.js';
+  import { track } from '../scripts/track.js';
 
   type Unit = { deva: string; keys: string };
   type Passage = { id: string; title: string; units: Unit[] };
@@ -1170,6 +1171,8 @@ const strings = raw(lang, 'tutor');
       pauseBtn.hidden = true;
       updateStats();
       showResult(reason);
+      // Which lesson or test was finished: counted, never what was typed.
+      if (mode !== 'lesson') track('test_finish', { mode, minutes: timed() ? Math.round(testSeconds() / 60) : 0 });
     }
 
     // ----------------------------------------------------------------------
@@ -1347,6 +1350,7 @@ const strings = raw(lang, 'tutor');
 
       writeProgress(progress);
       renderLevels();
+      track('lesson_finish', { lesson: levelId, cleared: cleared ? 'yes' : 'no' });
     }
 
     /** The Hindi printed on a cap, for the missed-keys list. */
@@ -1576,5 +1580,18 @@ const strings = raw(lang, 'tutor');
 
     setMode('lesson');
     me.render(ctx());
+
+    // The QR code on a printed practice sheet opens its lesson: #lesson-<id>.
+    // A lesson this device has not unlocked yet stays locked - the ladder is
+    // the same however the page was opened - so the furthest open one starts.
+    const wanted = /^#lesson-([a-z]+)$/.exec(location.hash)?.[1];
+    if (wanted && LEVELS.some((l) => l.id === wanted)) {
+      const open = unlocked(wanted) ? wanted : [...LEVELS].reverse().find((l) => unlocked(l.id))!.id;
+      if (open !== levelId) {
+        levelId = open;
+        renderLevels();
+        reset({ newPassage: true });
+      }
+    }
   }
 </script>

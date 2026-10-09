@@ -18,7 +18,7 @@ Remington layout that exams use.
 | **Hindi tools** | Number to Hindi words · Amount in words (lakh, crore) · Hindi ↔ English digits · Date in Hindi · Hindi word counter · Hindi to IAST / ISO 15919 · Hindi to Gujarati, Bengali, Odia, Telugu, Kannada and Malayalam script |
 | **Word files** | Upload a `.docx` or `.txt` on the Kruti Dev ↔ Unicode and Kruti Dev ↔ Mangal pages. Only the Hindi changes, and English, tables and formatting stay as they were. |
 | **Typing** | Typing tutor and timed tests, Hindi typing test for exams, on-screen Hindi keyboard, Remington keyboard, English to Hindi (Hinglish) typing |
-| **Printables** | Keyboard chart, finger chart, matra and conjunct chart, practice sheets, progress log (free PDFs) |
+| **Printables** | Keyboard chart, alphabet chart, finger chart, matra and conjunct chart, practice sheets, progress log (free PDFs, each with a QR code back to the tutor) |
 | **Help** | 8 guides (font not installed, boxes or question marks, Word files, exam tips...) and pages on Kruti Dev 010, typing Hindi in MS Word and more |
 
 Every page exists in English at `/page` and in Hindi at `/hi/page`. Converters

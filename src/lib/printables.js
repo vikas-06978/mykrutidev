@@ -24,9 +24,10 @@ import { glyphChecker } from './fontGlyphs.js';
 import { layout, locate, FINGERS } from './remington.js';
 import { LEVELS } from './lessons.js';
 import { wholeKeys, buildVerifiedUnits } from './tutor.build.js';
+import { SITE } from './routes.js';
 
 /**
- * The five printables. `pdf` names the file under /downloads/ (one per
+ * The printables. `pdf` names the file under /downloads/ (one per
  * language, see pdfFile); `pages` is how many A4 pages it must print
  * to - the build and the tests both check it.
  */
@@ -36,9 +37,34 @@ export const PRINTABLES = [
   { path: '/hindi-typing-practice-sheets', kind: 'sheets', pdf: 'hindi-typing-practice-sheets', landscape: false, pages: LEVELS.length },
   { path: '/kruti-dev-matra-chart', kind: 'matras', pdf: 'kruti-dev-matra-conjunct-chart', landscape: false, pages: 1 },
   { path: '/hindi-typing-progress-log', kind: 'log', pdf: 'hindi-typing-progress-log', landscape: false, pages: 1 },
+  { path: '/kruti-dev-alphabet-chart', kind: 'alphabet', pdf: 'kruti-dev-alphabet-chart', landscape: false, pages: 1 },
 ];
 
 export const printableFor = (path) => PRINTABLES.find((p) => p.path === path) ?? null;
+
+/**
+ * The QR code printed on each sheet leads back to the typing tutor, at the
+ * lesson that sheet is about. Each practice sheet opens its own lesson, and the
+ * matra chart opens the matras lesson.
+ * `utm_*` lets Analytics count the visits that came from a printed sheet.
+ * The #lesson-<id> part is read by the tutor (TypingTutor.astro).
+ */
+export const QR_PAGE = '/hindi-typing-test';
+const QR_LESSON = { keyboard: 'home', fingers: 'home', matras: 'matras', alphabet: 'home' };
+
+/** The lesson a printable's QR opens, or null for the tutor as it starts. */
+export const qrLesson = (p, sheetId = null) => sheetId ?? QR_LESSON[p.kind] ?? null;
+
+/**
+ * The address inside the QR code.
+ * @param {string} localPath  the tutor's path in the sheet's language, e.g. /hi/hindi-typing-test/
+ * @param {{ kind: string }} p
+ * @param {string | null} [sheetId]  a practice sheet's level id
+ */
+export function qrUrl(localPath, p, sheetId = null) {
+  const lesson = qrLesson(p, sheetId);
+  return `${SITE}${localPath}?utm_source=pdf&utm_medium=qr&utm_campaign=${p.kind}${lesson ? `#lesson-${lesson}` : ''}`;
+}
 
 /**
  * The file a visitor downloads: mykrutidev-kruti-dev-keyboard-chart.pdf, and
@@ -179,6 +205,55 @@ export function matraRows() {
     });
     return { ...item, keys, steps };
   });
+}
+
+/**
+ * The alphabet chart (varnamala): every vowel, consonant, digit and danda
+ * with the keys that type it, and each consonant's half form.
+ *
+ * ङ and ञ are left out on purpose: no key of Kruti Dev 010 types them (the
+ * converter passes them through untouched), and Hindi usually writes them
+ * as the anusvara (गंगा, चंचल). A letter that has no key but a character of
+ * the font's own (ऊ is Å) is typed with its Alt code on the number pad.
+ */
+export const ALPHABET = {
+  vowels: ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ऋ', 'ए', 'ऐ', 'ओ', 'औ', 'अं', 'अः'],
+  consonants: [
+    ...'क ख ग घ च छ ज झ ट ठ ड ढ ण त थ द ध न प फ ब भ म य र ल व श ष स ह'.split(' '),
+    'ड़',
+    'ढ़',
+  ],
+  digits: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '।', '॥'],
+};
+
+/** The letters the alphabet chart leaves out, and why: see ALPHABET. */
+export const ALPHABET_MISSING = ['ङ', 'ञ'];
+
+/**
+ * One keystroke as the visitor presses it: a key (with Shift or not), or,
+ * for a character on no key, its Alt code: Å is Alt + 0197.
+ */
+function stepOf(ch, what) {
+  const at = locate(ch);
+  if (at) return { ch, cap: at.cap, shift: at.shift };
+  const code = ch.codePointAt(0);
+  if (code >= 0xa0 && code <= 0xff) return { ch, alt: `0${code}` };
+  throw new Error(`printables: ${what} needs "${ch}", which no key types`);
+}
+
+/** Every key sequence on the alphabet chart, checked to type its letter. */
+export function alphabetRows() {
+  const item = (deva) => {
+    const keys = wholeKeys(deva);
+    if (kruti2unicode(keys) !== deva) throw new Error(`printables: ${keys} does not type ${deva}`);
+    return { deva, keys, steps: [...keys].map((ch) => stepOf(ch, deva)) };
+  };
+  return {
+    vowels: ALPHABET.vowels.map(item),
+    // The half form of ड़ ढ़ is not written in Hindi, so they have none.
+    consonants: ALPHABET.consonants.map((c) => ({ ...item(c), half: /़/.test(c) ? null : item(`${c}्`) })),
+    digits: ALPHABET.digits.map(item),
+  };
 }
 
 /** Rows on the progress log. */

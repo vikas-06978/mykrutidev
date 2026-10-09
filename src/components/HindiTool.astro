@@ -203,6 +203,7 @@ const strings = {
   import { toScript } from '../lib/indicScripts.js';
   import { romanize } from '../lib/romanize.js';
   import { toast } from '../scripts/toast.js';
+  import { track } from '../scripts/track.js';
 
   async function copy(text: string, L: Record<string, string>, status: HTMLElement) {
     if (!text) {
@@ -212,6 +213,7 @@ const strings = {
     }
     try {
       await navigator.clipboard.writeText(text);
+      track('copy_text', { tool: location.pathname.replace(/^\/[a-z]{2}\//, '/') });
       toast(L.copiedToast);
       status.textContent = L.copiedToast;
     } catch {

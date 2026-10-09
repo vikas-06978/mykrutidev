@@ -2880,6 +2880,32 @@
         }
       ]
     },
+    "/kruti-dev-alphabet-chart": {
+      "nav": "Alphabet chart",
+      "h1": "Kruti Dev Alphabet Chart (Hindi Varnamala) - Free PDF",
+      "title": "Kruti Dev Alphabet Chart PDF | Keys for Every Hindi Letter (Free)",
+      "description": "Free Kruti Dev typing chart PDF: the keys for every Hindi vowel, consonant, half letter and digit on the Remington layout, from अ to ह, on one A4 page.",
+      "lede": "Every vowel, every consonant with its half form, the Hindi digits and the danda, with the exact Kruti Dev 010 keys to press - on one A4 page to keep beside the keyboard.",
+      "body": [
+        "<h2>How to read the chart</h2>",
+        "<p>Under each letter are the keys to press, left to right. <strong>Shift +</strong> means hold Shift while you press the key. Many letters take two keys: आ is अ followed by the aa-matra, and the letters with a standing bar (ख घ झ ण थ ध भ श ष) are their half form followed by the bar, the <code>k</code> key.</p>",
+        "<p>The half forms make conjuncts: type the half letter, then the full one (क् + य = क्य). For the matras, the reph and the joined letters क्ष त्र ज्ञ श्र, use the <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a>. To learn the keys by heart, start lesson 1 of the <a href=\"/hindi-typing-test\">typing tutor</a>.</p>"
+      ],
+      "faq": [
+        {
+          "q": "How do I type ऊ in Kruti Dev?",
+          "a": "ऊ has no key of its own. With Num Lock on, hold Alt and type 0197 on the number pad: Kruti Dev 010 draws ऊ for that character. On a laptop without a number pad, write the text in Unicode and convert it with Unicode to Kruti Dev."
+        },
+        {
+          "q": "Why are ङ and ञ not on the chart?",
+          "a": "No key of Kruti Dev 010 types them. Hindi usually writes the anusvara in their place: गंगा, not गङ्गा, and चंचल, not चञ्चल."
+        },
+        {
+          "q": "Are the Hindi digits on the number row?",
+          "a": "Yes. In Kruti Dev 010 the number keys 1 to 9 and 0 type the Hindi digits १ to ९ and ०, and Shift + a types the danda ।."
+        }
+      ]
+    },
     "/hindi-typing-progress-log": {
       "nav": "Progress log",
       "h1": "Hindi Typing Progress Log - Free PDF",
@@ -3180,7 +3206,7 @@
         "<ul><li>Your theme and colour choice, and your language choice.</li><li>In the converters: the text in the input box, so it is still there after a refresh, and the last 10 texts you converted with each tool, under <strong>Recent</strong> (each up to 50,000 characters). Clearing the box removes its draft, and <strong>Delete all</strong> empties Recent.</li><li>In the typing tutor: which lessons you have cleared, your best speed, your daily practice streak, badges, and your last 30 practice sessions.</li><li>A few interface preferences, such as whether key sounds are on.</li><li>The date you last sent feedback, so the feedback form does not ask again for 30 days.</li></ul>",
         "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. The only cookies are Google Analytics' own, described below.</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
         "<h2>Visit statistics (Google Analytics)</h2>",
-        "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself.</p>",
+        "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself. It also counts which buttons in the tools are used, such as Copy, Download Word, Print or a finished lesson, with the fonts or the lesson involved.</p>",
         "<p>It sets two cookies, <code>_ga</code> and <code>_ga_VZZRXNT8TQ</code>, so that a returning visitor is not counted as a new one. They last up to two years. It never receives the text you convert, your files or anything you type in the tools, because those never leave your device. We have switched off Google signals and ad personalisation, so this data is not used for advertising, and the reports do not tell us who you are.</p>",
         "<p>To opt out, block cookies for this site in your browser settings, use a tracker blocker, or install Google's <a href=\"https://tools.google.com/dlpage/gaoptout\">Analytics opt-out add-on</a>. The site works the same either way. Google's handling of this data is covered by <a href=\"https://policies.google.com/privacy\">Google's privacy policy</a>.</p>",
         "<h2>Feedback</h2>",
@@ -3196,7 +3222,7 @@
         "<h2>Children</h2>",
         "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 7 October 2026.</p>"
+        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 9 October 2026.</p>"
       ]
     },
     "/terms": {
@@ -4957,6 +4983,8 @@
     "downloadPdf": "Download PDF",
     "printPage": "Print",
     "practiseOnline": "Practise online",
+    "typeLayout": "Type with this layout",
+    "qr": "Scan to practise online",
     "pdfOne": "Free PDF, 1 A4 page. No sign-up.",
     "pdfMany": "Free PDF, {n} A4 pages. No sign-up.",
     "listHeading": "Printable charts and practice sheets",
@@ -4974,7 +5002,8 @@
     },
     "sheets": {
       "keys": "Keys",
-      "howTo": "Type each line on the Remington (Kruti Dev) layout. The keys are printed under it. Say each key as you press it, then write the line once in the ruled space."
+      "howTo": "Type each line on the Remington (Kruti Dev) layout. The keys are printed under it. Say each key as you press it, then write the line once in the ruled space.",
+      "practise": "Practise this lesson online"
     },
     "matras": {
       "sign": "Sign",
@@ -5006,6 +5035,15 @@
         "nuktaZa": "The letter, then the dot."
       }
     },
+    "alpha": {
+      "intro": "The keys to press for each letter on the Remington (Kruti Dev) layout, left to right. Shift + means hold Shift while you press the key.",
+      "vowels": "Vowels (स्वर)",
+      "consonants": "Consonants (व्यंजन), with the half form under each",
+      "digits": "Digits and the danda",
+      "half": "A half form + a full letter makes a conjunct: क् + य = क्य.",
+      "alt": "ऊ: with Num Lock on, hold Alt and type 0197 on the number pad.",
+      "missing": "{letters} have no key in Kruti Dev 010. Hindi writes the anusvara in their place: गंगा, चंचल."
+    },
     "log": {
       "intro": "Note every practice session. Speed follows accuracy: aim for 95% before you push the WPM.",
       "date": "Date",
@@ -5019,6 +5057,7 @@
       "fingers": "Finger chart",
       "sheets": "Practice sheets (11 lessons)",
       "matras": "Matra and conjunct chart",
+      "alphabet": "Alphabet chart (varnamala)",
       "log": "Progress log"
     },
     "pdfAria": "Download PDF: {name}",

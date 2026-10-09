@@ -258,6 +258,7 @@ const strings = {
   import { fill } from '../i18n/fill.js';
   import { workspace } from '../scripts/workspace.js';
   import { toast } from '../scripts/toast.js';
+  import { track } from '../scripts/track.js';
 
   /** The local engine is cheap, so it runs between keystrokes. */
   const DEBOUNCE_MS = 80;
@@ -651,6 +652,7 @@ const strings = {
       const value = output.value;
       if (!value) return say(L.nothingToCopy);
       await writeClipboard(value);
+      track('copy_text', { tool: 'english-to-hindi' });
       copyLabel.textContent = L.copied;
       copyBtn.dataset.copied = 'true';
       say(L.copiedToClipboard);
@@ -672,6 +674,7 @@ const strings = {
         const { downloadDocx } = await import('../lib/docx.js');
         downloadDocx(body, { fontName: 'Mangal', fileName: 'mykrutidev-typing.docx' });
         say(L.downloaded);
+        track('download_word', { tool: 'english-to-hindi' });
       } catch (err) {
         console.error(err);
         say(L.downloadFailed);
