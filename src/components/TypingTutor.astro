@@ -105,11 +105,28 @@ const strings = raw(lang, 'tutor');
         noise is a page people close, and a tutor is used in offices and
         libraries as often as at home.
       */}
-      <label class="tt-sound">
-        <input type="checkbox" data-role="sound" class="size-4 accent-[var(--color-brick)]" />
-        <span>{t('tutor.sound')}</span>
-      </label>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/*
+          Exam rules, ON by default: corrections and highlighting are what make
+          the tutor teach. Turning either off is for practising like an exam
+          that allows no Backspace, or whose software shows no colours or hints.
+        */}
+        <label class="tt-sound" title={t('tutor.backspaceTitle')}>
+          <input type="checkbox" data-role="backspace" checked class="size-4 accent-[var(--color-brick)]" />
+          <span>{t('tutor.backspace')}</span>
+        </label>
+        <label class="tt-sound" title={t('tutor.highlightTitle')}>
+          <input type="checkbox" data-role="highlight" checked class="size-4 accent-[var(--color-brick)]" />
+          <span>{t('tutor.highlight')}</span>
+        </label>
+        <label class="tt-sound">
+          <input type="checkbox" data-role="sound" class="size-4 accent-[var(--color-brick)]" />
+          <span>{t('tutor.sound')}</span>
+        </label>
+      </div>
     </div>
+    {/* Shown only while a rule is off, so nobody wonders where the hints went. */}
+    <p data-role="rules-note" class="tt-mode-note" hidden></p>
   </div>
 
   {/* ------------------------------ Levels ------------------------------- */}
@@ -261,6 +278,15 @@ const strings = raw(lang, 'tutor');
         {t('tutor.veil')}
       </span>
     </div>
+  </div>
+
+  {/*
+    With highlighting off the passage no longer shows what was typed, so - as in
+    exam software - it appears here, in Kruti Dev 010 itself.
+  */}
+  <div class="tt-typed-wrap" data-role="typed-wrap" hidden>
+    <span class="cv-eyebrow">{t('tutor.typedLabel')}</span>
+    <p class="tt-typed" data-role="typed" translate="no" aria-hidden="true"></p>
   </div>
 
   {/* ---------------------------- Next key ------------------------------- */}
@@ -493,6 +519,9 @@ const strings = raw(lang, 'tutor');
   const BEST_KEY = 'mykrutidev:best-wpm';
   const PROGRESS_KEY = 'mykrutidev:tutor';
   const SOUND_KEY = 'mykrutidev:tutor-sound';
+  /** Stored only as 'off': a visitor who never touched them gets them on. */
+  const BACKSPACE_KEY = 'mykrutidev:tutor-backspace';
+  const HIGHLIGHT_KEY = 'mykrutidev:tutor-highlight';
 
   const read = (sel: string) => {
     const el = document.querySelector<HTMLElement>(sel);
@@ -878,6 +907,14 @@ const strings = raw(lang, 'tutor');
       litShift = [];
       litFingers = [];
 
+      // Highlighting off: no key, no finger, no Hindi glyph to aim for.
+      if (!highlightOn()) {
+        promptKeys.textContent = '';
+        promptDeva.textContent = '';
+        promptFinger.textContent = ch ? L.highlightOffPrompt : L.finished;
+        return;
+      }
+
       if (!ch) {
         promptKeys.textContent = '';
         promptDeva.textContent = '';
@@ -1082,6 +1119,10 @@ const strings = raw(lang, 'tutor');
         return;
       }
       if (e.key === 'Enter') e.preventDefault();
+      if (!backspaceOn() && (e.key === 'Backspace' || e.key === 'Delete')) {
+        e.preventDefault();
+        return;
+      }
       // Printable keys only: a modifier or an arrow is not an attempt.
       if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
 
@@ -1089,9 +1130,80 @@ const strings = raw(lang, 'tutor');
       const right = e.key === want;
       const at = locate(e.key);
       const cap = at ? caps.get(at.cap) : null;
-      if (cap) flash(cap, right ? 'ok' : 'bad');
+      // A green or red flash tells right from wrong: that is highlighting too.
+      if (cap && highlightOn()) flash(cap, right ? 'ok' : 'bad');
       click(right);
     });
+
+    // ----------------------------------------------------------------------
+    // Exam rules: Backspace and highlighting, both on unless turned off
+    // ----------------------------------------------------------------------
+
+    const backspaceBox = q<HTMLInputElement>('backspace');
+    const highlightBox = q<HTMLInputElement>('highlight');
+    const rulesNote = q<HTMLElement>('rules-note');
+    const typedWrap = q<HTMLElement>('typed-wrap');
+    const typedEl = q<HTMLElement>('typed');
+    const backspaceOn = () => backspaceBox.checked;
+    const highlightOn = () => highlightBox.checked;
+
+    function readRule(key: string) {
+      try {
+        return localStorage.getItem(key) !== 'off';
+      } catch {
+        return true;
+      }
+    }
+    function writeRule(key: string, on: boolean) {
+      try {
+        if (on) localStorage.removeItem(key);
+        else localStorage.setItem(key, 'off');
+      } catch {
+        // Applies to this visit only. Harmless.
+      }
+    }
+
+    function applyRules() {
+      root.dataset.highlight = highlightOn() ? 'on' : 'off';
+      typedWrap.hidden = highlightOn();
+      typedEl.textContent = capture.value;
+      updateStats();
+      const off = [!backspaceOn() && L.backspaceOffNote, !highlightOn() && L.highlightOffNote].filter(Boolean);
+      rulesNote.textContent = off.join(' ');
+      rulesNote.hidden = off.length === 0;
+      showNextKey(capture.value);
+    }
+
+    backspaceBox.checked = readRule(BACKSPACE_KEY);
+    highlightBox.checked = readRule(HIGHLIGHT_KEY);
+    backspaceBox.addEventListener('change', () => {
+      writeRule(BACKSPACE_KEY, backspaceBox.checked);
+      applyRules();
+      capture.focus();
+    });
+    highlightBox.addEventListener('change', () => {
+      writeRule(HIGHLIGHT_KEY, highlightBox.checked);
+      applyRules();
+      capture.focus();
+    });
+
+    // No Backspace means no correction of any kind: phone keyboards delete
+    // through beforeinput rather than a Backspace keydown, and undo, cut or
+    // typing over a selection would correct just the same.
+    capture.addEventListener('beforeinput', (e) => {
+      if (backspaceOn()) return;
+      if (/^(delete|history)/.test(e.inputType)) e.preventDefault();
+    });
+    capture.addEventListener('cut', (e) => {
+      if (!backspaceOn()) e.preventDefault();
+    });
+    // And the caret stays at the end, so nothing can be inserted earlier on.
+    const pinCaret = () => {
+      if (backspaceOn()) return;
+      const end = capture.value.length;
+      if (capture.selectionStart !== end || capture.selectionEnd !== end) capture.setSelectionRange(end, end);
+    };
+    for (const type of ['select', 'click', 'keyup', 'focus']) capture.addEventListener(type, pinCaret);
 
     // A typing test is not a copy-paste exercise.
     capture.addEventListener('paste', (e) => e.preventDefault());
@@ -1187,8 +1299,10 @@ const strings = raw(lang, 'tutor');
       timeEl.textContent = formatClock(timed() ? remaining() : elapsed());
       statTime.dataset.low = String(timed() && running && remaining() <= 10_000);
       wpmEl.textContent = String(Math.round(s.net));
-      accEl.textContent = `${Math.round(s.accuracy)}%`;
-      errEl.textContent = String(s.wrong);
+      // Highlighting off: as in an exam, how it is going waits for the result.
+      const live = highlightOn() || done;
+      accEl.textContent = live ? `${Math.round(s.accuracy)}%` : '–';
+      errEl.textContent = live ? String(s.wrong) : '–';
 
       // Progress is measured in keystrokes, like everything else on this page.
       // Aksharas would read as a smaller number that moves at a different
@@ -1376,6 +1490,7 @@ const strings = raw(lang, 'tutor');
 
       capture.disabled = false;
       capture.value = '';
+      typedEl.textContent = '';
       result.hidden = true;
       nextLevelBtn.hidden = true;
       shareBtn.hidden = true;
@@ -1442,6 +1557,10 @@ const strings = raw(lang, 'tutor');
 
       paint(capture.value);
       showNextKey(capture.value);
+      if (!highlightOn()) {
+        typedEl.textContent = capture.value;
+        typedEl.scrollTop = typedEl.scrollHeight;
+      }
       const s = updateStats();
 
       // Finishing the passage ends the run early: there is nothing left to
@@ -1579,6 +1698,7 @@ const strings = raw(lang, 'tutor');
     });
 
     setMode('lesson');
+    applyRules();
     me.render(ctx());
 
     // The QR code on a printed practice sheet opens its lesson: #lesson-<id>.
