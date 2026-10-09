@@ -29,5 +29,6 @@ e.g. `LMG Arun/sample-letter.docx`.
 - DRChatrikWeb
 - Gurmukhi Lys 020
 
-Once at least one font is read key by key, `/punjabi-font-converter` goes live
-(it shows "Soon" until then).
+Once at least one font is read key by key, a `/punjabi-font-converter` page
+can be added (the old "Soon" page was removed in October 2026; its address
+redirects to /all-converters).

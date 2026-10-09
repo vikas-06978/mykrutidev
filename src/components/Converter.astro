@@ -344,6 +344,29 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
     }
   </div>
 
+  {/*
+    Kruti Dev 055 types Hindi digits on the number keys and has Alt codes of
+    its own (kruti055Keys). Pasted text has lost its font name, so the visitor
+    says which cut it is. A Word file names it, and needs no box.
+  */}
+  {
+    from === 'kruti-dev' && (
+      <div class="cv-strip bg-inset">
+        <label class="flex items-start gap-2.5 text-body">
+          <input
+            type="checkbox"
+            data-role="cut-055"
+            class="mt-0.5 size-4 shrink-0 accent-[var(--color-brick)]"
+          />
+          <span>
+            <strong class="font-medium text-ink" set:html={render(t('converter.cut055'))} />
+            <span class="block text-xs text-mute" set:html={render(t('converter.cut055Help'))} />
+          </span>
+        </label>
+      </div>
+    )
+  }
+
   {/* Which Kruti Dev cuts the result is right for (each checked against its font file). */}
   {
     (from === 'kruti-dev' || to === 'kruti-dev') && (
@@ -402,6 +425,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
     const input = q<HTMLTextAreaElement>('input');
     const output = q<HTMLTextAreaElement>('output');
     const keepEnglish = q<HTMLInputElement>('keep-english');
+    const cut055Box = maybe<HTMLInputElement>('cut-055');
     const countIn = q<HTMLElement>('count-in');
     const countOut = q<HTMLElement>('count-out');
     const status = q<HTMLElement>('status');
@@ -531,7 +555,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
       if (!wordsPanel) return;
       const report =
         keepEnglish.checked && input.value
-          ? englishReport(input.value, from, { keepWords, convertWords, candidates })
+          ? englishReport(input.value, from, { keepWords, convertWords, candidates, cut055: cut055Box?.checked })
           : [];
       const kept = report.filter((r) => r.english);
       const maybeEnglish = report.filter((r) => !r.english);
@@ -552,6 +576,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
           keepEnglish: keepEnglish.checked,
           keepWords,
           convertWords,
+          cut055: cut055Box?.checked,
         });
       } catch (err) {
         console.error(err);
@@ -585,7 +610,12 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
 
       let result = '';
       try {
-        result = convert(text, from, to, { keepEnglish: keepEnglish.checked, keepWords, convertWords });
+        result = convert(text, from, to, {
+          keepEnglish: keepEnglish.checked,
+          keepWords,
+          convertWords,
+          cut055: cut055Box?.checked,
+        });
       } catch (err) {
         console.error(err);
         say(L.conversionFailed);
@@ -624,6 +654,10 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
     input.addEventListener('input', tick);
     // A setting change is not typing: apply it immediately.
     keepEnglish.addEventListener('change', () => {
+      lastConverted = null;
+      flush();
+    });
+    cut055Box?.addEventListener('change', () => {
       lastConverted = null;
       flush();
     });

@@ -175,6 +175,8 @@
     "review": "<span class=\"font-medium text-body\">Please review the output.</span> Matra order and the common conjuncts (<span lang=\"hi\">क्ष, त्र, ज्ञ, श्र</span>) are handled, but rare characters in very old documents may still differ. Nothing you type is uploaded. This page converts entirely inside your browser.",
     "worksWithFrom": "Works with text in Kruti Dev 010, 011, 012, 014, 016 and 055, which share one keyboard. From a Word file, Word’s curly quotes and dashes and the Hindi digits of Kruti Dev 055 are read too. Kruti Dev 020 has another layout: use <a href=\"/devlys-020-to-unicode\">DevLys 020 to Unicode</a>.",
     "worksWithTo": "The result is for Kruti Dev 010, 011, 012, 014 or 016: set one of them as the font in Word. Hindi digits are written with Kruti Dev’s Alt-code characters.",
+    "cut055": "My text is in Kruti Dev 055",
+    "cut055Help": "Tick this only for text typed in Kruti Dev 055. Its number keys type Hindi digits (1 is १), and some Alt codes type other letters (Alt+0131 is घ). Text in Kruti Dev 010 to 016 needs no tick.",
     "otherDirection": "Need the other direction? {title}",
     "hintUnicodeLead": "This looks like Unicode Hindi, not {from}. ",
     "hintUnicodeBody": "You may want the converter that goes the other way",
@@ -1637,58 +1639,6 @@
         "tip": "Word keeps the old font on pasted text. Select it and set the font to Mangal, or download the .docx instead."
       }
     },
-    "/chanakya-to-unicode": {
-      "nav": "Chanakya → Unicode",
-      "h1": "Chanakya to Unicode Converter",
-      "title": "Chanakya to Unicode Converter | Chanakya 905 to Hindi Unicode",
-      "description": "Convert Chanakya font Hindi to Unicode instantly in your browser. Free, no signup, nothing uploaded.",
-      "note": "The Chanakya layout is now written and round-trips cleanly through conjuncts, matras and nukta letters, and every key it uses exists in the Chanakya font file we hold. What is still missing is proof that it matches the font rather than only itself: the font names itself simply \"Chanakya\", and Walkman Chanakya 905 is one of several cuts that do not all share a keyboard layout. Until a real Chanakya document confirms it, this page stays off - a converter that is confidently wrong is worse than one that is honestly unfinished.",
-      "lede": "Convert Chanakya font Hindi to Unicode, entirely in your browser.",
-      "body": [
-        "<h2>Coming in phase 2</h2>",
-        "<p>Chanakya uses a different glyph layout from Kruti Dev, and its map has not been built from real documents yet. Until it has been checked, this pair stays switched off.</p>",
-        "<p>The <a href=\"/\">Kruti Dev to Unicode converter</a> is finished and tested if that is the font you actually have.</p>"
-      ]
-    },
-    "/unicode-to-chanakya": {
-      "nav": "Unicode / Hindi → Chanakya",
-      "h1": "Unicode to Chanakya Converter",
-      "title": "Unicode to Chanakya Converter | Hindi Unicode to Chanakya 905 Font",
-      "description": "Convert Unicode Hindi back to Chanakya font encoding. Live, free and fully client-side.",
-      "note": "The Chanakya layout is written and round-trips cleanly, but it has not yet been confirmed against a real Chanakya document - and the font file names itself only `Chanakya`, not Walkman Chanakya 905. This page stays off until that is settled.",
-      "lede": "Convert Unicode Hindi back to the Chanakya font encoding, entirely in your browser.",
-      "body": [
-        "<h2>Coming in phase 2</h2>",
-        "<p>The Chanakya mapping is not filled in yet, so this pair is disabled rather than approximate.</p>",
-        "<p><a href=\"/unicode-to-kruti-dev\">Unicode to Kruti Dev</a> is complete if that direction helps.</p>"
-      ]
-    },
-    "/kruti-dev-to-chanakya": {
-      "nav": "Kruti Dev → Chanakya",
-      "h1": "Kruti Dev to Chanakya Converter",
-      "title": "Kruti Dev to Chanakya Converter | KrutiDev to Chanakya 905 Hindi",
-      "description": "Convert Kruti Dev text to Chanakya font encoding online. Free, browser-based, no upload.",
-      "note": "The Kruti Dev half of this conversion is done and tested. The Chanakya half is written and round-trips cleanly, but is not yet confirmed against a real Chanakya document, so the page stays off.",
-      "lede": "Convert Kruti Dev text to the Chanakya font encoding, entirely in your browser.",
-      "body": [
-        "<h2>Coming in phase 2</h2>",
-        "<p>The Chanakya character map has not been verified against real documents yet, so this pair is switched off rather than left to quietly mangle your text. A half-remembered mapping is worse than none.</p>",
-        "<p>In the meantime, the <a href=\"/\">Kruti Dev to Unicode converter</a> is complete and tested.</p>"
-      ]
-    },
-    "/chanakya-to-kruti-dev": {
-      "nav": "Chanakya → Kruti Dev",
-      "h1": "Chanakya to Kruti Dev Converter",
-      "title": "Chanakya to Kruti Dev Converter | Chanakya 905 to KrutiDev 010",
-      "description": "Convert Chanakya font Hindi to Kruti Dev 010 text online, free and entirely in your browser.",
-      "note": "The Kruti Dev half of this conversion is done and tested. The Chanakya half is written and round-trips cleanly, but is not yet confirmed against a real Chanakya document, so the page stays off.",
-      "lede": "Paste Chanakya 905 text on the left and get Kruti Dev 010 on the right, once the Chanakya layout has been mapped.",
-      "body": [
-        "<h2>Chanakya and Kruti Dev are different layouts</h2>",
-        "<p>Both are legacy Hindi fonts that store Devanagari on ASCII codepoints, but they were made by different vendors and they do not agree on which key carries which letter. A Chanakya document opened with Kruti Dev installed shows the wrong Hindi, not gibberish, which is exactly why this needs a real map rather than an approximation.</p>",
-        "<p>The Kruti Dev half of this conversion is already finished and tested. What is missing is the Chanakya side. In the meantime, the <a href=\"/\">Kruti Dev to Unicode converter</a> works today.</p>"
-      ]
-    },
     "/shusha-to-unicode": {
       "nav": "Shusha → Unicode",
       "h1": "Shusha to Unicode Converter",
@@ -2226,19 +2176,6 @@
         ],
         "tip": "Words with ো or ৌ are the quickest check: <code>†mvbvi</code> should read <strong lang=\"bn\">সোনার</strong>, not ে, স, া."
       }
-    },
-    "/punjabi-font-converter": {
-      "nav": "Punjabi",
-      "h1": "Punjabi Gurmukhi Font Converter",
-      "title": "Punjabi Font Converter | AnmolLipi and Asees Gurmukhi to Unicode",
-      "description": "A planned Punjabi font converter for AnmolLipi, Asees and other legacy Gurmukhi fonts to Unicode.",
-      "note": "Planned. Gurmukhi is a separate script from Devanagari and needs its own character map built from real AnmolLipi and Asees documents.",
-      "lede": "Planned: a Punjabi font converter for AnmolLipi, Asees and other legacy Gurmukhi fonts to Unicode.",
-      "body": [
-        "<h2>Planned, not started</h2>",
-        "<p>AnmolLipi and Asees are the legacy Gurmukhi fonts behind most older Punjabi documents. As with Kruti Dev, the text inside the file is ASCII and only becomes Punjabi when the right font is installed.</p>",
-        "<p>Gurmukhi is a separate script from Devanagari with its own letters, vowel signs and subjoined forms, so nothing in the current engine transfers. The route exists so the work has a home. It will be switched on only after a keyword check and a mapping built from real AnmolLipi and Asees documents.</p>"
-      ]
     },
     "/hindi-font-converter": {
       "nav": "Hindi font converter",

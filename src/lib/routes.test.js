@@ -34,11 +34,11 @@ describe('status: the one flag every "Soon" badge renders from', () => {
     }
   });
 
-  test('both Abbasi Chanakya pages are live; the generic Chanakya ones are soon', () => {
+  test('both Abbasi Chanakya pages are live; the Walkman-Chanakya ones were removed', () => {
     assert.equal(statusOf(getPage('/abbasi-chanakya-to-unicode')), 'live');
     assert.equal(statusOf(getPage('/unicode-to-abbasi-chanakya')), 'live');
     for (const path of ['/chanakya-to-unicode', '/chanakya-to-kruti-dev', '/unicode-to-chanakya', '/kruti-dev-to-chanakya']) {
-      assert.equal(statusOf(getPage(path)), 'soon', path);
+      assert.equal(getPage(path), undefined, path);
     }
   });
 });
@@ -130,13 +130,13 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
   });
 
   test('ready:true alone does not make a page live', () => {
-    // chanakya is deliberately not accurate; pretend someone flips ready.
-    const pretend = { ...getPage('/chanakya-to-unicode'), ready: true };
+    // chanakya is deliberately not accurate; pretend someone gives it a page.
+    const pretend = { path: '/chanakya-to-unicode', ready: true, kind: 'converter', from: 'chanakya', to: 'unicode' };
     assert.equal(isLive(pretend), false);
   });
 
   test('a converter page with no font pair can never be live', () => {
-    const pretend = { ...getPage('/punjabi-font-converter'), ready: true };
+    const pretend = { path: '/punjabi-font-converter', ready: true, kind: 'converter', from: null, to: null };
     assert.equal(isLive(pretend), false);
   });
 
@@ -156,14 +156,6 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
     }
   });
 
-  test('the generic Chanakya pages stay off until their map is verified', () => {
-    for (const path of [
-      '/chanakya-to-unicode', '/unicode-to-chanakya',
-      '/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev',
-    ]) {
-      assert.equal(isLive(getPage(path)), false, `${path} must stay pending`);
-    }
-  });
 
   test('every unverified font keeps its pages off', () => {
     for (const key of Object.keys(FONTS).filter((k) => !FONTS[k].accurate)) {
@@ -316,7 +308,7 @@ describe('indexing', () => {
 
   test('a trailing slash does not change the verdict', () => {
     assert.equal(isIndexable(`${SITE}/kruti-dev-to-mangal/`), true);
-    assert.equal(isIndexable(`${SITE}/chanakya-to-unicode/`), false);
+    assert.equal(isIndexable(`${SITE}/kruti-dev-to-mangal`), true);
   });
 
   test('an unknown URL is not indexable', () => {
@@ -393,5 +385,26 @@ describe('font links under each converter', async () => {
 
   test('the tool count is every live page All tools lists', () => {
     assert.ok(liveToolCount() >= 50);
+  });
+});
+
+describe('removed pages redirect to a live page', () => {
+  test('Walkman-Chanakya and Punjabi addresses, in every language, with and without the slash', async () => {
+    const { parseRedirects } = await import('../../scripts/serve-dist.mjs');
+    const { readFileSync } = await import('node:fs');
+    const rules = parseRedirects(readFileSync(new URL('../../public/_redirects', import.meta.url), 'utf8'));
+    const gone = ['/chanakya-to-unicode', '/unicode-to-chanakya', '/kruti-dev-to-chanakya', '/chanakya-to-kruti-dev', '/punjabi-font-converter'];
+    for (const lang of ['', '/hi', '/bn', '/mr', '/ta', '/gu', '/pa']) {
+      for (const path of gone) {
+        assert.equal(getPage(path), undefined, path);
+        for (const from of [`${lang}${path}`, `${lang}${path}/`]) {
+          const rule = rules.get(from);
+          assert.ok(rule, from);
+          assert.equal(rule.status, 301, from);
+          assert.ok(rule.to.startsWith(`${lang}/`), from);
+          assert.ok(isLive(getPage(rule.to.slice(lang.length).replace(/\/$/, ''))), `${from} -> ${rule.to}`);
+        }
+      }
+    }
   });
 });

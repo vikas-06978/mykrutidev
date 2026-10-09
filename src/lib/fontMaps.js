@@ -366,6 +366,7 @@ const KRUTI_SMART_QUOTES = {
  *   ”  ष्  in 011 012 014 016 055; nothing in 010
  *   —  कृ  in every cut                    …  ३  in 010 to 016
  *   0-9  Hindi digits in 055; English digits in every other cut
+ *   and 055's own Alt codes (kruti055Keys below)
  * Kruti Dev 020 is another layout (DevLys 020's) and never comes here.
  *
  * @param {string} text  the run's characters
@@ -375,7 +376,7 @@ export function krutiWordRun(text, fontName) {
   const cut = /(\d{3})/.exec(fontName)?.[1] ?? '010';
   const known = ['010', '011', '012', '014', '016', '055'].includes(cut);
   const quotesAreSha = known && cut !== '010';
-  return text.replace(/[’‘“”–—…0-9]/g, (ch) => {
+  const quotes = text.replace(/[’‘“”–—…]/g, (ch) => {
     switch (ch) {
       case '’':
         return "'";
@@ -392,9 +393,47 @@ export function krutiWordRun(text, fontName) {
       case '…':
         return known && cut !== '055' ? '३' : ch;
       default:
-        return cut === '055' ? String.fromCharCode(0x966 + Number(ch)) : ch;
+        return ch;
     }
   });
+  return cut === '055' ? kruti055Keys(quotes) : quotes;
+}
+
+// Kruti Dev 055 (public/fonts/KRDEV055.woff, drawn glyph by glyph beside
+// KRDEV010.woff): every ASCII letter key is 010's, but the number keys draw
+// Hindi digits, and these Alt codes draw what ANOTHER key draws in 010 (the
+// same glyph, outline for outline): ƒ घ (Ä), „ ह्म (ã), ‡ ह्न (à), ‰ क्त
+// (ä), ‹ श् (Ü), … ि with the reph and ं (É), 0x90 भ (Ò). † and ˆ draw
+// nothing, Š a star (∗, as `*` is a Kruti key). å and Œ draw a stroke that is
+// not a letter: å is ० in 010, so it is read as Œ, which no Kruti key reads.
+const KRUTI_055_AS_010 = {
+  'ƒ': 'Ä',
+  '„': 'ã',
+  '‡': 'à',
+  '‰': 'ä',
+  '‹': 'Ü',
+  '…': 'É',
+  '\u0090': 'Ò',
+  '†': '',
+  'ˆ': '',
+  'Š': '∗',
+  'å': 'Œ',
+};
+const RE_055 = new RegExp(`[0-9${Object.keys(KRUTI_055_AS_010).join('')}]`, 'g');
+
+/**
+ * Text typed in Kruti Dev 055, rewritten as the Kruti Dev 010 keys that draw
+ * the same thing, so the Kruti Dev map reads it: its number keys become Hindi
+ * digits. Web and email addresses are left alone.
+ *
+ * @param {string} text
+ */
+export function kruti055Keys(text) {
+  return splitProtected(text, RE_PROTECT_LINKS)
+    .map(({ skip, v }) =>
+      skip ? v : v.replace(RE_055, (ch) => KRUTI_055_AS_010[ch] ?? String.fromCharCode(0x966 + Number(ch))),
+    )
+    .join('');
 }
 
 // The upper range of Kruti Dev 010: ready-made conjuncts, full and half
@@ -894,8 +933,10 @@ export const DEVLYS_DIVERGENT_RANGE = { from: 0x80, to: 0x9f, extra: [0xfc] };
 // STATUS: accurate: false, and NOT merely because nobody has got round to
 // checking it. The table below is complete and round-trips cleanly. It also
 // did not describe the Chanakya font file this repo used to ship, which is why
-// the pages stay on "coming soon" and why that file has since been removed.
-// The pages load NO preview font until a matching one is supplied (TODO below).
+// that file was removed, and why the font has NO pages: they sat on "coming
+// soon" until October 2026 and were then removed (public/_redirects sends
+// their addresses to /hindi-font-converter). Add them back, with routes and
+// copy, once the real Walkman-Chanakya 905 font is supplied (TODO below).
 //
 // ---------------------------------------------------------------------------
 // WHAT THIS TABLE ACTUALLY IS
@@ -3609,7 +3650,7 @@ export function unmappedChars(text, toKey, opts = {}) {
  * @param {string} text
  * @param {string} fromKey key into FONTS
  * @param {string} toKey   key into FONTS
- * @param {{ keepEnglish?: boolean }} [opts]
+ * @param {{ keepEnglish?: boolean, keepWords?: Set<string>, convertWords?: Set<string>, cut055?: boolean }} [opts]
  * @returns {string}
  */
 export function convert(text, fromKey, toKey, opts = {}) {
@@ -3618,6 +3659,10 @@ export function convert(text, fromKey, toKey, opts = {}) {
   const to = FONTS[toKey];
   if (!from || !to) throw new Error(`Unknown font: ${!from ? fromKey : toKey}`);
   opts = scriptOpts(from, to, opts);
+  // Text in Kruti Dev 055 (the visitor says so): its number keys and own Alt
+  // codes are read as the 010 keys that draw the same thing.
+  const cut055 = Boolean(opts.cut055) && fromKey === 'kruti-dev';
+  if (cut055) text = kruti055Keys(text);
 
   // Unicode -> Unicode is identity. This is the whole Mangal story: Mangal is a
   // Unicode font, not an encoding, so "Kruti Dev to Mangal" is "Kruti Dev to
@@ -3640,7 +3685,8 @@ export function convert(text, fromKey, toKey, opts = {}) {
   // Two fonts on one keyboard layout draw the same letter on every key, so the
   // keys ARE the answer. Going through Unicode would only lose detail it cannot
   // hold, such as which way a quote mark faces (Kruti's Þ and ß both become ").
-  if (from.layout && from.layout === to.layout) return text;
+  // Not for 055 text, whose Hindi digits are no key of the other font.
+  if (from.layout && from.layout === to.layout && !cut055) return text;
 
   // legacy -> legacy routes through Unicode.
   return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, readOpts), to.map, {
@@ -3657,12 +3703,13 @@ export function convert(text, fromKey, toKey, opts = {}) {
  *
  * @param {string} text
  * @param {string} fromKey
- * @param {{ keepWords?: Set<string>, convertWords?: Set<string>, candidates?: Set<string>, limit?: number }} [opts]
+ * @param {{ keepWords?: Set<string>, convertWords?: Set<string>, candidates?: Set<string>, cut055?: boolean, limit?: number }} [opts]
  * @returns {{ token: string, hindi: string, english: boolean }[]}
  */
-export function englishReport(text, fromKey, { keepWords, convertWords, candidates, limit = 60 } = {}) {
+export function englishReport(text, fromKey, { keepWords, convertWords, candidates, cut055, limit = 60 } = {}) {
   const from = FONTS[fromKey];
   if (!text || from?.kind !== 'legacy' || from.asciiIsScript) return [];
+  if (cut055 && fromKey === 'kruti-dev') text = kruti055Keys(text);
   const trie = trieFor(from.readMap ?? from.map);
   const toLogical = from.toLogical ?? toLogicalOrder;
   const ambiguous = KRUTI_KEYBOARD.has(fromKey) ? AMBIGUOUS_ENGLISH : null;

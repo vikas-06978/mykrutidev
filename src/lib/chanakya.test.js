@@ -390,19 +390,11 @@ describe('Chanakya stays behind the accuracy gate', () => {
     assert.equal(isAccurate('chanakya'), false);
   });
 
-  for (const path of [
-    '/chanakya-to-unicode',
-    '/unicode-to-chanakya',
-    '/chanakya-to-kruti-dev',
-    '/kruti-dev-to-chanakya',
-  ]) {
-    test(`${path} is not live`, () => {
-      const page = getPage(path);
-      assert.ok(page, 'the page should exist');
-      assert.equal(isLive(page), false);
-      assert.ok(page.note && page.note.length > 40, 'and should say why');
-    });
-  }
+  test('it has no pages: they were removed until the Walkman-Chanakya 905 font is supplied', () => {
+    for (const path of ['/chanakya-to-unicode', '/unicode-to-chanakya', '/chanakya-to-kruti-dev', '/kruti-dev-to-chanakya']) {
+      assert.equal(getPage(path), undefined, path);
+    }
+  });
 });
 
 describe('adding Chanakya did not disturb the verified fonts', () => {

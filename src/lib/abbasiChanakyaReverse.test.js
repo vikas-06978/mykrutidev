@@ -180,8 +180,8 @@ describe('the page', () => {
       const { from, to } = getPage(p);
       assert.ok(from === 'abbasi-chanakya' || to === 'abbasi-chanakya', p);
     }
-    // The generic Chanakya items are still there, still "coming soon".
-    assert.ok(chanakya.pages.some((p) => p.path === '/chanakya-to-unicode' && !p.live));
+    // The Walkman-Chanakya pages were removed, not left "coming soon".
+    assert.ok(!chanakya.pages.some((p) => p.path === '/chanakya-to-unicode'));
   });
 
   test('the two Abbasi pages link to each other', () => {

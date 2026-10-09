@@ -278,9 +278,11 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
         }
       }
     }
-    // Soon rows are only on All tools now, in both languages; live rows are
-    // in every page's menus too.
-    assert.ok(soon >= 10 && live > 100, `too few rows checked (${soon} soon, ${live} live)`);
+    // Soon rows are only on All tools, in every language; live rows are in
+    // every page's menus too. Since October 2026 no page is "soon" (the
+    // Walkman-Chanakya and Punjabi ones were removed), so none may show.
+    const anySoon = PAGES.some((x) => statusOf(x) === 'soon');
+    assert.ok((anySoon ? soon >= 10 : soon === 0) && live > 100, `rows checked: ${soon} soon, ${live} live`);
   });
 
   test('no badge anywhere outside a listed route', () => {
