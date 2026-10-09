@@ -50,7 +50,7 @@
  */
 
 import { unzipSync, zipSync, strFromU8, strToU8 } from 'fflate';
-import { convert, FONTS } from './fontMaps.js';
+import { convert, FONTS, krutiWordRun } from './fontMaps.js';
 import { WORD_FONTS, pairOf, isUnicodeKey, docLabel } from './wordFonts.js';
 import {
   parseXml, attrs, inner, outer, child, descendants, ancestor,
@@ -600,6 +600,8 @@ function emitLegacyGroup(xml, group, pair, font, edits, paragraphs, stats) {
   let pendingText = '';
   const flush = () => {
     if (!pendingText) return;
+    // In a Kruti Dev font, Word's curly quotes and dashes are letters.
+    if (/kruti\s*dev/i.test(group.name)) pendingText = krutiWordRun(pendingText, group.name);
     const u = legacyToUnicode(pendingText, group.from);
     stats.convertedChars += countDeva(u);
     const out = isUnicodeKey(pair.to) ? u : legacyToTarget(pendingText, group.from, pair.to);

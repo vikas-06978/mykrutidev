@@ -289,8 +289,9 @@ describe('convert() routing', () => {
 });
 
 describe('english safety toggle', () => {
-  test('off: numbers become devanagari digits', () => {
-    assert.equal(legacyToUnicode('2024', KD, { keepEnglish: false }), '२०२४');
+  // Kruti Dev 010 draws its number keys as 1 2 3, so they stay digits either way.
+  test('off: numbers stay as the English digits the font draws', () => {
+    assert.equal(legacyToUnicode('2024', KD, { keepEnglish: false }), '2024');
   });
 
   test('on: numbers stay as-is', () => {

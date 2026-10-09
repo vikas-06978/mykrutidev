@@ -155,6 +155,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
       live && path === '/remington-hindi-keyboard' && (
         <section aria-labelledby="layout-heading" class="mt-10">
           <h2 id="layout-heading" class="text-xl">{t('page.layoutHeading')}</h2>
+          <p class="mt-1 text-xs font-semibold text-mute" data-font-line set:html={render(t('print.fontLine'))} />
           <p class="mt-2 max-w-2xl text-sm text-body" set:html={render(t('page.layoutNote'))} />
           <div class="mt-4 card p-3 sm:p-4">
             <PrintKeyboard mode="layout" />

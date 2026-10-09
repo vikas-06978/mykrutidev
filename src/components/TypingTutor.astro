@@ -9,7 +9,7 @@ import HandGuide from './HandGuide.astro';
 import { langOf, useT, raw } from '../i18n/index.js';
 
 const lang = langOf(Astro.url);
-const { t } = useT(lang);
+const { t, render } = useT(lang);
 
 /**
  * The Hindi typing tutor.
@@ -298,6 +298,7 @@ const strings = raw(lang, 'tutor');
   </div>
 
   {/* ---------------------------- Keyboard ------------------------------- */}
+  <p class="tt-kbd-font" data-font-line set:html={render(t('print.fontLine'))} />
   <RemingtonKeyboard font={LEGACY} />
 
   {/* ---------------------------- Hands ---------------------------------- */}

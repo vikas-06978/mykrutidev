@@ -61,7 +61,7 @@ describe('the chart covers what a learner needs', () => {
   });
 
   test('there are enough rows to be a chart rather than a sample', () => {
-    assert.ok(hints.singles.length >= 80, `only ${hints.singles.length} single keys`);
+    assert.ok(hints.singles.length >= 75, `only ${hints.singles.length} single keys`);
     assert.ok(hints.combos.length >= 20, `only ${hints.combos.length} combos`);
   });
 

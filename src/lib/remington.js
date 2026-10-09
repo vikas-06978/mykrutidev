@@ -130,6 +130,10 @@ export function layout(map) {
     return typeof v === 'string' && /[ऀ-ॿ]/.test(v) ? v : '';
   };
 
+  // A number key the map leaves alone types its own digit: Kruti Dev 010 draws
+  // 1 2 3 there, and the cap says so instead of looking dead.
+  const label = (ch, d) => (d ? capLabel(d) : /^[0-9]$/.test(ch) && !(ch in map) ? ch : '');
+
   return GRID.map((row) =>
     row.map(([base, shift]) => {
       const baseDeva = deva(base);
@@ -139,8 +143,8 @@ export function layout(map) {
         shift,
         baseDeva,
         shiftDeva,
-        baseLabel: capLabel(baseDeva),
-        shiftLabel: capLabel(shiftDeva),
+        baseLabel: label(base, baseDeva),
+        shiftLabel: label(shift, shiftDeva),
         finger: FINGER_OF.get(base) ?? '',
         hand: handOf(FINGER_OF.get(base) ?? ''),
         home: HOME_KEYS.includes(base),

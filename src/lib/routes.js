@@ -1047,6 +1047,16 @@ export const PAGES = [
     related: ['/kruti-dev-keyboard', '/kruti-dev-matra-chart', '/remington-hindi-keyboard'],
   },
   {
+    path: '/kruti-dev-alt-codes',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    printable: true,
+    group: 'More',
+    related: ['/kruti-dev-alphabet-chart', '/unicode-to-kruti-dev', '/kruti-dev-keyboard'],
+  },
+  {
     path: '/hindi-typing-progress-log',
     ready: true,
     kind: 'content',

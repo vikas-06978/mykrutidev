@@ -268,17 +268,12 @@ const KRUTI_DEV = {
   // -- Reph: typed AFTER its cluster, belongs BEFORE it ----------------------
   Z: REPH,
 
-  // -- Digits (only reached when "keep English & numbers" is off) ------------
-  0: '०',
-  1: '१',
-  2: '२',
-  3: '३',
-  4: '४',
-  5: '५',
-  6: '६',
-  7: '७',
-  8: '८',
-  9: '९',
+  // -- Digits ----------------------------------------------------------------
+  // None. Kruti Dev 010 draws the number keys as English digits 1 2 3, as do
+  // 011, 012, 014, 016 and every font built on this map (DevLys 010, Arjun,
+  // Kundli...), so 0-9 stay 0-9 in both directions. Hindi digits are on the
+  // Alt-code keys: read through KRUTI_EXTENDED, written through
+  // KRUTI_WRITE_EXTRA below.
 
   // -- Punctuation -----------------------------------------------------------
   // Kruti Dev has ~94 printable slots and far more than 94 Devanagari glyphs to
@@ -325,6 +320,82 @@ const KRUTI_DEV = {
   'ñ': '°',
   'Û': '•',
 };
+
+// What Unicode -> Kruti Dev writes with an Alt-code key, because the font draws
+// it nowhere on the keyboard: the Hindi digits (Alt+0229 is ०, Alt+0131 is
+// १ ... Alt+0139 is ९, ३ on … Alt+0133), ङ (Alt+0179) and ञ (Alt+0165). Each
+// glyph was read off KRDEV010.woff. Kruti Dev only: DevLys 010 has other
+// glyphs in the 0x80-0x9F range these use (see DEVLYS), and … stays out of the
+// READING map, because pasted English text has real ellipses.
+const KRUTI_WRITE_EXTRA = {
+  'å': '०',
+  'ƒ': '१',
+  '„': '२',
+  '…': '३',
+  '†': '४',
+  '‡': '५',
+  'ˆ': '६',
+  '‰': '७',
+  'Š': '८',
+  '‹': '९',
+  '³': 'ङ',
+  '¥': 'ञ',
+};
+
+// Word's AutoCorrect turns the ' key (श्) into ’ or ‘ as it is typed, and
+// every Kruti Dev cut draws श् on ’ (011-016 and 055 on ‘ too). Read only
+// where the bar follows (’k is श), which no English text has: a lone ’ stays
+// an apostrophe, so English pasted alongside is never touched. A Word file
+// knows its font, and there every quote and dash is read as that cut draws it
+// (krutiWordRun below).
+const KRUTI_SMART_QUOTES = {
+  '’k': 'श',
+  '‘k': 'श',
+};
+
+/**
+ * A run of a Word file set in a Kruti Dev font, with Word's AutoCorrect
+ * characters put back as the keys that draw the same thing in THAT cut, so the
+ * Kruti Dev map reads them. Only where the font is known (a document names it
+ * on every run); pasted text has no font, and keeps these as punctuation.
+ *
+ * Read off each font file, glyph by glyph (docs/FONTS.md):
+ *   ’  श्  in every cut                    –  दृ  in every cut
+ *   ‘  श्  in 011 012 014 016 055; nothing in 010
+ *   “  ष्  in 011 012 014 016 055; भ in 010
+ *   ”  ष्  in 011 012 014 016 055; nothing in 010
+ *   —  कृ  in every cut                    …  ३  in 010 to 016
+ *   0-9  Hindi digits in 055; English digits in every other cut
+ * Kruti Dev 020 is another layout (DevLys 020's) and never comes here.
+ *
+ * @param {string} text  the run's characters
+ * @param {string} fontName  the run's font, as Word names it
+ */
+export function krutiWordRun(text, fontName) {
+  const cut = /(\d{3})/.exec(fontName)?.[1] ?? '010';
+  const known = ['010', '011', '012', '014', '016', '055'].includes(cut);
+  const quotesAreSha = known && cut !== '010';
+  return text.replace(/[’‘“”–—…0-9]/g, (ch) => {
+    switch (ch) {
+      case '’':
+        return "'";
+      case '–':
+        return 'n`';
+      case '—':
+        return 'Ñ';
+      case '‘':
+        return quotesAreSha ? "'" : cut === '010' ? '' : ch;
+      case '“':
+        return quotesAreSha ? '"' : cut === '010' ? 'Hk' : ch;
+      case '”':
+        return quotesAreSha ? '"' : cut === '010' ? '' : ch;
+      case '…':
+        return known && cut !== '055' ? '३' : ch;
+      default:
+        return cut === '055' ? String.fromCharCode(0x966 + Number(ch)) : ch;
+    }
+  });
+}
 
 // The upper range of Kruti Dev 010: ready-made conjuncts, full and half
 // letters, combined signs and the Hindi digits typists reach with Alt codes.
@@ -471,6 +542,9 @@ const DEVLYS = { ...KRUTI_DEV };
 // the font: every Kruti Dev key containing one is removed. `add` is the font's
 // own keys. As for Kruti Dev, `map` writes (taught keys only) and `readMap`
 // also reads the upper-range keys.
+
+/** For the cuts whose number keys draw Hindi digits (Ruchi, DevLys 020). */
+const HINDI_DIGIT_KEYS = { 0: '०', 1: '१', 2: '२', 3: '३', 4: '४', 5: '५', 6: '६', 7: '७', 8: '८', 9: '९' };
 
 /** @param {{ drop: string, add: Record<string,string> }} spec */
 function krutiVariant({ drop, add }) {
@@ -669,6 +743,7 @@ NEW_DELHI.readMap["'"] = 'श्';
 const RUCHI = krutiVariant({
   drop: '¼¾«Ö÷ÜŸË¶ÒÌÍÎëÏÔðÝàùÓîÆÇÉÈÊ®·åƒ„†‡ˆ‰Š‹£¥³',
   add: {
+    ...HINDI_DIGIT_KEYS,
     'Ë': 'ऐ',
     'Ê': 'ऍ',
     'Á': 'आ',
@@ -702,6 +777,7 @@ const RUCHI = krutiVariant({
 const DEVLYS_020 = krutiVariant({
   drop: 'ÛàÄÔïƒ„†‡ˆ‰Š‹å',
   add: {
+    ...HINDI_DIGIT_KEYS,
     'Ä': 'ध',
     'Û': 'स्त्र',
     'à': 'ह्व',
@@ -2474,6 +2550,9 @@ function bnVisual(s) {
 // has a sub-label under it, so the font name there has to stay short. Only
 // Kruti Dev needs one; every other name is already one word.
 
+/** Built on first use: buildReverse() is defined further down. */
+let krutiReverse = null;
+
 export const FONTS = {
   'kruti-dev': {
     key: 'kruti-dev',
@@ -2483,8 +2562,17 @@ export const FONTS = {
     shortLabel: 'Kruti',
     kind: 'legacy',
     map: KRUTI_DEV,
+    // Unicode -> Kruti Dev also writes the Alt-code keys (KRUTI_WRITE_EXTRA).
+    // Kept out of `map`, which is the keyboard: what the tutor and the key
+    // charts teach.
+    get reverse() {
+      return (krutiReverse ??= {
+        ...buildReverse(KRUTI_DEV),
+        ...Object.fromEntries(Object.entries(KRUTI_WRITE_EXTRA).map(([k, u]) => [u, k])),
+      });
+    },
     // Kruti Dev -> Unicode also reads the upper-range keys (KRUTI_EXTENDED).
-    readMap: { ...KRUTI_DEV, ...KRUTI_EXTENDED },
+    readMap: { ...KRUTI_DEV, ...KRUTI_EXTENDED, ...KRUTI_SMART_QUOTES },
     // Same keyboard layout as DevLys (see the note above DEVLYS): text moving
     // between the two is passed through untouched rather than via Unicode.
     layout: 'kruti',

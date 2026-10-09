@@ -12,6 +12,7 @@ const PRINTABLES = [
   { path: '/kruti-dev-matra-chart', pdf: 'kruti-dev-matra-conjunct-chart', landscape: false, pages: 1 },
   { path: '/hindi-typing-progress-log', pdf: 'hindi-typing-progress-log', landscape: false, pages: 1 },
   { path: '/kruti-dev-alphabet-chart', pdf: 'kruti-dev-alphabet-chart', landscape: false, pages: 1 },
+  { path: '/kruti-dev-alt-codes', pdf: 'kruti-dev-alt-code-chart', landscape: false, pages: 1 },
 ];
 // The printable width of A4 inside the @page margins, in CSS px (96 per inch).
 const MM = 96 / 25.4;

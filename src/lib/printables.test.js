@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { FONTS, convert } from './fontMaps.js';
+import { FONTS, convert, krutiWordRun } from './fontMaps.js';
 import { layout, locate, FINGERS } from './remington.js';
 import { LEVELS } from './lessons.js';
 import { wholeKeys } from './tutor.build.js';
@@ -19,7 +19,8 @@ import {
   KRUTI_FONT,
   alphabetRows,
   ALPHABET,
-  ALPHABET_MISSING,
+  altCode,
+  altCodeRows,
   qrUrl,
   qrLesson,
 } from './printables.js';
@@ -87,9 +88,9 @@ describe('the printables come from the tutor’s own data', () => {
     assert.deepEqual(rows.find((r) => r.id === 'reph').keys, 'deZ');
   });
 
-  test('six printables, each with its own PDF name and page count', () => {
-    assert.equal(PRINTABLES.length, 6);
-    assert.equal(new Set(PRINTABLES.map((p) => p.pdf)).size, 6);
+  test('seven printables, each with its own PDF name and page count', () => {
+    assert.equal(PRINTABLES.length, 7);
+    assert.equal(new Set(PRINTABLES.map((p) => p.pdf)).size, 7);
     assert.equal(PRINTABLES.find((p) => p.kind === 'sheets').pages, LEVELS.length);
     assert.equal(pdfFile(PRINTABLES[0], 'en'), 'mykrutidev-kruti-dev-keyboard-chart.pdf');
     assert.equal(pdfHref(PRINTABLES[0], 'hi'), '/downloads/mykrutidev-kruti-dev-keyboard-chart-hindi.pdf');
@@ -145,13 +146,15 @@ describe('the alphabet chart', () => {
     assert.deepEqual(rows.consonants.map((r) => r.deva), ALPHABET.consonants);
     assert.deepEqual(rows.digits.map((r) => r.deva), ALPHABET.digits);
     assert.equal(rows.vowels.length, 13);
-    assert.equal(rows.consonants.length, 33);
+    assert.equal(rows.consonants.length, 35);
   });
 
-  test('each sequence is what the tutor uses and types its letter back', () => {
+  test('each sequence is what the converter writes and reads back as its letter', () => {
     for (const r of all) {
-      assert.equal(r.keys, wholeKeys(r.deva), r.deva);
-      assert.equal(kruti2unicode(r.keys), r.deva, r.deva);
+      assert.equal(r.keys, convert(r.deva, 'unicode', 'kruti-dev', { keepEnglish: false }), r.deva);
+      // … (३) is read as ३ only in a Word file in Kruti Dev, where the font is known.
+      const back = r.keys === '…' ? convert(krutiWordRun(r.keys, 'Kruti Dev 010'), 'kruti-dev', 'unicode') : kruti2unicode(r.keys);
+      assert.equal(back, r.deva, r.deva);
       assert.equal(r.steps.map((s) => s.ch).join(''), r.keys, r.deva);
     }
   });
@@ -163,13 +166,19 @@ describe('the alphabet chart', () => {
         const at = locate(s.ch);
         if (at) assert.deepEqual({ cap: s.cap, shift: s.shift }, { cap: at.cap, shift: at.shift }, `${r.deva} ${s.ch}`);
         else {
-          assert.equal(s.alt, `0${s.ch.codePointAt(0)}`, r.deva);
+          assert.equal(s.alt, altCode(s.ch), r.deva);
           assert.ok(hasGlyph(s.ch), `${r.deva}: the font has no ${s.ch}`);
         }
       }
     }
-    // The one everybody asks about.
-    assert.deepEqual(rows.vowels.find((r) => r.deva === 'ऊ').steps, [{ ch: 'Å', alt: '0197' }]);
+    // The ones everybody asks about, with Windows' own Alt codes.
+    const step = (deva) => all.find((r) => r.deva === deva).steps;
+    assert.deepEqual(step('ऊ'), [{ ch: 'Å', alt: '0197' }]);
+    assert.deepEqual(step('ङ'), [{ ch: '³', alt: '0179' }]);
+    assert.deepEqual(step('ञ'), [{ ch: '¥', alt: '0165' }]);
+    assert.deepEqual(step('१'), [{ ch: 'ƒ', alt: '0131' }]);
+    assert.deepEqual(step('०'), [{ ch: 'å', alt: '0229' }]);
+    assert.deepEqual(step('३'), [{ ch: '…', alt: '0133' }]);
   });
 
   test('half forms: every consonant but ड़ ढ़, each the consonant with a halant', () => {
@@ -180,11 +189,11 @@ describe('the alphabet chart', () => {
     assert.equal(rows.consonants.find((c) => c.deva === 'क').half.keys, 'D');
   });
 
-  test('the letters left out really have no key', () => {
-    for (const ch of ALPHABET_MISSING) {
-      assert.ok(!ALPHABET.consonants.includes(ch));
-      assert.equal(convert(ch, 'unicode', 'kruti-dev'), ch, `${ch} now converts - add it to the chart`);
-    }
+  test('Windows Alt codes: the code page number, not the Unicode one', () => {
+    assert.equal(altCode('ƒ'), '0131');
+    assert.equal(altCode('‹'), '0139');
+    assert.equal(altCode('Å'), '0197');
+    assert.equal(altCode('d'), null);
   });
 });
 
@@ -208,5 +217,37 @@ describe('the QR code on each printable', () => {
       if (lesson) assert.ok(ids.has(lesson), `${p.kind}: ${lesson}`);
     }
     for (const s of practiceSheets()) assert.equal(qrLesson(PRINTABLES[2], s.id), s.id);
+  });
+});
+
+describe('the Alt code chart', () => {
+  const rows = altCodeRows();
+  const all = Object.values(rows).flat();
+
+  test('every entry is drawn by the Kruti Dev 010 font and typed with its Windows Alt code', () => {
+    const hasGlyph = glyphChecker(KRUTI_FONT);
+    for (const r of all) {
+      assert.ok(hasGlyph(r.ch), `${r.deva}: KRDEV010.woff has no ${r.ch}`);
+      assert.equal(r.alt, altCode(r.ch), r.deva);
+      assert.ok(!locate(r.ch), `${r.deva}: ${r.ch} is on a key - it does not belong on the Alt code chart`);
+    }
+  });
+
+  test('each reads back as its letter (३ from a Word file, where the font is known)', () => {
+    for (const r of all) {
+      const text = r.ch === '…' ? krutiWordRun(r.ch, 'Kruti Dev 010') : r.ch;
+      assert.equal(convert(text, 'kruti-dev', 'unicode', { keepEnglish: false }), r.deva, r.deva);
+    }
+  });
+
+  test('the ones people look for are there', () => {
+    const alt = (deva) => all.find((r) => r.deva === deva)?.alt;
+    assert.equal(alt('१'), '0131');
+    assert.equal(alt('०'), '0229');
+    assert.equal(alt('ऊ'), '0197');
+    assert.equal(alt('ङ'), '0179');
+    assert.equal(alt('ञ'), '0165');
+    assert.equal(alt('कृ'), '0209');
+    assert.equal(alt('द्द'), '0204');
   });
 });

@@ -14,9 +14,9 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
 import { SITE, PAGES, isLive, isIndexable, statusOf, navMenus } from '../src/lib/routes.js';
-import { convert, FONTS } from '../src/lib/fontMaps.js';
+import { convert, FONTS, krutiWordRun } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
-import { PRINTABLES, chartRows, practiceSheets, matraRows, alphabetRows, pdfFile, pdfHref, qrUrl, QR_PAGE } from '../src/lib/printables.js';
+import { PRINTABLES, chartRows, practiceSheets, matraRows, alphabetRows, altCodeRows, pdfFile, pdfHref, qrUrl, QR_PAGE } from '../src/lib/printables.js';
 import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
@@ -475,7 +475,9 @@ describe('printable charts and PDFs', () => {
       assert.deepEqual(got, want, `${p}: letters`);
       const gotHalf = [...html.matchAll(/<span\b(?:[^>"]|"[^"]*")*>/g)].filter(([tag]) => / data-half="/.test(tag)).map(([tag]) => [attr(tag, 'data-half'), decode(attr(tag, 'data-keys'))]);
       assert.deepEqual(gotHalf, halves, `${p}: half forms`);
-      for (const [deva, keys] of [...want, ...halves]) assert.equal(convert(keys, 'kruti-dev', 'unicode', { keepEnglish: false }), deva, `${p}: ${keys}`);
+      // … (३) is read as ३ in a Word file in Kruti Dev, where the font is known.
+      const read = (keys) => convert(keys === '…' ? krutiWordRun(keys, 'Kruti Dev 010') : keys, 'kruti-dev', 'unicode', { keepEnglish: false });
+      for (const [deva, keys] of [...want, ...halves]) assert.equal(read(keys), deva, `${p}: ${keys}`);
       assert.match(html, />Alt\+0197</, `${p}: ऊ by its Alt code`);
     }
   });
@@ -511,6 +513,40 @@ describe('printable charts and PDFs', () => {
         const prefix = isHiPath(p) ? '/hi' : '';
         assert.ok(pages.get(p).includes(`href="${prefix}/remington-hindi-keyboard/"`), `${p}: Type with this layout`);
       }
+    }
+  });
+
+  test('Kruti Dev converters say which cuts they are right for; charts and keyboards name font and layout', () => {
+    for (const p of [...both('/'), ...both('/unicode-to-kruti-dev'), ...both('/kruti-dev-to-mangal')]) {
+      assert.match(pages.get(p), /data-works-with[^>]*>[\s\S]{0,120}Kruti Dev 010<\/span>, 011, 012, 014/, `${p}: works-with line`);
+    }
+    assert.doesNotMatch(pages.get('/devlys-to-unicode'), /data-works-with/, 'only the Kruti Dev pages');
+    for (const pr of PRINTABLES.filter((x) => x.kind !== 'log')) {
+      for (const p of both(pr.path)) assert.match(pages.get(p), /data-font-line[^>]*>[\s\S]{0,80}Kruti Dev 010/, `${p}: font line`);
+    }
+    for (const p of [...both('/hindi-typing-test'), ...both('/remington-hindi-keyboard')]) {
+      assert.match(pages.get(p), /data-font-line[^>]*>[\s\S]{0,80}Kruti Dev 010/, `${p}: font line`);
+    }
+  });
+
+  test('the Alt code chart: every Hindi digit, ऊ ङ ञ and the conjuncts, with Windows Alt codes', () => {
+    for (const p of both('/kruti-dev-alt-codes')) {
+      const html = pages.get(p);
+      const got = [...html.matchAll(/<li\b(?:[^>"]|"[^"]*")*>/g)]
+        .filter(([tag]) => / data-alt="/.test(tag))
+        .map(([tag]) => [attr(tag, 'data-letter'), attr(tag, 'data-alt')]);
+      const want = Object.values(altCodeRows()).flat().map((r) => [r.deva, r.alt]);
+      assert.deepEqual(got, want, p);
+      assert.ok(got.some(([d, a]) => d === '१' && a === '0131'), p);
+    }
+  });
+
+  test('the number row: Kruti Dev 010 number keys are drawn as the English digits they type', () => {
+    for (const p of both('/kruti-dev-keyboard')) {
+      const tag = [...pages.get(p).matchAll(/<span\b(?:[^>"]|"[^"]*")*\bdata-cap-key\b(?:[^>"]|"[^"]*")*>/g)]
+        .map(([t]) => t)
+        .find((t) => attr(t, 'data-base') === '1');
+      assert.equal(attr(tag, 'data-base-label'), '1', p);
     }
   });
 

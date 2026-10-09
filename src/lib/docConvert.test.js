@@ -736,6 +736,26 @@ describe('documents in every font', async () => {
     assert.deepEqual(textOf(text('word/document.xml')), ['पत्र', 'पत्र', 'नेपाल']);
   });
 
+  test('Word\'s curly quotes and dashes in a Kruti Dev run are read as that cut draws them', async () => {
+    // ’ and ‘ are श् (the ' key) and “ ” are ष् (the " key) in Kruti Dev 011;
+    // in 010 ’ is श् and “ is भ. – and — are दृ and कृ in every cut.
+    const doc = makeDocx({
+      document: body(
+        p(r(font('Kruti Dev 011'), '‘kfDr Hkk“kk –f\"V —i;k')) +
+          p(r(KRUTI, '’kfDr “kjr 2024')) +
+          p(r(font('Kruti Dev 055'), 'lu~ 1947')),
+      ),
+    });
+    const { text } = await run(doc, 'to-unicode');
+    assert.deepEqual(textOf(text('word/document.xml')), ['शक्ति भाषा दृष्टि कृपया', 'शक्ति भारत 2024', 'सन् १९४७']);
+  });
+
+  test('Kruti Dev 020 is read with DevLys 020\'s keys: ध on Ä, Hindi digits', async () => {
+    const doc = makeDocx({ document: body(p(r(font('Kruti Dev 020'), 'Äku 2024'))) });
+    const { text } = await run(doc, 'to-unicode');
+    assert.deepEqual(textOf(text('word/document.xml')), ['धान २०२४']);
+  });
+
   test('a style whose keys were not checked is left as it is', async () => {
     // Agra Wide types त्र on `=` as Kruti Dev does, unlike Agra.
     const doc = makeDocx({ document: body(p(r(font('Agra Wide'), 'i='))) });

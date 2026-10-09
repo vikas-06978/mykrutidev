@@ -52,11 +52,23 @@ published with the site, so it lives here instead.
 | `bamini.woff` | Bamini PB | WOFF | **preview on the Tamil (Bamini) pages** (the map was read off this file) |
 | `sutonnymj.woff` | SutonnyMJ | WOFF | **preview on the Bengali (SutonnyMJ) pages** (the map was read off this file) |
 
-The numbered Kruti Dev variants used to fill a dropdown in the output box. That
-picker is gone: the variants share one keyboard layout and differ only in
-letterforms, so choosing one changed nothing a user could act on. The files stay
-here in case a reason to surface them appears, but nothing references them and
-they are never downloaded by a visitor.
+The numbered Kruti Dev cuts are not loaded by any page, but they were each
+drawn key by key beside `KRDEV010.woff` (October 2026) to say which ones the
+converter is right for:
+
+| Cut | Letters on the keys | Number keys | Upper range (Alt codes) | Word's ‘ ’ “ ” |
+| --- | --- | --- | --- | --- |
+| 010 | — | English digits | Hindi digits, ऊ ङ ञ, conjuncts | ’ श्, “ भ, ‘ ” nothing |
+| 011, 012, 014, 016 | same as 010 (bold, italic) | English digits | same as 010 | ‘ ’ श्, “ ” ष् |
+| 055 | same as 010 | **Hindi digits** | differs (ƒ is घ ...) | ‘ ’ श्, “ ” ष् |
+| 020 | DevLys 020's layout (ध on Ä) | **Hindi digits** | DevLys 020's | ’ श्, “ भ |
+
+So the Kruti Dev converter reads 010-016 and 055's letters; a Word file names
+its font on every run, and there `krutiWordRun()` (fontMaps.js) reads the
+curly quotes, dashes and 055's digits as that cut draws them, and Kruti Dev
+020 is read with the DevLys 020 map (wordFonts.js). Every font on the Kruti
+Dev keyboard, 010 included, draws its number keys as English digits; Hindi
+digits are Alt codes, which Unicode -> Kruti Dev writes (KRUTI_WRITE_EXTRA).
 
 **There is no Walkman-Chanakya font here, on purpose.** The old `chanakya.woff`
 did not match the Chanakya character map and was removed. The Chanakya pages are

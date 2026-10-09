@@ -324,6 +324,16 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
     </label>
   </div>
 
+  {/* Which Kruti Dev cuts the result is right for (each checked against its font file). */}
+  {
+    (from === 'kruti-dev' || to === 'kruti-dev') && (
+      <p
+        class="cv-strip bg-surface text-xs leading-relaxed text-body"
+        data-works-with
+        set:html={render(t(from === 'kruti-dev' ? 'converter.worksWithFrom' : 'converter.worksWithTo'))}
+      />
+    )
+  }
   <p
     class="cv-strip bg-surface text-xs leading-relaxed text-mute"
     set:html={render(t('converter.review'))}

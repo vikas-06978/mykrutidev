@@ -226,19 +226,15 @@ export const EXTRA_ROWS = [
  * rather than letting someone paste Devanagari into Word under a legacy font
  * and find a blank where the letter should be.
  *
- * ङ and ञ are the ones that matter: they are in every वर्णमाला chart, so they
- * stay on the keyboard, but the Kruti Dev map has no key for either in any
- * context - not alone and not in a conjunct. In practice that rarely bites,
- * because modern Hindi spells those words with an anusvara instead (अंक, पंच,
- * संगीत, all of which convert), and the conjunct spellings अङ्क and पञ्च belong
- * to Sanskrit orthography. The rest of this list is Sanskrit vowels, candra
- * signs and Marathi or Dravidian letters.
+ * ङ and ञ are not on it: Kruti Dev 010 draws them on Alt-code keys (Alt+0179
+ * and Alt+0165), and Unicode -> Kruti Dev writes those. This list is Sanskrit
+ * vowels, candra signs and Marathi or Dravidian letters.
  *
  * keyboard.test.js pins this list to what the engine actually does: fill a gap
  * in fontMaps.js and the test fails here, asking for the entry to be removed.
  */
 export const NO_KRUTI_EQUIVALENT = [
-  'ङ', 'ञ', 'ॠ', 'ऌ', 'ॡ', 'ऍ', 'ऎ', 'ऒ', 'ॲ', 'ॐ', 'ऽ', 'ऩ', 'ऱ', 'ऴ', '॰',
+  'ॠ', 'ऌ', 'ॡ', 'ऍ', 'ऎ', 'ऒ', 'ॲ', 'ॐ', 'ऽ', 'ऩ', 'ऱ', 'ऴ', '॰',
   'ॄ', 'ॢ', 'ॣ', 'ॆ', 'ॊ',
 ];
 
