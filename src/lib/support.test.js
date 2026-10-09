@@ -121,3 +121,14 @@ describe('the QR code', () => {
     assert.equal(scan(modulesOf(qrSvg(qrModules(long), 'x'))), long);
   });
 });
+
+describe('the UPI number, for "Pay to UPI number"', () => {
+  test('only the digits of a number ID', async () => {
+    const { upiNumberOf } = await import('./support.build.js');
+    assert.equal(upiNumberOf('98765432@upi'), '98765432');
+    assert.equal(upiNumberOf('9876543210@ybl'), '9876543210');
+    assert.equal(upiNumberOf('mykrutidev.test@upi'), null);
+    assert.equal(upiNumberOf('Q123456789@ybl'), null);
+    assert.equal(upiNumberOf(null), null);
+  });
+});

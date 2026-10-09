@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **3552 keys**, identical in both files (enforced by `npm test` and at build time).
+- **3555 keys**, identical in both files (enforced by `npm test` and at build time).
 - **154 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -3495,6 +3495,9 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `support.idLabel` | UPI ID | UPI ID |  |
 | `support.copy` | Copy | कॉपी करें |  |
 | `support.copied` | Copied | कॉपी हो गया |  |
+| `support.idHint` | Paste it under &lt;strong>Pay to UPI ID&lt;/strong> in your UPI app. | इसे अपने UPI ऐप में &lt;strong>UPI ID पर पे करें&lt;/strong> वाले हिस्से में पेस्ट करें। |  |
+| `support.numberLabel` | UPI number | UPI नंबर |  |
+| `support.numberHint` | Under &lt;strong>Pay to UPI number&lt;/strong> or &lt;strong>mobile number&lt;/strong>, enter only this number, without the part after @. | &lt;strong>UPI नंबर&lt;/strong> या &lt;strong>मोबाइल नंबर पर पे करें&lt;/strong> वाले हिस्से में सिर्फ़ यह नंबर डालें, @ के बाद वाला हिस्सा नहीं। |  |
 | `support.payButton` | Pay with a UPI app | UPI ऐप से भेजें |  |
 | `support.amount` | You choose the amount in your UPI app, and confirm it there with your own PIN. | रकम आप अपने UPI ऐप में खुद चुनते हैं, और वहीं अपने PIN से पक्की करते हैं। |  |
 | `support.name` | Before you pay, your UPI app shows the name of the account holder, which may differ from MyKrutiDev. | भेजने से पहले आपका UPI ऐप खाताधारक का नाम दिखाता है, जो MyKrutiDev से अलग हो सकता है। |  |
