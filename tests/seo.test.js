@@ -26,6 +26,7 @@ import { SITE } from '../src/lib/routes.js';
 import { parseRedirects } from '../scripts/serve-dist.mjs';
 import { GUIDES, guidePath } from '../src/lib/guides.js';
 import { DICTS, LOCALES, LOCALE_META } from '../src/i18n/index.js';
+import { BRAND, fits, visibleLength } from '../src/lib/seoTitle.js';
 
 const { en, hi } = DICTS;
 /** Each language's home page: "/", "/hi/", "/bn/", ... */
@@ -109,12 +110,14 @@ describe('titles, headings and images', () => {
     }
   });
 
-  test('every indexable page has a <title> of at most 70 characters', () => {
-    // Bing Webmaster Tools reports a longer title as an error, and Google
-    // cuts it off in results.
+  test('every indexable page has a short <title> that ends with the brand', () => {
+    // Google cuts a title off at about 60 visible characters; Bing Webmaster
+    // Tools reports one over 70 characters as an error. The brand is in Latin
+    // script in every language (src/lib/seoTitle.js).
     for (const u of indexable) {
       const t = decode(pages.get(u).match(/<title>([^<]*)<\/title>/)?.[1] ?? '');
-      assert.ok(t.length <= 70, `${u}: title is ${t.length} characters: "${t}"`);
+      assert.ok(fits(t), `${u}: title is ${visibleLength(t)} visible / ${t.length} characters: "${t}"`);
+      assert.ok(t.includes(BRAND), `${u}: title has no ${BRAND}: "${t}"`);
     }
   });
 

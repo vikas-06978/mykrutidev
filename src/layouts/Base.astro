@@ -10,6 +10,7 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Feedback from '../components/Feedback.astro';
 import { SITE, CONTACT_EMAIL, getPage, isLive } from '../lib/routes.js';
 import { analyticsScript } from '../lib/analytics.js';
+import { brandTitle } from '../lib/seoTitle.js';
 import { ogImagePath, OG_SIZE } from '../lib/og.js';
 import {
   LOCALES,
@@ -75,6 +76,17 @@ const alternates = [
 ];
 
 const h1 = page ? t(`pages.${page.path}.h1`) : title;
+
+// The <title> always carries the brand, in Latin script in every language, so
+// a search for "MyKrutiDev" finds the site (Google otherwise reads it as a
+// misspelling of "Kruti Dev"). Search results show about 60 characters, so:
+// the whole title plus the brand if that fits; otherwise the main keyword (the
+// part before the first " | ") plus the brand. A title written with the brand
+// already in it is used as it is - that is how a page that needs a hand-made
+// short title gets one (src/i18n/*.json). Counted in graphemes: a Devanagari
+// letter with its matra takes one place on screen, not two or three.
+const seoTitle = brandTitle(title);
+
 const plain = (s: string) => s.replace(/<[^>]+>/g, '').trim();
 
 // Home › (trail) › this page. Visible above the page and published as
@@ -278,7 +290,7 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{title}</title>
+    <title>{seoTitle}</title>
     <meta name="description" content={description} />
     {!notFound && <link rel="canonical" href={canonical} />}
     {!notFound && alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}

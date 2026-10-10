@@ -793,7 +793,7 @@
       "nav": "English to Hindi Typing",
       "navSub": "Roman to Hindi",
       "h1": "English to Hindi Typing (Roman to Hindi)",
-      "title": "English to Hindi Typing - Type Hindi in Roman (Free)",
+      "title": "English to Hindi Typing, Free Online",
       "description": "Free English to Hindi typing tool. Type Hindi in Roman letters - namaste becomes नमस्ते - and get Unicode Hindi or Kruti Dev instantly. Works offline too.",
       "lede": "Type Hindi using the English keyboard you already have. Write it the way it sounds and the Devanagari appears as you type - no Hindi keypad, no install, no sign-up.",
       "body": [
@@ -868,7 +868,7 @@
       "nav": "Hindi Typing Test",
       "navSub": "Tutor, lessons and speed test",
       "h1": "Hindi Typing Test - Kruti Dev Remington Typing Tutor (Free)",
-      "title": "Hindi Typing Test | KrutiDev Remington Typing Tutor for CPCT & SSC",
+      "title": "Hindi Typing Test: Kruti Dev, CPCT, SSC",
       "description": "Free Hindi typing tutor and test on the Kruti Dev Remington layout: 11 lessons, finger guide and 1-minute to 2-hour tests with live WPM. For CPCT, SSC, court.",
       "lede": "Learn Hindi typing on the Kruti Dev Remington layout that many Hindi typing exams use. An on-screen keyboard shows the next key, the hand guide shows which finger presses it, and eleven lessons take you from the home row to full paragraphs. Practice tests run from 1 minute to 2 hours, you can pause the clock, and you can submit at any point to see your result. Free, unlimited, and nothing is uploaded.",
       "body": [
@@ -934,7 +934,7 @@
       "nav": "Hindi Keyboard",
       "navSub": "On-screen Devanagari",
       "h1": "Hindi Keyboard Online - Type in Hindi Without a Hindi Keypad",
-      "title": "Hindi Keyboard Online | Type in Hindi Free, No Install Needed",
+      "title": "Hindi Keyboard Online, Type Hindi Free",
       "description": "Free on-screen Hindi keyboard. Tap Devanagari letters to write Hindi without installing a keypad - vowels become matras by themselves - then copy it.",
       "lede": "Click the Devanagari letters to write Hindi - no keypad to install and no layout to learn. Copy the Unicode when you are done. Nothing is uploaded.",
       "body": [
@@ -2593,7 +2593,7 @@
     "/english-date-to-hindi": {
       "nav": "Date in Hindi",
       "h1": "English Date to Hindi Date Converter",
-      "title": "Date in Hindi | English Date to Hindi Date Converter",
+      "title": "English Date to Hindi Date Converter",
       "description": "Write any date in Hindi: 02/10/2026 becomes 2 अक्टूबर 2026, शुक्रवार, with Hindi digits or in words for letters and documents. Free.",
       "lede": "Pick a date and see it written every way a Hindi letter or document needs, each with its own copy button.",
       "body": [
@@ -3138,7 +3138,7 @@
       "nav": "Typing test for exams",
       "navSub": "SSC, CPCT and court exam practice",
       "h1": "Hindi Typing Test for SSC, CPCT and Court Exams",
-      "title": "Hindi Typing Test for SSC, CPCT & Court Exams | Free Practice",
+      "title": "Hindi Typing Test for CPCT, SSC, LDC Exams",
       "description": "Practise the Hindi typing skill test for SSC, CPCT, High Court and district court exams in Kruti Dev (Remington), timed, with net WPM and accuracy.",
       "lede": "Practise the Hindi typing skill test the way it is set: Kruti Dev on the Remington layout, a timed passage, and a result in net words per minute with accuracy. Choose the length your exam uses and sit it in full.",
       "howTo": {
@@ -3323,7 +3323,7 @@
     "/contact": {
       "nav": "Contact",
       "h1": "Contact MyKrutiDev",
-      "title": "Contact MyKrutiDev | Report a Conversion Error or Ask a Question",
+      "title": "Contact MyKrutiDev | Report a Conversion Error",
       "description": "Email the MyKrutiDev team to report a wrong conversion, a typing tutor problem or a mistake in a guide. We read every message.",
       "lede": "The quickest way to reach us is email. We read every message, and a report of a wrong conversion is the most useful thing you can send.",
       "body": [
@@ -3339,7 +3339,7 @@
     "/privacy-policy": {
       "nav": "Privacy policy",
       "h1": "Privacy Policy",
-      "title": "Privacy Policy | MyKrutiDev - Your Files Never Leave Your Browser",
+      "title": "Privacy Policy: Files Stay on Your Device",
       "description": "MyKrutiDev converts text and files in your browser, so nothing you paste or upload is sent to us. What is stored on your device, and what Analytics counts.",
       "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
       "body": [
@@ -3373,7 +3373,7 @@
     "/terms": {
       "nav": "Terms of use",
       "h1": "Terms of Use",
-      "title": "Terms of Use | MyKrutiDev Hindi Font Converters and Typing Tools",
+      "title": "Terms of Use",
       "description": "The terms for using the MyKrutiDev converters, typing tutor and guides: free to use, no warranty, check important documents, fonts belong to their owners.",
       "lede": "MyKrutiDev is free to use. These terms are short and mostly common sense: check what matters, and use the tools lawfully.",
       "body": [
@@ -5224,7 +5224,7 @@
     "kickerSite": "MyKrutiDev"
   },
   "notFound": {
-    "title": "Page not found | MyKrutiDev",
+    "title": "Page not found",
     "description": "This page does not exist. Find the Hindi font converters, typing tests and guides from here.",
     "h1": "Page not found",
     "lede": "The address may be mistyped, or the page may have moved. Everything on the site is still one click away.",
@@ -5355,7 +5355,7 @@
     "install-kruti-dev-010-font-windows": {
       "crumb": "Install Kruti Dev 010",
       "h1": "How to Install Kruti Dev 010 on Windows (and Check It Works)",
-      "title": "How to Install Kruti Dev 010 Font on Windows 10 & 11 | Step by Step",
+      "title": "Install Kruti Dev 010 Font on Windows",
       "description": "Install the Kruti Dev 010 Hindi font on Windows 10 or 11, check that Word can use it, and fix the problems that stop it showing up.",
       "lede": "Installing a font takes a minute. The trouble usually comes after: Word not listing it, text still showing English letters, or a different Kruti Dev turning up. This guide covers the install and all three.",
       "body": [
@@ -5382,7 +5382,7 @@
     "kruti-dev-text-shows-english-letters": {
       "crumb": "Kruti Dev shows English letters",
       "h1": "Why Kruti Dev Text Shows English Letters (and How to Fix It)",
-      "title": "Kruti Dev Showing English Letters like Hkkjr? Why and How to Fix",
+      "title": "Kruti Dev Text in English Letters? How to Fix",
       "description": "Why a Hindi file typed in Kruti Dev turns into letters like Hkkjr and fgUnh, and three ways to fix it: install the font, re-apply it, or convert to Unicode.",
       "lede": "You open a Hindi document and it reads <code>Hkkjr ljdkj</code> instead of <span lang=\"hi\">भारत सरकार</span>. Nothing is corrupted. The text was typed in Kruti Dev, and the computer showing it does not have that font.",
       "body": [
@@ -5412,7 +5412,7 @@
     "kruti-dev-vs-unicode-government-work": {
       "crumb": "Kruti Dev vs Unicode",
       "h1": "Kruti Dev vs Unicode: Which to Use for Government Work",
-      "title": "Kruti Dev vs Unicode (Mangal) for Government Work | Which to Use",
+      "title": "Kruti Dev vs Unicode for Government Work",
       "description": "Kruti Dev or Unicode for official Hindi work? How they differ, where each is still required, and how to move between them without losing matras or conjuncts.",
       "lede": "Most offices now have both: old files and templates in Kruti Dev, new portals and e-Office in Unicode. Here is how they differ, where each still belongs, and how to switch without retyping.",
       "body": [
@@ -5438,7 +5438,7 @@
     "convert-word-file-from-kruti-dev": {
       "crumb": "Convert a Word file",
       "h1": "How to Convert a Whole Word File from Kruti Dev to Unicode",
-      "title": "Convert a Kruti Dev Word File (.docx) to Unicode | Keep Formatting",
+      "title": "Convert a Kruti Dev Word File to Unicode",
       "description": "Convert a whole Kruti Dev .docx to Unicode Hindi in your browser, keeping tables, bold and layout - and what to do with .doc files and PDFs.",
       "lede": "Copying a long document into a converter page by page loses its tables and formatting and takes an afternoon. You can convert the whole .docx at once instead, with the layout intact and without uploading it anywhere.",
       "body": [
@@ -5465,7 +5465,7 @@
     "hindi-typing-speed-tips-for-exams": {
       "crumb": "Typing speed tips for exams",
       "h1": "Hindi Typing Speed Tips for Exams: A Four-Week Plan",
-      "title": "Hindi Typing Speed Tips for SSC, CPCT & Court Exams | 4-Week Plan",
+      "title": "Hindi Typing Speed Tips for SSC, CPCT",
       "description": "How to raise your Hindi typing speed for SSC, CPCT and court exams: accuracy first, the keys that cost the most time, a four-week plan and exam-day habits.",
       "lede": "Most candidates try to get faster by typing faster. It is the slowest way there. Speed in Hindi typing comes from accuracy, from the handful of keys that cost the most time, and from stamina - in that order.",
       "body": [
@@ -5516,7 +5516,7 @@
     "hindi-text-shows-boxes-or-question-marks": {
       "crumb": "Hindi shows boxes or ???",
       "h1": "Hindi Text Shows Boxes or Question Marks? How to Fix It",
-      "title": "Hindi Showing Boxes (□□□) or Question Marks (???) | Causes and Fixes",
+      "title": "Hindi Showing Boxes or Question Marks?",
       "description": "Why Hindi text turns into empty boxes, question marks or odd symbols in Word, Excel, email and websites - and the fix for each case.",
       "lede": "Boxes, question marks and English letters look like one problem, but they are three different ones with three different fixes. Find the symptom you have below.",
       "body": [
