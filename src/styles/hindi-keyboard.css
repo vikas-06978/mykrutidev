@@ -6,18 +6,20 @@
 
      desktop (>= 1024px)  text box sticky at the top of the tool, keyboard in
                           flow under it; the tool fits a 1366x768 viewport.
-     tablet  (768-1023)   text box sticky at the top, keyboard docked to the
-     phone   (< 768)      bottom of the screen like a phone keyboard - max 45vh
-                          on a tablet, 55vh on a phone - scrolling inside itself.
+     tablet and phone     text box sticky at the top, keyboard in flow right
+     (< 1024px)           under it, never taller than the screen leaves room
+                          for, scrolling inside itself. Nothing is pinned to
+                          the bottom of the screen: that used to leave an empty
+                          block in the page and cover what came after.
 
    Own class names (hk-*), not the kb-* caps in typing.css: those are shared with
    the Kruti Dev hint chart on the typing tutor, which must not change.
    =========================================================================== */
 
 .hk {
-  /* Set from the script to the measured height of the docked keyboard, so the
-     spacer holds its place and docking never makes the page jump. */
-  --hk-pad-h: 0px;
+  /* Set from the script to the text box's measured height: on phones and
+     tablets the keys take the rest of the screen and no more. */
+  --hk-top-h: 12rem;
   overflow: visible; /* .card clips; sticky children need to escape it */
 }
 
@@ -166,27 +168,20 @@
     height: 44px;
   }
 
-  .hk[data-docked='true'] .hk-pad {
-    position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    z-index: 40;
-    max-height: 45vh;
+  /* Text box and keys on screen together: the keys take what is left, and
+     scroll inside themselves. Once their own end is reached, a swipe moves
+     the page on (no overscroll-behavior: contain), so nobody gets stuck. */
+  .hk-pad {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid var(--color-hairline);
-    border-radius: 0;
-    box-shadow: 0 -6px 20px color-mix(in srgb, var(--color-shadow) 12%, transparent);
-    padding-bottom: env(safe-area-inset-bottom);
+    max-height: calc(100vh - var(--hk-top-h) - 0.5rem);
+    max-height: calc(100dvh - var(--hk-top-h) - 0.5rem);
+    min-height: 15rem;
   }
-  .hk[data-docked='true'] .hk-scroll {
+  .hk-scroll {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .hk[data-docked='true'] .hk-spacer {
-    height: var(--hk-pad-h);
   }
 
   /* "Use my keyboard": ours folds away so the phone's can take the space. */
@@ -202,9 +197,6 @@
 }
 
 @media (max-width: 767px) {
-  .hk[data-docked='true'] .hk-pad {
-    max-height: 55vh;
-  }
   /* Narrow screens: the group label goes above its keys, full width. */
   .hk-row {
     flex-direction: column;

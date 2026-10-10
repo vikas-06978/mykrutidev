@@ -73,9 +73,9 @@ test.describe('nothing covers the tool on load', () => {
   }
 });
 
-test('Hindi Keyboard on a phone: docking the keys while scrolling shifts nothing', async ({ page }) => {
-  // The spacer used to take the DOCKED height (max 55vh), so everything below
-  // jumped up by the difference as soon as the keys docked.
+test('Hindi Keyboard on a phone: text box and keys fit the screen together, and nothing is pinned or left empty', async ({ page }) => {
+  // The keys used to be pinned to the bottom of the screen while scrolling,
+  // leaving an empty block where they had been and covering the page below.
   await page.setViewportSize(VIEWPORTS.phone);
   await page.addInitScript(() => {
     localStorage.setItem('mkd-tour:/hindi-keyboard', '1');
@@ -87,13 +87,24 @@ test('Hindi Keyboard on a phone: docking the keys while scrolling shifts nothing
   await page.goto('/hindi-keyboard');
   const below = page.locator('#howto-heading');
   const before = await below.evaluate((el) => el.getBoundingClientRect().top + scrollY);
+  await page.locator('[data-keyboard] textarea').click();
+  // Brought into view: the text box at the top, every key row below it, on screen.
+  await expect
+    .poll(() => page.locator('[data-keyboard]').evaluate((el) => Math.round(el.getBoundingClientRect().top)))
+    .toBeLessThanOrEqual(1);
+  const pad = await page.locator('[data-keyboard] .hk-pad').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top, bottom: r.bottom, position: getComputedStyle(el).position };
+  });
+  expect(pad.position).not.toBe('fixed');
+  expect(pad.bottom).toBeLessThanOrEqual(VIEWPORTS.phone.height + 1);
+  // Scrolling on: the page simply moves on. Nothing below moved in the page.
   for (let i = 0; i < 6; i++) {
     await page.mouse.wheel(0, 120);
     await page.waitForTimeout(80);
   }
-  await expect(page.locator('[data-keyboard]')).toHaveAttribute('data-docked', 'true');
   const after = await below.evaluate((el) => el.getBoundingClientRect().top + scrollY);
-  expect(Math.round(after)).toBe(Math.round(before)); // nothing below moved in the page
+  expect(Math.round(after)).toBe(Math.round(before));
   expect(await page.evaluate(() => window.__cls)).toBe(0);
 });
 

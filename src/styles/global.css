@@ -149,7 +149,7 @@
    Builds on typing.css rather than repeating it. */
 @import './tutor.css';
 
-/* The Hindi Keyboard page: sticky text box, docked keyboard on phones. Its own
+/* The Hindi Keyboard page: sticky text box, keys fitted under it on phones. Its own
    hk-* classes, so the typing tutor's kb-* caps are untouched. */
 @import './hindi-keyboard.css';
 

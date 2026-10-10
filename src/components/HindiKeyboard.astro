@@ -7,8 +7,8 @@ import { langOf, useT } from '../i18n/index.js';
  *
  * A text box with the keys under it, laid out so both are on screen at once:
  * the text box sticks to the top of the tool, and on phones and tablets the
- * keys dock to the bottom of the screen like a phone keyboard. See
- * src/styles/hindi-keyboard.css for the layout rules.
+ * keys are just short enough to fit under it, scrolling inside themselves.
+ * See src/styles/hindi-keyboard.css for the layout rules.
  *
  * Vowel keys are "smart": after a consonant they insert the matra (क + इ ->
  * कि) and show it on the cap. See keyboard.js.
@@ -27,7 +27,6 @@ const strings = { copied: t('common.copied') };
 <div
   class="hk card"
   data-keyboard
-  data-docked="false"
   data-own="false"
   data-i18n={JSON.stringify(strings)}
 >
@@ -70,9 +69,6 @@ const strings = { copied: t('common.copied') };
       <span data-role="count" class="hk-count" aria-label={t('keyboard.countAria')}>0</span>
     </div>
   </div>
-
-  {/* Holds the docked keyboard's place in the page, so docking never jumps. */}
-  <div class="hk-spacer" aria-hidden="true"></div>
 
   {/* ----------------------------- The keys ----------------------------- */}
   <div class="hk-pad" data-role="pad" role="group" aria-label={t('keyboard.padAria')} translate="no">
@@ -148,7 +144,7 @@ const strings = { copied: t('common.copied') };
   import { clusters } from '../lib/typing.js';
   import { consonantBefore, pressKey, vowelLabel, vowelName } from '../lib/keyboard.js';
 
-  /** Phones and tablets: the keyboard docks and the phone keyboard is held back. */
+  /** Phones and tablets: the keys fit under the text box and the phone keyboard is held back. */
   const NARROW = window.matchMedia('(max-width: 1023px)');
   const COARSE = window.matchMedia('(pointer: coarse)');
   const MAX_LINES = 6;
@@ -193,55 +189,39 @@ const strings = { copied: t('common.copied') };
       // closes for ours.
       text.blur();
       text.focus();
-      dock();
+      fit();
     }
     ownBtn.addEventListener('click', () => setOwnKeyboard(true));
     reopenBtn.addEventListener('click', () => setOwnKeyboard(false));
 
     // ----------------------------------------------------------------------
-    // Docking (phones and tablets). The keys go fixed to the bottom of the
-    // screen once the text box has stuck to the top, and come back into the
-    // page once the tool scrolls away. The spacer keeps their height in the
-    // page so neither switch moves anything.
+    // Phones and tablets: the keys stay in the page, right under the text
+    // box, and are only as tall as the screen leaves room for (CSS reads the
+    // text box's height from --hk-top-h). Scrolled to, text box and keys are
+    // on screen together; scrolled on, the page simply moves on. They used to
+    // be pinned to the bottom of the screen instead, which left an empty block
+    // where they had been and covered the page below.
     // ----------------------------------------------------------------------
-    // Synchronous on purpose: one layout read per scroll event is cheap, and a
-    // requestAnimationFrame here would never run in a backgrounded tab, leaving
-    // the keys undocked when the tab comes back.
-    function dock() {
-      const r = root.getBoundingClientRect();
-      const on = NARROW.matches && !ownKeyboard && r.top <= 1 && r.bottom > top.offsetHeight + 24;
-      // The spacer takes the keys' height as they were IN THE PAGE, measured
-      // before they dock. Measured after, it got the docked (shorter, max
-      // 55vh) height and everything below jumped up by the difference - a
-      // layout shift of 0.4 on a phone.
-      if (on && root.dataset.docked !== 'true') {
-        // The exact (fractional) height: offsetHeight rounds, which left a 1px step.
-        root.style.setProperty('--hk-pad-h', `${pad.getBoundingClientRect().height}px`);
-      }
-      if ((root.dataset.docked === 'true') !== on) {
-        root.dataset.docked = String(on);
-      }
+    function fit() {
+      root.style.setProperty('--hk-top-h', `${top.getBoundingClientRect().height}px`);
     }
-    window.addEventListener('scroll', dock, { passive: true });
     window.addEventListener('resize', () => {
       // Also re-derive the input mode: a width change that happened before
       // the NARROW listener below was attached would otherwise be missed.
       applyInputMode();
-      dock();
+      fit();
     });
     NARROW.addEventListener('change', () => {
       applyInputMode();
-      dock();
+      fit();
     });
 
-    /** On a phone, bring the whole tool into view so the keys can dock. */
+    /** On a phone, bring the whole tool into view: text box and keys together. */
     function bringIntoView() {
       if (!NARROW.matches || ownKeyboard) return;
-      if (root.getBoundingClientRect().top > 1) {
+      if (Math.abs(root.getBoundingClientRect().top) > 1) {
         root.scrollIntoView({ block: 'start', behavior: 'smooth' });
       }
-      // Already at the top means no scroll event will come to do this.
-      dock();
     }
     text.addEventListener('focus', bringIntoView);
 
@@ -349,7 +329,6 @@ const strings = { copied: t('common.copied') };
         for (const panel of keys.querySelectorAll<HTMLElement>('[data-layer-panel]')) {
           panel.hidden = panel.dataset.layerPanel !== btn.dataset.layer;
         }
-        dock();
       });
     }
 
@@ -357,8 +336,8 @@ const strings = { copied: t('common.copied') };
       count.textContent = String(text.value.length);
       autoGrow();
       refreshVowels();
-      // The text box may have grown, which changes where docking starts.
-      dock();
+      // The text box may have grown, which leaves the keys less room.
+      fit();
     }
 
     // ----------------------------------------------------------------------
@@ -406,6 +385,5 @@ const strings = { copied: t('common.copied') };
 
     applyInputMode();
     update();
-    dock();
   }
 </script>
