@@ -168,9 +168,26 @@
     height: 44px;
   }
 
-  /* Text box and keys on screen together: the keys take what is left, and
-     scroll inside themselves. Once their own end is reached, a swipe moves
-     the page on (no overscroll-behavior: contain), so nobody gets stuck. */
+
+  /* "Use my keyboard": ours folds away so the phone's can take the space. */
+  .hk[data-own='true'] .hk-pad {
+    display: none;
+  }
+  .hk[data-own='true'] .hk-reopen {
+    display: inline-flex;
+  }
+  .hk[data-own='true'] .hk-own {
+    display: none;
+  }
+}
+
+/* Touch screens only: text box and keys on screen together - the keys take
+   what is left, and scroll inside themselves. Once their own end is reached,
+   a swipe moves the page on (no overscroll-behavior: contain), so nobody gets
+   stuck. With a mouse (a narrow or zoomed desktop window) the whole keyboard
+   shows at once: a box that scrolls inside a page that scrolls only hides
+   keys there. */
+@media (max-width: 1023px) and (pointer: coarse) {
   .hk-pad {
     display: flex;
     flex-direction: column;
@@ -182,17 +199,6 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-  }
-
-  /* "Use my keyboard": ours folds away so the phone's can take the space. */
-  .hk[data-own='true'] .hk-pad {
-    display: none;
-  }
-  .hk[data-own='true'] .hk-reopen {
-    display: inline-flex;
-  }
-  .hk[data-own='true'] .hk-own {
-    display: none;
   }
 }
 
