@@ -73,16 +73,21 @@ test.describe('nothing covers the tool on load', () => {
   }
 });
 
-test('Hindi Keyboard on a phone: text box and keys fit the screen together, and nothing is pinned or left empty', async ({ page }) => {
-  // The keys used to be pinned to the bottom of the screen while scrolling,
-  // leaving an empty block where they had been and covering the page below.
-  await page.setViewportSize(VIEWPORTS.phone);
-  await page.addInitScript(() => {
-    localStorage.setItem('mkd-tour:/hindi-keyboard', '1');
-    window.__cls = 0;
-    new PerformanceObserver((l) => {
-      for (const e of l.getEntries()) window.__cls += e.value;
-    }).observe({ type: 'layout-shift', buffered: true });
+test.describe('Hindi Keyboard on a touch screen', () => {
+  // The fit applies to touch screens only (hindi-keyboard.css): a phone, not
+  // a narrow desktop window, which shows every key at once.
+  test.use({ hasTouch: true, isMobile: true, viewport: VIEWPORTS.phone });
+
+  test('on a phone: text box and keys fit the screen together, and nothing is pinned or left empty', async ({ page }) => {
+    // The keys used to be pinned to the bottom of the screen while scrolling,
+    // leaving an empty block where they had been and covering the page below.
+    await page.setViewportSize(VIEWPORTS.phone);
+    await page.addInitScript(() => {
+      localStorage.setItem('mkd-tour:/hindi-keyboard', '1');
+      window.__cls = 0;
+      new PerformanceObserver((l) => {
+        for (const e of l.getEntries()) window.__cls += e.value;
+      }).observe({ type: 'layout-shift', buffered: true });
   });
   await page.goto('/hindi-keyboard');
   const below = page.locator('#howto-heading');
@@ -106,6 +111,18 @@ test('Hindi Keyboard on a phone: text box and keys fit the screen together, and 
   const after = await below.evaluate((el) => el.getBoundingClientRect().top + scrollY);
   expect(Math.round(after)).toBe(Math.round(before));
   expect(await page.evaluate(() => window.__cls)).toBe(0);
+  });
+});
+
+test('Hindi Keyboard in a narrow desktop window: every key row shows, nothing scrolls inside', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 650 });
+  await page.addInitScript(() => localStorage.setItem('mkd-tour:/hindi-keyboard', '1'));
+  await page.goto('/hindi-keyboard');
+  const box = await page.locator('[data-keyboard] .hk-scroll').evaluate((el) => ({
+    inner: el.scrollHeight - el.clientHeight,
+    overflow: getComputedStyle(el).overflowY,
+  }));
+  expect(box).toEqual({ inner: 0, overflow: 'visible' });
 });
 
 // ---------------------------------------------------------------------------

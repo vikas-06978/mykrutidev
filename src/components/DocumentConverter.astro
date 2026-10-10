@@ -234,6 +234,10 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
       a.download = name;
     }
 
+    /** A file's size in four broad steps, for counting; never the exact size. */
+    const sizeBucket = (bytes: number) =>
+      bytes < 100_000 ? 'under-100kb' : bytes < 1_000_000 ? 'under-1mb' : bytes < 5_000_000 ? 'under-5mb' : '5mb-plus';
+
     async function handle(file: File) {
       current = file;
       const run = ++busy;
@@ -249,6 +253,9 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         m = await load();
         const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
         const checked = m.checkFile({ name: file.name, size: file.size, head });
+        // That a file was chosen: its type and a rough size. Never its name or
+        // anything in it - the file itself never leaves the browser.
+        track('upload_file', { file: 'error' in checked ? 'refused' : checked.kind, size: sizeBucket(file.size) });
         if ('error' in checked) return fail(localizeDocMessage(checked.error, m, L));
 
         const bytes = new Uint8Array(await file.arrayBuffer());

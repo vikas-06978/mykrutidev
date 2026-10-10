@@ -26,6 +26,7 @@ import { SITE } from '../src/lib/routes.js';
 import { parseRedirects } from '../scripts/serve-dist.mjs';
 import { GUIDES, guidePath } from '../src/lib/guides.js';
 import { DICTS, LOCALES, LOCALE_META } from '../src/i18n/index.js';
+import { BRAND, fits, visibleLength } from '../src/lib/seoTitle.js';
 
 const { en, hi } = DICTS;
 /** Each language's home page: "/", "/hi/", "/bn/", ... */
@@ -109,12 +110,14 @@ describe('titles, headings and images', () => {
     }
   });
 
-  test('every indexable page has a <title> of at most 70 characters', () => {
-    // Bing Webmaster Tools reports a longer title as an error, and Google
-    // cuts it off in results.
+  test('every indexable page has a short <title> that ends with the brand', () => {
+    // Google cuts a title off at about 60 visible characters; Bing Webmaster
+    // Tools reports one over 70 characters as an error. The brand is in Latin
+    // script in every language (src/lib/seoTitle.js).
     for (const u of indexable) {
       const t = decode(pages.get(u).match(/<title>([^<]*)<\/title>/)?.[1] ?? '');
-      assert.ok(t.length <= 70, `${u}: title is ${t.length} characters: "${t}"`);
+      assert.ok(fits(t), `${u}: title is ${visibleLength(t)} visible / ${t.length} characters: "${t}"`);
+      assert.ok(t.includes(BRAND), `${u}: title has no ${BRAND}: "${t}"`);
     }
   });
 
@@ -239,6 +242,12 @@ describe('sitemap, canonical and hreflang', () => {
     for (const [u, html] of pages) {
       if (u === '/404.html') continue;
       const alt = Object.fromEntries(linkRel(html, 'alternate').map((t) => [attr(t, 'hreflang'), attr(t, 'href')]));
+      // A page that hands its ranking to another URL carries no hreflang set:
+      // hreflang belongs between canonical pages only.
+      if (attr(linkRel(html, 'canonical')[0] ?? '', 'href') !== abs(u)) {
+        assert.deepEqual(alt, {}, `${u}: canonical points elsewhere but it has hreflang`);
+        continue;
+      }
       assert.deepEqual(Object.keys(alt).sort(), [...codes, 'x-default'].sort(), u);
       assert.equal(alt['x-default'], alt.en, `${u}: x-default`);
       assert.ok(codes.some((c) => alt[c] === abs(u)), `${u}: its own URL is not one of its alternates`);
@@ -302,8 +311,14 @@ describe('sharing previews and structured data', () => {
 
   test('Organization and WebSite on the home pages; Article on every guide', () => {
     for (const u of HOMES) {
-      const types = jsonLd(pages.get(u)).map((d) => d['@type']);
+      const data = jsonLd(pages.get(u));
+      const types = data.map((d) => d['@type']);
       assert.ok(types.includes('Organization') && types.includes('WebSite'), `${u}: ${types}`);
+      // The brand, in Latin script in every language, with its spaced form.
+      for (const d of data.filter((x) => x['@type'] === 'Organization' || x['@type'] === 'WebSite')) {
+        assert.equal(d.name, 'MyKrutiDev', u);
+        assert.ok(d.alternateName.includes('My Kruti Dev'), `${u}: ${d['@type']} alternateName`);
+      }
     }
     for (const g of GUIDES) {
       for (const u of LOCALES.map((l) => `${l === 'en' ? '' : `/${l}`}${guidePath(g)}/`)) {
