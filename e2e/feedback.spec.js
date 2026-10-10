@@ -338,15 +338,12 @@ test.describe('never covers Copy, Download or the keys', () => {
     await expect(button(page)).toHaveAttribute('data-hidden', 'false', { timeout: 1000 });
   });
 
-  test('on a phone the docked Hindi keyboard keeps it hidden', async ({ page }) => {
+  test('on a phone the Hindi keyboard\'s keys keep it hidden', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('mkd-tour:/hindi-keyboard', '1'));
     await page.setViewportSize(PHONE);
     await page.goto('/hindi-keyboard');
-    for (let i = 0; i < 6; i++) {
-      await page.mouse.wheel(0, 120);
-      await page.waitForTimeout(80);
-    }
-    await expect(page.locator('[data-keyboard]')).toHaveAttribute('data-docked', 'true');
+    // Text box and keys brought on screen together: the keys reach the corner.
+    await page.locator('[data-keyboard] textarea').click();
     await expect(button(page)).toHaveAttribute('data-hidden', 'true');
   });
 

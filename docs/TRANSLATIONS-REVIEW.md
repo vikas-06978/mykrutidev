@@ -4,7 +4,7 @@ Generated from `src/i18n/en.json` and `src/i18n/hi.json` by
 `npm run i18n:review`. Edit **hi.json**, then re-run the script. Do not edit
 this file by hand.
 
-- **3555 keys**, identical in both files (enforced by `npm test` and at build time).
+- **3566 keys**, identical in both files (enforced by `npm test` and at build time).
 - **154 flagged ⚠️** - strings I was not sure about. Search this page for ⚠️.
 - Style: simple everyday Hindi. कृतिदेव in headings and running text; exact font
   names in Latin wherever the reader has to type or pick the font (Kruti Dev 010,
@@ -360,11 +360,22 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `tutor.notQuite` | Not quite | थोड़ा और अभ्यास | ⚠️ "Not quite" -> "थोड़ा और अभ्यास" (a little more practice). Not literal - check tone. |
 | `tutor.needs` | {acc}% accurate - this lesson needs {threshold}%. Slow down until the mistakes stop. The speed comes on its own. | {acc}% शुद्धता - इस पाठ के लिए {threshold}% चाहिए। तब तक धीरे टाइप करें जब तक गलतियाँ बंद न हों। स्पीड अपने-आप आएगी। |  |
 | `tutor.keyboardAria` | Remington Hindi keyboard layout | रेमिंगटन हिंदी कीबोर्ड लेआउट |  |
+| `tutor.shiftView` | Show Shift letters | Shift वाले अक्षर दिखाएँ |  |
+| `tutor.phoneNote` | On a phone this keyboard is a guide. Real exam practice is best done on a computer keyboard. | फ़ोन पर यह कीबोर्ड सिर्फ़ रास्ता दिखाने के लिए है। परीक्षा की असली तैयारी कंप्यूटर के कीबोर्ड पर सबसे अच्छी होती है। |  |
 | `tutor.today` | Today's practice | आज का अभ्यास |  |
 | `tutor.exam` | Exam (10 min) | परीक्षा (10 मिनट) |  |
 | `tutor.todayNote` | A new passage every day - the same one for everyone today. | हर दिन नया पैराग्राफ़ - आज सबके लिए एक ही। |  |
 | `tutor.todayDone` | Done today ✓ | आज पूरा ✓ |  |
 | `tutor.todayTitle` | Today's practice · {title} | आज का अभ्यास · {title} |  |
+| `tutor.daysHeading` | Last 7 days | पिछले 7 दिन |  |
+| `tutor.daysCount` | · {done} of 7 done | · 7 में से {done} पूरे |  |
+| `tutor.daysNote` | Kept in this browser only. Tap a day to type its passage again. | सिर्फ़ इसी ब्राउज़र में सेव। किसी दिन पर टैप करके उसका पैराग्राफ़ दोबारा टाइप करें। |  |
+| `tutor.daysToday` | Today | आज |  |
+| `tutor.daysNone` | Not practised | अभ्यास नहीं किया |  |
+| `tutor.daysDone` | Done ✓ | पूरा ✓ |  |
+| `tutor.daysPart` | {pct}% typed | {pct}% टाइप किया |  |
+| `tutor.daysStats` | {wpm} WPM, {acc}% | {wpm} WPM, {acc}% |  |
+| `tutor.dayTitle` | Practice for {date} · {title} | {date} का अभ्यास · {title} |  |
 | `tutor.examNote` | 10 minutes, no pause - like the SSC and CPCT typing tests. You are scored on net WPM and accuracy. | 10 मिनट, बिना रुके - SSC और CPCT टाइपिंग टेस्ट की तरह। नतीजा नेट WPM और शुद्धता में मिलेगा। |  |
 | `tutor.examResult` | Exam result | परीक्षा का नतीजा |  |
 | `tutor.examScore` | Net speed {wpm} WPM at {acc}% accuracy. | {acc}% शुद्धता के साथ नेट स्पीड {wpm} WPM। |  |
