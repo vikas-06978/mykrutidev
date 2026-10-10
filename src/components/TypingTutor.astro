@@ -1257,6 +1257,9 @@ const strings = raw(lang, 'tutor');
 
     function start() {
       if (running || done) return;
+      // A new run, not a resume after a pause. Which mode and how long - never
+      // the passage or anything typed.
+      if (accumulated === 0) track('typing_test_start', { mode, minutes: timed() ? Math.round(testSeconds() / 60) : 0 });
       running = true;
       paused = false;
       segmentStart = Date.now();
