@@ -41,9 +41,12 @@ describe('the UPI ID setting', () => {
 
   test('accepts the shapes UPI IDs come in', () => {
     for (const id of ['47291836@upi', 'mykrutidev@okaxis', 'Q123456789@ybl', 'my.kruti-dev_1@paytm']) {
-      assert.equal(readUpiId(id), id);
+      assert.equal(readUpiId(id), id.toLowerCase());
     }
     assert.equal(readUpiId('  47291836@upi\n'), '47291836@upi');
+    // Shown, copied and paid in small letters, as UPI apps show it.
+    assert.equal(readUpiId('MyKrutidev@upi'), 'mykrutidev@upi');
+    assert.equal(readSupport({ PUBLIC_UPI_ID: 'MyKrutidev@upi' }).link, upiLink('mykrutidev@upi'));
   });
 
   test('anything else fails the build rather than going live', () => {
