@@ -65,8 +65,22 @@ export function emptyHabit() {
     streak: { last: null, count: 0, best: 0 },
     badges: [],
     dailyDone: null,
+    // Today's practice, by the date whose passage it was: the best try at
+    // each, for the "last days" list. { 'YYYY-MM-DD': { pct, wpm, acc } }
+    daily: {},
   };
 }
+
+/** How many days of Today's practice are kept. */
+export const DAILY_DAYS = 14;
+
+/** The newest `DAILY_DAYS` entries of a daily record. */
+const keepRecent = (daily) =>
+  Object.fromEntries(
+    Object.entries(daily)
+      .sort(([a], [b]) => (a < b ? 1 : -1))
+      .slice(0, DAILY_DAYS),
+  );
 
 const num = (v, max) => {
   const n = Number(v);
@@ -105,6 +119,14 @@ export function sanitize(raw) {
   }
   if (Array.isArray(raw.badges)) h.badges = [...new Set(raw.badges.filter((b) => BADGE_IDS.has(b)))];
   if (DAY.test(raw.dailyDone)) h.dailyDone = raw.dailyDone;
+  if (raw.daily && typeof raw.daily === 'object' && !Array.isArray(raw.daily)) {
+    const out = {};
+    for (const [d, v] of Object.entries(raw.daily)) {
+      if (!DAY.test(d) || !v || typeof v !== 'object') continue;
+      out[d] = { pct: Math.round(num(v.pct, 100)), wpm: num(v.wpm, MAX_WPM), acc: num(v.acc, 100) };
+    }
+    h.daily = keepRecent(out);
+  }
   return h;
 }
 
@@ -149,9 +171,11 @@ export function newBadges(habit, ctx) {
  *
  * @param {ReturnType<typeof emptyHabit>} habit
  * @param {{ mode: string, wpm: number, acc: number, ms: number, typed: number,
- *           ranked: boolean, complete?: boolean }} s
+ *           ranked: boolean, complete?: boolean, day?: string, pct?: number }} s
  *   `ranked`: the run went the distance (a finished drill or passage, or a
  *   timed test that ran out), so its speed may count as a best.
+ *   `day`, `pct`: Today's practice only - the date whose passage was typed
+ *   (today, or a past day picked from the list) and how much of it.
  * @param {string} today 'YYYY-MM-DD'
  * @param {{ lessonsDone: number, lessonsTotal: number }} ctx
  */
@@ -175,26 +199,53 @@ export function recordSession(habit, s, today, ctx) {
     bestWpm: s.ranked ? Math.max(habit.bestWpm, wpm) : habit.bestWpm,
     bestAcc: s.ranked ? Math.max(habit.bestAcc, acc) : habit.bestAcc,
     streak: practise(habit.streak, today),
-    dailyDone: s.mode === 'daily' && s.complete ? today : habit.dailyDone,
+    dailyDone: s.mode === 'daily' && s.complete && (s.day ?? today) === today ? today : habit.dailyDone,
+    daily: s.mode === 'daily' ? addDaily(habit.daily ?? {}, DAY.test(s.day) ? s.day : today, s, wpm, acc) : habit.daily,
   };
   const earned = newBadges(next, ctx);
   next.badges = [...habit.badges, ...earned];
   return { habit: next, earned };
 }
 
+/** The best try at one day's passage: the furthest, then the fastest. */
+function addDaily(daily, day, s, wpm, acc) {
+  const pct = s.complete ? 100 : Math.min(99, Math.round(num(s.pct, 100)));
+  const old = daily[day];
+  const better = !old || pct > old.pct || (pct === old.pct && wpm > old.wpm);
+  return keepRecent({ ...daily, [day]: better ? { pct, wpm, acc } : old });
+}
+
+/** The `n` dates ending with `today`, newest first. */
+export function lastDays(today, n) {
+  const [y, m, d] = today.split('-').map(Number);
+  return Array.from({ length: n }, (_, i) => dayKey(new Date(y, m - 1, d - i)));
+}
+
 /**
- * Today's passage: the same one for everybody on the same date, a different
- * one tomorrow. FNV-1a over the date string - stable across browsers and
- * builds, and never needs a server.
+ * The order the passages come in, one per day: shuffled once, the same for
+ * everybody, so no two days running get the same passage.
+ */
+function dailyOrder(count) {
+  const order = Array.from({ length: count }, (_, i) => i);
+  let h = 0x2545f491;
+  for (let i = count - 1; i > 0; i--) {
+    h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
+    h = Math.imul(h ^ (h >>> 12), 0x297a2d39) >>> 0;
+    const j = h % (i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+
+/**
+ * Today's passage: the same one for everybody on the same date. The passages
+ * take turns: every one comes once before any comes again, so a passage
+ * returns only after `count` days. Never needs a server.
  */
 export function dailyIndex(day, count) {
   if (count <= 0) return 0;
-  let h = 0x811c9dc5;
-  for (let i = 0; i < day.length; i++) {
-    h ^= day.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h % count;
+  const n = daysBetween('2026-01-01', day);
+  return dailyOrder(count)[((n % count) + count) % count];
 }
 
 /** Whole minutes practised, rounded down - "1 min" only once a minute is done. */

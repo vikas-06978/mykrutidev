@@ -12,6 +12,8 @@ import {
   currentStreak,
   recordSession,
   dailyIndex,
+  lastDays,
+  DAILY_DAYS,
   practiceMinutes,
 } from './habit.js';
 import { addRecent, sanitizeRecent, preview, MAX_RECENT, MAX_CHARS } from './recent.js';
@@ -236,5 +238,54 @@ describe('recent conversions', () => {
   test('preview collapses whitespace and cuts long text', () => {
     assert.equal(preview('a\n\n  b'), 'a b');
     assert.equal(preview('abcdef', 3), 'abc…');
+  });
+});
+
+describe("Today's practice: one passage per day, taking turns", () => {
+  test('every passage comes once before any comes again, so no two days running repeat', () => {
+    for (const count of [16, 36]) {
+      const days = Array.from({ length: count * 2 }, (_, i) => dayKey(new Date(2026, 9, 1 + i)));
+      const idx = days.map((d) => dailyIndex(d, count));
+      for (let i = 0; i + count <= idx.length; i += count) {
+        assert.equal(new Set(idx.slice(i, i + count)).size, count, `${count} passages, days ${i}-${i + count - 1}`);
+      }
+      for (let i = 1; i < idx.length; i++) assert.notEqual(idx[i], idx[i - 1], days[i]);
+    }
+  });
+
+  test('the same passage for everybody on the same date', () => {
+    assert.equal(dailyIndex('2026-10-10', 36), dailyIndex('2026-10-10', 36));
+  });
+
+  test('the last days, newest first, across a month end', () => {
+    assert.deepEqual(lastDays('2026-03-02', 3), ['2026-03-02', '2026-03-01', '2026-02-28']);
+  });
+
+  const daily = (o) => ({ mode: 'daily', wpm: 30, acc: 95, ms: 60_000, typed: 400, ranked: true, ...o });
+
+  test('each day keeps its best try: the furthest, then the fastest', () => {
+    let h = emptyHabit();
+    h = recordSession(h, daily({ complete: false, pct: 40, wpm: 50 }), '2026-10-10', CTX).habit;
+    h = recordSession(h, daily({ complete: true, wpm: 28, acc: 97 }), '2026-10-10', CTX).habit;
+    h = recordSession(h, daily({ complete: false, pct: 60, wpm: 60 }), '2026-10-10', CTX).habit;
+    assert.deepEqual(h.daily['2026-10-10'], { pct: 100, wpm: 28, acc: 97 });
+    assert.equal(h.dailyDone, '2026-10-10');
+  });
+
+  test('a past day typed today counts for that day, and is not "done today"', () => {
+    const { habit } = recordSession(emptyHabit(), daily({ complete: true, day: '2026-10-08' }), '2026-10-10', CTX);
+    assert.deepEqual(Object.keys(habit.daily), ['2026-10-08']);
+    assert.equal(habit.dailyDone, null);
+    assert.equal(habit.streak.last, '2026-10-10');
+  });
+
+  test('only the last days are kept, and a bad stored record is dropped', () => {
+    let h = emptyHabit();
+    for (let i = 0; i < DAILY_DAYS + 5; i++) {
+      h = recordSession(h, daily({ complete: true, day: dayKey(new Date(2026, 9, 1 + i)) }), '2026-10-30', CTX).habit;
+    }
+    assert.equal(Object.keys(h.daily).length, DAILY_DAYS);
+    const clean = sanitize({ daily: { '2026-10-10': { pct: 250, wpm: 'x', acc: 90 }, nope: { pct: 1 }, '2026-10-09': null } });
+    assert.deepEqual(clean.daily, { '2026-10-10': { pct: 0, wpm: 0, acc: 90 } });
   });
 });

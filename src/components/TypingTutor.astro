@@ -97,6 +97,18 @@ const strings = raw(lang, 'tutor');
     </div>
     {/* What Today's practice and the Exam are, shown in those modes only. */}
     <p data-role="mode-note" class="tt-mode-note" hidden></p>
+    {/*
+      Today's practice: the last days, each with its passage and how far it
+      got. Tap one to type that day's passage. Filled by the script; kept in
+      this browser only, which the note under it says.
+    */}
+    <details data-role="days" class="tt-days" hidden>
+      <summary class="tt-days-head">
+        {t('tutor.daysHeading')} <span data-role="days-count" class="tt-days-count"></span>
+      </summary>
+      <ol data-role="days-list" class="tt-days-list"></ol>
+      <p class="tt-days-note">{t('tutor.daysNote')}</p>
+    </details>
     <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <p class="text-xs text-mute">{t('tutor.layoutNote')}</p>
 
@@ -462,7 +474,7 @@ const strings = raw(lang, 'tutor');
   import { locate } from '../lib/remington.js';
   import { planPassages, JOINER, DURATIONS } from '../lib/passages.js';
   import { fill } from '../i18n/fill.js';
-  import { dailyIndex, dayKey } from '../lib/habit.js';
+  import { dailyIndex, dayKey, lastDays } from '../lib/habit.js';
   import { progressPanel, shareResult } from '../scripts/progress.js';
   import { track } from '../scripts/track.js';
 
@@ -605,6 +617,8 @@ const strings = raw(lang, 'tutor');
     }
 
     let mode: Mode = 'lesson';
+    /** Today's practice: whose date's passage is on screen (today, or one picked from the list). */
+    let dailyDay = dayKey();
     let levelId = LEVELS[0].id;
     let seconds = DURATIONS[0].value;
     /** The two modes that run on a clock and end when it runs out. */
@@ -737,10 +751,14 @@ const strings = raw(lang, 'tutor');
         levelFocus.textContent = level.focus;
       } else if (mode === 'daily') {
         // By the visitor's own calendar date: everyone typing on the 26th
-        // gets the same passage, and it changes at their midnight.
-        const p = PASSAGES[dailyIndex(dayKey(), PASSAGES.length)];
+        // gets the same passage, and it changes at their midnight. A past
+        // day picked from the list brings back that day's passage.
+        const p = PASSAGES[dailyIndex(dailyDay, PASSAGES.length)];
         units = p.units;
-        titleEl.textContent = fill(L.todayTitle, { title: p.title });
+        titleEl.textContent =
+          dailyDay === dayKey()
+            ? fill(L.todayTitle, { title: p.title })
+            : fill(L.dayTitle, { date: dateLabel(dailyDay), title: p.title });
       } else {
         // Sized in KEYSTROKES, not aksharas. They are not the same count - भा
         // is one akshara and three keys - and the clock is spent on keystrokes.
@@ -1409,9 +1427,19 @@ const strings = raw(lang, 'tutor');
 
       // Into the long-term record: streak, minutes, chart, badges.
       me.record(
-        { mode, wpm: net, acc, ms: elapsed(), typed: s.typed, ranked: ranks, complete: s.complete },
+        {
+          mode,
+          wpm: net,
+          acc,
+          ms: elapsed(),
+          typed: s.typed,
+          ranked: ranks,
+          complete: s.complete,
+          ...(mode === 'daily' ? { day: dailyDay, pct: Math.round((s.typed / expected.length) * 100) } : {}),
+        },
         ctx(),
       );
+      if (mode === 'daily') renderDays();
       lastResult = { wpm: net, acc };
       shareBtn.hidden = net <= 0;
 
@@ -1507,10 +1535,73 @@ const strings = raw(lang, 'tutor');
       showNextKey('');
     }
 
+    /** A date as this page's language writes it short: "10 Oct", "10 अक्टू॰". */
+    function dateLabel(day: string) {
+      const [y, m, d] = day.split('-').map(Number);
+      return new Intl.DateTimeFormat(document.documentElement.lang || 'en', { day: 'numeric', month: 'short' }).format(
+        new Date(y, m - 1, d),
+      );
+    }
+
+    /**
+     * Today's practice: the last 7 days, newest first. Each row shows the
+     * day's passage and the best try at it, and opens that passage. Built
+     * with textContent only.
+     */
+    const daysBox = q<HTMLElement>('days');
+    const daysList = q<HTMLElement>('days-list');
+    const daysCount = q<HTMLElement>('days-count');
+    function renderDays() {
+      const today = dayKey();
+      const record = me.habit.daily ?? {};
+      const week = lastDays(today, 7);
+      daysCount.textContent = fill(L.daysCount, { done: week.filter((d) => (record[d]?.pct ?? 0) >= 100).length });
+      daysList.replaceChildren(
+        ...week.map((day) => {
+          const p = PASSAGES[dailyIndex(day, PASSAGES.length)];
+          const r = record[day];
+          const li = document.createElement('li');
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'tt-day';
+          btn.dataset.day = day;
+          btn.setAttribute('aria-pressed', String(day === dailyDay));
+          const when = document.createElement('span');
+          when.className = 'tt-day-when';
+          when.textContent = day === today ? L.daysToday : dateLabel(day);
+          const title = document.createElement('span');
+          title.className = 'tt-day-title';
+          title.lang = 'hi';
+          title.textContent = p.title;
+          const status = document.createElement('span');
+          status.className = 'tt-day-status';
+          status.dataset.state = !r ? 'none' : r.pct >= 100 ? 'done' : 'part';
+          status.textContent = !r
+            ? L.daysNone
+            : (r.pct >= 100 ? L.daysDone : fill(L.daysPart, { pct: r.pct })) +
+              ' · ' +
+              fill(L.daysStats, { wpm: r.wpm, acc: r.acc });
+          btn.append(when, title, status);
+          btn.addEventListener('click', () => {
+            dailyDay = day;
+            renderDays();
+            reset({ newPassage: true });
+            capture.focus();
+          });
+          li.append(btn);
+          return li;
+        }),
+      );
+    }
+
     /** Swap between the ladder and the timed test, and re-dress the UI for it. */
     function setMode(next: Mode) {
       mode = next;
       root.dataset.mode = next;
+      // Today's practice always opens on today's passage.
+      dailyDay = dayKey();
+      daysBox.hidden = next !== 'daily';
+      if (next === 'daily') renderDays();
 
       for (const b of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
         b.setAttribute('aria-pressed', String(b.dataset.mode === next));
