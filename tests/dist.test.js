@@ -129,7 +129,8 @@ describe('language and SEO tags', () => {
 
   test('hreflang for every language and x-default on every page, pointing at the same set', () => {
     for (const p of english()) {
-      const want = {
+      // Canonical elsewhere: no hreflang set at all (Base.astro).
+      const want = PAGES.find((x) => x.path === p)?.canonical ? {} : {
         ...Object.fromEntries(LOCALES.map((l) => [LOCALE_META[l].hreflang, abs(inLocale(p, l))])),
         'x-default': abs(p),
       };

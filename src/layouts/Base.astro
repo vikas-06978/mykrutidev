@@ -69,11 +69,16 @@ const abs = (p: string) => new URL(p, SITE).href;
 const selfUrl = abs(localizePath(path, lang));
 const canonical = page?.canonical ? abs(localizePath(page.canonical, lang)) : selfUrl;
 
-// Every language version of this route, plus x-default (= English).
-const alternates = [
-  ...LOCALES.map((l) => ({ hreflang: LOCALE_META[l].hreflang, href: abs(localizePath(path, l)) })),
-  { hreflang: 'x-default', href: abs(localizePath(path, DEFAULT_LOCALE)) },
-];
+// Every language version of this route, plus x-default (= English). Not on a
+// page whose canonical points elsewhere: Google reads hreflang only between
+// canonical pages, and a set naming non-canonical URLs is a mixed signal.
+// The page it points to carries the set instead.
+const alternates = page?.canonical
+  ? []
+  : [
+      ...LOCALES.map((l) => ({ hreflang: LOCALE_META[l].hreflang, href: abs(localizePath(path, l)) })),
+      { hreflang: 'x-default', href: abs(localizePath(path, DEFAULT_LOCALE)) },
+    ];
 
 const h1 = page ? t(`pages.${page.path}.h1`) : title;
 

@@ -242,6 +242,12 @@ describe('sitemap, canonical and hreflang', () => {
     for (const [u, html] of pages) {
       if (u === '/404.html') continue;
       const alt = Object.fromEntries(linkRel(html, 'alternate').map((t) => [attr(t, 'hreflang'), attr(t, 'href')]));
+      // A page that hands its ranking to another URL carries no hreflang set:
+      // hreflang belongs between canonical pages only.
+      if (attr(linkRel(html, 'canonical')[0] ?? '', 'href') !== abs(u)) {
+        assert.deepEqual(alt, {}, `${u}: canonical points elsewhere but it has hreflang`);
+        continue;
+      }
       assert.deepEqual(Object.keys(alt).sort(), [...codes, 'x-default'].sort(), u);
       assert.equal(alt['x-default'], alt.en, `${u}: x-default`);
       assert.ok(codes.some((c) => alt[c] === abs(u)), `${u}: its own URL is not one of its alternates`);
