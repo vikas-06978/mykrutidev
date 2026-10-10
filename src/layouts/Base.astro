@@ -107,13 +107,18 @@ const breadcrumb = {
   })),
 };
 
-// Who publishes the site, and the site itself - on the home page only.
+// Who publishes the site, and the site itself - on the home page only, which
+// is where Google reads a site's name from. `alternateName` tells it that
+// "My Kruti Dev" is the same brand, not a misspelling of the font. No sameAs:
+// there are no social profiles to point at yet; add them here when there are.
 const homeUrl = abs(localizePath('/', lang));
+const ALT_NAMES = ['My Kruti Dev', 'mykrutidev.com'];
 const organization = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${SITE}/#organization`,
   name: 'MyKrutiDev',
+  alternateName: ALT_NAMES,
   url: `${SITE}/`,
   logo: abs('/og/logo.png'),
   email: CONTACT_EMAIL,
@@ -124,6 +129,7 @@ const website = {
   '@type': 'WebSite',
   '@id': `${homeUrl}#website`,
   name: 'MyKrutiDev',
+  alternateName: ALT_NAMES,
   url: homeUrl,
   inLanguage: meta.htmlLang,
   publisher: { '@id': `${SITE}/#organization` },

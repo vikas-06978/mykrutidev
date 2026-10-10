@@ -305,8 +305,14 @@ describe('sharing previews and structured data', () => {
 
   test('Organization and WebSite on the home pages; Article on every guide', () => {
     for (const u of HOMES) {
-      const types = jsonLd(pages.get(u)).map((d) => d['@type']);
+      const data = jsonLd(pages.get(u));
+      const types = data.map((d) => d['@type']);
       assert.ok(types.includes('Organization') && types.includes('WebSite'), `${u}: ${types}`);
+      // The brand, in Latin script in every language, with its spaced form.
+      for (const d of data.filter((x) => x['@type'] === 'Organization' || x['@type'] === 'WebSite')) {
+        assert.equal(d.name, 'MyKrutiDev', u);
+        assert.ok(d.alternateName.includes('My Kruti Dev'), `${u}: ${d['@type']} alternateName`);
+      }
     }
     for (const g of GUIDES) {
       for (const u of LOCALES.map((l) => `${l === 'en' ? '' : `/${l}`}${guidePath(g)}/`)) {
