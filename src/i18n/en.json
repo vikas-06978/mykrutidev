@@ -367,6 +367,8 @@
     "notQuite": "Not quite",
     "needs": "{acc}% accurate - this lesson needs {threshold}%. Slow down until the mistakes stop. The speed comes on its own.",
     "keyboardAria": "Remington Hindi keyboard layout",
+    "shiftView": "Show Shift letters",
+    "phoneNote": "On a phone this keyboard is a guide. Real exam practice is best done on a computer keyboard.",
     "today": "Today's practice",
     "exam": "Exam (10 min)",
     "todayNote": "A new passage every day - the same one for everyone today.",

@@ -37,17 +37,21 @@ const lang = langOf(Astro.url);
  * Shift carries a finger because the tutor highlights it: it is held by the
  * hand NOT typing, and that is the part beginners get wrong.
  */
+/*
+ * `wp`, `short`: the same cap on a phone, where the whole board has to fit
+ * the screen's width. Every row there comes to 14 key widths (tutor.css).
+ */
 const LEADING = [
   null,
-  { label: 'Tab', w: 1.5, finger: 'l-pinky' },
-  { label: 'Caps', w: 1.75, finger: 'l-pinky' },
-  { label: 'Shift', w: 2.25, finger: 'l-pinky', mod: 'shift' },
+  { label: 'Tab', short: '⇥', w: 1.5, wp: 1, finger: 'l-pinky' },
+  { label: 'Caps', short: '⇪', w: 1.75, wp: 1.25, finger: 'l-pinky' },
+  { label: 'Shift', short: '⇧', w: 2.25, wp: 1.75, finger: 'l-pinky', mod: 'shift' },
 ];
 const TRAILING = [
-  { label: 'Bksp', w: 2, finger: 'r-pinky' },
+  { label: 'Bksp', short: '⌫', w: 2, wp: 1, finger: 'r-pinky' },
   null,
-  { label: 'Enter', w: 2.25, finger: 'r-pinky' },
-  { label: 'Shift', w: 2.75, finger: 'r-pinky', mod: 'shift' },
+  { label: 'Enter', short: '↵', w: 2.25, wp: 1.75, finger: 'r-pinky' },
+  { label: 'Shift', short: '⇧', w: 2.75, wp: 2.25, finger: 'r-pinky', mod: 'shift' },
 ];
 ---
 
@@ -68,11 +72,14 @@ const TRAILING = [
         {LEADING[i] && (
           <span
             class="kbd-cap"
-            style={`--w:${LEADING[i].w}`}
+            style={`--wd:${LEADING[i].w};--wp:${LEADING[i].wp}`}
             data-finger={LEADING[i].finger}
             data-mod={LEADING[i].mod}
           >
-            <span class="kbd-mod">{LEADING[i].label}</span>
+            <span class="kbd-mod">
+              <span class="kbd-mod-long">{LEADING[i].label}</span>
+              <span class="kbd-mod-short">{LEADING[i].short}</span>
+            </span>
           </span>
         )}
 
@@ -103,34 +110,38 @@ const TRAILING = [
         {TRAILING[i] && (
           <span
             class="kbd-cap"
-            style={`--w:${TRAILING[i].w}`}
+            style={`--wd:${TRAILING[i].w};--wp:${TRAILING[i].wp}`}
             data-finger={TRAILING[i].finger}
             data-mod={TRAILING[i].mod}
           >
-            <span class="kbd-mod">{TRAILING[i].label}</span>
+            <span class="kbd-mod">
+              <span class="kbd-mod-long">{TRAILING[i].label}</span>
+              <span class="kbd-mod-short">{TRAILING[i].short}</span>
+            </span>
           </span>
         )}
       </div>
     ))
   }
 
+  {/* Ctrl and Alt type nothing here; on a phone they make room. */}
   <div class="kbd-row">
-    <span class="kbd-cap" style="--w:3.25" data-finger="l-pinky" data-mod="shift">
+    <span class="kbd-cap" style="--wd:3.25;--wp:3.75" data-finger="l-pinky" data-mod="shift">
       <span class="kbd-mod">Shift</span>
     </span>
-    <span class="kbd-cap" style="--w:1.25" data-finger="l-pinky">
+    <span class="kbd-cap kbd-extra" style="--wd:1.25" data-finger="l-pinky">
       <span class="kbd-mod">Ctrl</span>
     </span>
-    <span class="kbd-cap" style="--w:1.25" data-finger="l-pinky">
+    <span class="kbd-cap kbd-extra" style="--wd:1.25" data-finger="l-pinky">
       <span class="kbd-mod">Alt</span>
     </span>
-    <span class="kbd-cap" style="--w:6.5" data-cap=" " data-finger="thumb">
+    <span class="kbd-cap" style="--wd:6.5" data-cap=" " data-finger="thumb">
       <span class="kbd-mod">Space</span>
     </span>
-    <span class="kbd-cap" style="--w:1.25" data-finger="r-pinky">
+    <span class="kbd-cap kbd-extra" style="--wd:1.25" data-finger="r-pinky">
       <span class="kbd-mod">Alt</span>
     </span>
-    <span class="kbd-cap" style="--w:3.25" data-finger="r-pinky" data-mod="shift">
+    <span class="kbd-cap" style="--wd:3.25;--wp:3.75" data-finger="r-pinky" data-mod="shift">
       <span class="kbd-mod">Shift</span>
     </span>
   </div>

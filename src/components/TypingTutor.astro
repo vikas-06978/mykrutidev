@@ -305,13 +305,21 @@ const strings = raw(lang, 'tutor');
   <div class="tt-prompt">
     <span class="tt-prompt-label">{t('tutor.press')}</span>
     <span data-role="prompt-keys" class="tt-prompt-keys" translate="no"></span>
+    <span class="tt-prompt-arrow" aria-hidden="true">→</span>
     <span data-role="prompt-deva" class="tt-prompt-deva" lang="hi" translate="no"></span>
     <span id="tt-prompt-text" data-role="prompt-finger" class="tt-prompt-finger"></span>
   </div>
 
   {/* ---------------------------- Keyboard ------------------------------- */}
-  <p class="tt-kbd-font" data-font-line set:html={render(t('print.fontLine'))} />
+  <div class="tt-kbd-bar">
+    <p class="tt-kbd-font" data-font-line set:html={render(t('print.fontLine'))} />
+    {/* Phones and small tablets only: there the caps show one Hindi letter each (tutor.css). */}
+    <button type="button" data-role="shift-view" class="tt-shift-view" aria-pressed="false">
+      {t('tutor.shiftView')}
+    </button>
+  </div>
   <RemingtonKeyboard font={LEGACY} />
+  <p class="tt-phone-note">{t('tutor.phoneNote')}</p>
 
   {/* ---------------------------- Hands ---------------------------------- */}
   <div class="border-t border-hairline bg-inset">
@@ -577,6 +585,14 @@ const strings = raw(lang, 'tutor');
     const promptFinger = q<HTMLElement>('prompt-finger');
 
     const board = root.querySelector<HTMLElement>('[data-keyboard]')!;
+    const shiftView = q<HTMLButtonElement>('shift-view');
+    // Keep the typing box focused, so a phone's keyboard stays up.
+    shiftView.addEventListener('pointerdown', (e) => e.preventDefault());
+    shiftView.addEventListener('click', () => {
+      const on = shiftView.getAttribute('aria-pressed') !== 'true';
+      shiftView.setAttribute('aria-pressed', String(on));
+      board.dataset.shifted = String(on);
+    });
     const caps = new Map<string, HTMLElement>();
     const shiftCaps: HTMLElement[] = [];
     for (const cap of board.querySelectorAll<HTMLElement>('.kbd-cap')) {
@@ -920,6 +936,7 @@ const strings = raw(lang, 'tutor');
 
       // Clear whatever was lit, before working out what is lit now.
       litCap?.removeAttribute('data-next');
+      litCap?.removeAttribute('data-show');
       for (const s of litShift) s.removeAttribute('data-next');
       for (const f of litFingers) f.removeAttribute('data-active');
       litCap = null;
@@ -971,6 +988,9 @@ const strings = raw(lang, 'tutor');
         const cap = caps.get(at.cap);
         if (cap) {
           cap.dataset.next = 'true';
+          // On a phone a cap shows one Hindi letter; the lit one shows the
+          // letter it will type, whichever way the board is turned.
+          cap.dataset.show = at.shift ? 'shift' : 'base';
           litCap = cap;
           keepCapInView(cap);
         }
