@@ -44,6 +44,10 @@ const UPI_ID_RE = /^[a-z0-9][a-z0-9._-]{1,254}@[a-z][a-z0-9]{1,63}$/i;
  * Cloudflare setting can never go live: the deploy fails and the site that
  * was already live stays as it was.
  *
+ * UPI IDs do not depend on case, and UPI apps show them in small letters, so
+ * the site does too: `MyKrutidev@upi` is shown, copied and paid as
+ * `mykrutidev@upi`.
+ *
  * @param {string | undefined} raw  import.meta.env.PUBLIC_UPI_ID
  * @returns {string | null}
  */
@@ -53,7 +57,7 @@ export function readUpiId(raw) {
   if (!UPI_ID_RE.test(value)) {
     throw new Error(`PUBLIC_UPI_ID is set to "${value}", which is not a UPI ID (name@bank, e.g. 12345678@upi).`);
   }
-  return value;
+  return value.toLowerCase();
 }
 
 /**
