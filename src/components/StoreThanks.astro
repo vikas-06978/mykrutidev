@@ -1,0 +1,115 @@
+---
+/**
+ * /store/thanks: where Razorpay sends the buyer back to, and where the link in
+ * the email lands. It asks the server what happened (the address is never
+ * trusted) and shows the download.
+ *
+ * The download is a plain form POST to /api/store/download, so a mail
+ * scanner opening the link cannot use up a download.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+const { t, path: to } = useT(lang);
+const keys = [
+  'thanksChecking', 'thanksWaiting', 'thanksPaid', 'thanksLeft', 'thanksEmail', 'thanksExpired', 'thanksRefunded',
+  'thanksClosed', 'thanksNone', 'thanksUnverified',
+];
+const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
+---
+
+<section class="mt-8 card p-5 sm:p-6" aria-live="polite" data-store-thanks data-i18n={JSON.stringify(strings)}>
+  <p class="text-lg font-medium text-ink" data-st-status role="status">{t('store.thanksChecking')}</p>
+  <p class="mt-2 text-sm text-body" data-st-extra hidden></p>
+  <form method="post" action="/api/store/download" class="mt-4" data-st-download hidden>
+    <input type="hidden" name="o" value="" />
+    <input type="hidden" name="t" value="" />
+    <button type="submit" class="btn btn-primary">{t('store.thanksDownload')}</button>
+  </form>
+  <p class="mt-4 flex flex-wrap gap-3">
+    <button type="button" class="btn btn-outline" data-st-retry hidden>{t('store.thanksRetry')}</button>
+    <a href={to('/store')} class="btn btn-ghost" data-st-store hidden>{t('store.thanksStore')}</a>
+  </p>
+</section>
+
+<script>
+  import { daysLeft, readOrderFrom, thanksKey } from '../lib/storeClient.js';
+
+  const root = document.querySelector<HTMLElement>('[data-store-thanks]');
+  if (root) {
+    const L = JSON.parse(root.dataset.i18n ?? '{}');
+    const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
+    const status = $<HTMLElement>('[data-st-status]');
+    const extra = $<HTMLElement>('[data-st-extra]');
+    const download = $<HTMLFormElement>('[data-st-download]');
+    const retry = $<HTMLButtonElement>('[data-st-retry]');
+    const store = $<HTMLAnchorElement>('[data-st-store]');
+
+    const say = (text: string, more = '') => {
+      status.textContent = text;
+      extra.textContent = more;
+      extra.hidden = !more;
+    };
+    const showPaid = (d: { token: string; remaining: number; expires: number | null }, order: string) => {
+      say(L.thanksPaid, `${L.thanksLeft.replace('{n}', String(d.remaining)).replace('{days}', String(daysLeft(d.expires)))} ${L.thanksEmail}`);
+      const [o, t] = download.querySelectorAll<HTMLInputElement>('input');
+      o.value = order;
+      t.value = d.token;
+      download.hidden = d.remaining < 1;
+      retry.hidden = true;
+      // Keep a link that works after a reload; drop Razorpay's query from the address bar.
+      history.replaceState(null, '', `${location.pathname}#o=${order}&t=${d.token}`);
+    };
+    const showOther = (state: string) => {
+      const key = thanksKey(state);
+      say(L[key]);
+      download.hidden = true;
+      retry.hidden = !(key === 'thanksWaiting' || key === 'thanksUnverified');
+      store.hidden = false;
+    };
+
+    const from = readOrderFrom(location);
+    let order = from?.order ?? '';
+    if (!from) {
+      try {
+        order = sessionStorage.getItem('mkd-order') ?? '';
+      } catch {
+        order = '';
+      }
+    }
+
+    async function check(tries = 1) {
+      if (!from && !order) {
+        say(L.thanksNone);
+        store.hidden = false;
+        return;
+      }
+      say(L.thanksChecking);
+      retry.hidden = true;
+      let json: any = null;
+      try {
+        const r =
+          from?.kind === 'link'
+            ? await fetch(`/api/store/order?o=${from.order}&t=${encodeURIComponent(from.token)}`, { headers: { Accept: 'application/json' } })
+            : await fetch('/api/store/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ order }),
+              });
+        json = await r.json().catch(() => null);
+      } catch {
+        json = null;
+      }
+      if (json?.ok && (json.state === 'paid')) return showPaid(json, from?.kind === 'link' ? from.order : order);
+      const state = json?.ok ? String(json.state) : 'unverified';
+      // Just back from paying: Razorpay can take a few seconds to say "paid".
+      if (from?.kind === 'return' && (state === 'pending' || state === 'created') && tries < 4) {
+        say(L.thanksChecking);
+        return void setTimeout(() => check(tries + 1), 4000);
+      }
+      showOther(state);
+    }
+    retry.addEventListener('click', () => void check());
+    void check();
+  }
+</script>

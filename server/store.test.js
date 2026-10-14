@@ -568,11 +568,11 @@ describe('GET /api/store/order', () => {
 describe('emails', () => {
   test('the buyer\'s email has the link, the limits and the refund promise, in English and Hindi', () => {
     const order = { id: 'oabc', amount: 19900, email: 'b@example.com', max_downloads: 5 };
-    const m = buyerMail({ NOTIFY_TO: 'owner@example.com, second@example.com' }, { order, product: PRODUCT, link: 'https://mykrutidev.com/store/thanks?o=oabc&t=tok' });
+    const m = buyerMail({ NOTIFY_TO: 'owner@example.com, second@example.com' }, { order, product: PRODUCT, link: 'https://mykrutidev.com/store/thanks#o=oabc&t=tok' });
     assert.equal(m.to, 'b@example.com');
     assert.equal(m.replyTo, 'owner@example.com');
     assert.match(m.subject, /^Your download: /);
-    assert.match(m.text, /https:\/\/mykrutidev\.com\/store\/thanks\?o=oabc&t=tok/);
+    assert.match(m.text, /https:\/\/mykrutidev\.com\/store\/thanks#o=oabc&t=tok/);
     assert.match(m.text, new RegExp(`${STORE.downloadDays} days`));
     assert.match(m.text, new RegExp(`within ${STORE.refundDays} days`));
     assert.match(m.text, /Rs 199/);

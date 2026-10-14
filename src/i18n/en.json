@@ -3336,7 +3336,9 @@
         "<h2>Reporting a wrong conversion</h2>",
         "<p>Please include the text you pasted (a sentence or two is enough), what the converter gave you, and what it should have been. If the text came from a document, tell us the font name Word shows for it. <strong>Do not send personal or confidential documents</strong> - a short sample that shows the problem is all we need, and it helps us fix it for everyone.</p>",
         "<h2>What we cannot help with</h2>",
-        "<p>We cannot send font files, answer questions about a particular exam's results, or convert documents for you by email: the tools on the site do the conversion privately in your own browser. For exam dates and rules, the official notification is the only reliable source.</p>"
+        "<p>We cannot send font files, answer questions about a particular exam's results, or convert documents for you by email: the tools on the site do the conversion privately in your own browser. For exam dates and rules, the official notification is the only reliable source.</p>",
+        "<h2>Orders and refunds</h2>",
+        "<p>For a problem with a purchase, write to <a href=\"mailto:{email}\">{email}</a> from the email address you bought with, and give the order number from your email if you have it. Refund requests are answered within a few working days. See the <a href=\"/refund-policy\">refund policy</a>.</p>"
       ]
     },
     "/privacy-policy": {
@@ -3347,7 +3349,7 @@
       "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
       "body": [
         "<h2>Your text and your files</h2>",
-        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only things our server accepts are the short feedback form and the tool request form on the <a href=\"/links\">ToolMitra links page</a>, and only when you press Send. You can load a page, disconnect from the internet and keep converting.</p>",
+        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only things our server accepts are the short feedback form, the tool request form on the <a href=\"/links\">ToolMitra links page</a> and, if you buy a PDF, the store order form, and only when you press Send or Pay. You can load a page, disconnect from the internet and keep converting.</p>",
         "<h2>The one exception: English to Hindi typing</h2>",
         "<p>On <a href=\"/english-to-hindi-typing\">English to Hindi typing</a>, the Hinglish mode sends each word you type to Google's public input-tools service to get its best Hindi spelling. Only the words being transliterated are sent, not the rest of the page, and web and email addresses are never sent. If you do not want that, switch Typing to <strong>Exact (ITRANS)</strong>, which works entirely offline. Google's handling of those requests is covered by Google's own privacy policy.</p>",
         "<h2>What is stored on your device</h2>",
@@ -3365,12 +3367,16 @@
         "<p>The <a href=\"/links\">ToolMitra links page</a> has a short form for suggesting the next tool. If you press Send, we store what you wrote in it, an email address only if you chose to give one, the site language, whether you were on a phone or a computer, and the date. Nothing else. Requests are kept in the same database as feedback, under the same rules: no IP address, read only by the site's owner, and an email used only to tell you when the tool is ready. A copy of each request is also emailed to the site's owner through Resend, in the same way. To have a request deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
         "<h2>Spam protection</h2>",
         "<p>To keep robots out, the feedback form and the tool request form use Cloudflare Turnstile, an invisible check that runs only after you open or start filling in a form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour on each form, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
+        "<h2>Buying a PDF</h2>",
+        "<p>If you buy a PDF, we ask for your email address and nothing else. We keep it with your order (what you bought, the amount and the Razorpay payment reference) so we can send the download link, let you download again and handle a refund. We do not use it for marketing and we never sell or share it.</p>",
+        "<p>You pay on Razorpay's own page. Razorpay handles your UPI, card or bank details under its own privacy policy, and we never see or store them. The order form uses the same invisible Cloudflare Turnstile check described above, and the download link is sent by email through Resend, an email delivery service.</p>",
+        "<p>Orders that are never paid are deleted after {unpaidDays} days. Paid orders are kept for as long as refunds and our accounts require, which can be several years. To ask about your order, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
         "<h2>Server logs</h2>",
         "<p>The site is a set of static files served by a hosting provider. Like any web server, it may keep standard access logs - IP address, the page requested, browser type and time - for security and to keep the service running. These logs never contain the text or files you convert, because those never reach the server.</p>",
         "<h2>Children</h2>",
-        "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form.</p>",
+        "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form, and the email box when you buy a PDF. Buying is meant for adults, so children should ask a parent.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 9 October 2026.</p>"
+        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 14 October 2026.</p>"
       ]
     },
     "/terms": {
@@ -3390,8 +3396,83 @@
         "<p>Kruti Dev, DevLys, Chanakya, Mangal, Nirmala UI and other font names belong to their owners. MyKrutiDev is not affiliated with them and does not distribute their font files. Names are used only to describe what the tools convert.</p>",
         "<h2>Who owns what</h2>",
         "<p>The text, guides, charts, printable sheets, diagrams, design and code of MyKrutiDev are our own work and are protected by copyright. You may not copy them wholesale, republish them, or present them as your own. Quoting a short passage with a link back to the page is fine, and linking to any page is welcome. What you type or convert on this site is yours, and we claim no rights over it. Please do not try to disrupt the site.</p>",
+        "<h2>Buying PDFs and ebooks</h2>",
+        "<p>The PDFs and ebooks in the <a href=\"/store\">store</a> are paid. A purchase gives you a personal licence to read and print the file for your own use. You may not resell, share or upload it. Payments are made through Razorpay and prices are in Indian rupees. Refunds and delivery are explained in the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>. The free printable charts stay free to print and share for teaching, as written above.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 26 September 2026.</p>"
+        "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 14 October 2026.</p>"
+      ]
+    },
+    "/store": {
+      "nav": "Store",
+      "h1": "Store",
+      "title": "PDF Store - Practice Packs and Ebooks",
+      "description": "Practice PDFs and ebooks for Hindi typing and exams, checked by hand. Pay securely with UPI or card and download at once.",
+      "lede": "Careful, practical PDFs for Hindi typing and exam preparation. Every one is checked before it is listed, and you can get your money back within {refundDays} days.",
+      "body": [
+        "<h2>How buying works</h2>",
+        "<p>Pick a PDF, enter your email and pay on Razorpay's secure page. The download button appears as soon as the payment is confirmed, and the link is also emailed to you.</p>",
+        "<h2>Our promise</h2>",
+        "<p>Every PDF is checked against official sources before it is listed. If one is not useful to you, ask for a refund within {refundDays} days. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
+      ]
+    },
+    "/store/sample-test": {
+      "nav": "Sample file",
+      "h1": "Sample file (test purchase)",
+      "title": "Sample File - Test Purchase",
+      "description": "A one-page test file used to check that payment and download work. It is not on sale to the public.",
+      "lede": "This page exists only to test the shop before real PDFs are listed.",
+      "body": [
+        "<h2>What you get</h2>",
+        "<p>A one-page sample PDF. Nothing else.</p>"
+      ]
+    },
+    "/store/thanks": {
+      "nav": "Your order",
+      "h1": "Your order",
+      "title": "Your Order and Download",
+      "description": "Confirm your payment and download your PDF. This page is private and is not listed in search.",
+      "lede": "We check your payment with Razorpay, then your download appears here.",
+      "body": [
+        "<h2>Need help?</h2>",
+        "<p>Write to <a href=\"mailto:{email}\">{email}</a> and mention the email address you used. We usually reply within a few working days.</p>"
+      ]
+    },
+    "/refund-policy": {
+      "nav": "Refund policy",
+      "h1": "Refund Policy",
+      "title": "Refund Policy for PDFs and Ebooks",
+      "description": "Not satisfied with a PDF or ebook? Ask for a full refund within the refund period. How to ask and how long the money takes to return.",
+      "lede": "If a PDF is not useful to you, you can have your money back. No long forms and no questions asked.",
+      "body": [
+        "<h2>Full refund within {refundDays} days</h2>",
+        "<p>Within {refundDays} days of paying, you can ask for a full refund for any reason. We do not ask you to prove anything or to return the file.</p>",
+        "<h2>How to ask</h2>",
+        "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with and give your order number if you have it. We reply within a few working days.</p>",
+        "<h2>How the money comes back</h2>",
+        "<p>The refund goes through Razorpay to the same UPI app, card or bank account you paid from. It usually reaches you in 5 to 7 working days, depending on your bank. When the refund is made, the download link stops working.</p>",
+        "<h2>Payments that go wrong</h2>",
+        "<p>If money left your account but you did not get the download, write to us at once. We will either deliver the PDF or refund you in full.</p>",
+        "<h2>Free tools are not affected</h2>",
+        "<p>The converters, the typing tutor and the printable charts stay free. This policy covers only PDFs and ebooks bought in the <a href=\"/store\">store</a>.</p>"
+      ]
+    },
+    "/delivery-policy": {
+      "nav": "Delivery policy",
+      "h1": "Delivery Policy",
+      "title": "Delivery Policy - How You Get Your PDF",
+      "description": "How a PDF or ebook reaches you: instant download after payment, an emailed link, how long it works and what to do if it does not arrive.",
+      "lede": "Everything we sell is a digital file. Nothing is posted, so there is no shipping.",
+      "body": [
+        "<h2>Instant delivery</h2>",
+        "<p>When your payment is confirmed, the download button appears on screen and the same link is emailed to you. This normally takes under a minute.</p>",
+        "<h2>How long the link works</h2>",
+        "<p>The link works for {downloadDays} days and for up to {maxDownloads} downloads, so you can save the file on your phone and your computer. After that, write to us and we will extend it.</p>",
+        "<h2>If the email does not come</h2>",
+        "<p>Check your spam or promotions folder. The download button is also on the page you land on after paying. If neither works, write to <a href=\"mailto:{email}\">{email}</a> with the email address you used and we will send it again.</p>",
+        "<h2>Keep it private</h2>",
+        "<p>The link is meant for you alone. Please do not share it or post it online.</p>",
+        "<h2>Format</h2>",
+        "<p>Files are PDFs that open on any phone, tablet or computer. No app or account is needed.</p>"
       ]
     },
     "/arjun-to-unicode": {
@@ -5785,5 +5866,42 @@
       "numericHindiDigits": "Numeric, Hindi digits",
       "words": "In words"
     }
+  },
+  "store": {
+    "price": "Price",
+    "meta": "PDF · {pages} pages · instant download",
+    "buyHeading": "Buy this PDF",
+    "emailLabel": "Your email address",
+    "emailHelp": "The download link is sent here. We use it for nothing else.",
+    "acceptLabel": "I agree to the <a href=\"/terms\">terms</a> and the <a href=\"/refund-policy\">refund policy</a>.",
+    "buy": "Pay {price} securely",
+    "working": "Please wait…",
+    "payNote": "You pay on Razorpay's secure page with UPI, card or net banking. We never see your payment details.",
+    "deliveryNote": "You get the PDF right after payment, on screen and by email. <a href=\"/delivery-policy\">How delivery works</a>.",
+    "refundNote": "<a href=\"/refund-policy\">Full refund within {refundDays} days</a>, for any reason.",
+    "errEmail": "Please enter a valid email address.",
+    "errAccept": "Please tick the box to agree to the terms.",
+    "errRate": "Too many tries from here just now. Please try again in an hour.",
+    "errChallenge": "The robot check did not finish. Please wait a moment and try again.",
+    "errClosed": "This PDF is not on sale right now.",
+    "errProvider": "The payment page could not be opened. You have not been charged. Please try again in a moment.",
+    "errGeneric": "That did not go through. Please try again.",
+    "emptyTitle": "The store opens soon",
+    "empty": "No PDFs are on sale yet. The first ones are being checked carefully before they are listed.",
+    "view": "View details",
+    "thanksChecking": "Checking your payment…",
+    "thanksWaiting": "Your payment is not confirmed yet. If you have paid, wait a minute and check again. You will not be charged twice.",
+    "thanksPaid": "Payment received. Thank you!",
+    "thanksDownload": "Download PDF",
+    "thanksLeft": "{n} downloads left. The link works for {days} more days.",
+    "thanksEmail": "We have also emailed you the link. Check your spam folder if you cannot find it.",
+    "thanksExpired": "This download has expired or reached its limit. Write to us and we will help.",
+    "thanksRefunded": "This order was refunded, so the download is closed.",
+    "thanksClosed": "This payment was not completed. You have not been charged.",
+    "thanksNone": "This page needs the link from your purchase. Open the link from your email, or go back to the store.",
+    "thanksUnverified": "We could not confirm the payment just now. Please try again in a minute.",
+    "thanksRetry": "Check again",
+    "thanksStore": "Back to the store",
+    "businessHeading": "Who sells"
   }
 }

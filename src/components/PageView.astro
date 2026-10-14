@@ -20,6 +20,11 @@ import HindiTool from './HindiTool.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
+import StoreList from './StoreList.astro';
+import StoreBuy from './StoreBuy.astro';
+import StoreThanks from './StoreThanks.astro';
+import { STORE } from '../lib/store.js';
+import { BUSINESS, businessLines } from '../lib/business.js';
 import { FONTS } from '../lib/fontMaps.js';
 import { langOf, useT } from '../i18n/index.js';
 
@@ -82,7 +87,19 @@ const blockers = [page.from, page.to]
   .filter((k) => k && !FONTS[k]?.accurate)
   .map((k) => FONTS[k!].label);
 
-const body: string[] = (maybe(`pages.${path}.body`) ?? []).map((s: string) => s.replaceAll('{email}', CONTACT_EMAIL));
+// The few numbers the store's pages quote come from src/lib/store.js, so the
+// policy text can never disagree with what the server does.
+const STORE_VARS: Record<string, string> = {
+  '{email}': CONTACT_EMAIL,
+  '{refundDays}': String(STORE.refundDays),
+  '{downloadDays}': String(STORE.downloadDays),
+  '{maxDownloads}': String(STORE.maxDownloads),
+  '{unpaidDays}': String(STORE.unpaidDays),
+};
+const fillVars = (s: string) => Object.entries(STORE_VARS).reduce((acc, [k, v]) => acc.replaceAll(k, v), s);
+const body: string[] = (maybe(`pages.${path}.body`) ?? []).map(fillVars);
+// Who sells: printed on /contact once src/lib/business.js is filled in.
+const seller = path === '/contact' ? businessLines(BUSINESS) : [];
 const problems: { problem: string; fix: string }[] = maybe(`pages.${path}.problems`) ?? [];
 // Converters and the everyday tools sit under "All tools" in the breadcrumb trail.
 const trail =
@@ -125,8 +142,12 @@ const betaNote = maybe(`pages.${path}.betaNote`);
       }
     </div>
     {betaNote && <p class="mt-2 text-sm font-medium text-ink" set:html={render(betaNote)} />}
-    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(text('lede'))} />
+    <p class="mt-3 max-w-2xl text-base text-body" set:html={render(fillVars(text('lede')))} />
     {live && page.kind === 'converter' && <FontStrip page={page} />}
+
+    {path === '/store' && <StoreList />}
+    {page.product && <StoreBuy product={page.product} />}
+    {path === '/store/thanks' && <StoreThanks />}
 
     {
       Tool && (
@@ -228,6 +249,22 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {faq.length > 0 && <Faq items={faq} schema={live} />}
 
     <div class="prose-page mt-12 text-body" set:html={body.map(render).join('\n')} />
+
+    {
+      seller.length > 0 && (
+        <section class="mt-8" aria-labelledby="seller">
+          <h2 id="seller" class="text-xl">{t('store.businessHeading')}</h2>
+          <p class="mt-2 text-body" translate="no">
+            {seller.map((line, i) => (
+              <>
+                {i > 0 && <br />}
+                {line}
+              </>
+            ))}
+          </p>
+        </section>
+      )
+    }
 
     {
       related.length > 0 && (

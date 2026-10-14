@@ -53,9 +53,13 @@ const owners = (env) =>
     .map((a) => a.trim())
     .filter(Boolean);
 
-/** The link in the buyer's email: the thanks page, which offers the download. */
+/**
+ * The link in the buyer's email: the thanks page, which offers the download.
+ * The order and key are after the # so they never reach a server log, and
+ * analytics.js keeps the page's address from Google as well.
+ */
 export const downloadPage = (origin, orderId, token) =>
-  `${origin}/store/thanks?o=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`;
+  `${origin}/store/thanks#o=${encodeURIComponent(orderId)}&t=${encodeURIComponent(token)}`;
 
 /** The email to the buyer, English and Hindi. */
 export function buyerMail(env, { order, product, link, origin = SITE_URL }) {

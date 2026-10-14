@@ -1,0 +1,14 @@
+---
+// English. One page per product in src/lib/store.js; the words live in
+// src/i18n/en.json under pages["/store/<id>"].
+import PageView from '../../components/PageView.astro';
+import { PRODUCTS } from '../../lib/store.js';
+
+export function getStaticPaths() {
+  return PRODUCTS.map((p) => ({ params: { product: p.id }, props: { path: `/store/${p.id}` } }));
+}
+
+const { path } = Astro.props;
+---
+
+<PageView path={path} />

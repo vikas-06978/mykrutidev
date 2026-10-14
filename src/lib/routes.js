@@ -40,6 +40,7 @@ import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
 import { PREFIXED_LOCALES } from '../i18n/locales.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
+import { PRODUCTS, liveProducts } from './store.js';
 import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
@@ -64,6 +65,7 @@ export const SITE = 'https://mykrutidev.com';
  * (Upload Word file is offered on every page docPairFor() accepts.)
  * @property {boolean} [app]  a content page that embeds a tool (PageView's TOOLS)
  *   without being a menubar `tool` itself: it still gets WebApplication data
+ * @property {string} [product]  a store product's page: the catalog id (store.js)
  */
 
 /** @type {Page[]} */
@@ -1229,6 +1231,61 @@ export const PAGES = [
     trust: true,
     group: 'More',
     related: ['/about', '/privacy-policy', '/contact'],
+  },
+  {
+    path: '/refund-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/delivery-policy', '/terms', '/contact'],
+  },
+  {
+    path: '/delivery-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/refund-policy', '/terms', '/contact'],
+  },
+  // ==========================================================================
+  // THE STORE (src/lib/store.js). Not "live" until a product is: with nothing
+  // on sale the pages stay out of the sitemap and carry noindex. A product's
+  // page goes live when its status in the catalog is 'live'. The thanks page,
+  // where Razorpay sends the buyer back, is never indexed.
+  // ==========================================================================
+  {
+    path: '/store',
+    ready: liveProducts().length > 0,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/refund-policy', '/delivery-policy', '/terms'],
+  },
+  ...PRODUCTS.map((product) => ({
+    path: `/store/${product.id}`,
+    ready: product.status === 'live',
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    product: product.id,
+    related: ['/store', '/refund-policy', '/delivery-policy'],
+  })),
+  {
+    path: '/store/thanks',
+    ready: false,
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    related: ['/store', '/refund-policy', '/contact'],
   },
 ];
 
