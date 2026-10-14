@@ -18,6 +18,7 @@ import AllConverters from './AllConverters.astro';
 import FontStrip from './FontStrip.astro';
 import HindiTool from './HindiTool.astro';
 import ExcelConverter from './ExcelConverter.astro';
+import AdSlot from './AdSlot.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
@@ -27,6 +28,7 @@ import StorePreview from './StorePreview.astro';
 import StoreThanks from './StoreThanks.astro';
 import { STORE } from '../lib/store.js';
 import { BUSINESS, businessLines } from '../lib/business.js';
+import { ADS } from '../lib/ads.js';
 import { FONTS } from '../lib/fontMaps.js';
 import { langOf, useT } from '../i18n/index.js';
 
@@ -102,8 +104,20 @@ const STORE_VARS: Record<string, string> = {
   // Who runs the site, from src/lib/business.js (privacy policy).
   '{seller}': [BUSINESS.name, BUSINESS.address].map((v) => v.trim()).filter(Boolean).join(', ') || 'MyKrutiDev',
 };
+// The privacy policy speaks of advertising only once an AdSense publisher ID
+// is set (src/lib/ads.js): its cookie line, and a section after Google Analytics.
+if (path === '/privacy-policy') {
+  STORE_VARS['{cookiesLine}'] = text(ADS ? 'cookiesWithAds' : 'cookiesGaOnly');
+}
 const fillVars = (s: string) => Object.entries(STORE_VARS).reduce((acc, [k, v]) => acc.replaceAll(k, v), s);
-const body: string[] = (maybe(`pages.${path}.body`) ?? []).map(fillVars);
+const rawBody: string[] = maybe(`pages.${path}.body`) ?? [];
+const adsBody: string[] = ADS ? (maybe(`pages.${path}.adsBody`) ?? []) : [];
+if (adsBody.length) {
+  // Right after the Google Analytics section, which ends with its opt-out link.
+  const at = rawBody.findIndex((b) => b.includes('tools.google.com/dlpage/gaoptout')) + 1;
+  rawBody.splice(at > 0 ? at : rawBody.length, 0, ...adsBody);
+}
+const body: string[] = rawBody.map(fillVars);
 // Who sells: printed on /contact once src/lib/business.js is filled in.
 const seller = path === '/contact' ? businessLines(BUSINESS) : [];
 const problems: { problem: string; fix: string }[] = maybe(`pages.${path}.problems`) ?? [];
@@ -197,6 +211,9 @@ const betaNote = maybe(`pages.${path}.betaNote`);
 
     {/* Help sits UNDER the tool, never over it: the tool is the first thing on the page. */}
     {live && howTo && <HowTo steps={howTo.steps} tip={howTo.tip} />}
+
+    {/* An ad, only once AdSense is switched on: under the tool and its steps, never above them. */}
+    {live && <AdSlot />}
 
     {live && problems.length > 0 && <Problems items={problems} />}
 

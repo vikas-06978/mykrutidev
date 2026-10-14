@@ -23,6 +23,7 @@ import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
+import { readAds, adsTxt, adsAllowedOn } from '../src/lib/ads.js';
 import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
 import { LOCALES, PREFIXED_LOCALES, LOCALE_META } from '../src/i18n/locales.js';
 import { DICTS } from '../src/i18n/index.js';
@@ -1002,5 +1003,38 @@ describe('the ToolMitra links page (/links)', () => {
       if (url) assert.ok(html.includes(`href="${url}"`) && html.includes('data-links-instagram'));
       else assert.doesNotMatch(html, /data-links-instagram|instagram\.com/);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Google AdSense (src/lib/ads.js): exactly what the build's variables ask for
+// ---------------------------------------------------------------------------
+
+describe('AdSense follows its build variables', () => {
+  const ads = readAds(process.env);
+  const headers = () => readFileSync(join(DIST, '_headers'), 'utf8');
+
+  test('without a publisher ID: no AdSense code, no ads.txt, no ad address in the CSP', { skip: Boolean(ads) }, () => {
+    for (const [u, html] of pages) {
+      assert.doesNotMatch(html, /adsbygoogle|google-adsense-account|googlesyndication/, u);
+    }
+    assert.ok(!existsSync(join(DIST, 'ads.txt')), 'dist/ads.txt');
+    assert.doesNotMatch(headers(), /googlesyndication|doubleclick/);
+    // And the privacy policy says nothing about ads it does not show.
+    assert.doesNotMatch(pages.get('/privacy-policy'), /AdSense/);
+  });
+
+  test('with a publisher ID: the site check on every page, ads.txt, and the policy section', { skip: !ads }, () => {
+    for (const [u, html] of pages) assert.match(html, new RegExp(`<meta name="google-adsense-account" content="${ads.client}"`), u);
+    assert.equal(readFileSync(join(DIST, 'ads.txt'), 'utf8'), adsTxt(ads));
+    for (const l of LOCALES) assert.match(pages.get(inLocale('/privacy-policy', l)), /Google AdSense/, l);
+  });
+
+  test('ads, when on, never load on the store, the policies or contact', { skip: !ads?.show }, () => {
+    for (const [u, html] of pages) {
+      const route = u.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+      assert.equal(/adsbygoogle\.js/.test(html), adsAllowedOn(route), u);
+    }
+    assert.match(headers(), /pagead2\.googlesyndication\.com/);
   });
 });

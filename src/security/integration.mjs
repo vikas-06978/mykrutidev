@@ -18,6 +18,9 @@
  * Pages Functions (functions/: /api/feedback, /admin/feedback) set their own
  * headers; _headers applies only to static files.
  *
+ * Google AdSense (src/lib/ads.js) adds its addresses only when ads are
+ * switched on, and /ads.txt is written only once its publisher ID is set.
+ *
  * If Cloudflare Web Analytics is ever switched on, its beacon needs
  * https://static.cloudflareinsights.com in script-src and
  * https://cloudflareinsights.com in connect-src - and the privacy policy
@@ -27,6 +30,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnv } from 'vite';
+import { readAds, adsTxt, ADS_CSP } from '../lib/ads.js';
 
 /** Cloudflare's limits for _headers: rules per file, characters per header line. */
 export const MAX_RULES = 100;
@@ -67,16 +72,21 @@ export function inlineScriptHashes(htmls) {
   return [...hashes].sort();
 }
 
-/** @param {string[]} scriptHashes */
-export function contentSecurityPolicy(scriptHashes) {
+/**
+ * @param {string[]} scriptHashes
+ * @param {import('../lib/ads.js').Ads | null} [ads]  Google's ad addresses are
+ *   allowed only once ads are switched on (PUBLIC_ADSENSE_ADS, src/lib/ads.js).
+ */
+export function contentSecurityPolicy(scriptHashes, ads = null) {
+  const on = Boolean(ads?.show);
   return [
     "default-src 'self'",
-    `script-src 'self' ${[...scriptHashes, TURNSTILE, GA_SCRIPT].join(' ')}`,
+    `script-src 'self' ${[...scriptHashes, TURNSTILE, GA_SCRIPT, ...(on ? ADS_CSP.script : [])].join(' ')}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' ${GA_PIXELS.join(' ')}`,
+    `img-src 'self' ${[...GA_PIXELS, ...(on ? ADS_CSP.img : [])].join(' ')}`,
     "font-src 'self'",
-    `connect-src 'self' ${[INPUT_TOOLS, ...GA_HITS].join(' ')}`,
-    `frame-src ${TURNSTILE}`,
+    `connect-src 'self' ${[INPUT_TOOLS, ...GA_HITS, ...(on ? ADS_CSP.connect : [])].join(' ')}`,
+    `frame-src ${[TURNSTILE, ...(on ? ADS_CSP.frame : [])].join(' ')}`,
     "worker-src 'self'",
     "manifest-src 'self'",
     "object-src 'none'",
@@ -94,13 +104,14 @@ export function contentSecurityPolicy(scriptHashes) {
  * and joins repeated header names with commas, so each header is set by
  * exactly one rule for any path.
  * @param {string[]} scriptHashes
+ * @param {import('../lib/ads.js').Ads | null} [ads]
  */
-export function headersFile(scriptHashes) {
+export function headersFile(scriptHashes, ads = null) {
   const rules = [
     [
       '/*',
       {
-        'Content-Security-Policy': contentSecurityPolicy(scriptHashes),
+        'Content-Security-Policy': contentSecurityPolicy(scriptHashes, ads),
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
@@ -108,7 +119,9 @@ export function headersFile(scriptHashes) {
         // Features the site never uses. (Only names Chrome knows: an unknown
         // one is logged as an error on every page.)
         'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
-        'Cross-Origin-Opener-Policy': 'same-origin',
+        // An ad opens the advertiser's site in a new tab: with ads on, that tab
+        // may keep its link to this one (AdSense needs it to count the click).
+        'Cross-Origin-Opener-Policy': ads?.show ? 'same-origin-allow-popups' : 'same-origin',
       },
     ],
     // Built scripts, styles and fonts: the file name carries a hash of the
@@ -151,11 +164,19 @@ export default function securityHeaders() {
           .filter((p) => p.endsWith('.html'))
           .map((p) => readFileSync(p, 'utf8'));
         const hashes = inlineScriptHashes(htmls);
-        const file = headersFile(hashes);
+        // The same variables the pages were built with: .env files, then the
+        // build's own environment (Cloudflare's), as Astro reads them.
+        const ads = readAds({ ...loadEnv('production', process.cwd(), 'PUBLIC_'), ...process.env });
+        const file = headersFile(hashes, ads);
         const long = file.split('\n').find((l) => l.length > MAX_LINE);
         if (long) throw new Error(`_headers: a header is ${long.length} characters, Cloudflare allows ${MAX_LINE}`);
         writeFileSync(join(root, '_headers'), file);
         logger.info(`_headers written: ${hashes.length} inline script hashes`);
+        // /ads.txt only once an AdSense publisher ID is set (src/lib/ads.js).
+        if (ads) {
+          writeFileSync(join(root, 'ads.txt'), adsTxt(ads));
+          logger.info(`ads.txt written for ${ads.pub}${ads.show ? ', ads on' : ', ads not shown yet'}`);
+        }
       },
     },
   };
