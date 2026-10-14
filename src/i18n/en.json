@@ -162,7 +162,11 @@
     "forWord": "For MS Word / forms",
     "copyUnicode": "Copy as Hindi (Unicode)",
     "copyUnicodeGu": "Copy as Gujarati (Unicode)",
+    "copyUnicodeMr": "Copy as Marathi (Unicode)",
+    "copyUnicodeNe": "Copy as Nepali (Unicode)",
     "unicodeGu": "Unicode / Gujarati",
+    "unicodeMr": "Unicode / Marathi",
+    "unicodeNe": "Unicode / Nepali",
     "copyUnicodeTa": "Copy as Tamil (Unicode)",
     "copyUnicodeBn": "Copy as Bengali (Unicode)",
     "unicodeTa": "Unicode / Tamil",
@@ -192,6 +196,8 @@
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
     "previewGu": "Preview (Gujarati)",
+    "previewMr": "Preview (Marathi)",
+    "previewNe": "Preview (Nepali)",
     "previewTa": "Preview (Tamil)",
     "previewBn": "Preview (Bengali)"
   },
@@ -2191,7 +2197,7 @@
     "/unicode-to-dvtt-surekh": {
       "nav": "Unicode → DV-TT Surekh",
       "h1": "Unicode to DV-TT Surekh Converter (Marathi)",
-      "title": "Unicode to DV-TT Surekh Converter | Marathi Unicode to DV-TT Font",
+      "title": "Unicode to DV-TT Surekh Converter (Marathi) | MyKrutiDev",
       "description": "Convert Unicode Marathi into DV-TT Surekh font code for office letters and old templates. ि, the reph and ो drawn the way the font draws them. Free.",
       "betaNote": "For documents that will be set in DV-TT Surekh or DV-TT Yogesh.",
       "lede": "Type or paste Marathi on the left and get DV-TT Surekh code on the right, ready for Word or your DTP program.",
@@ -2232,7 +2238,7 @@
     "/gujarati-font-converter": {
       "nav": "Terafont → Unicode (Gujarati)",
       "h1": "Gujarati Font Converter: Terafont and LMG Arun to Unicode",
-      "title": "Gujarati Font Converter | Terafont Varun, LMG Arun to Unicode",
+      "title": "Gujarati Font Converter: Terafont, LMG Arun | MyKrutiDev",
       "description": "Convert Terafont Varun and LMG Arun Gujarati to Unicode for portals, WhatsApp and Word. Read off the font files, with digits and conjuncts put right. Free.",
       "betaNote": "For Gujarati typed in Terafont (Varun, Ganesh, Indra and the rest) or in LMG Arun, Laxmi and Rupen.",
       "lede": "Paste Gujarati typed in Terafont or LMG Arun on the left and get Unicode Gujarati on the right, ready for any website, portal, email or phone.",
@@ -2594,7 +2600,7 @@
     "/english-date-to-hindi": {
       "nav": "Date in Hindi",
       "h1": "English Date to Hindi Date Converter",
-      "title": "English Date to Hindi Date Converter",
+      "title": "English Date to Hindi Date Converter (तारीख हिंदी में) | MyKrutiDev",
       "description": "Write any date in Hindi: 02/10/2026 becomes 2 अक्टूबर 2026, शुक्रवार, with Hindi digits or in words for letters and documents. Free.",
       "lede": "Pick a date and see it written every way a Hindi letter or document needs, each with its own copy button.",
       "body": [
@@ -5647,7 +5653,7 @@
     "kruti-dev-typing-rules-matras-reph-half-letters": {
       "crumb": "Kruti Dev typing rules",
       "h1": "Kruti Dev Typing Rules: Matras, Reph, Half Letters and Conjuncts",
-      "title": "Kruti Dev Typing Rules | How to Type ि, Reph, Half Letters & Conjuncts",
+      "title": "Kruti Dev Typing Rules: ि, Reph, Half Letters | MyKrutiDev",
       "description": "The rules behind Kruti Dev typing: why ि comes first, where the reph goes, how half letters, rakar and conjuncts like क्ष, त्र, ज्ञ and श्र are typed.",
       "lede": "Kruti Dev follows the typewriter: you type what is drawn, left to right, not what is spoken. Five rules explain almost every sequence that trips people up.",
       "body": [
