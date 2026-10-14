@@ -958,7 +958,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard', '/store/kruti-dev-typing-30-passages'],
   },
   {
     path: '/remington-hindi-keyboard',

@@ -86,6 +86,20 @@ export const PRODUCTS = [
     // Pictures of the PDF in public/store-img: the cover, one page shown free (its number), and a blurred later page.
     images: { cover: 'kruti-dev-7-day-starter-cover.webp', open: 'kruti-dev-7-day-starter-page-3.webp', openPage: 3, locked: 'kruti-dev-7-day-starter-locked.webp' },
   },
+  {
+    // The next step after the Starter: 30 original passages (98-216 words) with the Kruti Dev keys of each one's
+    // hardest words. Every passage and key was checked with convert() before the PDF was drawn. 'test' until the
+    // prepared file is in the bucket and a preview test purchase worked, as for the Starter.
+    id: 'kruti-dev-typing-30-passages',
+    status: 'test',
+    title: 'Kruti Dev Typing Practice: 30 Hindi Passages (PDF, 36 pages)',
+    pricePaise: 4900,
+    file: 'kruti-dev-typing-30-passages.pdf',
+    fileName: 'kruti-dev-typing-30-passages.pdf',
+    pages: 36,
+    stamp: true,
+    images: { cover: 'kruti-dev-typing-30-passages-cover.webp', open: 'kruti-dev-typing-30-passages-page-5.webp', openPage: 5, locked: 'kruti-dev-typing-30-passages-locked.webp' },
+  },
 ];
 
 export const productById = (id) => PRODUCTS.find((p) => p.id === id);

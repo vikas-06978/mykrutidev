@@ -70,6 +70,18 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 
 Changing a price or a file later: edit `src/lib/store.js`. Already-created orders keep the amount they were created with.
 
+## The products so far
+
+| id | price | file in the bucket | status |
+| --- | --- | --- | --- |
+| `kruti-dev-7-day-starter` | ₹39 | `kruti-dev-7-day-starter.pdf` (32 pages, prepared for stamping) | test |
+| `kruti-dev-typing-30-passages` | ₹49 | `kruti-dev-typing-30-passages.pdf` (36 pages, prepared for stamping) | test |
+
+The 30 passages were written for the book. They are not from any exam paper. Before the PDF was drawn, every passage and every key it shows was converted with `convert()` and checked to give back the same Hindi. Every key is on an ordinary keyboard: the passages avoid ँ, ऊ, ऑ and nukta letters other than ड़ and ढ़, the same rule as `src/lib/passages.js`. Its free sample is `public/downloads/mykrutidev-kruti-dev-typing-30-passages-sample.pdf` (the first 5 pages). To sell it:
+1. Upload the prepared PDF to the bucket under exactly that name.
+2. Buy it once on a preview with test keys.
+3. Set `status: 'live'`.
+
 ## Product pictures ("Look inside")
 
 A product's `images` in `src/lib/store.js` name three files in `public/store-img/`: the cover, one inside page shown free (`openPage`), and a later page **blurred in the file itself** with a lock on top. Make them from the PDF that is sold (`pdftoppm -r 110`, then 640 px wide WebP), never from a review copy. The blur must be in the image: a CSS blur would still ship the readable page.
