@@ -53,7 +53,8 @@ const { t, maybe, render, path: to } = useT(lang);
 const text = (field: string) => t(`pages.${path}.${field}`);
 
 const live = isLive(page);
-const related = page.related.map(getPage).filter(Boolean);
+// A store product is suggested only once it is on sale: never as a "soon" card.
+const related = page.related.map(getPage).filter((r) => r && (!r.product || isLive(r)));
 
 // The interactive tool a content page is built around, if any.
 const TOOLS: Record<string, any> = {

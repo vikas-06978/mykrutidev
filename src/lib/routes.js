@@ -136,7 +136,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev'],
+    related: ['/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/hindi-keyboard',
@@ -1017,7 +1017,7 @@ export const PAGES = [
     to: null,
     printable: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-progress-log', '/kruti-dev-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-progress-log', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/kruti-dev-matra-chart',
