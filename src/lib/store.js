@@ -27,7 +27,7 @@ export const SITE_URL = 'https://mykrutidev.com';
 
 export const STORE = {
   currency: 'INR',
-  /** Shown in the refund policy and the buyer's email. */
+  /** Days a buyer has to report a problem (failed delivery, double payment, broken file). There is no refund for a delivered, working file. Shown in the policy and the buyer's email. */
   refundDays: 7,
   /** How long a download link works after payment. */
   downloadDays: 30,

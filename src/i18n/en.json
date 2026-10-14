@@ -3407,12 +3407,12 @@
       "h1": "Store",
       "title": "PDF Store - Practice Packs and Ebooks",
       "description": "Practice PDFs and ebooks for Hindi typing and exams, checked by hand. Pay securely with UPI or card and download at once.",
-      "lede": "Careful, practical PDFs for Hindi typing and exam preparation. Every one is checked before it is listed, and you can get your money back within {refundDays} days.",
+      "lede": "Careful, practical PDFs for Hindi typing and exam preparation. Every one is checked before it is listed.",
       "body": [
         "<h2>How buying works</h2>",
         "<p>Pick a PDF, enter your email and pay on Razorpay's secure page. The download button appears as soon as the payment is confirmed, and the link is also emailed to you.</p>",
         "<h2>Our promise</h2>",
-        "<p>Every PDF is checked against official sources before it is listed. If one is not useful to you, ask for a refund within {refundDays} days. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
+        "<p>Every PDF is checked against official sources before it is listed. If a file is damaged or not as described, we fix it or refund you. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
       ]
     },
     "/store/sample-test": {
@@ -3440,18 +3440,18 @@
     "/refund-policy": {
       "nav": "Refund policy",
       "h1": "Refund Policy",
-      "title": "Refund Policy for PDFs and Ebooks",
-      "description": "Not satisfied with a PDF or ebook? Ask for a full refund within the refund period. How to ask and how long the money takes to return.",
-      "lede": "If a PDF is not useful to you, you can have your money back. No long forms and no questions asked.",
+      "title": "Refund and Cancellation Policy",
+      "description": "Digital PDFs and ebooks are not refundable once delivered. What we do fix or refund: failed delivery, double payment or a damaged file, and how to ask.",
+      "lede": "A PDF or ebook cannot be returned once you have it, so we do not refund after delivery. We do fix or refund when something goes wrong on our side.",
       "body": [
-        "<h2>Full refund within {refundDays} days</h2>",
-        "<p>Within {refundDays} days of paying, you can ask for a full refund for any reason. We do not ask you to prove anything or to return the file.</p>",
+        "<h2>No refunds on delivered files</h2>",
+        "<p>Digital files cannot be returned. Once the download is available to you, the sale is final. Please read the description and the sample pages on the product page before you buy.</p>",
+        "<h2>When we do help</h2>",
+        "<p>Write to us within {refundDays} days if money was taken but no download reached you, if you paid twice for the same PDF, or if the file is damaged, will not open or is not the one described. We will send a working file, or refund you in full if we cannot.</p>",
         "<h2>How to ask</h2>",
         "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with and give your order number if you have it. We reply within a few working days.</p>",
         "<h2>How the money comes back</h2>",
-        "<p>The refund goes through Razorpay to the same UPI app, card or bank account you paid from. It usually reaches you in 5 to 7 working days, depending on your bank. When the refund is made, the download link stops working.</p>",
-        "<h2>Payments that go wrong</h2>",
-        "<p>If money left your account but you did not get the download, write to us at once. We will either deliver the PDF or refund you in full.</p>",
+        "<p>An approved refund goes through Razorpay to the same UPI app, card or bank account you paid from. It usually reaches you in 5 to 7 working days, depending on your bank. When the refund is made, the download link stops working.</p>",
         "<h2>Free tools are not affected</h2>",
         "<p>The converters, the typing tutor and the printable charts stay free. This policy covers only PDFs and ebooks bought in the <a href=\"/store\">store</a>.</p>"
       ]
@@ -5878,7 +5878,7 @@
     "working": "Please wait…",
     "payNote": "You pay on Razorpay's secure page with UPI, card or net banking. We never see your payment details.",
     "deliveryNote": "You get the PDF right after payment, on screen and by email. <a href=\"/delivery-policy\">How delivery works</a>.",
-    "refundNote": "<a href=\"/refund-policy\">Full refund within {refundDays} days</a>, for any reason.",
+    "refundNote": "Digital files cannot be returned, so there is no refund after delivery, <a href=\"/refund-policy\">except when something goes wrong</a>.",
     "errEmail": "Please enter a valid email address.",
     "errAccept": "Please tick the box to agree to the terms.",
     "errRate": "Too many tries from here just now. Please try again in an hour.",

@@ -7,7 +7,7 @@
  *
  * Only the buyer's email goes to our server; see the privacy policy.
  */
-import { PRODUCTS, STORE, price } from '../lib/store.js';
+import { PRODUCTS, price } from '../lib/store.js';
 import { langOf, useT, fill } from '../i18n/index.js';
 
 interface Props {
@@ -78,7 +78,7 @@ const buy = fill(t('store.buy'), { price: amount });
   <ul class="mt-5 grid gap-1.5 text-xs text-mute">
     <li set:html={render(t('store.payNote'))} />
     <li set:html={render(t('store.deliveryNote'))} />
-    <li set:html={render(fill(t('store.refundNote'), { refundDays: String(STORE.refundDays) }))} />
+    <li set:html={render(t('store.refundNote'))} />
   </ul>
 </section>
 
