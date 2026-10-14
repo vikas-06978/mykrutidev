@@ -68,6 +68,19 @@ export const PRODUCTS = [
     pages: 1,
     stamp: true,
   },
+  {
+    // Rs 39: a starter price, to learn whether people will pay before anything bigger is priced.
+    // 'test' = sold only where STORE_TEST_PRODUCTS=1 (a preview with Razorpay test keys). Change to 'live' when
+    // the file is in the bucket, the seller details are in src/lib/business.js and the preview test purchase worked.
+    id: 'kruti-dev-7-day-starter',
+    status: 'test',
+    title: 'Kruti Dev 7-Day Starter (PDF, 32 pages)',
+    pricePaise: 3900,
+    file: 'products/kruti-dev-7-day-starter.pdf',
+    fileName: 'kruti-dev-7-day-starter.pdf',
+    pages: 32,
+    stamp: true,
+  },
 ];
 
 export const productById = (id) => PRODUCTS.find((p) => p.id === id);
