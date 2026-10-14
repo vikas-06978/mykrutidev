@@ -1,10 +1,12 @@
-// Test-only config: gives server/feedback.test.js a local, in-memory D1
-// database through wrangler's getPlatformProxy(). Not used for deploys - the
-// site's real bindings are set in the Cloudflare dashboard (see README.md).
+// Test-only config: gives server/feedback.test.js and server/store.test.js a
+// local, in-memory D1 database and R2 bucket through wrangler's
+// getPlatformProxy(). Not used for deploys - the site's real bindings are set
+// in the Cloudflare dashboard (see README.md and docs/STORE.md).
 {
   "name": "mykrutidev-feedback-test",
   "compatibility_date": "2025-09-01",
   "d1_databases": [
     { "binding": "DB", "database_name": "mykrutidev-feedback-test", "database_id": "00000000-0000-0000-0000-000000000000" }
-  ]
+  ],
+  "r2_buckets": [{ "binding": "STORE_FILES", "bucket_name": "mykrutidev-store-test" }]
 }

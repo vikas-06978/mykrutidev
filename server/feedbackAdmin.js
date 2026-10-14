@@ -26,7 +26,7 @@ const SESSION_SECONDS = 8 * 3600;
 /** Wrong keys allowed per IP per hour before the form stops answering. */
 const LOGIN_TRIES = 10;
 
-const SECURITY = {
+export const SECURITY = {
   'Cache-Control': 'no-store',
   'X-Robots-Tag': 'noindex, nofollow',
   'Referrer-Policy': 'no-referrer',
@@ -36,7 +36,7 @@ const SECURITY = {
     "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
 };
 
-const esc = (v) =>
+export const esc = (v) =>
   String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 const enc = new TextEncoder();
@@ -82,7 +82,7 @@ export async function isAuthorized(request, key) {
 const label = (group, id) => LABELS[group]?.[id] ?? id;
 const ratingName = (r) => `${RATING_EMOJI[r] ?? ''} ${LABELS.ratings[r] ?? r}`;
 
-function page(title, body, status = 200, extra = {}) {
+export function page(title, body, status = 200, extra = {}) {
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -170,6 +170,7 @@ function dashboard({ total, ratings, wants, used, latest, requestTotal, requests
   <div class="fa-actions">
     <a class="fa-button" href="?format=csv" download>Download CSV</a>
     <a class="fa-button" href="?format=csv&amp;table=requests" download>Tool requests CSV</a>
+    <a class="fa-link" href="/admin/orders">Orders</a>
     <form method="post"><button type="submit" name="logout" value="1" class="fa-link">Sign out</button></form>
   </div>
 </header>
