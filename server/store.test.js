@@ -788,6 +788,23 @@ describe('/admin/orders', () => {
     assert.equal((await orders())[0].status, 'refunded');
   });
 
+  test('a database error on an action shows its reason instead of a bare 1101', async () => {
+    const id = await startOrder(net);
+    net.pay();
+    await settleOrder(ENV(), id, { fetch: net.fetch });
+    const broken = {
+      ...ENV(),
+      DB: new Proxy(DB, {
+        get: (t, k) => (k === 'prepare' ? (sql) => (/^UPDATE orders SET status/.test(sql) ? { bind: () => ({ run: async () => { throw new Error('D1_ERROR: boom'); } }) } : t.prepare(sql)) : k === 'batch' ? t.batch.bind(t) : t[k]),
+      }),
+    };
+    const form = new URLSearchParams({ action: 'refund', id });
+    const r = await handleAdminOrders(req('/admin/orders', { method: 'POST', body: form, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }), broken, { fetch: net.fetch });
+    assert.equal(r.status, 500);
+    assert.match(await r.text(), /That did not work \(refund\): D1_ERROR: boom/);
+    assert.equal((await orders())[0].status, 'paid');
+  });
+
   test('refuses a form from another site, and a made-up order id does nothing', async () => {
     const id = await startOrder(net);
     net.pay();

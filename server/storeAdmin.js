@@ -170,6 +170,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
     const id = String(form?.get('id') ?? '');
     const action = String(form?.get('action') ?? '');
     if (/^o[a-z2-7]{24}$/.test(id)) {
+      try {
       if (action === 'check') {
         await settleOrder(env, id, { fetch: deps.fetch, now, origin: siteOrigin(request) });
       } else if (action === 'resend') {
@@ -190,6 +191,11 @@ export async function handleAdminOrders(request, env, deps = {}) {
           )
           .bind(Math.floor(now / 1000), STORE.downloadDays * 86400, id)
           .run();
+      }
+      } catch (err) {
+        // Signed in already, so the reason can be shown: a bare 1101 page helps nobody.
+        console.error('admin order action failed', action, err);
+        return page('Orders', `<h1>Orders</h1><p>That did not work (${esc(action)}): ${esc(String(err?.message ?? err).slice(0, 300))}</p><p><a href="/admin/orders">Back to orders</a></p>`, 500);
       }
     }
     return new Response(null, { status: 303, headers: { Location: '/admin/orders', ...SECURITY } });
