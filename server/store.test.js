@@ -788,6 +788,17 @@ describe('/admin/orders', () => {
     assert.equal((await orders())[0].status, 'refunded');
   });
 
+  test('a form post from our own page with "Origin: null" (no-referrer) works, from elsewhere it does not', async () => {
+    const id = await startOrder(net);
+    net.pay();
+    await settleOrder(ENV(), id, { fetch: net.fetch });
+    assert.equal((await act('refund', id, { Origin: 'null' })).status, 403);
+    assert.equal((await orders())[0].status, 'paid');
+    assert.equal((await act('refund', id, { Origin: 'null', 'Sec-Fetch-Site': 'cross-site' })).status, 403);
+    assert.equal((await act('refund', id, { Origin: 'null', 'Sec-Fetch-Site': 'same-origin' })).status, 303);
+    assert.equal((await orders())[0].status, 'refunded');
+  });
+
   test('a database error on an action shows its reason instead of a bare 1101', async () => {
     const id = await startOrder(net);
     net.pay();

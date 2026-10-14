@@ -140,6 +140,17 @@ ${test ? '<p class="fa-banner">Razorpay is in TEST mode: no real money moves.</p
   );
 }
 
+/** Is this form post from our own pages? (An unparsable Origin, such as "null", is not a crash.) */
+function sameSite(request) {
+  const origin = request.headers.get('Origin');
+  if (!origin) return true;
+  try {
+    return new URL(origin).host === new URL(request.url).host;
+  } catch {
+    return request.headers.get('Sec-Fetch-Site') === 'same-origin';
+  }
+}
+
 /**
  * @param {Request} request
  * @param {Record<string, any>} env
@@ -161,11 +172,10 @@ export async function handleAdminOrders(request, env, deps = {}) {
   const now = deps.now ?? Date.now();
 
   if (request.method === 'POST') {
-    // Same-site forms only (the session cookie is SameSite=Strict as well).
-    const origin = request.headers.get('Origin');
-    if (origin && new URL(origin).host !== new URL(request.url).host) {
-      return new Response('Forbidden', { status: 403, headers: SECURITY });
-    }
+    // Same-site forms only (the session cookie is SameSite=Strict as well). These pages send
+    // Referrer-Policy: no-referrer, so a browser posts a form from them with "Origin: null":
+    // that is accepted only when the browser says the request is from the same origin.
+    if (!sameSite(request)) return new Response('Forbidden', { status: 403, headers: SECURITY });
     const form = await request.formData().catch(() => null);
     const id = String(form?.get('id') ?? '');
     const action = String(form?.get('action') ?? '');
