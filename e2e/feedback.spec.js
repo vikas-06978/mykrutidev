@@ -55,9 +55,11 @@ test.describe('opening and closing', () => {
     await expect(panel(page)).toHaveCount(0);
     // The panel's script came after the load event (on idle), and nothing
     // talked to the API or to Turnstile.
+    // (The panel's script may come with a small shared chunk of constants, also named feedback.*.js:
+    // what matters is that none of them is fetched before the page has loaded.)
     const chunk = requests.filter((r) => /\/_astro\/feedback\.[\w-]+\.js$/.test(r.url));
-    expect(chunk.length).toBe(1);
-    expect(chunk[0].at).toBeGreaterThanOrEqual(loaded);
+    expect(chunk.length).toBeGreaterThanOrEqual(1);
+    for (const c of chunk) expect(c.at).toBeGreaterThanOrEqual(loaded);
     expect(requests.filter((r) => /api\/feedback|challenges\.cloudflare\.com/.test(r.url))).toEqual([]);
   });
 

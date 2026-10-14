@@ -113,7 +113,6 @@ const buy = fill(t('store.buy'), { price: amount });
 </style>
 
 <script>
-  import { challenge } from '../scripts/turnstile.js';
   import { checkoutError, payUrlOk } from '../lib/storeClient.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-sb-form]');
@@ -127,9 +126,12 @@ const buy = fill(t('store.buy'), { price: amount });
     const pay = form.querySelector<HTMLButtonElement>('[data-sb-pay]')!;
 
     // Turnstile starts once someone begins filling in the form, not on page load.
-    type Check = Awaited<ReturnType<typeof challenge>>;
+    // Loaded on demand (not imported up front) so the shop adds nothing to the pages that share this script's chunks.
+    type Check = Awaited<ReturnType<(typeof import('../scripts/turnstile.js'))['challenge']>>;
     let check: Promise<Check> | null = null;
-    form.addEventListener('focusin', () => (check ??= challenge(form.querySelector('[data-sb-turnstile]')!, lang)), { once: true });
+    const startCheck = () =>
+      (check ??= import('../scripts/turnstile.js').then((m) => m.challenge(form.querySelector('[data-sb-turnstile]')!, lang)));
+    form.addEventListener('focusin', startCheck, { once: true });
 
     const fail = (text: string, el?: HTMLElement) => {
       err.textContent = text;
@@ -152,8 +154,7 @@ const buy = fill(t('store.buy'), { price: amount });
       let res: Response | null = null;
       let json: any = null;
       try {
-        check ??= challenge(form.querySelector('[data-sb-turnstile]')!, lang);
-        const token = await (await check)?.token();
+        const token = await (await startCheck())?.token();
         res = await fetch('/api/store/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },

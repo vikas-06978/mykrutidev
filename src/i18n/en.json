@@ -3412,7 +3412,7 @@
         "<h2>How buying works</h2>",
         "<p>Pick a PDF, enter your email and pay on Razorpay's secure page. The download button appears as soon as the payment is confirmed, and the link is also emailed to you.</p>",
         "<h2>Our promise</h2>",
-        "<p>Every PDF is checked against official sources before it is listed. If a file is damaged or not as described, we fix it or refund you. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
+        "<p>Every PDF is checked against official sources before it is listed. If the download fails or the file will not open, we fix it or refund you. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
       ]
     },
     "/store/sample-test": {
@@ -3447,7 +3447,7 @@
         "<h2>No refunds on delivered files</h2>",
         "<p>Digital files cannot be returned. Once the download is available to you, the sale is final. Please read the description and the sample pages on the product page before you buy.</p>",
         "<h2>When we do help</h2>",
-        "<p>Write to us within {refundDays} days if money was taken but no download reached you, if you paid twice for the same PDF, or if the file is damaged, will not open or is not the one described. We will send a working file, or refund you in full if we cannot.</p>",
+        "<p>Write to us within {refundDays} days if money was taken but no download reached you, if you paid twice for the same PDF, or if the file will not open. We can check each of these in our own records and by testing the file, and we will send a working file or refund you in full if we cannot.</p>",
         "<h2>How to ask</h2>",
         "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with and give your order number if you have it. We reply within a few working days.</p>",
         "<h2>How the money comes back</h2>",

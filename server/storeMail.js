@@ -73,7 +73,7 @@ export function buyerMail(env, { order, product, link, origin = SITE_URL }) {
     link,
     ``,
     `The link works for ${STORE.downloadDays} days and allows ${order.max_downloads} downloads. Please keep this email.`,
-    `If the file is wrong or will not open, reply to this email within ${STORE.refundDays} days and we will fix it or refund you.`,
+    `If the download fails or the file will not open, reply to this email within ${STORE.refundDays} days and we will fix it or refund you.`,
     `Refund policy: ${origin}/refund-policy`,
     ``,
     `---`,
@@ -81,7 +81,7 @@ export function buyerMail(env, { order, product, link, origin = SITE_URL }) {
     `MyKrutiDev से खरीदारी के लिए धन्यवाद।`,
     ``,
     `अपनी PDF डाउनलोड करने के लिए ऊपर का लिंक खोलें। लिंक ${STORE.downloadDays} दिन चलेगा और ${order.max_downloads} बार डाउनलोड हो सकेगी। इस ईमेल को संभालकर रखें।`,
-    `फ़ाइल में कोई गड़बड़ी हो या वह खुले नहीं, तो ${STORE.refundDays} दिन के भीतर इसी ईमेल का जवाब दें। हम उसे ठीक करेंगे या पैसे लौटाएँगे।`,
+    `अगर डाउनलोड न हो या फ़ाइल खुले नहीं, तो ${STORE.refundDays} दिन के भीतर इसी ईमेल का जवाब दें। हम उसे ठीक करेंगे या पैसे लौटाएँगे।`,
   ];
   return {
     to: order.email,
