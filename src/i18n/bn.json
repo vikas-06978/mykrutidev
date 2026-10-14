@@ -5324,7 +5324,8 @@
   "og": {
     "kickerTool": "বিনামূল্যে অনলাইন টুল",
     "kickerGuide": "গাইড",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "প্রিন্টযোগ্য PDF"
   },
   "notFound": {
     "title": "পাতা পাওয়া যায়নি",

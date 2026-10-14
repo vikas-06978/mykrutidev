@@ -10,16 +10,26 @@
 import { DICTS, LOCALES } from '../i18n/index.js';
 import { PAGES, isLive } from './routes.js';
 import { GUIDES, GUIDES_PATH, guidePath } from './guides.js';
+import { shownProducts, hasPage, productById } from './store.js';
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
 /** "/" -> "home", "/guides/x" -> "guides--x". */
 const slugOf = (route) => (route === '/' ? 'home' : route.slice(1).replace(/\//g, '--'));
 
+/**
+ * Store pages are live on a branch preview before they are in production
+ * (isPreviewBuild in store.js). Cloudflare cannot draw images, so theirs are
+ * always drawn and committed, whatever build this is.
+ */
+const storePreviewPage = (p) =>
+  (p.path === '/store' && shownProducts(true).length > 0) ||
+  (Boolean(p.product) && hasPage(productById(p.product), true));
+
 /** Routes that get their own image; everything else uses the home image. */
 function ownImageRoutes() {
   return new Set([
-    ...PAGES.filter((p) => isLive(p) && !p.canonical).map((p) => p.path),
+    ...PAGES.filter((p) => (isLive(p) || storePreviewPage(p)) && !p.canonical).map((p) => p.path),
     GUIDES_PATH,
     ...GUIDES.map(guidePath),
   ]);
@@ -49,7 +59,9 @@ export function ogEntries() {
         kicker = d.og.kickerGuide;
       } else {
         title = d.pages[route].h1;
-        if (PAGES.find((p) => p.path === route)?.trust) kicker = d.og.kickerSite;
+        const page = PAGES.find((p) => p.path === route);
+        if (page?.trust) kicker = d.og.kickerSite;
+        if (page?.product) kicker = d.og.kickerProduct;
       }
       out.push({ lang, route, file: `${lang}/${slugOf(route)}.png`, title: plain(title), kicker });
     }

@@ -5324,7 +5324,8 @@
   "og": {
     "kickerTool": "இலவச இணையக் கருவி",
     "kickerGuide": "வழிகாட்டி",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "அச்சிடக்கூடிய PDF"
   },
   "notFound": {
     "title": "பக்கம் கிடைக்கவில்லை",

@@ -5324,7 +5324,8 @@
   "og": {
     "kickerTool": "Free online tool",
     "kickerGuide": "Guide",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "Printable PDF"
   },
   "notFound": {
     "title": "Page not found",

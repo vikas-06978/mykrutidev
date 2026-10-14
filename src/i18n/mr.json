@@ -5324,7 +5324,8 @@
   "og": {
     "kickerTool": "मोफत ऑनलाइन टूल",
     "kickerGuide": "मार्गदर्शिका",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "छापण्यायोग्य PDF"
   },
   "notFound": {
     "title": "पान सापडले नाही",

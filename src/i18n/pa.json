@@ -5324,7 +5324,8 @@
   "og": {
     "kickerTool": "ਮੁਫ਼ਤ ਆਨਲਾਈਨ ਟੂਲ",
     "kickerGuide": "ਗਾਈਡ",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "ਪ੍ਰਿੰਟ ਕਰਨ ਯੋਗ PDF"
   },
   "notFound": {
     "title": "ਪੰਨਾ ਨਹੀਂ ਮਿਲਿਆ",
