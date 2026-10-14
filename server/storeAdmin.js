@@ -21,7 +21,7 @@
  */
 import { ORDER_COLUMNS, STORE, PRODUCTS, price, productById } from '../src/lib/store.js';
 import { toCsv } from '../src/lib/feedback.js';
-import { SECURITY, esc, isAuthorized, page } from './feedbackAdmin.js';
+import { SECURITY, bearerGuard, esc, isAuthorized, page } from './feedbackAdmin.js';
 import { ensureStoreSchema, downloadToken, siteOrigin, settleOrder } from './storeApi.js';
 import { hasKeys, mode } from './razorpay.js';
 import { buyerMail, canMail, downloadPage, sendMail } from './storeMail.js';
@@ -165,7 +165,9 @@ export async function handleAdminOrders(request, env, deps = {}) {
   await ensureStoreSchema(env.DB);
 
   // Signing in happens on /admin/feedback; the session cookie covers /admin.
-  if (!(await isAuthorized(request, key))) {
+  const guarded = await bearerGuard(request, env.DB, key, env.RATE_LIMIT_SALT || key, deps.now);
+  if (guarded) return guarded;
+  if (!(await isAuthorized(request, key, deps.now))) {
     return new Response(null, { status: 303, headers: { Location: '/admin/feedback', ...SECURITY } });
   }
   const db = env.DB;

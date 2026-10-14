@@ -57,8 +57,16 @@ async function same(a, b) {
   return diff === 0;
 }
 
-/** The session cookie's value: fixed per key, so changing ADMIN_KEY signs everyone out. */
-const sessionValue = (key) => hmac(key, 'mkd-admin-session-v1');
+/**
+ * The session cookie: "<expiry>.<signature>". The server checks the expiry itself, so a copied
+ * cookie stops working after SESSION_SECONDS even if the browser keeps it, and changing
+ * ADMIN_KEY signs everyone out at once.
+ */
+const sessionSignature = (key, exp) => hmac(key, `mkd-admin-session-v2|${exp}`);
+const sessionValue = async (key, nowMs = Date.now()) => {
+  const exp = Math.floor(nowMs / 1000) + SESSION_SECONDS;
+  return `${exp}.${await sessionSignature(key, exp)}`;
+};
 
 function cookie(request, name) {
   for (const part of (request.headers.get('Cookie') ?? '').split(';')) {
@@ -68,11 +76,25 @@ function cookie(request, name) {
   return null;
 }
 
-export async function isAuthorized(request, key) {
+export async function isAuthorized(request, key, nowMs = Date.now()) {
   const auth = request.headers.get('Authorization') ?? '';
   if (auth.startsWith('Bearer ') && (await same(auth.slice(7), key))) return true;
   const c = cookie(request, COOKIE);
-  return !!c && (await same(c, await sessionValue(key)));
+  const m = /^(\d{1,12})\.([0-9a-f]{64})$/.exec(c ?? '');
+  if (!m || Number(m[1]) * 1000 <= nowMs) return false;
+  return same(m[2], await sessionSignature(key, m[1]));
+}
+
+/**
+ * Wrong keys sent in an Authorization header count against the same per-IP limit as the login
+ * form, so the header is not a way round it. Returns a 429 Response or null.
+ */
+export async function bearerGuard(request, db, key, salt, now) {
+  const auth = request.headers.get('Authorization') ?? '';
+  if (!auth.startsWith('Bearer ')) return null;
+  if (await same(auth.slice(7), key)) return null;
+  const { hits } = await countHit(db, clientIp(request), salt, { scope: 'admin', now });
+  return hits > LOGIN_TRIES ? new Response('Too many tries', { status: 429, headers: { 'Retry-After': '3600', ...SECURITY } }) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -291,7 +313,7 @@ export async function handleAdmin(request, env, { now } = {}) {
       status: 303,
       headers: {
         Location: '/admin/feedback',
-        'Set-Cookie': `${COOKIE}=${await sessionValue(key)}; Path=/admin; Max-Age=${SESSION_SECONDS}; HttpOnly; Secure; SameSite=Strict`,
+        'Set-Cookie': `${COOKIE}=${await sessionValue(key, now)}; Path=/admin; Max-Age=${SESSION_SECONDS}; HttpOnly; Secure; SameSite=Strict`,
         ...SECURITY,
       },
     });
@@ -300,7 +322,9 @@ export async function handleAdmin(request, env, { now } = {}) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST', ...SECURITY } });
   }
-  if (!(await isAuthorized(request, key))) return loginPage('', 401);
+  const guarded = await bearerGuard(request, db, key, env.RATE_LIMIT_SALT || key, now);
+  if (guarded) return guarded;
+  if (!(await isAuthorized(request, key, now))) return loginPage('', 401);
 
   const params = new URL(request.url).searchParams;
   if (params.get('format') === 'csv') {
