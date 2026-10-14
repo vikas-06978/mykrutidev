@@ -53,7 +53,7 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 ## Test before real money (Preview environment)
 
 1. Pages → Settings → *Preview* environment: the same variables but with **test keys** (`rzp_test_…`), a test webhook, and `STORE_TEST_PRODUCTS` = `1`.
-2. Upload any one-page PDF to the bucket as `test/sample.pdf`.
+2. Upload any one-page PDF to the bucket as `test-sample.pdf`.
 3. Open `/store/sample-test` on the preview URL: it sells the ₹1 sample. Pay with Razorpay's test UPI/card, watch the order turn *paid* in `/admin/orders`, download the file, then mark it refunded and see the download close.
 
 **Seeing the store on a preview.** A build on a Cloudflare branch preview (`CF_PAGES_BRANCH` set and not `main`) treats `test` products as listed: the header gets a *Store* link, `/store` lists them, and their pages are full pages. The ₹1 sample has `unlisted: true`, so it keeps a noindex page and stays out of the list. Production (`main`) and CI builds are unchanged until a product is `live`.

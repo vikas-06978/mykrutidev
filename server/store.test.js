@@ -741,10 +741,10 @@ describe('/admin/orders', () => {
 
   test('the setup check says what is missing, including a PDF not yet uploaded', async () => {
     let html = await (await handleAdminOrders(req(), ENV())).text();
-    assert.match(html, /fa-no">✗<\/span> PDF uploaded: test\/sample\.pdf/);
+    assert.match(html, /fa-no">✗<\/span> PDF uploaded: test-sample\.pdf/);
     await FILES.put(PRODUCT.file, PDF);
     html = await (await handleAdminOrders(req(), ENV())).text();
-    assert.match(html, /fa-ok">✓<\/span> PDF uploaded: test\/sample\.pdf/);
+    assert.match(html, /fa-ok">✓<\/span> PDF uploaded: test-sample\.pdf/);
     html = await (await handleAdminOrders(req(), { ...ENV(), RAZORPAY_WEBHOOK_SECRET: '' })).text();
     assert.match(html, /fa-no">✗<\/span> Razorpay webhook secret/);
   });
