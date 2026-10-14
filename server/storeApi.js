@@ -54,6 +54,7 @@ import {
   verifyWebhook,
 } from './razorpay.js';
 import { buyerMail, downloadPage, ownerMail, sendMail, canMail } from './storeMail.js';
+import { stampPdf, stampText } from './storeStamp.js';
 
 // ---------------------------------------------------------------------------
 // Setup
@@ -419,7 +420,7 @@ export async function handleDownload(request, env, deps = {}) {
   const db = env.DB;
   const counted = await db
     .prepare(
-      "UPDATE orders SET downloads = downloads + 1 WHERE id = ? AND status = 'paid' AND downloads < max_downloads AND (expires_at IS NULL OR expires_at > ?) RETURNING product_id",
+      "UPDATE orders SET downloads = downloads + 1 WHERE id = ? AND status = 'paid' AND downloads < max_downloads AND (expires_at IS NULL OR expires_at > ?) RETURNING product_id, email",
     )
     .bind(id, now)
     .first();
@@ -439,11 +440,29 @@ export async function handleDownload(request, env, deps = {}) {
     console.error('store file missing', product?.file ?? counted.product_id);
     return problem(503, 'The file is not available right now. Please try again later or write to us.', 'फ़ाइल अभी उपलब्ध नहीं है। थोड़ी देर बाद कोशिश करें या हमें लिखें।');
   }
-  return new Response(object.body, {
+  // The buyer's own copy: the file's stamp slots are overwritten with who it was sold to (server/storeStamp.js).
+  // A file that was not prepared has no slot and is served as it is.
+  let body;
+  let size = object.size;
+  if (product.stamp) {
+    // (read the object as bytes and never touch object.body: a body can be consumed once)
+    const bytes = new Uint8Array(await object.arrayBuffer());
+    body = bytes;
+    size = bytes.length;
+    try {
+      const done = stampPdf(bytes, stampText({ id, email: counted.email }));
+      if (done.count === 0) console.error('store file has no stamp slot, served unstamped:', product.file);
+    } catch (e) {
+      console.error('stamping failed, served unstamped:', e?.message || e);
+    }
+  } else {
+    body = object.body;
+  }
+  return new Response(body, {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      ...(object.size ? { 'Content-Length': String(object.size) } : {}),
+      ...(size ? { 'Content-Length': String(size) } : {}),
       'Content-Disposition': `attachment; filename="${product.fileName.replace(/[^A-Za-z0-9._-]/g, '_')}"`,
       'Cache-Control': 'private, no-store',
       'X-Content-Type-Options': 'nosniff',

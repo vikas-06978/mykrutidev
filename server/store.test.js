@@ -9,6 +9,7 @@ import { test, describe, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { getPlatformProxy } from 'wrangler';
+import { PDFDocument } from 'pdf-lib';
 
 import {
   downloadToken,
@@ -25,6 +26,8 @@ import { handleAdminOrders } from './storeAdmin.js';
 import { hmacHex, isPaidFor, verifyWebhook } from './razorpay.js';
 import { buyerMail, ownerMail } from './storeMail.js';
 import { PRODUCTS, STORE, ORDER_ID_RE } from '../src/lib/store.js';
+import { prepare } from '../scripts/prepare-store-pdf.mjs';
+import { STAMP_LEN, STAMP_SLOT, maskEmail, stampPdf, stampText } from './storeStamp.js';
 
 let proxy;
 let DB;
@@ -511,6 +514,68 @@ describe('download', () => {
     assert.equal(r.headers.get('X-Content-Type-Options'), 'nosniff');
     assert.deepEqual(new Uint8Array(await r.arrayBuffer()), PDF);
     assert.equal(await left(id), 1);
+  });
+
+  /** A small real PDF with a stamp slot on every page, as scripts/prepare-store-pdf.mjs makes it. */
+  async function preparedPdf(pages = 3) {
+    const doc = await PDFDocument.create();
+    for (let i = 0; i < pages; i++) doc.addPage([595, 842]);
+    return prepare(await doc.save());
+  }
+  const text = (bytes) => new TextDecoder('latin1').decode(bytes);
+
+  test('a stamped product: each buyer gets their own copy, with their stamp on every page', async () => {
+    const file = await preparedPdf(3);
+    assert.equal(text(file).split(STAMP_SLOT).length - 1, 3, 'one slot per page in the prepared file');
+    const a = await paid({ file: false });
+    await FILES.put(PRODUCT.file, file);
+    const copyA = new Uint8Array(await (await download(a.id, a.token)).arrayBuffer());
+
+    // a second buyer, another email
+    const net = fakeNet();
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: 'asha.verma@example.org' }), ENV(), { fetch: net.fetch });
+    const idB = (await r0.json()).order;
+    net.pay();
+    await settleOrder(ENV(), idB, { fetch: net.fetch });
+    const copyB = new Uint8Array(await (await download(idB, await downloadToken(ENV(), idB))).arrayBuffer());
+
+    for (const [copy, id, who] of [[copyA, a.id, 'bu***@example.com'], [copyB, idB, 'as***@example.org']]) {
+      const t = text(copy);
+      assert.equal(copy.length, file.length, 'the file is the same size: nothing moved');
+      assert.ok(!t.includes(STAMP_SLOT), 'no empty slot is left');
+      assert.equal(t.split(`Licensed to ${who} - Order ${id.slice(0, 12)}`).length - 1, 3, 'the stamp is on all 3 pages');
+      assert.equal((await PDFDocument.load(copy)).getPageCount(), 3, 'still a valid PDF');
+    }
+    assert.notDeepEqual(copyA, copyB, 'two buyers do not get the same bytes');
+    assert.ok(!text(copyA).includes('asha'), 'one buyer\'s address is never in another\'s copy');
+    // the file in the bucket is untouched
+    assert.deepEqual(new Uint8Array(await (await FILES.get(PRODUCT.file)).arrayBuffer()), file);
+  });
+
+  test('a stamped copy for an order with no email says so, without an address', async () => {
+    await FILES.put(PRODUCT.file, await preparedPdf(1));
+    const net = fakeNet();
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: '' }), ENV(), { fetch: net.fetch });
+    const id = (await r0.json()).order;
+    net.pay();
+    await settleOrder(ENV(), id, { fetch: net.fetch });
+    const copy = new Uint8Array(await (await download(id, await downloadToken(ENV(), id))).arrayBuffer());
+    assert.ok(text(copy).includes(`Licensed copy - Order ${id.slice(0, 12)}`));
+  });
+
+  test('stamp text: masked address, printable ASCII only, always the length of the slot', () => {
+    assert.equal(maskEmail('rahul.sharma@gmail.com'), 'ra***@gmail.com');
+    assert.equal(maskEmail('a@b.in'), 'a***@b.in');
+    assert.equal(maskEmail('nonsense'), '');
+    const t = stampText({ id: 'o' + 'x'.repeat(24), email: 'हिंदी(x)\\@example.com' });
+    assert.equal(t.length, STAMP_LEN);
+    assert.match(t, /^[\x20-\x7e]+$/);
+    assert.doesNotMatch(t, /[()\\]/);
+    // a file with no slot is reported as such, and is not changed
+    const plain = new TextEncoder().encode('%PDF-1.4 no slot here');
+    const before = new Uint8Array(plain);
+    assert.equal(stampPdf(plain, stampText({ id: 'oabc' })).count, 0);
+    assert.deepEqual(plain, before);
   });
 
   test('stops after the limit', async () => {

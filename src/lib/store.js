@@ -52,6 +52,8 @@ export const STORE = {
  * @property {string} file       the object key in the R2 bucket
  * @property {string} fileName   the name the buyer's browser saves it as
  * @property {number} pages
+ * @property {boolean} [stamp] every download carries the buyer's stamp (the file in R2 must be prepared with
+ *   scripts/prepare-store-pdf.mjs, see docs/STORE.md); an unprepared file is served as it is
  */
 
 /** @type {Product[]} */
@@ -64,6 +66,7 @@ export const PRODUCTS = [
     file: 'test/sample.pdf',
     fileName: 'mykrutidev-sample.pdf',
     pages: 1,
+    stamp: true,
   },
 ];
 

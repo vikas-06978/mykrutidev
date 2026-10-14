@@ -74,8 +74,21 @@ Changing a price or a file later: edit `src/lib/store.js`. Already-created order
 * **Paid is decided once**: `UPDATE … WHERE status='created' RETURNING *`, so two racing webhook/return calls cannot both send the emails.
 * **Downloads** are POST-only (a mail scanner opening the link cannot use one up) and counted in a single `UPDATE` that also checks paid, not refunded, not expired, under the limit (`STORE.maxDownloads`, `STORE.downloadDays`). A missing file does not cost a download.
 * **The link** is `/store/thanks#o=<order>&t=<HMAC>`: the token is in the fragment, so it is never sent to a server or in a Referer, and `src/lib/analytics.js` also strips the query from what Google Analytics sees on that page.
-* **Refunds**: the 7-day promise is in `STORE.refundDays` and printed from it. Refund in Razorpay's dashboard; the `refund.processed` webhook closes the downloads for a full refund. *Mark refunded* in `/admin/orders` does the same by hand.
+* **Refunds**: no refund once a working file has been delivered. The 7 days (`STORE.refundDays`) are the time a buyer has to report a failed download, a double payment or a file that will not open, which we can check ourselves. Refund in Razorpay's dashboard; the `refund.processed` webhook closes the downloads for a full refund. *Mark refunded* in `/admin/orders` does the same by hand.
+* **Email is optional.** With one, the link is emailed; without one, the buyer downloads from the page Razorpay sends them back to, and that page says to save its link (with a Copy link button). `/admin/orders` shows every paid order's download link, so you can send it yourself to a buyer who gave no email and lost the page. Ask them for the order number or the Razorpay payment ID.
 * **Privacy**: an order keeps only email, product, amount and Razorpay ids. Orders nobody paid are deleted after `STORE.unpaidDays`.
+
+## Stamping (each buyer's copy carries their name)
+
+A product with `stamp: true` is served with the buyer's stamp at the foot of every page: `Licensed to ab***@gmail.com - Order o... - mykrutidev.com` (or `Licensed copy - Order ...` when no email was given). It is a mark that lets a leaked copy be traced to an order. It does **not** stop sharing and is easy to remove by someone determined: it is a deterrent, not copy protection.
+
+How it stays cheap: opening and re-saving a PDF in the Function takes 50 to 130 ms of CPU, far over what the free plan allows (about 10 ms). So the work is done once, beforehand:
+
+1. Make the finished PDF, then run `node scripts/prepare-store-pdf.mjs book.pdf book-prepared.pdf`. It adds a fixed-length placeholder line to every page.
+2. Upload **`book-prepared.pdf`** to the R2 bucket under the product's `file` key.
+3. At download, `server/storeStamp.js` overwrites the placeholder bytes with the buyer's stamp: the file does not change size, nothing is parsed (about 1 to 2 ms for a 30-page, 900 KB PDF).
+
+If the file in the bucket was not prepared, the download still works but is served without a stamp, and `store file has no stamp slot` is logged. Check the Function's logs on the preview after the first test purchase.
 
 ## Before the first sale
 
