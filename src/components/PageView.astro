@@ -96,6 +96,8 @@ const STORE_VARS: Record<string, string> = {
   '{downloadDays}': String(STORE.downloadDays),
   '{maxDownloads}': String(STORE.maxDownloads),
   '{unpaidDays}': String(STORE.unpaidDays),
+  // Who runs the site, from src/lib/business.js (privacy policy).
+  '{seller}': [BUSINESS.name, BUSINESS.address].map((v) => v.trim()).filter(Boolean).join(', ') || 'MyKrutiDev',
 };
 const fillVars = (s: string) => Object.entries(STORE_VARS).reduce((acc, [k, v]) => acc.replaceAll(k, v), s);
 const body: string[] = (maybe(`pages.${path}.body`) ?? []).map(fillVars);
