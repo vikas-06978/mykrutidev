@@ -52,7 +52,7 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 
 ## Test before real money (Preview environment)
 
-1. Pages → Settings → *Preview* environment: the same variables but with **test keys** (`rzp_test_…`), a test webhook, and `STORE_TEST_PRODUCTS` = `1`.
+1. Pages → Settings → *Preview* environment: the same variables but with **test keys** (`rzp_test_…`), a test webhook, `STORE_TEST_PRODUCTS` = `1`, and the `STORE_FILES` (R2) and `DB` (D1) bindings. Variables and bindings only reach a build that starts after they were saved, so push a commit to the branch (or retry the *preview* deployment, never the Production one) after changing them.
 2. Upload any one-page PDF to the bucket as `test-sample.pdf`.
 3. Open `/store/sample-test` on the preview URL: it sells the ₹1 sample. Pay with Razorpay's test UPI/card, watch the order turn *paid* in `/admin/orders`, download the file, then mark it refunded and see the download close.
 
