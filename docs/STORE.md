@@ -74,6 +74,8 @@ Changing a price or a file later: edit `src/lib/store.js`. Already-created order
 
 A product's `images` in `src/lib/store.js` name three files in `public/store-img/`: the cover, one inside page shown free (`openPage`), and a later page **blurred in the file itself** with a lock on top. Make them from the PDF that is sold (`pdftoppm -r 110`, then 640 px wide WebP), never from a review copy. The blur must be in the image: a CSS blur would still ship the readable page.
 
+Preview bindings needed: D1 `DB` (the feedback database) and R2 `STORE_FILES` (the private store bucket).
+
 ## Rules the code enforces
 
 * **Price and file never come from the browser.** The request names a product id, nothing else.
