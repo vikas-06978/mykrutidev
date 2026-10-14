@@ -197,7 +197,7 @@ describe('language and SEO tags', () => {
 });
 
 describe('links', () => {
-  const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
+  const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt|store-img\/)/;
 
   test('internal links on a page in another language stay in that language', () => {
     for (const l of PREFIXED_LOCALES) {

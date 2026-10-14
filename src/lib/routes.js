@@ -40,7 +40,7 @@ import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
 import { PREFIXED_LOCALES } from '../i18n/locales.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
-import { PRODUCTS, liveProducts } from './store.js';
+import { PRODUCTS, shownProducts, hasPage } from './store.js';
 import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
@@ -1260,7 +1260,7 @@ export const PAGES = [
   // ==========================================================================
   {
     path: '/store',
-    ready: liveProducts().length > 0,
+    ready: shownProducts().length > 0,
     kind: 'content',
     from: null,
     to: null,
@@ -1270,7 +1270,7 @@ export const PAGES = [
   },
   ...PRODUCTS.map((product) => ({
     path: `/store/${product.id}`,
-    ready: product.status === 'live',
+    ready: hasPage(product),
     kind: 'content',
     from: null,
     to: null,

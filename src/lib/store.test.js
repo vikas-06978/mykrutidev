@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { PRODUCTS, STORE, STORE_SCHEMA, liveProducts, price, rupees, sellable, validateCheckout, newOrderId, ORDER_ID_RE } from './store.js';
+import { PRODUCTS, STORE, STORE_SCHEMA, liveProducts, shownProducts, price, rupees, sellable, isPreviewBuild, validateCheckout, newOrderId, ORDER_ID_RE } from './store.js';
 import { BUSINESS, businessLines } from './business.js';
 import { checkoutError, daysLeft, payUrlOk, readOrderFrom, thanksKey } from './storeClient.js';
 import { PAGES, getPage, isLive } from './routes.js';
@@ -47,9 +47,18 @@ describe('the catalog', () => {
   });
 
   test('the store pages are off the sitemap until a product is live, and the thanks page always', () => {
-    assert.equal(isLive(getPage('/store')), liveProducts().length > 0);
+    assert.equal(isLive(getPage('/store')), shownProducts().length > 0);
     assert.equal(isLive(getPage('/store/thanks')), false);
     assert.ok(isLive(getPage('/refund-policy')) && isLive(getPage('/delivery-policy')));
+  });
+
+  test('only a preview build shows test products, and never the unlisted sample in the list', () => {
+    assert.deepEqual(shownProducts(false), liveProducts());
+    const ids = shownProducts(true).map((p) => p.id);
+    assert.ok(!ids.includes('sample-test') && ids.includes('kruti-dev-7-day-starter'));
+    assert.equal(isPreviewBuild({}), false);
+    assert.equal(isPreviewBuild({ CF_PAGES_BRANCH: 'main' }), false);
+    assert.equal(isPreviewBuild({ CF_PAGES_BRANCH: 'claude/x' }), true);
   });
 
   test('a product that is on sale needs the seller details on /contact', () => {

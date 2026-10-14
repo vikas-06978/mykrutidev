@@ -4,11 +4,11 @@
  * plain "opens soon" note. Prices come from src/lib/store.js - the same file
  * the server prices the order from.
  */
-import { liveProducts, price } from '../lib/store.js';
+import { shownProducts, price } from '../lib/store.js';
 import { langOf, useT, fill } from '../i18n/index.js';
 
 const { t, render, path: to } = useT(langOf(Astro.url));
-const products = liveProducts();
+const products = shownProducts();
 ---
 
 {
@@ -21,6 +21,11 @@ const products = liveProducts();
     <ul class="mt-8 grid gap-4 sm:grid-cols-2" data-store-list>
       {products.map((p) => (
         <li class="card flex h-full flex-col p-5">
+          {p.images && (
+            <a href={to(`/store/${p.id}`)} tabindex="-1" aria-hidden="true" class="mb-4 block overflow-hidden rounded-md border border-hairline">
+              <img src={`/store-img/${p.images.cover}`} alt={t('store.previewCover')} width="640" height="906" loading="lazy" decoding="async" class="block h-56 w-full object-cover object-top" />
+            </a>
+          )}
           <h2 class="text-lg">
             <a href={to(`/store/${p.id}`)} class="text-ink no-underline hover:underline" set:html={render(t(`pages./store/${p.id}.h1`))} />
           </h2>

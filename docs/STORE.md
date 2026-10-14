@@ -56,6 +56,8 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 2. Upload any one-page PDF to the bucket as `test/sample.pdf`.
 3. Open `/store/sample-test` on the preview URL: it sells the ₹1 sample. Pay with Razorpay's test UPI/card, watch the order turn *paid* in `/admin/orders`, download the file, then mark it refunded and see the download close.
 
+**Seeing the store on a preview.** A build on a Cloudflare branch preview (`CF_PAGES_BRANCH` set and not `main`) treats `test` products as listed: the header gets a *Store* link, `/store` lists them, and their pages are full pages. The ₹1 sample has `unlisted: true`, so it keeps a noindex page and stays out of the list. Production (`main`) and CI builds are unchanged until a product is `live`.
+
 `STORE_TEST_PRODUCTS` must **not** be set in Production: the sample product is only sold where it is `1`.
 
 ## Adding a real product
@@ -67,6 +69,10 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 5. `npm test`, build, merge. The store page, the product page and the sitemap entries appear by themselves; with nothing live they stay `noindex` and out of the sitemap.
 
 Changing a price or a file later: edit `src/lib/store.js`. Already-created orders keep the amount they were created with.
+
+## Product pictures ("Look inside")
+
+A product's `images` in `src/lib/store.js` name three files in `public/store-img/`: the cover, one inside page shown free (`openPage`), and a later page **blurred in the file itself** with a lock on top. Make them from the PDF that is sold (`pdftoppm -r 110`, then 640 px wide WebP), never from a review copy. The blur must be in the image: a CSS blur would still ship the readable page.
 
 ## Rules the code enforces
 

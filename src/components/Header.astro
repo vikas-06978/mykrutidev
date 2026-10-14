@@ -36,6 +36,8 @@ const toAnchor = (href: string) => {
 };
 const allConverters = getPage('/all-converters');
 const showAll = allConverters && isLive(allConverters);
+const storePage = getPage('/store');
+const showStore = storePage && isLive(storePage);
 
 // Colour themes. The inline script in Base.astro applies them; this is only
 // the control (see ThemePicker.astro).
@@ -168,6 +170,23 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               </ul>
             </li>
           ))
+        }
+
+        {
+          showStore && (
+            <li>
+              <a
+                href={to('/store')}
+                aria-current={path.startsWith('/store') ? 'page' : undefined}
+                class:list={[
+                  'block rounded-(--radius-chrome) px-2.5 py-2 font-medium no-underline whitespace-nowrap',
+                  path.startsWith('/store') ? 'bg-inset text-ink' : 'text-brick hover:bg-inset',
+                ]}
+              >
+                {t('nav.store')}
+              </a>
+            </li>
+          )
         }
 
         {
@@ -456,6 +475,20 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
             </details>
           </li>
         ))
+      }
+
+      {
+        showStore && (
+          <li>
+            <a
+              href={to('/store')}
+              aria-current={path.startsWith('/store') ? 'page' : undefined}
+              class="flex min-h-11 items-center py-3 text-base font-medium text-brick no-underline"
+            >
+              {t('nav.store')}
+            </a>
+          </li>
+        )
       }
 
       {

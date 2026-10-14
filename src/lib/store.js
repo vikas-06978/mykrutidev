@@ -52,6 +52,8 @@ export const STORE = {
  * @property {string} file       the object key in the R2 bucket
  * @property {string} fileName   the name the buyer's browser saves it as
  * @property {number} pages
+ * @property {boolean} [unlisted] a test product that is not shown in the store list (its page still exists on a preview)
+ * @property {{cover: string, open: string, openPage: number, locked: string}} [images] files in public/store-img
  * @property {boolean} [stamp] every download carries the buyer's stamp (the file in R2 must be prepared with
  *   scripts/prepare-store-pdf.mjs, see docs/STORE.md); an unprepared file is served as it is
  */
@@ -61,6 +63,7 @@ export const PRODUCTS = [
   {
     id: 'sample-test',
     status: 'test',
+    unlisted: true,
     title: 'MyKrutiDev sample file (test purchase)',
     pricePaise: 100,
     file: 'test/sample.pdf',
@@ -80,6 +83,8 @@ export const PRODUCTS = [
     fileName: 'kruti-dev-7-day-starter.pdf',
     pages: 32,
     stamp: true,
+    // Pictures of the PDF in public/store-img: the cover, one page shown free (its number), and a blurred later page.
+    images: { cover: 'kruti-dev-7-day-starter-cover.webp', open: 'kruti-dev-7-day-starter-page-3.webp', openPage: 3, locked: 'kruti-dev-7-day-starter-locked.webp' },
   },
 ];
 
@@ -94,6 +99,22 @@ export function sellable(product, env = {}) {
 
 /** Products on sale to the public: the store page lists these. */
 export const liveProducts = () => PRODUCTS.filter((p) => p.status === 'live');
+
+/**
+ * A build on a Cloudflare branch preview (not production, which builds `main`)
+ * also shows the 'test' products, so the store can be looked at before it is
+ * live. Production and CI builds never do: CF_PAGES_BRANCH is unset in CI and
+ * is 'main' in production.
+ */
+export const isPreviewBuild = (env = (typeof process !== 'undefined' ? process.env : {})) =>
+  Boolean(env.CF_PAGES_BRANCH) && env.CF_PAGES_BRANCH !== 'main';
+
+/** Products the page shows: the live ones, plus the test ones on a preview build (the unlisted ₹1 sample stays out of the list). */
+export const shownProducts = (preview = isPreviewBuild()) =>
+  PRODUCTS.filter((p) => p.status === 'live' || (preview && p.status === 'test' && !p.unlisted));
+
+/** Is this product's page a real, listed page in this build (not noindex)? The unlisted sample keeps a noindex page. */
+export const hasPage = (p, preview = isPreviewBuild()) => p.status === 'live' || (preview && p.status === 'test' && !p.unlisted);
 
 /** 19900 -> "199", 19950 -> "199.50". The page adds the rupee sign. */
 export function rupees(paise) {

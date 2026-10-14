@@ -22,6 +22,7 @@ import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } fro
 import SoonBadge from './SoonBadge.astro';
 import StoreList from './StoreList.astro';
 import StoreBuy from './StoreBuy.astro';
+import StorePreview from './StorePreview.astro';
 import StoreThanks from './StoreThanks.astro';
 import { STORE } from '../lib/store.js';
 import { BUSINESS, businessLines } from '../lib/business.js';
@@ -146,6 +147,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {live && page.kind === 'converter' && <FontStrip page={page} />}
 
     {path === '/store' && <StoreList />}
+    {page.product && <StorePreview product={page.product} />}
     {page.product && <StoreBuy product={page.product} />}
     {path === '/store/thanks' && <StoreThanks />}
 
