@@ -61,14 +61,15 @@ describe('the catalog', () => {
     assert.equal(isPreviewBuild({ CF_PAGES_BRANCH: 'claude/x' }), true);
   });
 
-  test('a product that is on sale needs the seller details on /contact', () => {
+  test('a product that is on sale needs the seller name and address on /contact', () => {
     if (liveProducts().length === 0) return;
-    assert.ok(BUSINESS.name.trim() && BUSINESS.address.trim() && BUSINESS.phone.trim(), 'fill in src/lib/business.js');
+    assert.ok(BUSINESS.name.trim() && BUSINESS.address.trim(), 'fill in src/lib/business.js');
   });
 
   test('businessLines drops empty lines', () => {
     assert.deepEqual(businessLines({ name: ' A ', address: '', phone: '1' }), ['A', '1']);
     assert.deepEqual(businessLines({ name: '', address: '', phone: '' }), []);
+    assert.deepEqual(businessLines({ name: 'A', address: 'B', phone: '', email: 'a@b.c' }), ['A', 'B', 'a@b.c']);
   });
 });
 

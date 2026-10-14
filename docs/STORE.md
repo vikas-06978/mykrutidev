@@ -65,7 +65,7 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 1. Make the PDF. Upload it to the bucket, e.g. `ebooks/ssc-chsl-typing-mock-tests.pdf`.
 2. Add an entry to `PRODUCTS` in `src/lib/store.js` with `status: 'live'`, its `pricePaise` (₹199 → `19900`), `file`, `fileName`, `pages`.
 3. Add `pages["/store/<id>"]` (nav, h1, title, description, lede, body) to every `src/i18n/<lang>.json` (and the matching `i18n-drafts/`).
-4. Fill `src/lib/business.js` (name, address, phone: the same as on the Razorpay KYC). A test fails while a product is live and these are empty.
+4. Fill `src/lib/business.js` (name and address, the same as on the Razorpay KYC; the phone is optional and is not printed while empty). A test fails while a product is live and the name or address is empty.
 5. `npm test`, build, merge. The store page, the product page and the sitemap entries appear by themselves; with nothing live they stay `noindex` and out of the sitemap.
 
 Changing a price or a file later: edit `src/lib/store.js`. Already-created orders keep the amount they were created with.
