@@ -1,6 +1,7 @@
 ---
 /**
- * "Convert a document": upload a .docx or .txt, convert it, download it.
+ * "Convert a document": upload a .docx, .xlsx, .csv or .txt, convert it,
+ * download it. Spreadsheets go through src/lib/sheetConvert.js.
  *
  * Everything happens in the browser. The file is read with the File API,
  * converted by src/lib/docConvert.js - which uses the same convert() as the
@@ -117,7 +118,7 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         id={`${id}-input`}
         data-role="input"
         type="file"
-        accept=".docx,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+        accept=".docx,.xlsx,.xlsm,.csv,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
         class="sr-only"
       />
     </label>
@@ -160,11 +161,19 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
   import { track } from '../scripts/track.js';
 
   type Mod = typeof import('../lib/docConvert.js');
+  type SheetMod = typeof import('../lib/sheetConvert.js');
   let mod: Promise<Mod> | null = null;
+  let sheetMod: Promise<SheetMod> | null = null;
   // A failed load is not cached, so the next upload tries again.
   const load = () =>
     (mod ??= import('../lib/docConvert.js').catch((err) => {
       mod = null;
+      throw err;
+    }));
+  // Spreadsheets only: loaded when an .xlsx or .csv is dropped.
+  const loadSheet = () =>
+    (sheetMod ??= import('../lib/sheetConvert.js').catch((err) => {
+      sheetMod = null;
       throw err;
     }));
 
@@ -264,7 +273,38 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         const { pair, font } = target();
         const toUnicode = pair.to === 'unicode';
 
-        if (checked.kind === 'docx') {
+        if (checked.kind === 'xlsx') {
+          const sm = await loadSheet();
+          const out = await sm.convertXlsx(bytes, {
+            direction: pair,
+            unicodeFont: toUnicode ? font : undefined,
+            onProgress: (f) => run === busy && setProgress(f),
+          });
+          if (run !== busy) return;
+          stats = out.stats;
+          const ext = /\.xlsm$/i.test(file.name) ? 'xlsm' : 'xlsx';
+          offer(download, sm.xlsxBlob(out.bytes), m.outputName(file.name, pair, ext));
+        } else if (checked.kind === 'csv') {
+          const sm = await loadSheet();
+          const { text } = m.decodeTextFile(bytes);
+          setProgress(0.4);
+          const out = sm.convertCsv(text, pair);
+          if (run !== busy) return;
+          stats = out.stats;
+          offer(download, sm.csvBlob(out.text), m.outputName(file.name, pair, 'csv'));
+          // A CSV cannot carry a font: an Excel file with the font already set
+          // is offered too, built from the same converted rows.
+          if (stats.convertedChars > 0) {
+            const original = sm.parseCsv(text, out.delimiter).rows;
+            const xlsx = sm.csvToXlsx(out.rows, original, pair, {
+              unicodeFont: toUnicode ? font : undefined,
+              sheetName: file.name.replace(/\.[^.]+$/, ''),
+            });
+            offer(downloadDocx, sm.xlsxBlob(xlsx), m.outputName(file.name, pair, 'xlsx'));
+            downloadDocx.textContent = fill(L.downloadXlsx, { font });
+            downloadDocx.hidden = false;
+          }
+        } else if (checked.kind === 'docx') {
           const out = await m.convertDocx(bytes, {
             direction: pair,
             unicodeFont: toUnicode ? font : undefined,

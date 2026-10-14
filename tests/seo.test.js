@@ -332,10 +332,11 @@ describe('sharing previews and structured data', () => {
 
   test('WebApplication on every page with a working tool, and on no other page', () => {
     // The tools mark their own root element: a converter, English to Hindi
-    // typing, the Hindi keyboard, the typing tutor, the everyday Hindi tools.
+    // typing, the Hindi keyboard, the typing tutor, the everyday Hindi tools,
+    // the file converter (the Excel page).
     // Read from the built page, so a tool embedded on a new page cannot go
     // without it.
-    const TOOL = /<[a-z]+\b[^>]*\sdata-(?:converter|translit|keyboard|tutor|hindi-tool)(?=[\s>=])/;
+    const TOOL = /<[a-z]+\b[^>]*\sdata-(?:converter|doc-converter|translit|keyboard|tutor|hindi-tool)(?=[\s>=])/;
     let n = 0;
     for (const [u, html] of pages) {
       const hasTool = TOOL.test(html);

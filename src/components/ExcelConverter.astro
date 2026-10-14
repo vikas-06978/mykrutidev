@@ -1,0 +1,9 @@
+---
+/**
+ * The Excel page's tool: the document converter reading Kruti Dev, which
+ * takes .xlsx and .csv (src/lib/sheetConvert.js) as well as Word files.
+ */
+import DocumentConverter from './DocumentConverter.astro';
+---
+
+<DocumentConverter from="kruti-dev" to="unicode" embedded />

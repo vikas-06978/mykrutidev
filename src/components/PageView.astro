@@ -17,6 +17,7 @@ import { printableFor } from '../lib/printables.js';
 import AllConverters from './AllConverters.astro';
 import FontStrip from './FontStrip.astro';
 import HindiTool from './HindiTool.astro';
+import ExcelConverter from './ExcelConverter.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
@@ -63,6 +64,7 @@ const TOOLS: Record<string, any> = {
   '/hindi-typing-test': TypingTutor,
   '/hindi-typing-test-for-exams': TypingTutor,
   '/how-to-type-hindi-in-ms-word': Transliterator,
+  '/kruti-dev-excel-to-unicode': ExcelConverter,
 };
 // The everyday tools share one component, told which tool to be.
 const hindiTool = (TOOL_PAGES as Record<string, { tool: string; script?: string }>)[path];

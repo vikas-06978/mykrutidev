@@ -364,8 +364,17 @@ describe('english safety toggle', () => {
   });
 });
 
+describe('spreadsheet headings stay English', () => {
+  for (const w of ['Amount', 'Ram', 'Rate', 'Remarks', 'Gender', 'Male', 'Female', 'Price', 'Quantity', 'Balance']) {
+    test(w, () => assert.equal(convert(w, 'kruti-dev', 'unicode'), w));
+  }
+  test('while the Hindi beside them still converts', () => {
+    assert.equal(convert('Amount jkf\'k', 'kruti-dev', 'unicode'), 'Amount राशि');
+  });
+});
+
 describe('isWellFormedDevanagari', () => {
-  const ok = ['भारत', 'कि', 'कर्म', 'क्रम', 'क़', 'हिन्दी'];
+  const ok = ['भारत', 'कि', 'कर्म', 'क्रम', 'क़', 'हिन्दी', 'कीं', 'उं', 'है।', 'संदेश', 'दुःख'];
   const bad = [
     'ा', 'ेक', 'क्', 'ंक',
     // A halant with nothing to kill. This is what an English word decodes to
@@ -375,6 +384,10 @@ describe('isWellFormedDevanagari', () => {
     'आे',
     // A nukta with no consonant under it.
     '़',
+    // A nasal mark after a halant or another nasal mark: "Ram" is त्ंउ.
+    'त्ंउ', 'कंं',
+    // Letters straight after a danda at the start: "Amount" is ।उवनदज.
+    '।उवनदज', '।ंकींंत',
   ];
   for (const s of ok) test(`well formed: ${s}`, () => assert.ok(isWellFormedDevanagari(s)));
   for (const s of bad) test(`malformed: ${s}`, () => assert.ok(!isWellFormedDevanagari(s)));

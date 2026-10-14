@@ -26,7 +26,7 @@ import { pairOf, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
 // and checked against checkFile() in i18n.test.js.
 export const TOO_LARGE_EN =
   'This file is larger than 20 MB. Please split it into smaller files and convert them one at a time.';
-export const ONLY_TYPES_EN = 'Only .docx (Word) and .txt files can be converted here.';
+export const ONLY_TYPES_EN = 'Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.';
 
 /**
  * @param {string} msg  what checkFile() / messageFor() returned
@@ -40,6 +40,9 @@ export function localizeDocMessage(msg, m, L) {
   if (msg === m.SAVE_AS_MESSAGE) return L.saveAs;
   if (msg.startsWith(m.SAVE_AS_MESSAGE)) return `${L.saveAs} ${L.passwordHint}`;
   if (msg === m.DAMAGED_MESSAGE) return L.damaged;
+  if (msg === m.SHEET_SAVE_AS_MESSAGE) return L.sheetSaveAs;
+  if (m.SHEET_SAVE_AS_MESSAGE && msg.startsWith(m.SHEET_SAVE_AS_MESSAGE)) return `${L.sheetSaveAs} ${L.sheetPasswordHint}`;
+  if (msg === m.SHEET_DAMAGED_MESSAGE) return L.sheetDamaged;
   if (msg === m.GENERIC_MESSAGE) return L.generic;
   if (msg === TOO_LARGE_EN) return L.tooLarge;
   if (msg === ONLY_TYPES_EN) return L.onlyTypes;
@@ -61,7 +64,11 @@ const fmt = (n) => n.toLocaleString('en-IN');
 export function localizeSummary(stats, direction, L) {
   const pair = pairOf(direction);
   const count = (n, one, many) => fill(n === 1 ? one : many, { n: fmt(n) });
-  const parts = [fill(L.summaryLine, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
+  // A spreadsheet counts cells and sheets (sheetConvert.js); a document, paragraphs and tables.
+  const parts =
+    'cells' in stats
+      ? [fill(L.summaryLine, { paragraphs: count(stats.cells, L.cellOne, L.cellMany) }), count(stats.sheets, L.sheetOne, L.sheetMany)]
+      : [fill(L.summaryLine, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
   if (stats.tables) parts.push(count(stats.tables, L.tableOne, L.tableMany));
   const line = parts.join(' · ');
 

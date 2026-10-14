@@ -387,10 +387,10 @@ describe('checking the file', () => {
     assert.deepEqual(checkFile({ name: 'a.docx', size: 10, head: strToU8('hello') }), { error: DAMAGED_MESSAGE });
   });
 
-  test('.docx and .txt are accepted; anything else is not', () => {
+  test('.docx and .txt are accepted (.xlsx and .csv: sheetConvert.test.js); anything else is not', () => {
     assert.deepEqual(checkFile({ name: 'a.docx', size: 10, head: strToU8('PK\x03\x04') }), { kind: 'docx' });
     assert.deepEqual(checkFile({ name: 'a.TXT', size: 10 }), { kind: 'txt' });
-    assert.ok(checkFile({ name: 'a.xlsx', size: 10 }).error);
+    assert.ok(checkFile({ name: 'a.pptx', size: 10 }).error);
   });
 
   test('over 20 MB is refused', () => {

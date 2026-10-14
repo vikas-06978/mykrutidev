@@ -1,6 +1,6 @@
 /**
  * Whole-document conversion for the Kruti Dev pages: .docx and .txt in, the
- * same file converted out. Runs entirely in the browser; nothing is uploaded.
+ * same file converted out (.xlsx and .csv: sheetConvert.js). Runs entirely in the browser; nothing is uploaded.
  *
  * ---------------------------------------------------------------------------
  * THE ONE RULE: CHANGE THE HINDI, NOTHING ELSE
@@ -68,6 +68,9 @@ export const SAVE_AS_MESSAGE = 'Please open it in Word and Save As → Word Docu
 export const PDF_MESSAGE =
   'PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.';
 export const DAMAGED_MESSAGE = 'This file seems damaged. Open it in Word and save it again.';
+// The same two for spreadsheets (sheetConvert.js).
+export const SHEET_SAVE_AS_MESSAGE = 'Please open it in Excel and Save As → Excel Workbook (.xlsx).';
+export const SHEET_DAMAGED_MESSAGE = 'This file seems damaged. Open it in Excel and save it again.';
 export const GENERIC_MESSAGE = 'Something went wrong converting this file.';
 
 /** An error whose message is written for the person, and is safe to show. */
@@ -90,7 +93,7 @@ const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingm
 /**
  * @param {{ name: string, size: number, head?: Uint8Array }} file
  *   `head` is the first few bytes, to catch a .doc or .pdf renamed to .docx.
- * @returns {{ kind: 'docx' | 'txt' } | { error: string }}
+ * @returns {{ kind: 'docx' | 'txt' | 'xlsx' | 'csv' } | { error: string }}
  */
 export function checkFile({ name, size, head }) {
   const ext = (name.match(/\.([^.]+)$/)?.[1] ?? '').toLowerCase();
@@ -118,7 +121,15 @@ export function checkFile({ name, size, head }) {
     return { kind: 'docx' };
   }
   if (ext === 'txt') return { kind: 'txt' };
-  return { error: 'Only .docx (Word) and .txt files can be converted here.' };
+  if (['xls', 'ods', 'numbers', 'xlsb'].includes(ext)) return { error: SHEET_SAVE_AS_MESSAGE };
+  if (ext === 'xlsx' || ext === 'xlsm') {
+    // A password-protected workbook is stored in the old container too.
+    if (isOle) return { error: `${SHEET_SAVE_AS_MESSAGE} If the workbook is password-protected, remove the password first.` };
+    if (head && !isZip) return { error: SHEET_DAMAGED_MESSAGE };
+    return { kind: 'xlsx' };
+  }
+  if (ext === 'csv') return { kind: 'csv' };
+  return { error: 'Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.' };
 }
 
 /** original.docx -> original-unicode.docx, original-krutidev.docx ... */
@@ -196,7 +207,7 @@ export const unicodeTextToKruti = (text) => unicodeTextTo(text, 'kruti-dev');
  * Does a font name in the document belong to `key`? A font on the same
  * keyboard layout counts too: DevLys 010 text converts on a Kruti Dev page.
  */
-function fontIs(name, key) {
+export function fontIs(name, key) {
   if (!name) return false;
   if (WORD_FONTS[key]?.match.test(name)) return true;
   const layout = FONTS[key]?.layout;
@@ -842,7 +853,10 @@ const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
  */
 export function summarize(stats, direction) {
   const pair = pairOf(direction);
-  const parts = [`Converted ${plural(stats.paragraphs, 'paragraph', 'paragraphs')}`];
+  const parts =
+    'cells' in stats
+      ? [`Converted ${plural(stats.cells, 'cell', 'cells')}`, plural(stats.sheets, 'sheet', 'sheets')]
+      : [`Converted ${plural(stats.paragraphs, 'paragraph', 'paragraphs')}`];
   if (stats.tables) parts.push(plural(stats.tables, 'table', 'tables'));
   const line = parts.join(' · ');
 

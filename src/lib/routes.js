@@ -80,7 +80,7 @@ export const PAGES = [
     from: 'kruti-dev',
     to: 'unicode',
     group: 'Kruti Dev',
-    related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev'],
+    related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev', '/kruti-dev-excel-to-unicode'],
   },
   {
     path: '/unicode-to-kruti-dev',
@@ -984,6 +984,17 @@ export const PAGES = [
     app: true,
     group: 'More',
     related: ['/english-to-hindi-typing', '/unicode-to-kruti-dev', '/hindi-keyboard'],
+  },
+  {
+    path: '/kruti-dev-excel-to-unicode',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    // The document converter, reading Kruti Dev, sits at the top (PageView's TOOLS).
+    app: true,
+    group: 'More',
+    related: ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal'],
   },
   // ---- Printables: an HTML page + a PDF each, built from the tutor's data
   // (src/lib/printables.js). The keyboard chart carries the one menu entry;

@@ -86,10 +86,10 @@ test.describe('both tabs are visible on first load, with the tool', () => {
   test('the labels, in both languages', async ({ page }) => {
     await page.goto('/');
     await expect(tab(page, 'text')).toHaveText('Paste text');
-    await expect(tab(page, 'file')).toHaveText(/Upload Word file\s*New/);
+    await expect(tab(page, 'file')).toHaveText(/Upload Word \/ Excel\s*New/);
     await page.goto('/hi/');
     await expect(tab(page, 'text')).toHaveText('टेक्स्ट पेस्ट करें');
-    await expect(tab(page, 'file')).toHaveText(/Word फ़ाइल अपलोड करें\s*नया/);
+    await expect(tab(page, 'file')).toHaveText(/Word \/ Excel फ़ाइल अपलोड करें\s*नया/);
   });
 });
 
@@ -278,7 +278,7 @@ test.describe('drag a file anywhere', () => {
     await page.goto('/unicode-to-kruti-dev/');
     await dragFileOnto(page, 'main', { name: 'photo.png', type: 'image/png', base64: btoa('\x89PNG....') });
     await expect(tab(page, 'file')).toHaveAttribute('aria-selected', 'true');
-    await expect(error).toHaveText('Only .docx (Word) and .txt files can be converted here.');
+    await expect(error).toHaveText('Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.');
     // A PDF gets the more useful advice checkFile() gives it.
     await dragFileOnto(page, 'main', { name: 'scan.pdf', type: 'application/pdf', base64: btoa('%PDF-1.4 x') });
     await expect(error).toHaveText(

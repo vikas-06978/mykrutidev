@@ -203,12 +203,12 @@
   },
   "doc": {
     "title": "Convert a document",
-    "introLegacy": "Upload a Word (.docx) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
-    "introUnicode": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
+    "introLegacy": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
+    "introUnicode": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
     "private": "Your file never leaves your computer.",
     "drag": "Drag a file here, or ",
     "choose": "Choose file",
-    "limits": ".docx or .txt, up to 20 MB",
+    "limits": ".docx, .xlsx, .csv or .txt, up to 20 MB",
     "targetLabel": "Convert to:",
     "unicodeIn": "Unicode ({font})",
     "groupUnicode": "Unicode",
@@ -221,18 +221,26 @@
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
+    "downloadXlsx": "Download as Excel (.xlsx) with {font}",
     "saveAs": "Please open it in Word and Save As → Word Document (.docx).",
     "pdf": "PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.",
     "passwordHint": "If the document is password-protected, remove the password first.",
     "tooLarge": "This file is larger than 20 MB. Please split it into smaller files and convert them one at a time.",
-    "onlyTypes": "Only .docx (Word) and .txt files can be converted here.",
+    "onlyTypes": "Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.",
     "damaged": "This file seems damaged. Open it in Word and save it again.",
+    "sheetSaveAs": "Please open it in Excel and Save As → Excel Workbook (.xlsx).",
+    "sheetPasswordHint": "If the workbook is password-protected, remove the password first.",
+    "sheetDamaged": "This file seems damaged. Open it in Excel and save it again.",
     "generic": "Something went wrong converting this file.",
     "summaryLine": "Converted {paragraphs}",
     "paragraphOne": "{n} paragraph",
     "paragraphMany": "{n} paragraphs",
     "tableOne": "{n} table",
     "tableMany": "{n} tables",
+    "cellOne": "{n} cell",
+    "cellMany": "{n} cells",
+    "sheetOne": "{n} sheet",
+    "sheetMany": "{n} sheets",
     "fontKruti": "Kruti Dev",
     "fontUnicode": "Unicode",
     "noLegacy": "No {font} text found in this document. Is it already Unicode?",
@@ -3330,6 +3338,61 @@
         "<p>Office files often mix both. Convert rather than retype: <a href=\"/?mode=file\">Kruti Dev to Unicode</a> for old documents, <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> when a template needs Kruti Dev. Both convert whole .docx files and keep tables and formatting.</p>"
       ]
     },
+    "/kruti-dev-excel-to-unicode": {
+      "nav": "Kruti Dev Excel to Unicode",
+      "h1": "Kruti Dev Excel to Unicode Converter",
+      "title": "Kruti Dev Excel to Unicode Converter | MyKrutiDev",
+      "description": "Convert a whole Excel sheet from Kruti Dev to Unicode in one go. Upload .xlsx or .csv, only the Kruti Dev cells change and the formatting stays. Free, private.",
+      "lede": "Upload an Excel file (.xlsx) or a .csv and every cell typed in Kruti Dev becomes Unicode Hindi in Mangal. Numbers, formulas, English cells, colours and column widths stay as they were, and the file never leaves your computer.",
+      "howTo": {
+        "steps": [
+          "Choose the Excel file (.xlsx) or .csv below, or drag it onto the box. An old .xls file must first be saved as .xlsx in Excel: <strong>File → Save As → Excel Workbook</strong>.",
+          "Pick the font for the Hindi: Unicode in Mangal or Nirmala UI, or another Hindi font such as DevLys 010.",
+          "Download the converted file and open it in Excel. The Kruti Dev cells now hold Unicode Hindi, which you can search, sort, filter and paste anywhere."
+        ],
+        "tip": "Converting the other way? On <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> the same upload turns Unicode cells into Kruti Dev 010."
+      },
+      "problems": [
+        {
+          "problem": "Some cells are still in Kruti Dev after converting",
+          "fix": "Only cells whose font is Kruti Dev (or DevLys and the other fonts on the same keys) are converted, because the font is the only sure way to tell Kruti Dev code from English. In the original file, select those cells, set their font to Kruti Dev 010, save and convert again."
+        },
+        {
+          "problem": "My file is .xls, not .xlsx",
+          "fix": "Open it in Excel and choose <strong>File → Save As → Excel Workbook (.xlsx)</strong>, then upload that copy. From Google Sheets, choose <strong>File → Download → Microsoft Excel (.xlsx)</strong>."
+        },
+        {
+          "problem": "The CSV opens in Excel as gibberish",
+          "fix": "A CSV has no fonts, so Kruti Dev text shows as English letters until its font is set. Use the Excel (.xlsx) download offered next to the CSV: the font is already set in it."
+        },
+        {
+          "problem": "Text in charts, shapes or the page header did not change",
+          "fix": "Only cells and the notes on cells are converted. Copy that other text into the <a href=\"/\">Kruti Dev to Unicode</a> box and paste the result back."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does it change my numbers or formulas?",
+          "a": "No. Numbers, dates and formulas are left exactly as they are. Only the text in cells set in a Kruti Dev font is converted, and formulas that refer to those cells keep working."
+        },
+        {
+          "q": "Is my Excel file uploaded anywhere?",
+          "a": "No. Your own browser reads and converts the file, on your own computer. Nothing is sent to this site or anyone else, so it is safe for office data."
+        },
+        {
+          "q": "Can I convert a CSV file?",
+          "a": "Yes. A CSV has no fonts, so each field is judged on its own: numbers, dates and English words stay, Kruti Dev text is converted. You get the converted CSV and an Excel file with the Hindi font already set. If you also have the file as .xlsx, convert that instead: its fonts say exactly which cells are Kruti Dev."
+        },
+        {
+          "q": "Which fonts does it convert?",
+          "a": "On this page, Kruti Dev 010 and the other Kruti Dev versions, DevLys 010 and the fonts typed on the same keys. The upload on each converter page of this site works the same way for that page’s font."
+        },
+        {
+          "q": "Does it work with Google Sheets or LibreOffice?",
+          "a": "Yes. In Google Sheets choose <strong>File → Download → Microsoft Excel (.xlsx)</strong>, convert that file here and open the result with <strong>File → Import</strong>. LibreOffice Calc opens and saves .xlsx files directly."
+        }
+      ]
+    },
     "/contact": {
       "nav": "Contact",
       "h1": "Contact MyKrutiDev",
@@ -5765,9 +5828,9 @@
   "modes": {
     "label": "Convert text or a file",
     "text": "Paste text",
-    "file": "Upload Word file",
+    "file": "Upload Word / Excel",
     "new": "New",
-    "hint": "Converting a full document? <a href=\"{href}\">Upload the Word file</a>, formatting stays.",
+    "hint": "Converting a full document or spreadsheet? <a href=\"{href}\">Upload the Word or Excel file</a>, formatting stays.",
     "back": "Have a full Word file? <a href=\"{href}\">Upload it here ↑</a>",
     "drop": "Drop your file to convert"
   },

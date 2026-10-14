@@ -3698,6 +3698,16 @@ const ENGLISH_WORDS = new Set([
   'status','sub','subject','submitted','sum','summary','superintendent','tahsil','tehsil',
   'teacher','test','thanks','total','town','training','university','urgent','village','ward',
   'website','www','year','yours',
+  // Spreadsheet column headings (a CSV has no fonts to tell English from
+  // Kruti Dev). Each decodes to no Hindi word: amount is ंउवनदज, rate is
+  // तंजम. Not tax (जंग) or paid (चंपक), which are Hindi too.
+  'aadhaar','aadhar','absent','amount','balance','basic','bill','birth','caste','credit',
+  'days','debit','deduction','description','dob','due','experience','fail','female','gender',
+  'grand','gross','husband','income','invoice','item','items','khasra','leave','male','mark',
+  'marks','maximum','minimum','net','obtained','occupation','particulars','pass','percentage',
+  'pincode','place','police','present','price','qty','qualification','quantity','rank','rate',
+  'receipt','relation','religion','remark','remarks','salary','serial','sno','sr','unit','units',
+  'value','voucher','wife',
 ]);
 
 const RE_ALL_CAPS = /^[A-Z]{2,6}$/;
@@ -3721,6 +3731,10 @@ export function isWellFormedDevanagari(s) {
     const isHalant = ch === HALANT;
     const isNukta = ch === NUKTA;
 
+    // A danda ends a sentence: letters straight after one at the start of a
+    // word are code, not Hindi ("Amount" decodes to ।उवनदज).
+    if (/[।॥]/.test(prev) && !sawDevanagari && (isCons || isIndepVowel || isMatra || isNasal)) return false;
+
     if (isCons || isIndepVowel) sawDevanagari = true;
 
     // A vowel sign needs a consonant (or nukta/another sign) to attach to.
@@ -3735,8 +3749,9 @@ export function isWellFormedDevanagari(s) {
     }
     // A nukta needs a consonant before it.
     if (isNukta && !isConsonantChar(prev)) return false;
-    // A nasal mark cannot open a syllable.
-    if (isNasal && prev === '') return false;
+    // A nasal mark cannot open a syllable, follow a halant, or double up:
+    // Kruti Dev "Ram" decodes to त्ंउ, which no Hindi word spells.
+    if (isNasal && (prev === '' || prev === HALANT || /[ँ-ः]/.test(prev))) return false;
 
     prev = ch;
   }
