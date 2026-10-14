@@ -79,7 +79,7 @@ export async function createPaymentLink(env, p, fetchImpl = fetch) {
       accept_partial: false,
       reference_id: p.referenceId,
       description: p.description.slice(0, 2048),
-      customer: { email: p.email },
+      ...(p.email ? { customer: { email: p.email } } : {}),
       // Razorpay does not message the buyer: we send our own email with the download link.
       notify: { sms: false, email: false },
       reminder_enable: false,

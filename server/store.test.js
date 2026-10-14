@@ -182,7 +182,6 @@ describe('POST /api/store/checkout', () => {
     const net = fakeNet();
     const run = (body, opts, env = ENV()) => handleCheckout(post('/api/store/checkout', body, opts), env, { fetch: net.fetch });
     assert.equal((await run({ ...good, email: 'not-an-email' })).status, 400);
-    assert.equal((await run({ ...good, email: '' })).status, 400);
     assert.equal((await run({ ...good, accept: false })).status, 400);
     assert.equal((await run({ ...good, accept: 'yes' })).status, 400);
     assert.equal((await run({ ...good, productId: 'nothing' })).status, 404);
@@ -194,6 +193,17 @@ describe('POST /api/store/checkout', () => {
     assert.equal((await run(null, { raw: 'x'.repeat(5000) })).status, 413);
     assert.equal(net.calls.length, 0, 'Razorpay was never asked');
     assert.equal((await orders()).length, 0, 'no order row for any of them');
+  });
+
+  test('the email is optional: an order without one is made, and Razorpay is not given a customer', async () => {
+    const net = fakeNet();
+    const r = await handleCheckout(post('/api/store/checkout', { ...good, email: '' }), ENV(), { fetch: net.fetch });
+    assert.equal(r.status, 201);
+    const [row] = await orders();
+    assert.equal(row.email, '');
+    assert.equal(net.calls[0].body.customer, undefined);
+    // a typed email must still look like one
+    assert.equal((await handleCheckout(post('/api/store/checkout', { ...good, email: 'nope' }), ENV(), { fetch: net.fetch })).status, 400);
   });
 
   test('is rate limited per IP', async () => {
@@ -352,6 +362,31 @@ describe('POST /api/store/confirm', () => {
     assert.match(out.token, /^[0-9a-f]{64}$/);
     // Again (a refresh): the same answer.
     assert.deepEqual(await (await confirm()).json(), out);
+  });
+
+  test('paid without an email: no mail to the buyer, the owner is told, and the page is told to say "save this link"', async () => {
+    const net = fakeNet();
+    const env = { ...ENV(), RESEND_API_KEY: 're_test', NOTIFY_FROM: 'MyKrutiDev <contact@mykrutidev.com>', NOTIFY_TO: 'owner@example.com' };
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: '' }), env, { fetch: net.fetch });
+    const id = (await r0.json()).order;
+    net.pay();
+    const r = await handleConfirm(post('/api/store/confirm', { order: id }), env, { fetch: net.fetch });
+    const out = await r.json();
+    assert.equal(out.state, 'paid');
+    assert.equal(out.emailed, false);
+    assert.equal(net.mails.length, 1, 'only the owner is mailed');
+    assert.deepEqual(net.mails[0].to, ['owner@example.com']);
+    assert.match(net.mails[0].text, /no email given/);
+    assert.equal(net.mails[0].reply_to, undefined);
+    assert.equal((await orders())[0].mail_status, 'none');
+  });
+
+  test('paid with an email: the answer says it was emailed', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    net.pay();
+    const out = await (await handleConfirm(post('/api/store/confirm', { order: id }), ENV(), { fetch: net.fetch })).json();
+    assert.equal(out.emailed, true);
   });
 
   test('an unknown or malformed order id is refused', async () => {
@@ -608,6 +643,18 @@ describe('/admin/orders', () => {
     assert.equal(r.headers.get('Location'), '/admin/feedback');
     assert.equal((await handleAdminOrders(req(), { ...ENV(), ADMIN_KEY: '' })).status, 503);
     assert.equal((await handleAdminOrders(req(), { ...ENV(), DB: undefined })).status, 503);
+  });
+
+  test('a paid order shows its download link, and one without an email has no "Resend email"', async () => {
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: '' }), ENV(), { fetch: net.fetch });
+    const id = (await r0.json()).order;
+    net.pay();
+    await settleOrder(ENV(), id, { fetch: net.fetch });
+    const html = await (await handleAdminOrders(req(), ENV())).text();
+    const token = await downloadToken(ENV(), id);
+    assert.ok(html.includes(`/store/thanks#o=${id}&amp;t=${token}`) || html.includes(`/store/thanks#o=${id}&t=${token}`), 'the buyer\'s download page link is on the admin page');
+    assert.match(html, /no email/);
+    assert.doesNotMatch(html, /Resend email/);
   });
 
   test('lists orders with their status and totals, and escapes what buyers typed', async () => {

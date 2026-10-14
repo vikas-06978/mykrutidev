@@ -200,9 +200,14 @@ async function sendOrderMails(env, order, { fetchImpl, origin }) {
   if (!product) return;
   let status = 'off';
   if (canMail(env)) {
-    const link = downloadPage(origin, order.id, await downloadToken(env, order.id));
-    const sent = await sendMail(env, buyerMail(env, { order, product, link, origin }), fetchImpl);
-    status = sent ? 'sent' : 'failed';
+    // No email given: nothing to send to the buyer, the download is on the page they land on.
+    if (order.email) {
+      const link = downloadPage(origin, order.id, await downloadToken(env, order.id));
+      const sent = await sendMail(env, buyerMail(env, { order, product, link, origin }), fetchImpl);
+      status = sent ? 'sent' : 'failed';
+    } else {
+      status = 'none';
+    }
     if (String(env.NOTIFY_TO ?? '').trim()) await sendMail(env, ownerMail(env, { order, product, origin }), fetchImpl);
   }
   await env.DB.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(status, order.id).run();
@@ -260,6 +265,8 @@ async function paidView(env, order) {
   return {
     state: 'paid',
     productId: order.product_id,
+    /** false: no email was given, so the page must tell the buyer to keep its link */
+    emailed: !!order.email,
     token: await downloadToken(env, order.id),
     remaining: Math.max(0, order.max_downloads - order.downloads),
     expires: order.expires_at,

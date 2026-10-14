@@ -17,7 +17,7 @@
  *   3. Add its page text under `pages["/store/<id>"]` in every language
  *      (src/i18n/*.json) and a matching entry in routes.js (storeRoutes()).
  *
- * PRIVACY: an order stores the buyer's email, the product, the amount and the
+ * PRIVACY: an order stores the buyer's email (if they gave one), the product, the amount and the
  * Razorpay ids - nothing else. No IP address, no user agent. Unpaid orders are
  * deleted after UNPAID_DAYS.
  */
@@ -128,7 +128,8 @@ export function validateCheckout(body) {
   const productId = typeof body.productId === 'string' ? body.productId : '';
   if (!productId || productId.length > LIMITS.productId) errors.push('productId: missing');
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-  if (!email || email.length > LIMITS.email || !EMAIL_RE.test(email)) errors.push('email: not an email address');
+  // Optional: left empty, the buyer gets the download on the page after paying (and keeps that link).
+  if (email && (email.length > LIMITS.email || !EMAIL_RE.test(email))) errors.push('email: not an email address');
   if (body.accept !== true) errors.push('accept: the terms were not accepted');
   const lang = typeof body.lang === 'string' && /^[a-z]{2}$/.test(body.lang) ? body.lang : 'en';
   return errors.length ? { ok: false, errors } : { ok: true, value: { productId, email, lang } };

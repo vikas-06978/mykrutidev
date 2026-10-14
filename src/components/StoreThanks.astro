@@ -13,7 +13,7 @@ const lang = langOf(Astro.url);
 const { t, path: to } = useT(lang);
 const keys = [
   'thanksChecking', 'thanksWaiting', 'thanksPaid', 'thanksLeft', 'thanksEmail', 'thanksExpired', 'thanksRefunded',
-  'thanksClosed', 'thanksNone', 'thanksUnverified',
+  'thanksClosed', 'thanksNone', 'thanksUnverified', 'thanksSave', 'thanksCopy', 'thanksCopied',
 ];
 const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 ---
@@ -28,6 +28,7 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
   </form>
   <p class="mt-4 flex flex-wrap gap-3">
     <button type="button" class="btn btn-outline" data-st-retry hidden>{t('store.thanksRetry')}</button>
+    <button type="button" class="btn btn-outline" data-st-copy hidden>{t('store.thanksCopy')}</button>
     <a href={to('/store')} class="btn btn-ghost" data-st-store hidden>{t('store.thanksStore')}</a>
   </p>
 </section>
@@ -44,14 +45,18 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
     const download = $<HTMLFormElement>('[data-st-download]');
     const retry = $<HTMLButtonElement>('[data-st-retry]');
     const store = $<HTMLAnchorElement>('[data-st-store]');
+    const copy = $<HTMLButtonElement>('[data-st-copy]');
 
     const say = (text: string, more = '') => {
       status.textContent = text;
       extra.textContent = more;
       extra.hidden = !more;
     };
-    const showPaid = (d: { token: string; remaining: number; expires: number | null }, order: string) => {
-      say(L.thanksPaid, `${L.thanksLeft.replace('{n}', String(d.remaining)).replace('{days}', String(daysLeft(d.expires)))} ${L.thanksEmail}`);
+    const showPaid = (d: { token: string; remaining: number; expires: number | null; emailed?: boolean }, order: string) => {
+      // With an email the link is also in their inbox; without one, this page is the only copy, so say so.
+      const where = d.emailed ? L.thanksEmail : L.thanksSave;
+      say(L.thanksPaid, `${L.thanksLeft.replace('{n}', String(d.remaining)).replace('{days}', String(daysLeft(d.expires)))} ${where}`);
+      copy.hidden = !!d.emailed;
       const [o, t] = download.querySelectorAll<HTMLInputElement>('input');
       o.value = order;
       t.value = d.token;
@@ -110,6 +115,14 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
       showOther(state);
     }
     retry.addEventListener('click', () => void check());
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        copy.textContent = L.thanksCopied;
+      } catch {
+        window.prompt('', location.href);
+      }
+    });
     void check();
   }
 </script>

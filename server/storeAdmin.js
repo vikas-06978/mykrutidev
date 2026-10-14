@@ -12,7 +12,8 @@
  * The actions:
  *   check    ask Razorpay again whether an unpaid order was paid (a buyer who
  *            closed the tab, or a webhook that never came)
- *   resend   send the download email again
+ *   resend   send the download email again (only for an order that has an email)
+ *   (a paid order also shows its download link, to send to a buyer who gave no email)
  *   refund   end the downloads of a refunded order. The money itself is
  *            refunded in Razorpay's dashboard; when the webhook for it is set up
  *            this happens by itself for a full refund
@@ -66,7 +67,7 @@ async function setup(env) {
     .join('')}</ul>`;
 }
 
-function dashboard(env, { orders, totals, checks }) {
+function dashboard(env, { orders, totals, checks, links }) {
   const test = hasKeys(env) && mode(env) === 'test';
   const rows = orders
     .map((o) => {
@@ -78,7 +79,9 @@ function dashboard(env, { orders, totals, checks }) {
         );
       if (o.status === 'created') act('check', 'Check payment');
       if (o.status === 'paid') {
-        act('resend', 'Resend email');
+        // The buyer's own download page: for an order with no email, this is how you can send it to them yourself.
+        if (links[o.id]) actions.push(`<a class="fa-act" href="${esc(links[o.id])}">Download link</a>`);
+        if (o.email) act('resend', 'Resend email');
         act('extend', 'Extend');
         act('refund', 'Mark refunded');
       }
@@ -87,7 +90,7 @@ function dashboard(env, { orders, totals, checks }) {
   <td>${esc(o.status)}</td>
   <td>${esc(product?.title ?? o.product_id)}</td>
   <td class="fa-nowrap">${esc(price(o.amount))}</td>
-  <td><a href="mailto:${esc(o.email)}">${esc(o.email)}</a></td>
+  <td>${o.email ? `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : '<span class="sub">no email</span>'}</td>
   <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}</td>
   <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
   <td>${esc(o.mail_status ?? '')}</td>
@@ -215,7 +218,13 @@ export async function handleAdminOrders(request, env, deps = {}) {
       )
       .first(),
   ]);
+  const origin = siteOrigin(request);
+  const links = {};
+  for (const o of orders.results) {
+    if (o.status === 'paid') links[o.id] = downloadPage(origin, o.id, await downloadToken(env, o.id));
+  }
   return dashboard(env, {
+    links,
     orders: orders.results,
     totals: { paid: totals?.paid ?? 0, revenue: totals?.revenue ?? 0, refunded: totals?.refunded ?? 0, open: totals?.open ?? 0 },
     checks: await setup(env),

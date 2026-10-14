@@ -3368,7 +3368,7 @@
         "<h2>Spam protection</h2>",
         "<p>To keep robots out, the feedback form and the tool request form use Cloudflare Turnstile, an invisible check that runs only after you open or start filling in a form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour on each form, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
         "<h2>Buying a PDF</h2>",
-        "<p>If you buy a PDF, we ask for your email address and nothing else. We keep it with your order (what you bought, the amount and the Razorpay payment reference) so we can send the download link, let you download again and handle a refund. We do not use it for marketing and we never sell or share it.</p>",
+        "<p>If you buy a PDF, we ask for an email address, but you may leave it empty. We keep what the order needs (what you bought, the amount and the Razorpay payment reference) and, if you gave one, your email, so we can send the download link, let you download again and handle a refund. We do not use it for marketing and we never sell or share it.</p>",
         "<p>You pay on Razorpay's own page. Razorpay handles your UPI, card or bank details under its own privacy policy, and we never see or store them. The order form uses the same invisible Cloudflare Turnstile check described above, and the download link is sent by email through Resend, an email delivery service.</p>",
         "<p>Orders that are never paid are deleted after {unpaidDays} days. Paid orders are kept for as long as refunds and our accounts require, which can be several years. To ask about your order, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
         "<h2>Server logs</h2>",
@@ -3449,7 +3449,7 @@
         "<h2>When we do help</h2>",
         "<p>Write to us within {refundDays} days if money was taken but no download reached you, if you paid twice for the same PDF, or if the file will not open. We can check each of these in our own records and by testing the file, and we will send a working file or refund you in full if we cannot.</p>",
         "<h2>How to ask</h2>",
-        "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with and give your order number if you have it. We reply within a few working days.</p>",
+        "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with. If you did not give an email, give your order number or Razorpay payment ID. We reply within a few working days.</p>",
         "<h2>How the money comes back</h2>",
         "<p>An approved refund goes through Razorpay to the same UPI app, card or bank account you paid from. It usually reaches you in 5 to 7 working days, depending on your bank. When the refund is made, the download link stops working.</p>",
         "<h2>Free tools are not affected</h2>",
@@ -5871,8 +5871,8 @@
     "price": "Price",
     "meta": "PDF · {pages} pages · instant download",
     "buyHeading": "Buy this PDF",
-    "emailLabel": "Your email address",
-    "emailHelp": "The download link is sent here. We use it for nothing else.",
+    "emailLabel": "Your email address (optional)",
+    "emailHelp": "With an email we also send you the download link, so you can get it again later. Without one, save the page you see after paying: it has your download.",
     "acceptLabel": "I agree to the <a href=\"/terms\">terms</a> and the <a href=\"/refund-policy\">refund policy</a>.",
     "buy": "Pay {price} securely",
     "working": "Please wait…",
@@ -5902,6 +5902,9 @@
     "thanksUnverified": "We could not confirm the payment just now. Please try again in a minute.",
     "thanksRetry": "Check again",
     "thanksStore": "Back to the store",
-    "businessHeading": "Who sells"
+    "businessHeading": "Who sells",
+    "thanksSave": "You did not give an email, so we cannot send the link. Save this page now (bookmark it or press Copy link): it is the only place to download from.",
+    "thanksCopy": "Copy link",
+    "thanksCopied": "Link copied"
   }
 }

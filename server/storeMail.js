@@ -100,12 +100,12 @@ export function ownerMail(env, { order, product, origin = SITE_URL }) {
     text: [
       `Product: ${product.title}`,
       `Amount: Rs ${rupees(order.amount)}`,
-      `Buyer: ${order.email}`,
+      `Buyer: ${order.email || '(no email given: they download from the page after paying)'}`,
       `Order: ${order.id}`,
       `Payment: ${order.payment_id ?? 'see Razorpay'}`,
       ``,
       `All orders: ${origin}/admin/orders`,
     ].join('\n'),
-    replyTo: order.email,
+    ...(order.email ? { replyTo: order.email } : {}),
   };
 }

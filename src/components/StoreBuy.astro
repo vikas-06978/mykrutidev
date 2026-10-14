@@ -51,7 +51,6 @@ const buy = fill(t('store.buy'), { price: amount });
         type="email"
         inputmode="email"
         autocomplete="email"
-        required
         maxlength="254"
         class="sb-input"
         aria-describedby="sb-email-help"
@@ -147,7 +146,8 @@ const buy = fill(t('store.buy'), { price: amount });
       e.preventDefault();
       err.hidden = true;
       const address = email.value.trim();
-      if (!email.checkValidity() || !address) return fail(L.errEmail, email);
+      // The email is optional: empty is fine, a typed one must look right.
+      if (address && !email.checkValidity()) return fail(L.errEmail, email);
       if (!accept.checked) return fail(L.errAccept, accept);
 
       busy(true);
