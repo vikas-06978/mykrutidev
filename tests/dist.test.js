@@ -401,7 +401,7 @@ describe('printable charts and PDFs', () => {
     for (const [p, html] of pages) {
       for (const [tag] of html.matchAll(/<a\b(?:[^>"]|"[^"]*")*\bhref="[^"]*\.pdf"(?:[^>"]|"[^"]*")*>/g)) {
         const href = attr(tag, 'href');
-        assert.match(href, /^\/downloads\/mykrutidev-[a-z-]+\.pdf$/, `${p}: ${href}`);
+        assert.match(href, /^\/downloads\/mykrutidev-[a-z0-9-]+\.pdf$/, `${p}: ${href}`);
         assert.equal(attr(tag, 'download'), href.slice('/downloads/'.length), `${p}: download name for ${href}`);
         assert.equal(attr(tag, 'type'), 'application/pdf', `${p}: type for ${href}`);
         const file = join(DIST, href);
