@@ -37,7 +37,7 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
 </section>
 
 <script>
-  import { daysLeft, readOrderFrom, thanksKey } from '../lib/storeClient.js';
+  import { daysLeft, readOrderFrom, rememberPurchase, thanksKey } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const root = document.querySelector<HTMLElement>('[data-store-thanks]');
@@ -56,7 +56,13 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       extra.textContent = more;
       extra.hidden = !more;
     };
-    const showPaid = (d: { token: string; remaining: number; expires: number | null; emailed?: boolean }, order: string) => {
+    const showPaid = (d: { token: string; remaining: number; expires: number | null; emailed?: boolean; productId?: string }, order: string) => {
+      // So the product page can offer this download again on this device.
+      try {
+        rememberPurchase(localStorage, String(d.productId ?? ''), order, d.token, d.expires);
+      } catch {
+        // No storage at all: the email and this page's link still work.
+      }
       // With an email the link is also in their inbox; without one, this page is the only copy, so say so.
       const where = d.emailed ? L.thanksEmail : L.thanksSave;
       say(L.thanksPaid, `${L.thanksLeft.replace('{n}', String(d.remaining)).replace('{days}', String(daysLeft(d.expires)))} ${where}`);
@@ -117,8 +123,10 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
         return showPaid(json, from?.kind === 'link' ? from.order : order);
       }
       const state = json?.ok ? String(json.state) : 'unverified';
-      // Just back from paying: Razorpay can take a few seconds to say "paid".
-      if (from?.kind === 'return' && (state === 'pending' || state === 'created') && tries < 4) {
+      // Just back from paying: Razorpay can take a while to say "paid" (a UPI
+      // payment often 10-30 seconds), so keep asking for about a minute
+      // before showing "not confirmed yet".
+      if (from?.kind === 'return' && (state === 'pending' || state === 'created' || state === 'unverified') && tries < 15) {
         say(L.thanksChecking);
         return void setTimeout(() => check(tries + 1), 4000);
       }

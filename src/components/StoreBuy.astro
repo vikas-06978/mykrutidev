@@ -19,7 +19,7 @@ const product = PRODUCTS.find((p) => p.id === id);
 if (!product) throw new Error(`No store product ${id}`);
 
 const lang = langOf(Astro.url);
-const { t, render } = useT(lang);
+const { t, render, path: to } = useT(lang);
 const amount = price(product.pricePaise);
 const strings = Object.fromEntries(
   ['errEmail', 'errAccept', 'errRate', 'errChallenge', 'errClosed', 'errProvider', 'errGeneric', 'working'].map((k) => [k, t(`store.${k}`)]),
@@ -34,6 +34,12 @@ const buy = fill(t('store.buy'), { price: amount });
   </div>
   <p class="mt-3 text-sm text-mute">{t('store.price')}</p>
   <p class="text-3xl font-semibold text-ink" translate="no">{amount}</p>
+
+  {/* Filled from this browser's own record of a purchase (src/lib/storeClient.js). */}
+  <div class="sb-owned mt-5" data-sb-owned hidden>
+    <p class="text-sm font-medium text-ink">{t('store.ownedNote')}</p>
+    <a class="btn btn-primary mt-3" href={to('/store/thanks')} data-sb-owned-link>{t('store.ownedButton')}</a>
+  </div>
 
   <form
     class="mt-5 grid gap-4"
@@ -98,6 +104,12 @@ const buy = fill(t('store.buy'), { price: amount });
     color: var(--color-ink);
     font: inherit;
   }
+  .sb-owned {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-ok);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+  }
   .sb-hp {
     position: absolute;
     left: -10000px;
@@ -113,10 +125,27 @@ const buy = fill(t('store.buy'), { price: amount });
 </style>
 
 <script>
-  import { checkoutError, payUrlOk } from '../lib/storeClient.js';
+  import { boughtHash, checkoutError, payUrlOk } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-sb-form]');
+
+  // Bought already in this browser: offer that download first. The form stays,
+  // for someone buying another copy.
+  const owned = document.querySelector<HTMLElement>('[data-sb-owned]');
+  const ownedLink = owned?.querySelector<HTMLAnchorElement>('[data-sb-owned-link]');
+  if (owned && ownedLink && form?.dataset.product) {
+    let hash: string | null = null;
+    try {
+      hash = boughtHash(localStorage, form.dataset.product);
+    } catch {
+      hash = null;
+    }
+    if (hash) {
+      ownedLink.href = ownedLink.pathname + hash;
+      owned.hidden = false;
+    }
+  }
   if (form) {
     const L = JSON.parse(form.dataset.i18n ?? '{}');
     const lang = form.dataset.lang || 'en';

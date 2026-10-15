@@ -69,3 +69,14 @@ test('shop: product view and the Starter card, with product and price only', asy
   const [p] = await events(page, 'select_promotion');
   expect(p.params).toEqual({ promotion_id: 'practice-passages', items: [{ item_id: 'kruti-dev-7-day-starter' }] });
 });
+
+test('a purchase kept in this browser: the product page offers the download again', async ({ page }) => {
+  await page.goto('/store/kruti-dev-7-day-starter/');
+  await expect(page.locator('[data-sb-owned]')).toBeHidden();
+  const o = 'o' + 'a'.repeat(24);
+  const t = 'tok_' + 'x'.repeat(30);
+  await page.evaluate(([o, t]) => localStorage.setItem('mkd-bought', JSON.stringify({ 'kruti-dev-7-day-starter': { o, t, exp: Math.floor(Date.now() / 1000) + 86400 } })), [o, t]);
+  await page.reload();
+  await expect(page.locator('[data-sb-owned]')).toBeVisible();
+  await expect(page.locator('[data-sb-owned-link]')).toHaveAttribute('href', `/store/thanks/#o=${o}&t=${t}`);
+});

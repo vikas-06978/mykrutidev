@@ -54,3 +54,8 @@
 /pa/chanakya-to-kruti-dev/ /pa/hindi-font-converter/ 301
 /pa/punjabi-font-converter /pa/all-converters/ 301
 /pa/punjabi-font-converter/ /pa/all-converters/ 301
+
+# /admin on its own has no page: the private pages are /admin/orders and
+# /admin/feedback. The shop's orders are the one the owner looks for.
+/admin /admin/orders 302
+/admin/ /admin/orders 302

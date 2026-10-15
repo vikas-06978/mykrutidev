@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 import { PRODUCTS, STORE, STORE_SCHEMA, liveProducts, shownProducts, price, rupees, sellable, isPreviewBuild, validateCheckout, newOrderId, ORDER_ID_RE } from './store.js';
 import { BUSINESS, businessLines } from './business.js';
-import { checkoutError, daysLeft, payUrlOk, readOrderFrom, thanksKey } from './storeClient.js';
+import { BOUGHT_KEY, boughtHash, checkoutError, daysLeft, payUrlOk, readOrderFrom, rememberPurchase, thanksKey } from './storeClient.js';
 import { PAGES, getPage, isLive } from './routes.js';
 import { LOCALES } from '../i18n/locales.js';
 import { DICTS } from '../i18n/index.js';
@@ -159,5 +159,43 @@ describe('the policy pages say what the server does', () => {
       assert.match(d.pages['/privacy-policy'].body.join(''), /\{unpaidDays\}/);
       assert.match(d.pages['/contact'].body.join(''), /href="\/refund-policy"/);
     }
+  });
+});
+
+describe('a purchase remembered in this browser', () => {
+  const mem = () => {
+    const m = new Map();
+    return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), m };
+  };
+  const O = 'o' + 'a'.repeat(24);
+  const T = 'tok_' + 'x'.repeat(30);
+  const NOW = Date.parse('2026-10-16T00:00:00Z');
+
+  test('the product page gets the thanks link back until it expires', () => {
+    const s = mem();
+    rememberPurchase(s, 'kruti-dev-7-day-starter', O, T, NOW / 1000 + 86400);
+    assert.equal(boughtHash(s, 'kruti-dev-7-day-starter', NOW), `#o=${O}&t=${T}`);
+    assert.equal(boughtHash(s, 'other-product', NOW), null);
+    assert.equal(boughtHash(s, 'kruti-dev-7-day-starter', NOW + 2 * 86400 * 1000), null);
+    // No end date: kept.
+    rememberPurchase(s, 'kruti-dev-7-day-starter', O, T, null);
+    assert.equal(boughtHash(s, 'kruti-dev-7-day-starter', NOW + 400 * 86400 * 1000), `#o=${O}&t=${T}`);
+  });
+
+  test('nothing malformed is stored or handed back', () => {
+    const s = mem();
+    rememberPurchase(s, 'kruti-dev-7-day-starter', 'bad', T, null);
+    rememberPurchase(s, '../x', O, T, null);
+    assert.equal(s.m.size, 0);
+    s.setItem(BOUGHT_KEY, JSON.stringify({ p: { o: 'javascript:alert(1)', t: T, exp: null } }));
+    assert.equal(boughtHash(s, 'p', NOW), null);
+    s.setItem(BOUGHT_KEY, '{not json');
+    assert.equal(boughtHash(s, 'p', NOW), null);
+  });
+
+  test('blocked storage never throws', () => {
+    const blocked = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
+    assert.doesNotThrow(() => rememberPurchase(blocked, 'p', O, T, null));
+    assert.equal(boughtHash(blocked, 'p', NOW), null);
   });
 });
