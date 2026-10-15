@@ -1,0 +1,60 @@
+---
+/**
+ * "Look inside" on a product page: the cover, one page shown free, and a
+ * blurred later page that stays locked until the buyer pays. The blur is in
+ * the image file itself (public/store-img), so nothing readable is hidden
+ * behind CSS. Pictures are made from the PDF that is sold (see docs/STORE.md).
+ */
+import { PRODUCTS } from '../lib/store.js';
+import { langOf, useT, fill } from '../i18n/index.js';
+
+interface Props {
+  product: string;
+}
+const product = PRODUCTS.find((p) => p.id === Astro.props.product);
+const img = product?.images;
+const { t } = useT(langOf(Astro.url));
+const src = (f: string) => `/store-img/${f}`;
+const items = img
+  ? [
+      { file: img.cover, caption: t('store.previewCover'), locked: false },
+      { file: img.open, caption: fill(t('store.previewOpen'), { n: String(img.openPage) }), locked: false },
+      { file: img.locked, caption: fill(t('store.previewLocked'), { from: String(img.openPage + 1), to: String(product.pages) }), locked: true },
+    ]
+  : [];
+---
+
+{
+  img && (
+    <section class="mt-8" aria-labelledby="sp-h">
+      <h2 id="sp-h" class="text-xl">{t('store.previewHeading')}</h2>
+      <ul class="mt-4 grid grid-cols-3 gap-3 sm:gap-5">
+        {items.map((it) => (
+          <li>
+            <figure class="m-0">
+              <div class="relative overflow-hidden rounded-md border border-hairline bg-paper">
+                {it.locked ? (
+                  <img src={src(it.file)} alt={it.caption} width="640" height="906" loading="lazy" decoding="async" class="block h-auto w-full" />
+                ) : (
+                  <a href={src(it.file)} target="_blank" rel="noopener" class="block">
+                    <img src={src(it.file)} alt={it.caption} width="640" height="906" loading="lazy" decoding="async" class="block h-auto w-full" />
+                  </a>
+                )}
+                {it.locked && (
+                  <span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rounded-full bg-paper p-2 text-ink shadow">
+                      <rect x="5" y="11" width="14" height="9" rx="2" />
+                      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <figcaption class="mt-2 text-xs text-mute sm:text-sm" aria-hidden="true">{it.caption}</figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-3 text-sm text-mute">{t('store.previewNote')}</p>
+    </section>
+  )
+}

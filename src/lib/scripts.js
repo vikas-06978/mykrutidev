@@ -44,6 +44,27 @@ export const SCRIPTS = {
   },
 };
 
+/**
+ * Marathi and Nepali are written in Devanagari, so their pages keep the
+ * Devanagari fonts and tools, but the Unicode box says what the text is:
+ * "Unicode / Marathi", not "Unicode / Hindi", with an example in that language.
+ * `suffix` picks converter.unicode<suffix>, converter.copyUnicode<suffix> and
+ * converter.preview<suffix>.
+ */
+export const DEVA_LANGS = {
+  mr: { lang: 'mr', suffix: 'Mr', sample: 'महाराष्ट्र शासन, शिक्षण विभाग, मुंबई.', placeholder: 'येथे मराठी मजकूर टाइप करा' },
+  ne: { lang: 'ne', suffix: 'Ne', sample: 'नेपाल सरकार, शिक्षा मन्त्रालय, काठमाडौं।', placeholder: 'यहाँ नेपाली पाठ टाइप गर्नुहोस्' },
+};
+
+/** Marathi or Nepali for a Devanagari page whose legacy font is one of theirs, else null. */
+export function devaLangOfPage(from, to) {
+  for (const k of [from, to]) {
+    const lang = FONTS[k]?.lang;
+    if (lang && lang in DEVA_LANGS) return DEVA_LANGS[lang];
+  }
+  return null;
+}
+
 /** The script of a font: its own for Gujarati, Tamil and Bengali, else Devanagari. */
 export const scriptOfFont = (key) => (FONTS[key]?.lang in SCRIPTS && FONTS[key].lang !== 'hi' ? FONTS[key].lang : 'deva');
 

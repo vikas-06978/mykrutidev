@@ -15,6 +15,10 @@
  * config call is queued in dataLayer at once and gtag.js reads it on arrival.
  * Only a visitor who leaves before the page has finished loading goes
  * uncounted.
+ *
+ * The store's thanks page (/store/thanks) carries the buyer's order number and
+ * download key in its address. Google is told the page's address without them
+ * (page_location), so the key is never sent to Google.
  */
 import { SITE } from './routes.js';
 
@@ -37,7 +41,11 @@ export function analyticsScript(site = SITE) {
           dataLayer.push(arguments);
         };
         gtag('js', new Date());
-        gtag('config', ${id}, { allow_google_signals: false, allow_ad_personalization_signals: false });
+        var cfg = { allow_google_signals: false, allow_ad_personalization_signals: false };
+        // The page a buyer is sent back to has the order and its download key in
+        // its address: Google gets the page without them.
+        if (/\\/store\\/thanks\\/?$/.test(location.pathname)) cfg.page_location = location.origin + location.pathname;
+        gtag('config', ${id}, cfg);
         var load = function () {
           var s = document.createElement('script');
           s.async = true;

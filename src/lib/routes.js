@@ -40,6 +40,7 @@ import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
 import { PREFIXED_LOCALES } from '../i18n/locales.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
+import { PRODUCTS, shownProducts, hasPage } from './store.js';
 import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
 import en from '../i18n/en.json' with { type: 'json' };
 
@@ -64,6 +65,7 @@ export const SITE = 'https://mykrutidev.com';
  * (Upload Word file is offered on every page docPairFor() accepts.)
  * @property {boolean} [app]  a content page that embeds a tool (PageView's TOOLS)
  *   without being a menubar `tool` itself: it still gets WebApplication data
+ * @property {string} [product]  a store product's page: the catalog id (store.js)
  */
 
 /** @type {Page[]} */
@@ -78,7 +80,7 @@ export const PAGES = [
     from: 'kruti-dev',
     to: 'unicode',
     group: 'Kruti Dev',
-    related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev'],
+    related: ['/unicode-to-kruti-dev', '/kruti-dev-to-mangal', '/mangal-to-kruti-dev', '/kruti-dev-excel-to-unicode'],
   },
   {
     path: '/unicode-to-kruti-dev',
@@ -134,7 +136,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev'],
+    related: ['/hindi-typing-practice-passages', '/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/hindi-keyboard',
@@ -956,7 +958,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard', '/hindi-typing-practice-passages'],
   },
   {
     path: '/remington-hindi-keyboard',
@@ -970,7 +972,7 @@ export const PAGES = [
     // Not a menu `tool`: tools have no source font, and this page has one.
     // It is linked from the footer, the tutor and the keyboard chart instead.
     group: 'More',
-    related: ['/kruti-dev-keyboard', '/hindi-typing-test', '/hindi-keyboard'],
+    related: ['/kruti-dev-keyboard', '/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-keyboard'],
   },
   {
     path: '/how-to-type-hindi-in-ms-word',
@@ -982,6 +984,27 @@ export const PAGES = [
     app: true,
     group: 'More',
     related: ['/english-to-hindi-typing', '/unicode-to-kruti-dev', '/hindi-keyboard'],
+  },
+  {
+    path: '/kruti-dev-excel-to-unicode',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    // The document converter, reading Kruti Dev, sits at the top (PageView's TOOLS).
+    app: true,
+    group: 'More',
+    related: ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal'],
+  },
+  {
+    path: '/hindi-typing-practice-passages',
+    ready: true,
+    // Thirty passages to read and type, with the keys of the hardest words (PracticePassages).
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
   },
   // ---- Printables: an HTML page + a PDF each, built from the tutor's data
   // (src/lib/printables.js). The keyboard chart carries the one menu entry;
@@ -995,7 +1018,7 @@ export const PAGES = [
     printable: true,
     menu: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-finger-chart', '/hindi-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-finger-chart', '/hindi-keyboard'],
   },
   {
     path: '/hindi-typing-finger-chart',
@@ -1015,7 +1038,7 @@ export const PAGES = [
     to: null,
     printable: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-progress-log', '/kruti-dev-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-progress-log', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/kruti-dev-matra-chart',
@@ -1055,7 +1078,7 @@ export const PAGES = [
     to: null,
     printable: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
   },
   // ---- Everyday Hindi tools (HindiTool.astro, src/lib/toolPages.js). Each has
   // exactly one right answer, so each is live without a Beta badge.
@@ -1230,6 +1253,61 @@ export const PAGES = [
     group: 'More',
     related: ['/about', '/privacy-policy', '/contact'],
   },
+  {
+    path: '/refund-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/delivery-policy', '/terms', '/contact'],
+  },
+  {
+    path: '/delivery-policy',
+    ready: true,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/refund-policy', '/terms', '/contact'],
+  },
+  // ==========================================================================
+  // THE STORE (src/lib/store.js). Not "live" until a product is: with nothing
+  // on sale the pages stay out of the sitemap and carry noindex. A product's
+  // page goes live when its status in the catalog is 'live'. The thanks page,
+  // where Razorpay sends the buyer back, is never indexed.
+  // ==========================================================================
+  {
+    path: '/store',
+    ready: shownProducts().length > 0,
+    kind: 'content',
+    from: null,
+    to: null,
+    trust: true,
+    group: 'More',
+    related: ['/refund-policy', '/delivery-policy', '/terms'],
+  },
+  ...PRODUCTS.map((product) => ({
+    path: `/store/${product.id}`,
+    ready: hasPage(product),
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    product: product.id,
+    related: ['/store', '/refund-policy', '/delivery-policy'],
+  })),
+  {
+    path: '/store/thanks',
+    ready: false,
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    related: ['/store', '/refund-policy', '/contact'],
+  },
 ];
 
 /** The contact address printed on /contact and in Organization data. */
@@ -1327,6 +1405,7 @@ export const NAV_MENUS = [
       '/english-to-hindi-typing',
       '/hindi-typing-test',
       '/hindi-typing-test-for-exams',
+      '/hindi-typing-practice-passages',
       '/hindi-keyboard',
       '/remington-hindi-keyboard',
       '/kruti-dev-keyboard',

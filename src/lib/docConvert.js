@@ -1,6 +1,6 @@
 /**
  * Whole-document conversion for the Kruti Dev pages: .docx and .txt in, the
- * same file converted out. Runs entirely in the browser; nothing is uploaded.
+ * same file converted out (.xlsx and .csv: sheetConvert.js). Runs entirely in the browser; nothing is uploaded.
  *
  * ---------------------------------------------------------------------------
  * THE ONE RULE: CHANGE THE HINDI, NOTHING ELSE
@@ -68,6 +68,12 @@ export const SAVE_AS_MESSAGE = 'Please open it in Word and Save As → Word Docu
 export const PDF_MESSAGE =
   'PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.';
 export const DAMAGED_MESSAGE = 'This file seems damaged. Open it in Word and save it again.';
+// The same two for spreadsheets (sheetConvert.js).
+export const SHEET_SAVE_AS_MESSAGE = 'Please open it in Excel and Save As → Excel Workbook (.xlsx).';
+export const SHEET_DAMAGED_MESSAGE = 'This file seems damaged. Open it in Excel and save it again.';
+/** A .txt or .csv that is really something else, such as a .docx renamed. */
+export const NOT_TEXT_MESSAGE =
+  'This is not a plain text file. If it is a Word or Excel file, give it back its .docx or .xlsx name.';
 export const GENERIC_MESSAGE = 'Something went wrong converting this file.';
 
 /** An error whose message is written for the person, and is safe to show. */
@@ -90,7 +96,7 @@ const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingm
 /**
  * @param {{ name: string, size: number, head?: Uint8Array }} file
  *   `head` is the first few bytes, to catch a .doc or .pdf renamed to .docx.
- * @returns {{ kind: 'docx' | 'txt' } | { error: string }}
+ * @returns {{ kind: 'docx' | 'txt' | 'xlsx' | 'csv' } | { error: string }}
  */
 export function checkFile({ name, size, head }) {
   const ext = (name.match(/\.([^.]+)$/)?.[1] ?? '').toLowerCase();
@@ -117,8 +123,19 @@ export function checkFile({ name, size, head }) {
     if (head && !isZip) return { error: DAMAGED_MESSAGE };
     return { kind: 'docx' };
   }
+  // A Word or Excel file (or an old .doc) with a .txt or .csv name would be
+  // read as text and "converted" into rubbish.
+  if ((ext === 'txt' || ext === 'csv') && (isZip || isOle)) return { error: NOT_TEXT_MESSAGE };
   if (ext === 'txt') return { kind: 'txt' };
-  return { error: 'Only .docx (Word) and .txt files can be converted here.' };
+  if (['xls', 'ods', 'numbers', 'xlsb'].includes(ext)) return { error: SHEET_SAVE_AS_MESSAGE };
+  if (ext === 'xlsx' || ext === 'xlsm') {
+    // A password-protected workbook is stored in the old container too.
+    if (isOle) return { error: `${SHEET_SAVE_AS_MESSAGE} If the workbook is password-protected, remove the password first.` };
+    if (head && !isZip) return { error: SHEET_DAMAGED_MESSAGE };
+    return { kind: 'xlsx' };
+  }
+  if (ext === 'csv') return { kind: 'csv' };
+  return { error: 'Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.' };
 }
 
 /** original.docx -> original-unicode.docx, original-krutidev.docx ... */
@@ -196,7 +213,7 @@ export const unicodeTextToKruti = (text) => unicodeTextTo(text, 'kruti-dev');
  * Does a font name in the document belong to `key`? A font on the same
  * keyboard layout counts too: DevLys 010 text converts on a Kruti Dev page.
  */
-function fontIs(name, key) {
+export function fontIs(name, key) {
   if (!name) return false;
   if (WORD_FONTS[key]?.match.test(name)) return true;
   const layout = FONTS[key]?.layout;
@@ -603,7 +620,11 @@ function emitLegacyGroup(xml, group, pair, font, edits, paragraphs, stats) {
     // In a Kruti Dev font, Word's curly quotes and dashes are letters.
     if (/kruti\s*dev/i.test(group.name)) pendingText = krutiWordRun(pendingText, group.name);
     const u = legacyToUnicode(pendingText, group.from);
-    stats.convertedChars += countDeva(u);
+    // Hindi already in Unicode in a legacy-font run comes through as it is
+    // and counts as already Unicode, not as converted.
+    const pre = countDeva(pendingText);
+    stats.convertedChars += countDeva(u) - pre;
+    stats.alreadyChars += pre;
     const out = isUnicodeKey(pair.to) ? u : legacyToTarget(pendingText, group.from, pair.to);
     body += `<w:t xml:space="preserve">${encodeText(out)}</w:t>`;
     pendingText = '';
@@ -797,6 +818,29 @@ export function decodeTextFile(bytes) {
     return { text: new TextDecoder('utf-16be').decode(bytes.subarray(2)), encoding: 'utf-16be' };
   }
   const body = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf ? bytes.subarray(3) : bytes;
+  // Text never holds a zero byte, except UTF-16 saved without its byte-order
+  // mark: there every English letter, digit and space has one, on the odd
+  // bytes (little-endian, Windows "Unicode") or the even ones (big-endian).
+  // Read as 1252, that would be "converted" into rubbish, so it is either read
+  // as UTF-16 or refused.
+  const sample = body.subarray(0, 4096);
+  let even = 0;
+  let odd = 0;
+  sample.forEach((b, i) => {
+    if (b === 0) i % 2 ? (odd += 1) : (even += 1);
+  });
+  if (even + odd) {
+    const nul = even + odd;
+    const enc = odd >= nul * 0.9 ? 'utf-16le' : even >= nul * 0.9 ? 'utf-16be' : null;
+    if (enc && nul >= sample.length * 0.1 && body.length % 2 === 0) {
+      try {
+        return { text: new TextDecoder(enc, { fatal: true }).decode(body), encoding: enc };
+      } catch {
+        // not UTF-16 after all
+      }
+    }
+    throw new UserError(NOT_TEXT_MESSAGE);
+  }
   try {
     return { text: new TextDecoder('utf-8', { fatal: true }).decode(body), encoding: 'utf-8' };
   } catch {
@@ -842,7 +886,12 @@ const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
  */
 export function summarize(stats, direction) {
   const pair = pairOf(direction);
-  const parts = [`Converted ${plural(stats.paragraphs, 'paragraph', 'paragraphs')}`];
+  // Nothing converted: the file was only read, so the line says "Checked".
+  const verb = stats.convertedChars === 0 ? 'Checked' : 'Converted';
+  const parts =
+    'cells' in stats
+      ? [`${verb} ${plural(stats.cells, 'cell', 'cells')}`, plural(stats.sheets, 'sheet', 'sheets')]
+      : [`${verb} ${plural(stats.paragraphs, 'paragraph', 'paragraphs')}`];
   if (stats.tables) parts.push(plural(stats.tables, 'table', 'tables'));
   const line = parts.join(' · ');
 
@@ -853,13 +902,12 @@ export function summarize(stats, direction) {
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    return {
-      line,
-      share: null,
-      warning: isUnicodeKey(pair.from)
-        ? `No Unicode Hindi text found in this document. Is it already in ${docLabel(pair.to)}?`
-        : `No ${from} text found in this document. Is it already Unicode?`,
-    };
+    const base = isUnicodeKey(pair.from)
+      ? `No Unicode Hindi text found in this document. Is it already in ${docLabel(pair.to)}?`
+      : `No ${from} text found in this document. Is it already Unicode?`;
+    // A workbook says which fonts its cells are set in: a Hindi font this page does not read shows up here.
+    const fonts = stats.fonts?.length ? ` Fonts used in the cells: ${stats.fonts.join(', ')}.` : '';
+    return { line, share: null, warning: base + fonts };
   }
   if (a === 0) return { line, share: 'All Hindi text converted.', warning: null };
 

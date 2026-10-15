@@ -23,6 +23,7 @@ import { PDFDocument } from 'pdf-lib';
 import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
+import { readAds, adsTxt, adsAllowedOn } from '../src/lib/ads.js';
 import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
 import { LOCALES, PREFIXED_LOCALES, LOCALE_META } from '../src/i18n/locales.js';
 import { DICTS } from '../src/i18n/index.js';
@@ -197,7 +198,7 @@ describe('language and SEO tags', () => {
 });
 
 describe('links', () => {
-  const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt)/;
+  const NOT_A_PAGE = /^\/(?:_astro|data|downloads|fonts|favicon|sitemap|robots\.txt|store-img\/)/;
 
   test('internal links on a page in another language stay in that language', () => {
     for (const l of PREFIXED_LOCALES) {
@@ -282,7 +283,8 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
     // Soon rows are only on All tools, in every language; live rows are in
     // every page's menus too. Since October 2026 no page is "soon" (the
     // Walkman-Chanakya and Punjabi ones were removed), so none may show.
-    const anySoon = PAGES.some((x) => statusOf(x) === 'soon');
+    // The store's unlisted pages (the ₹1 test sample, the thanks page) are never listed, so they are not "soon".
+    const anySoon = PAGES.some((x) => statusOf(x) === 'soon' && !x.path.startsWith('/store'));
     assert.ok((anySoon ? soon >= 10 : soon === 0) && live > 100, `rows checked: ${soon} soon, ${live} live`);
   });
 
@@ -401,7 +403,7 @@ describe('printable charts and PDFs', () => {
     for (const [p, html] of pages) {
       for (const [tag] of html.matchAll(/<a\b(?:[^>"]|"[^"]*")*\bhref="[^"]*\.pdf"(?:[^>"]|"[^"]*")*>/g)) {
         const href = attr(tag, 'href');
-        assert.match(href, /^\/downloads\/mykrutidev-[a-z-]+\.pdf$/, `${p}: ${href}`);
+        assert.match(href, /^\/downloads\/mykrutidev-[a-z0-9-]+\.pdf$/, `${p}: ${href}`);
         assert.equal(attr(tag, 'download'), href.slice('/downloads/'.length), `${p}: download name for ${href}`);
         assert.equal(attr(tag, 'type'), 'application/pdf', `${p}: type for ${href}`);
         const file = join(DIST, href);
@@ -1001,6 +1003,61 @@ describe('the ToolMitra links page (/links)', () => {
     for (const html of Object.values(links())) {
       if (url) assert.ok(html.includes(`href="${url}"`) && html.includes('data-links-instagram'));
       else assert.doesNotMatch(html, /data-links-instagram|instagram\.com/);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Google AdSense (src/lib/ads.js): exactly what the build's variables ask for
+// ---------------------------------------------------------------------------
+
+describe('AdSense follows its build variables', () => {
+  const ads = readAds(process.env);
+  const headers = () => readFileSync(join(DIST, '_headers'), 'utf8');
+
+  test('without a publisher ID: no AdSense code, no ads.txt, no ad address in the CSP', { skip: Boolean(ads) }, () => {
+    for (const [u, html] of pages) {
+      assert.doesNotMatch(html, /adsbygoogle|google-adsense-account|googlesyndication/, u);
+    }
+    assert.ok(!existsSync(join(DIST, 'ads.txt')), 'dist/ads.txt');
+    assert.doesNotMatch(headers(), /googlesyndication|doubleclick/);
+    // And the privacy policy says nothing about ads it does not show.
+    assert.doesNotMatch(pages.get('/privacy-policy'), /AdSense/);
+  });
+
+  test('with a publisher ID: the site check on every page, ads.txt, and the policy section', { skip: !ads }, () => {
+    for (const [u, html] of pages) assert.match(html, new RegExp(`<meta name="google-adsense-account" content="${ads.client}"`), u);
+    assert.equal(readFileSync(join(DIST, 'ads.txt'), 'utf8'), adsTxt(ads));
+    for (const l of LOCALES) assert.match(pages.get(inLocale('/privacy-policy', l)), /Google AdSense/, l);
+  });
+
+  test('ads, when on, never load on the store, the policies or contact', { skip: !ads?.show }, () => {
+    for (const [u, html] of pages) {
+      const route = u.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+      assert.equal(/adsbygoogle\.js/.test(html), adsAllowedOn(route), u);
+    }
+    assert.match(headers(), /pagead2\.googlesyndication\.com/);
+  });
+});
+
+describe('the 7-Day Starter beside the free practice passages', () => {
+  const starter = PAGES.find((p) => p.path === '/store/kruti-dev-7-day-starter');
+  const read = (p) => readFileSync(join(DIST, p, 'index.html'), 'utf8');
+  test('suggested on the passages page exactly when its page is live, in every language', () => {
+    for (const prefix of ['', 'hi/', 'ta/']) {
+      const html = read(`${prefix}hindi-typing-practice-passages`);
+      assert.equal(/data-starter-promo/.test(html), isLive(starter), prefix);
+    }
+  });
+  test('its page carries Product structured data with the price exactly when it is live', () => {
+    const html = read('store/kruti-dev-7-day-starter');
+    const product = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)]
+      .map((m) => JSON.parse(m[1]))
+      .find((d) => d['@type'] === 'Product');
+    assert.equal(Boolean(product), isLive(starter));
+    if (product) {
+      assert.equal(product.offers.priceCurrency, 'INR');
+      assert.equal(product.offers.url, `${SITE}/store/kruti-dev-7-day-starter/`);
     }
   });
 });

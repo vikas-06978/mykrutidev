@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -170,10 +170,18 @@ describe('the ready flag cannot outrank an unverified mapping', () => {
 describe('routes match the files on disk', () => {
   const files = readdirSync(PAGES_DIR).filter((f) => f.endsWith('.astro'));
 
+  /** /store lives in store/index.astro, /store/thanks in store/thanks.astro, /store/<product> in store/[product].astro. */
+  const nestedFile = (path) => {
+    const [dir, leaf] = path.slice(1).split('/');
+    const inside = existsSync(`${PAGES_DIR}/${dir}`) ? readdirSync(`${PAGES_DIR}/${dir}`) : [];
+    if (leaf === undefined) return inside.includes('index.astro');
+    return inside.includes(`${leaf}.astro`) || inside.some((f) => /^\[\w+\]\.astro$/.test(f));
+  };
+
   test('every page in the table has an .astro file', () => {
     for (const p of PAGES) {
       assert.ok(
-        files.includes(routeToFile(p.path)),
+        files.includes(routeToFile(p.path)) || nestedFile(p.path),
         `${p.path} has no ${routeToFile(p.path)}`,
       );
     }

@@ -1,0 +1,37 @@
+---
+/**
+ * One fixed AdSense unit (src/lib/ads.js). Renders nothing - not even an
+ * empty box - unless ads are switched on, an ad unit ID is set, and the page
+ * is one that may carry ads. The space is reserved before the ad arrives, so
+ * the page does not jump when it does.
+ */
+import { ADS, adsAllowedOn } from '../lib/ads.js';
+import { splitLocale, useT } from '../i18n/index.js';
+
+const { lang, path } = splitLocale(Astro.url.pathname);
+const { t } = useT(lang);
+const show = Boolean(ADS?.show && ADS.slot) && adsAllowedOn(path);
+---
+
+{
+  show && (
+    <aside class="ad-slot mt-10" aria-label={t('ads.label')} data-ad-slot-box>
+      <p class="text-xs text-mute">{t('ads.label')}</p>
+      <ins
+        class="adsbygoogle mt-1"
+        style="display:block;min-height:280px"
+        data-ad-client={ADS!.client}
+        data-ad-slot={ADS!.slot!}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </aside>
+  )
+}
+
+<style>
+  /* AdSense marks a unit it had no ad for: give the space back. */
+  .ad-slot:has(ins[data-ad-status='unfilled']) {
+    display: none;
+  }
+</style>

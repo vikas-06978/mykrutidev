@@ -1,0 +1,79 @@
+import { test, describe } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { readAds, adsTxt, adsAllowedOn, adsScript, ADS, GOOGLE_TAG_ID } from './ads.js';
+import { contentSecurityPolicy, headersFile } from '../security/integration.mjs';
+
+const CLIENT = 'ca-pub-1234567890123456';
+
+describe('AdSense settings', () => {
+  test('off unless a publisher ID is set, and off in this test run', () => {
+    assert.equal(readAds({}), null);
+    assert.equal(readAds({ PUBLIC_ADSENSE_ADS: 'on' }), null);
+    assert.equal(ADS, null);
+  });
+
+  test('a malformed publisher ID keeps AdSense off', () => {
+    for (const bad of ['pub-1234567890123456', 'ca-pub-123', 'ca-pub-12345678901234567', ' ca-pub-x234567890123456']) {
+      assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: bad }), null, bad);
+    }
+  });
+
+  test('the publisher ID alone: verification, ads.txt and the policy, but no ads', () => {
+    const ads = readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT });
+    assert.deepEqual(ads, { client: CLIENT, pub: 'pub-1234567890123456', show: false, slot: null });
+  });
+
+  test('ads on, and an optional 10-digit ad unit', () => {
+    assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_ADS: 'ON' }).show, true);
+    assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_ADS: 'yes' }).show, false);
+    assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOT: '1234567890' }).slot, '1234567890');
+    assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOT: '12345' }).slot, null);
+  });
+
+  test('ads.txt is the line AdSense asks for', () => {
+    assert.equal(adsTxt(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT })), `google.com, pub-1234567890123456, DIRECT, ${GOOGLE_TAG_ID}\n`);
+  });
+
+  test('never on the store, the policies or contact', () => {
+    for (const p of ['/store', '/store/kruti-dev-7-day-starter', '/store/thanks', '/privacy-policy', '/terms', '/refund-policy', '/delivery-policy', '/contact']) {
+      assert.equal(adsAllowedOn(p), false, p);
+    }
+    for (const p of ['/', '/unicode-to-kruti-dev', '/kruti-dev-excel-to-unicode', '/guides/kruti-dev-typing-rules-matras-reph-half-letters']) {
+      assert.equal(adsAllowedOn(p), true, p);
+    }
+  });
+
+  test('the loader runs only on the live host and fills every unit', () => {
+    const js = adsScript(readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_ADS: 'on' }), 'https://mykrutidev.com');
+    assert.match(js, /location\.hostname !== "mykrutidev\.com"/);
+    assert.match(js, /adsbygoogle\.js\?client=ca-pub-1234567890123456/);
+    assert.match(js, /adsbygoogle\.push/);
+  });
+});
+
+describe('Content-Security-Policy with and without ads', () => {
+  const off = contentSecurityPolicy(["'sha256-x'"]);
+  const verifying = contentSecurityPolicy(["'sha256-x'"], readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT }));
+  const on = contentSecurityPolicy(["'sha256-x'"], readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_ADS: 'on' }));
+
+  test('no ad address until ads are switched on', () => {
+    assert.doesNotMatch(off, /googlesyndication|doubleclick|fundingchoices/);
+    assert.equal(verifying, off);
+  });
+
+  test('with ads on: the ad script, its frames and the consent message are allowed', () => {
+    const dir = (name) => on.split('; ').find((d) => d.startsWith(`${name} `));
+    assert.match(dir('script-src'), /https:\/\/pagead2\.googlesyndication\.com/);
+    assert.match(dir('frame-src'), /https:\/\/\*\.doubleclick\.net/);
+    assert.match(dir('script-src'), /fundingchoicesmessages\.google\.com/);
+    // Still no inline script but the hashed ones, and still no other site may frame us.
+    assert.doesNotMatch(dir('script-src'), /unsafe-inline|unsafe-eval/);
+    assert.match(on, /frame-ancestors 'none'/);
+  });
+
+  test('COOP lets an ad open its tab only once ads are on', () => {
+    assert.match(headersFile([]), /Cross-Origin-Opener-Policy: same-origin\n/);
+    assert.match(headersFile([], readAds({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_ADS: 'on' })), /Cross-Origin-Opener-Policy: same-origin-allow-popups/);
+  });
+});

@@ -1,6 +1,7 @@
 ---
 /**
- * "Convert a document": upload a .docx or .txt, convert it, download it.
+ * "Convert a document": upload a .docx, .xlsx, .csv or .txt, convert it,
+ * download it. Spreadsheets go through src/lib/sheetConvert.js.
  *
  * Everything happens in the browser. The file is read with the File API,
  * converted by src/lib/docConvert.js - which uses the same convert() as the
@@ -117,7 +118,7 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         id={`${id}-input`}
         data-role="input"
         type="file"
-        accept=".docx,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+        accept=".docx,.xlsx,.xlsm,.csv,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
         class="sr-only"
       />
     </label>
@@ -127,6 +128,7 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         <span data-role="file-name" class="font-medium break-all" translate="no"></span>
         <span data-role="file-size" class="text-mute"></span>
       </p>
+      <p data-role="note" hidden class="mt-1 text-sm text-mute"></p>
       <div
         data-role="progress-wrap"
         class="mt-2 h-2 overflow-hidden rounded-full bg-inset"
@@ -160,12 +162,27 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
   import { track } from '../scripts/track.js';
 
   type Mod = typeof import('../lib/docConvert.js');
+  type SheetMod = typeof import('../lib/sheetConvert.js');
   let mod: Promise<Mod> | null = null;
-  // A failed load is not cached, so the next upload tries again.
+  let sheetMod: Promise<SheetMod> | null = null;
+  // A failed load is not cached, so the next upload tries again. It is marked,
+  // so the page can say the converter did not load (offline, say) rather than
+  // that the file could not be converted.
+  const loadFailed = new WeakSet<object>();
+  const mark = (err: unknown) => {
+    if (err && typeof err === 'object') loadFailed.add(err);
+    return err;
+  };
   const load = () =>
     (mod ??= import('../lib/docConvert.js').catch((err) => {
       mod = null;
-      throw err;
+      throw mark(err);
+    }));
+  // Spreadsheets only: loaded when an .xlsx or .csv is dropped.
+  const loadSheet = () =>
+    (sheetMod ??= import('../lib/sheetConvert.js').catch((err) => {
+      sheetMod = null;
+      throw mark(err);
     }));
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-doc-converter]')) {
@@ -189,6 +206,7 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
     const status = q('status');
     const fileName = q('file-name');
     const fileSize = q('file-size');
+    const note = q('note');
     const progressWrap = q('progress-wrap');
     const progress = q('progress');
     const error = q('error');
@@ -203,8 +221,9 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
     let urls: string[] = [];
     let busy = 0;
 
+    // Rounded up, so a file just over the 20 MB limit never shows as "20.0 MB".
     const sizeLabel = (n: number) =>
-      n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
+      n < 1024 * 1024 ? `${Math.max(1, Math.ceil(n / 1024))} KB` : `${(Math.ceil((n / 1024 / 1024) * 10) / 10).toFixed(1)} MB`;
 
     function setProgress(f: number) {
       const pct = Math.round(f * 100);
@@ -238,10 +257,13 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
     const sizeBucket = (bytes: number) =>
       bytes < 100_000 ? 'under-100kb' : bytes < 1_000_000 ? 'under-1mb' : bytes < 5_000_000 ? 'under-5mb' : '5mb-plus';
 
-    async function handle(file: File) {
+    /** `others`: how many more files came in the same drop. One file is converted at a time. */
+    async function handle(file: File, others = 0) {
       current = file;
       const run = ++busy;
       reset();
+      note.hidden = !others;
+      note.textContent = others ? fill(L.oneAtATime, { n: String(others) }) : '';
       status.hidden = false;
       progressWrap.hidden = false;
       fileName.textContent = file.name;
@@ -264,7 +286,38 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         const { pair, font } = target();
         const toUnicode = pair.to === 'unicode';
 
-        if (checked.kind === 'docx') {
+        if (checked.kind === 'xlsx') {
+          const sm = await loadSheet();
+          const out = await sm.convertXlsx(bytes, {
+            direction: pair,
+            unicodeFont: toUnicode ? font : undefined,
+            onProgress: (f) => run === busy && setProgress(f),
+          });
+          if (run !== busy) return;
+          stats = out.stats;
+          const ext = /\.xlsm$/i.test(file.name) ? 'xlsm' : 'xlsx';
+          offer(download, sm.xlsxBlob(out.bytes), m.outputName(file.name, pair, ext));
+        } else if (checked.kind === 'csv') {
+          const sm = await loadSheet();
+          const { text } = m.decodeTextFile(bytes);
+          setProgress(0.4);
+          const out = sm.convertCsv(text, pair);
+          if (run !== busy) return;
+          stats = out.stats;
+          offer(download, sm.csvBlob(out.text), m.outputName(file.name, pair, 'csv'));
+          // A CSV cannot carry a font: an Excel file with the font already set
+          // is offered too, built from the same converted rows.
+          if (stats.convertedChars > 0) {
+            const original = sm.parseCsv(text, out.delimiter).rows;
+            const xlsx = sm.csvToXlsx(out.rows, original, pair, {
+              unicodeFont: toUnicode ? font : undefined,
+              sheetName: file.name.replace(/\.[^.]+$/, ''),
+            });
+            offer(downloadDocx, sm.xlsxBlob(xlsx), m.outputName(file.name, pair, 'xlsx'));
+            downloadDocx.textContent = fill(L.downloadXlsx, { font });
+            downloadDocx.hidden = false;
+          }
+        } else if (checked.kind === 'docx') {
           const out = await m.convertDocx(bytes, {
             direction: pair,
             unicodeFont: toUnicode ? font : undefined,
@@ -316,7 +369,8 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
         console.error('[doc-converter]', err, (err as Error)?.cause ?? '');
         if (run !== busy) return;
         // If the converter itself failed to load there is no messageFor().
-        fail(m ? localizeDocMessage(m.messageFor(err), m, L) : L.generic);
+        if (err && typeof err === 'object' && loadFailed.has(err)) fail(L.loadFailed);
+        else fail(m ? localizeDocMessage(m.messageFor(err), m, L) : L.generic);
       }
     }
 
@@ -346,14 +400,14 @@ const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from:
     drop.addEventListener('drop', (e) => {
       e.preventDefault();
       const f = e.dataTransfer?.files?.[0];
-      if (f) void handle(f);
+      if (f) void handle(f, e.dataTransfer!.files.length - 1);
     });
 
     // A file dropped anywhere on the page (ConvertModes' page-wide drop)
     // arrives here, and goes through exactly the same checks and conversion.
     root.addEventListener('mkd:doc-file', (e) => {
-      const f = (e as CustomEvent<File>).detail;
-      if (f) void handle(f);
+      const { file: f, others } = (e as CustomEvent<{ file: File; others: number }>).detail;
+      if (f) void handle(f, others);
     });
   }
 </script>

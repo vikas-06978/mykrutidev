@@ -28,9 +28,11 @@
     "teal": "Teal"
   },
   "nav": {
+    "new": "New",
     "aria": "Converters",
     "typingTools": "Typing tools",
     "allConverters": "All tools",
+    "store": "Store",
     "soon": "Soon",
     "menu": "Menu",
     "home": "Home",
@@ -161,7 +163,11 @@
     "forWord": "For MS Word / forms",
     "copyUnicode": "Copy as Hindi (Unicode)",
     "copyUnicodeGu": "Copy as Gujarati (Unicode)",
+    "copyUnicodeMr": "Copy as Marathi (Unicode)",
+    "copyUnicodeNe": "Copy as Nepali (Unicode)",
     "unicodeGu": "Unicode / Gujarati",
+    "unicodeMr": "Unicode / Marathi",
+    "unicodeNe": "Unicode / Nepali",
     "copyUnicodeTa": "Copy as Tamil (Unicode)",
     "copyUnicodeBn": "Copy as Bengali (Unicode)",
     "unicodeTa": "Unicode / Tamil",
@@ -191,17 +197,19 @@
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
     "previewGu": "Preview (Gujarati)",
+    "previewMr": "Preview (Marathi)",
+    "previewNe": "Preview (Nepali)",
     "previewTa": "Preview (Tamil)",
     "previewBn": "Preview (Bengali)"
   },
   "doc": {
     "title": "Convert a document",
-    "introLegacy": "Upload a Word (.docx) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
-    "introUnicode": "Upload a Word (.docx) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, italic, tables, images and the rest of the formatting stay exactly as they are.",
+    "introLegacy": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
+    "introUnicode": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
     "private": "Your file never leaves your computer.",
     "drag": "Drag a file here, or ",
     "choose": "Choose file",
-    "limits": ".docx or .txt, up to 20 MB",
+    "limits": ".docx, .xlsx, .csv or .txt, up to 20 MB",
     "targetLabel": "Convert to:",
     "unicodeIn": "Unicode ({font})",
     "groupUnicode": "Unicode",
@@ -214,24 +222,56 @@
     "progress": "Converting",
     "download": "Download converted file",
     "downloadLegacyDocx": "Download as Word (.docx) with {font}",
+    "downloadXlsx": "Download as Excel (.xlsx) with {font}",
     "saveAs": "Please open it in Word and Save As → Word Document (.docx).",
     "pdf": "PDFs cannot be converted directly. Open the PDF in Word (File → Open) and Word turns it into a document. Then choose Save As → Word Document (.docx) and upload that file here.",
     "passwordHint": "If the document is password-protected, remove the password first.",
     "tooLarge": "This file is larger than 20 MB. Please split it into smaller files and convert them one at a time.",
-    "onlyTypes": "Only .docx (Word) and .txt files can be converted here.",
+    "onlyTypes": "Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.",
     "damaged": "This file seems damaged. Open it in Word and save it again.",
+    "sheetSaveAs": "Please open it in Excel and Save As → Excel Workbook (.xlsx).",
+    "sheetPasswordHint": "If the workbook is password-protected, remove the password first.",
+    "sheetDamaged": "This file seems damaged. Open it in Excel and save it again.",
+    "notText": "This is not a plain text file. If it is a Word or Excel file, give it back its .docx or .xlsx name.",
+    "oneAtATime": "One file at a time: only this file is being converted. Drop the other {n} on their own.",
+    "loadFailed": "The converter could not load. Check your internet connection and try again. Your file is still on your computer.",
     "generic": "Something went wrong converting this file.",
     "summaryLine": "Converted {paragraphs}",
+    "summaryChecked": "Checked {paragraphs}",
     "paragraphOne": "{n} paragraph",
     "paragraphMany": "{n} paragraphs",
     "tableOne": "{n} table",
     "tableMany": "{n} tables",
+    "cellOne": "{n} cell",
+    "cellMany": "{n} cells",
+    "sheetOne": "{n} sheet",
+    "sheetMany": "{n} sheets",
     "fontKruti": "Kruti Dev",
     "fontUnicode": "Unicode",
     "noLegacy": "No {font} text found in this document. Is it already Unicode?",
     "noUnicode": "No Unicode Hindi text found in this document. Is it already in {font}?",
+    "fontsUsed": "Fonts used in the cells: {fonts}.",
     "allConverted": "All Hindi text converted.",
     "partial": "{pct}% of the Hindi text was in {from} and has been converted. {rest}% was already {to} and was left as it is."
+  },
+  "ads": {
+    "label": "Advertisement"
+  },
+  "practice": {
+    "level1": "Level 1: short passages",
+    "level2": "Level 2: medium passages",
+    "level3": "Level 3: long passages",
+    "range": "{min} to {max} words each",
+    "words": "{n} words",
+    "tricky": "Tricky words",
+    "keysNote": "The Hindi, and the Kruti Dev keys that type it.",
+    "practise": "Practise with the timed typing test",
+    "pdfTitle": "Free PDF: all 30 passages",
+    "pdfNote": "36 pages to print: each passage with its tricky words and keys, a score box, a joined-letters page and a progress log. Free to print and share.",
+    "pdfButton": "Download the free PDF",
+    "starterTitle": "New to the Kruti Dev keyboard? Start with the 7-Day Starter",
+    "starterNote": "A 32-page day-by-day PDF: the keys row by row, drills that show the keys to press, and a 5-minute self-check each day. Try Day 1 free before you buy.",
+    "starterButton": "See the 7-Day Starter · {price}"
   },
   "translit": {
     "inputLabel": "English (Roman)",
@@ -2190,7 +2230,7 @@
     "/unicode-to-dvtt-surekh": {
       "nav": "Unicode → DV-TT Surekh",
       "h1": "Unicode to DV-TT Surekh Converter (Marathi)",
-      "title": "Unicode to DV-TT Surekh Converter | Marathi Unicode to DV-TT Font",
+      "title": "Unicode to DV-TT Surekh Converter (Marathi) | MyKrutiDev",
       "description": "Convert Unicode Marathi into DV-TT Surekh font code for office letters and old templates. ि, the reph and ो drawn the way the font draws them. Free.",
       "betaNote": "For documents that will be set in DV-TT Surekh or DV-TT Yogesh.",
       "lede": "Type or paste Marathi on the left and get DV-TT Surekh code on the right, ready for Word or your DTP program.",
@@ -2231,7 +2271,7 @@
     "/gujarati-font-converter": {
       "nav": "Terafont → Unicode (Gujarati)",
       "h1": "Gujarati Font Converter: Terafont and LMG Arun to Unicode",
-      "title": "Gujarati Font Converter | Terafont Varun, LMG Arun to Unicode",
+      "title": "Gujarati Font Converter: Terafont, LMG Arun | MyKrutiDev",
       "description": "Convert Terafont Varun and LMG Arun Gujarati to Unicode for portals, WhatsApp and Word. Read off the font files, with digits and conjuncts put right. Free.",
       "betaNote": "For Gujarati typed in Terafont (Varun, Ganesh, Indra and the rest) or in LMG Arun, Laxmi and Rupen.",
       "lede": "Paste Gujarati typed in Terafont or LMG Arun on the left and get Unicode Gujarati on the right, ready for any website, portal, email or phone.",
@@ -2593,7 +2633,7 @@
     "/english-date-to-hindi": {
       "nav": "Date in Hindi",
       "h1": "English Date to Hindi Date Converter",
-      "title": "English Date to Hindi Date Converter",
+      "title": "English Date to Hindi Date Converter (तारीख हिंदी में) | MyKrutiDev",
       "description": "Write any date in Hindi: 02/10/2026 becomes 2 अक्टूबर 2026, शुक्रवार, with Hindi digits or in words for letters and documents. Free.",
       "lede": "Pick a date and see it written every way a Hindi letter or document needs, each with its own copy button.",
       "body": [
@@ -2981,6 +3021,22 @@
         }
       ]
     },
+    "/hindi-typing-practice-passages": {
+      "nav": "30 Practice Passages",
+      "navSub": "30 free passages, with the keys",
+      "h1": "30 Hindi Typing Practice Passages (Free)",
+      "title": "30 Hindi Typing Passages with Kruti Dev Keys",
+      "description": "Thirty original Hindi passages in three levels for typing practice, with the Kruti Dev keys of each one’s hardest words. Read online or get the free PDF.",
+      "lede": "Thirty original Hindi passages, from 98 to 216 words, in three levels. Under each one are its hardest words and the Kruti Dev keys that type them. Free to read here, or download the whole set as a printable PDF.",
+      "body": [
+        "<h2>How to practise</h2>",
+        "<p>Open a passage and read it once. Look at its tricky words and their keys, then type the whole passage in Kruti Dev 010 with a timer running. The <a href=\"/hindi-typing-test\">typing test</a> times you and counts your mistakes. Count a word as a mistake if any letter or matra in it is wrong. Net speed is the words typed minus the mistakes, divided by the minutes.</p>",
+        "<h2>Two Kruti Dev rules behind most mistakes</h2>",
+        "<p>The ि sign is typed <strong>before</strong> its letter: कि is <code>fd</code>. The reph (र् over a letter) is typed <strong>after</strong> the letter it sits on: कर्म is <code>deZ</code>. New to the keyboard? The <a href=\"/store/kruti-dev-7-day-starter\">Kruti Dev 7-Day Starter</a> teaches it day by day.</p>",
+        "<h2>About these passages</h2>",
+        "<p>All thirty were written for this site. They are not taken from any exam paper. The nasal is written ं (गांव, पहुंचना), an accepted printed spelling, so every word can be typed without Alt codes. No typing speed or exam result is promised: exams set their own speeds, fonts and marking rules, so read your exam’s official notification.</p>"
+      ]
+    },
     "/kruti-dev-matra-chart": {
       "nav": "Matra & conjunct chart",
       "h1": "Kruti Dev Matra and Conjunct Chart - Free PDF",
@@ -3323,6 +3379,61 @@
         "<p>Office files often mix both. Convert rather than retype: <a href=\"/?mode=file\">Kruti Dev to Unicode</a> for old documents, <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> when a template needs Kruti Dev. Both convert whole .docx files and keep tables and formatting.</p>"
       ]
     },
+    "/kruti-dev-excel-to-unicode": {
+      "nav": "Kruti Dev Excel to Unicode",
+      "h1": "Kruti Dev Excel to Unicode Converter",
+      "title": "Kruti Dev Excel to Unicode Converter | MyKrutiDev",
+      "description": "Convert a whole Excel sheet from Kruti Dev to Unicode in one go. Upload .xlsx or .csv, only the Kruti Dev cells change and the formatting stays. Free, private.",
+      "lede": "Upload an Excel file (.xlsx) or a .csv and every cell typed in Kruti Dev becomes Unicode Hindi in Mangal. Numbers, formulas, English cells, colours and column widths stay as they were, and the file never leaves your computer.",
+      "howTo": {
+        "steps": [
+          "Choose the Excel file (.xlsx) or .csv below, or drag it onto the box. An old .xls file must first be saved as .xlsx in Excel: <strong>File → Save As → Excel Workbook</strong>.",
+          "Pick the font for the Hindi: Unicode in Mangal or Nirmala UI, or another Hindi font such as DevLys 010.",
+          "Download the converted file and open it in Excel. The Kruti Dev cells now hold Unicode Hindi, which you can search, sort, filter and paste anywhere."
+        ],
+        "tip": "Converting the other way? On <a href=\"/unicode-to-kruti-dev?mode=file\">Unicode to Kruti Dev</a> the same upload turns Unicode cells into Kruti Dev 010."
+      },
+      "problems": [
+        {
+          "problem": "Some cells are still in Kruti Dev after converting",
+          "fix": "Only cells whose font is Kruti Dev (or DevLys and the other fonts on the same keys) are converted, because the font is the only sure way to tell Kruti Dev code from English. In the original file, select those cells, set their font to Kruti Dev 010, save and convert again."
+        },
+        {
+          "problem": "My file is .xls, not .xlsx",
+          "fix": "Open it in Excel and choose <strong>File → Save As → Excel Workbook (.xlsx)</strong>, then upload that copy. From Google Sheets, choose <strong>File → Download → Microsoft Excel (.xlsx)</strong>."
+        },
+        {
+          "problem": "The CSV opens in Excel as gibberish",
+          "fix": "A CSV has no fonts, so Kruti Dev text shows as English letters until its font is set. Use the Excel (.xlsx) download offered next to the CSV: the font is already set in it."
+        },
+        {
+          "problem": "Text in charts, shapes or the page header did not change",
+          "fix": "Only cells and the notes on cells are converted. Copy that other text into the <a href=\"/\">Kruti Dev to Unicode</a> box and paste the result back."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does it change my numbers or formulas?",
+          "a": "No. Numbers, dates and formulas are left exactly as they are. Only the text in cells set in a Kruti Dev font is converted, and formulas that refer to those cells keep working."
+        },
+        {
+          "q": "Is my Excel file uploaded anywhere?",
+          "a": "No. Your own browser reads and converts the file, on your own computer. Nothing is sent to this site or anyone else, so it is safe for office data."
+        },
+        {
+          "q": "Can I convert a CSV file?",
+          "a": "Yes. A CSV has no fonts, so each field is judged on its own: numbers, dates and English words stay, Kruti Dev text is converted. You get the converted CSV and an Excel file with the Hindi font already set. If you also have the file as .xlsx, convert that instead: its fonts say exactly which cells are Kruti Dev."
+        },
+        {
+          "q": "Which fonts does it convert?",
+          "a": "On this page, Kruti Dev 010 and the other Kruti Dev versions, DevLys 010 and the fonts typed on the same keys. The upload on each converter page of this site works the same way for that page’s font."
+        },
+        {
+          "q": "Does it work with Google Sheets or LibreOffice?",
+          "a": "Yes. In Google Sheets choose <strong>File → Download → Microsoft Excel (.xlsx)</strong>, convert that file here and open the result with <strong>File → Import</strong>. LibreOffice Calc opens and saves .xlsx files directly."
+        }
+      ]
+    },
     "/contact": {
       "nav": "Contact",
       "h1": "Contact MyKrutiDev",
@@ -3336,7 +3447,9 @@
         "<h2>Reporting a wrong conversion</h2>",
         "<p>Please include the text you pasted (a sentence or two is enough), what the converter gave you, and what it should have been. If the text came from a document, tell us the font name Word shows for it. <strong>Do not send personal or confidential documents</strong> - a short sample that shows the problem is all we need, and it helps us fix it for everyone.</p>",
         "<h2>What we cannot help with</h2>",
-        "<p>We cannot send font files, answer questions about a particular exam's results, or convert documents for you by email: the tools on the site do the conversion privately in your own browser. For exam dates and rules, the official notification is the only reliable source.</p>"
+        "<p>We cannot send font files, answer questions about a particular exam's results, or convert documents for you by email: the tools on the site do the conversion privately in your own browser. For exam dates and rules, the official notification is the only reliable source.</p>",
+        "<h2>Orders and refunds</h2>",
+        "<p>For a problem with a purchase, write to <a href=\"mailto:{email}\">{email}</a> from the email address you bought with, and give the order number from your email if you have it. Refund requests are answered within a few working days. See the <a href=\"/refund-policy\">refund policy</a>.</p>"
       ]
     },
     "/privacy-policy": {
@@ -3346,13 +3459,15 @@
       "description": "MyKrutiDev converts text and files in your browser, so nothing you paste or upload is sent to us. What is stored on your device, and what Analytics counts.",
       "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
       "body": [
+        "<h2>Who runs this site</h2>",
+        "<p>MyKrutiDev is run by {seller}. For anything about this policy or your data, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
         "<h2>Your text and your files</h2>",
-        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only things our server accepts are the short feedback form and the tool request form on the <a href=\"/links\">ToolMitra links page</a>, and only when you press Send. You can load a page, disconnect from the internet and keep converting.</p>",
+        "<p>When you paste text into a converter, type in the tutor or drop in a Word or text file, all the work happens in JavaScript on your own device. The file is read by your browser, converted in memory and handed back to you as a download. It is <strong>never uploaded</strong> to MyKrutiDev or anyone else, and nothing on the site could receive it: the only things our server accepts are the short feedback form, the tool request form on the <a href=\"/links\">ToolMitra links page</a> and, if you buy a PDF, the store order form, and only when you press Send or Pay. You can load a page, disconnect from the internet and keep converting.</p>",
         "<h2>The one exception: English to Hindi typing</h2>",
         "<p>On <a href=\"/english-to-hindi-typing\">English to Hindi typing</a>, the Hinglish mode sends each word you type to Google's public input-tools service to get its best Hindi spelling. Only the words being transliterated are sent, not the rest of the page, and web and email addresses are never sent. If you do not want that, switch Typing to <strong>Exact (ITRANS)</strong>, which works entirely offline. Google's handling of those requests is covered by Google's own privacy policy.</p>",
         "<h2>What is stored on your device</h2>",
-        "<ul><li>Your theme and colour choice, and your language choice.</li><li>In the converters: the text in the input box, so it is still there after a refresh, and the last 10 texts you converted with each tool, under <strong>Recent</strong> (each up to 50,000 characters). Clearing the box removes its draft, and <strong>Delete all</strong> empties Recent.</li><li>In the typing tutor: which lessons you have cleared, your best speed, your daily practice streak, badges, and your last 30 practice sessions.</li><li>A few interface preferences, such as whether key sounds are on.</li><li>The date you last sent feedback, so the feedback form does not ask again for 30 days.</li></ul>",
-        "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. The only cookies are Google Analytics' own, described below.</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
+        "<ul><li>Your theme and colour choice, and your language choice.</li><li>In the converters: the text in the input box, so it is still there after a refresh, and the last 10 texts you converted with each tool, under <strong>Recent</strong> (each up to 50,000 characters). Clearing the box removes its draft, and <strong>Delete all</strong> empties Recent.</li><li>In the typing tutor: which lessons you have cleared, your best speed, your daily practice streak, badges, and your last 30 practice sessions.</li><li>A few interface preferences, such as whether key sounds are on.</li><li>The date you last sent feedback, so the feedback form does not ask again for 30 days.</li><li>Which new pages you have already opened, so their \"New\" label goes away.</li></ul>",
+        "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. {cookiesLine}</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
         "<h2>Visit statistics (Google Analytics)</h2>",
         "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself. It also counts which buttons in the tools are used, such as Copy, Download Word, Print or a finished lesson, with the fonts or the lesson involved. It counts the start of a typing test (its mode and length) and that a file was chosen for conversion (its type and rough size, never its name or contents).</p>",
         "<p>It sets two cookies, <code>_ga</code> and <code>_ga_VZZRXNT8TQ</code>, so that a returning visitor is not counted as a new one. They last up to two years. It never receives the text you convert, your files or anything you type in the tools, because those never leave your device. We have switched off Google signals and ad personalisation, so this data is not used for advertising, and the reports do not tell us who you are.</p>",
@@ -3365,12 +3480,29 @@
         "<p>The <a href=\"/links\">ToolMitra links page</a> has a short form for suggesting the next tool. If you press Send, we store what you wrote in it, an email address only if you chose to give one, the site language, whether you were on a phone or a computer, and the date. Nothing else. Requests are kept in the same database as feedback, under the same rules: no IP address, read only by the site's owner, and an email used only to tell you when the tool is ready. A copy of each request is also emailed to the site's owner through Resend, in the same way. To have a request deleted, write to <a href=\"mailto:{email}\">{email}</a> from the address you gave.</p>",
         "<h2>Spam protection</h2>",
         "<p>To keep robots out, the feedback form and the tool request form use Cloudflare Turnstile, an invisible check that runs only after you open or start filling in a form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour on each form, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
+        "<h2>Buying a PDF</h2>",
+        "<p>If you buy a PDF, we ask for an email address, but you may leave it empty. We keep what the order needs (what you bought, the amount and the Razorpay payment reference) and, if you gave one, your email, so we can send the download link, let you download again and handle a refund. We do not use it for marketing and we never sell or share it.</p>",
+        "<p>You pay on Razorpay's own page. Razorpay handles your UPI, card or bank details under its own privacy policy, and we never see or store them. The order form uses the same invisible Cloudflare Turnstile check described above, and the download link is sent by email through Resend, an email delivery service. Razorpay also asks for your mobile number on its page. It shows with the payment in our Razorpay account, but this website does not store it, and we use it only to deal with that payment.</p>",
+        "<p>Each PDF you buy carries a small line at the foot of every page with part of your order number and, if you gave one, a shortened form of your email address (for example ab***@gmail.com). It is there so that a copy shared without permission can be traced to its order. Your full email address is never printed in the file.</p>",
+        "<p>Orders that are never paid are deleted after {unpaidDays} days. Paid orders are kept for as long as refunds and our accounts require, which can be several years. To ask about your order, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
         "<h2>Server logs</h2>",
         "<p>The site is a set of static files served by a hosting provider. Like any web server, it may keep standard access logs - IP address, the page requested, browser type and time - for security and to keep the service running. These logs never contain the text or files you convert, because those never reach the server.</p>",
+        "<h2>Where your data is kept</h2>",
+        "<p>The site runs on Cloudflare, and feedback, tool requests and orders are kept in Cloudflare's database and file storage. Visit statistics are kept by Google, payments by Razorpay, and emails are sent through Resend. Some of these companies may keep data on servers outside India. We use them only for the purposes described on this page.</p>",
+        "<h2>Your choices and rights</h2>",
+        "<p>You can ask us to show you, correct or delete the feedback, tool requests or order details we hold about you. Write to <a href=\"mailto:{email}\">{email}</a> and say what you want. To find an order, give its order number or the Razorpay payment ID. We usually reply within a few working days. Where the law or our accounts require us to keep the record of a paid order, we may have to keep it, but we will tell you so. What is stored on your own device you can delete yourself at any time, as described above.</p>",
         "<h2>Children</h2>",
-        "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form.</p>",
+        "<p>The site asks no one for personal information, children included. The only places you can give any are the optional email boxes in the feedback form and the tool request form, and the email box when you buy a PDF. Buying is meant for adults, so children should ask a parent.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 9 October 2026.</p>"
+        "<p>If this policy changes, the new version will be posted on this page. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 14 October 2026.</p>"
+      ],
+      "cookiesGaOnly": "The only cookies are Google Analytics' own, described below.",
+      "cookiesWithAds": "The only cookies are those of Google Analytics and Google's advertising, both described below.",
+      "adsBody": [
+        "<h2>Advertising (Google AdSense)</h2>",
+        "<p>Pages on this site may show ads served by Google AdSense. Third-party vendors, including Google, use cookies to serve ads based on your previous visits to this website and to other websites. Google's use of advertising cookies lets it and its partners serve ads to you based on your visits to this site and other sites on the internet.</p>",
+        "<p>You can opt out of personalised advertising in Google's <a href=\"https://adssettings.google.com\">Ads Settings</a>, and opt out of other vendors' cookies for personalised advertising at <a href=\"https://www.aboutads.info/choices/\">www.aboutads.info</a>. Visitors from the European Economic Area, the UK and Switzerland are asked for their consent before advertising cookies are used. Google explains the rest on <a href=\"https://policies.google.com/technologies/partner-sites\">How Google uses information from sites that use its services</a>.</p>",
+        "<p>We never pass the text you convert, your files or anything you type in the tools to Google or to any advertiser. Ads are not shown in the store, on this policy or on other pages without content of their own.</p>"
       ]
     },
     "/terms": {
@@ -3390,8 +3522,101 @@
         "<p>Kruti Dev, DevLys, Chanakya, Mangal, Nirmala UI and other font names belong to their owners. MyKrutiDev is not affiliated with them and does not distribute their font files. Names are used only to describe what the tools convert.</p>",
         "<h2>Who owns what</h2>",
         "<p>The text, guides, charts, printable sheets, diagrams, design and code of MyKrutiDev are our own work and are protected by copyright. You may not copy them wholesale, republish them, or present them as your own. Quoting a short passage with a link back to the page is fine, and linking to any page is welcome. What you type or convert on this site is yours, and we claim no rights over it. Please do not try to disrupt the site.</p>",
+        "<h2>Buying PDFs and ebooks</h2>",
+        "<p>The PDFs and ebooks in the <a href=\"/store\">store</a> are paid. A purchase gives you a personal licence to read and print the file for your own use. You may not resell, share or upload it. Payments are made through Razorpay and prices are in Indian rupees. Refunds and delivery are explained in the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>. The free printable charts stay free to print and share for teaching, as written above.</p>",
         "<h2>Changes and contact</h2>",
-        "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 26 September 2026.</p>"
+        "<p>We may update these terms. The version on this page applies. Questions: <a href=\"mailto:{email}\">{email}</a>. Last updated 14 October 2026.</p>"
+      ]
+    },
+    "/store": {
+      "nav": "Store",
+      "h1": "Store",
+      "title": "PDF Store - Practice Packs and Ebooks",
+      "description": "Practice PDFs and ebooks for Hindi typing and exams, checked by hand. Pay securely with UPI or card and download at once.",
+      "lede": "Careful, practical PDFs for Hindi typing and exam preparation. Every one is checked before it is listed.",
+      "body": [
+        "<h2>How buying works</h2>",
+        "<p>Pick a PDF, enter your email and pay on Razorpay's secure page. The download button appears as soon as the payment is confirmed, and the link is also emailed to you.</p>",
+        "<h2>Our promise</h2>",
+        "<p>Every PDF is checked against official sources before it is listed. If the download fails or the file will not open, we fix it or refund you. See the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
+      ]
+    },
+    "/store/sample-test": {
+      "nav": "Sample file",
+      "h1": "Sample file (test purchase)",
+      "title": "Sample File - Test Purchase",
+      "description": "A one-page test file used to check that payment and download work. It is not on sale to the public.",
+      "lede": "This page exists only to test the shop before real PDFs are listed.",
+      "body": [
+        "<h2>What you get</h2>",
+        "<p>A one-page sample PDF. Nothing else.</p>"
+      ]
+    },
+    "/store/kruti-dev-7-day-starter": {
+      "nav": "Kruti Dev 7-Day Starter",
+      "h1": "Kruti Dev 7-Day Starter",
+      "title": "Kruti Dev 7-Day Starter Plan (PDF)",
+      "description": "A 32-page day-by-day PDF to learn Hindi typing on the Kruti Dev keyboard, in Hindi and English. Try Day 1 free before you buy.",
+      "lede": "A day-by-day plan to learn Hindi typing on the Kruti Dev keyboard. Seven days, and every drill is checked against the keys you have already learned.",
+      "body": [
+        "<h2>What you get</h2>",
+        "<p>A 32-page A4 PDF in Hindi and English. Each of the seven days has the same four pages: the goal and the new keys, the rules and a warm-up, the drills, and a 5-minute self-check with an answer key. It ends with a 7-day tracker.</p>",
+        "<ul><li>The home row, top row, bottom row and numbers, the Shift keys, all the matras, the nine two-key letters, the four conjuncts, everyday words and full sentences.</li><li>Every drill line shows the Hindi and the keys to press, and was checked against the keys taught so far.</li><li>Print it, or read it on any phone, tablet or computer.</li></ul>",
+        "<h2>Try Day 1 free</h2>",
+        "<p><a href=\"/downloads/mykrutidev-kruti-dev-7-day-starter-day-1-sample.pdf\" download=\"mykrutidev-kruti-dev-7-day-starter-day-1-sample.pdf\" type=\"application/pdf\">Download the free Day 1 sample</a> (5 pages) and see exactly how the book works before you buy.</p>",
+        "<h2>What it does not promise</h2>",
+        "<p>No typing speed and no exam result. Exams set their own speeds, fonts and marking rules, so read your exam's official notification. You need the Kruti Dev 010 font in Word or Notepad, or you can practise on the <a href=\"/hindi-typing-test\">free typing tutor</a>.</p>",
+        "<h2>Delivery and refunds</h2>",
+        "<p>The download is ready right after payment, on screen and by email. A delivered, working file is not refundable. If the download fails, you pay twice or the file will not open, see the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
+      ]
+    },
+    "/store/thanks": {
+      "nav": "Your order",
+      "h1": "Your order",
+      "title": "Your Order and Download",
+      "description": "Confirm your payment and download your PDF. This page is private and is not listed in search.",
+      "lede": "We check your payment with Razorpay, then your download appears here.",
+      "body": [
+        "<h2>Need help?</h2>",
+        "<p>Write to <a href=\"mailto:{email}\">{email}</a> and mention the email address you used. We usually reply within a few working days.</p>"
+      ]
+    },
+    "/refund-policy": {
+      "nav": "Refund policy",
+      "h1": "Refund Policy",
+      "title": "Refund and Cancellation Policy",
+      "description": "Digital PDFs and ebooks are not refundable once delivered. What we do fix or refund: failed delivery, double payment or a damaged file, and how to ask.",
+      "lede": "A PDF or ebook cannot be returned once you have it, so we do not refund after delivery. We do fix or refund when something goes wrong on our side.",
+      "body": [
+        "<h2>No refunds on delivered files</h2>",
+        "<p>Digital files cannot be returned. Once the download is available to you, the sale is final. Please read the description and the sample pages on the product page before you buy.</p>",
+        "<h2>When we do help</h2>",
+        "<p>Write to us within {refundDays} days if money was taken but no download reached you, if you paid twice for the same PDF, or if the file will not open. We can check each of these in our own records and by testing the file, and we will send a working file or refund you in full if we cannot.</p>",
+        "<h2>How to ask</h2>",
+        "<p>Email <a href=\"mailto:{email}\">{email}</a> from the address you bought with. If you did not give an email, give your order number or Razorpay payment ID. We reply within a few working days.</p>",
+        "<h2>How the money comes back</h2>",
+        "<p>An approved refund goes through Razorpay to the same UPI app, card or bank account you paid from. It usually reaches you in 5 to 7 working days, depending on your bank. When the refund is made, the download link stops working.</p>",
+        "<h2>Free tools are not affected</h2>",
+        "<p>The converters, the typing tutor and the printable charts stay free. This policy covers only PDFs and ebooks bought in the <a href=\"/store\">store</a>.</p>"
+      ]
+    },
+    "/delivery-policy": {
+      "nav": "Delivery policy",
+      "h1": "Delivery Policy",
+      "title": "Delivery Policy - How You Get Your PDF",
+      "description": "How a PDF or ebook reaches you: instant download after payment, an emailed link, how long it works and what to do if it does not arrive.",
+      "lede": "Everything we sell is a digital file. Nothing is posted, so there is no shipping.",
+      "body": [
+        "<h2>Instant delivery</h2>",
+        "<p>When your payment is confirmed, the download button appears on screen and the same link is emailed to you. This normally takes under a minute.</p>",
+        "<h2>How long the link works</h2>",
+        "<p>The link works for {downloadDays} days and for up to {maxDownloads} downloads, so you can save the file on your phone and your computer. After that, write to us and we will extend it.</p>",
+        "<h2>If the email does not come</h2>",
+        "<p>Check your spam or promotions folder. The download button is also on the page you land on after paying. If neither works, write to <a href=\"mailto:{email}\">{email}</a> with the email address you used and we will send it again.</p>",
+        "<h2>Keep it private</h2>",
+        "<p>The link is meant for you alone. Please do not share it or post it online.</p>",
+        "<h2>Format</h2>",
+        "<p>Files are PDFs that open on any phone, tablet or computer. No app or account is needed.</p>"
       ]
     },
     "/arjun-to-unicode": {
@@ -5116,6 +5341,18 @@
       "otherScripts": {
         "title": "Hindi in other scripts",
         "benefit": "Write Hindi in Gujarati, Bengali, Odia, Telugu, Kannada or Malayalam letters."
+      },
+      "excel": {
+        "title": "Kruti Dev Excel → Unicode",
+        "benefit": "Convert a whole .xlsx or .csv sheet. Numbers, formulas and formatting stay."
+      },
+      "practice": {
+        "title": "30 practice passages",
+        "benefit": "Free Hindi passages with the Kruti Dev keys of the hardest words, and a PDF."
+      },
+      "store": {
+        "title": "Store",
+        "benefit": "Typing PDFs to learn and practise, checked key by key."
       }
     },
     "why": [
@@ -5224,7 +5461,8 @@
   "og": {
     "kickerTool": "Free online tool",
     "kickerGuide": "Guide",
-    "kickerSite": "MyKrutiDev"
+    "kickerSite": "MyKrutiDev",
+    "kickerProduct": "Printable PDF"
   },
   "notFound": {
     "title": "Page not found",
@@ -5546,7 +5784,7 @@
     "kruti-dev-typing-rules-matras-reph-half-letters": {
       "crumb": "Kruti Dev typing rules",
       "h1": "Kruti Dev Typing Rules: Matras, Reph, Half Letters and Conjuncts",
-      "title": "Kruti Dev Typing Rules | How to Type ि, Reph, Half Letters & Conjuncts",
+      "title": "Kruti Dev Typing Rules: ि, Reph, Half Letters | MyKrutiDev",
       "description": "The rules behind Kruti Dev typing: why ि comes first, where the reph goes, how half letters, rakar and conjuncts like क्ष, त्र, ज्ञ and श्र are typed.",
       "lede": "Kruti Dev follows the typewriter: you type what is drawn, left to right, not what is spoken. Five rules explain almost every sequence that trips people up.",
       "body": [
@@ -5651,9 +5889,9 @@
   "modes": {
     "label": "Convert text or a file",
     "text": "Paste text",
-    "file": "Upload Word file",
+    "file": "Upload Word / Excel",
     "new": "New",
-    "hint": "Converting a full document? <a href=\"{href}\">Upload the Word file</a>, formatting stays.",
+    "hint": "Converting a full document or spreadsheet? <a href=\"{href}\">Upload the Word or Excel file</a>, formatting stays.",
     "back": "Have a full Word file? <a href=\"{href}\">Upload it here ↑</a>",
     "drop": "Drop your file to convert"
   },
@@ -5785,5 +6023,50 @@
       "numericHindiDigits": "Numeric, Hindi digits",
       "words": "In words"
     }
+  },
+  "store": {
+    "price": "Price",
+    "meta": "PDF · {pages} pages · instant download",
+    "buyHeading": "Buy this PDF",
+    "emailLabel": "Your email address (optional)",
+    "emailHelp": "With an email we also send you the download link, so you can get it again later. Without one, save the page you see after paying: it has your download.",
+    "acceptLabel": "I agree to the <a href=\"/terms\">terms</a> and the <a href=\"/refund-policy\">refund policy</a>.",
+    "buy": "Pay {price} securely",
+    "working": "Please wait…",
+    "payNote": "You pay on Razorpay's secure page with UPI, card or net banking. We never see your payment details.",
+    "deliveryNote": "You get the PDF right after payment, on screen and by email. <a href=\"/delivery-policy\">How delivery works</a>.",
+    "refundNote": "Digital files cannot be returned, so there is no refund after delivery, <a href=\"/refund-policy\">except when something goes wrong</a>.",
+    "errEmail": "Please enter a valid email address.",
+    "errAccept": "Please tick the box to agree to the terms.",
+    "errRate": "Too many tries from here just now. Please try again in an hour.",
+    "errChallenge": "The robot check did not finish. Please wait a moment and try again.",
+    "errClosed": "This PDF is not on sale right now.",
+    "errProvider": "The payment page could not be opened. You have not been charged. Please try again in a moment.",
+    "errGeneric": "That did not go through. Please try again.",
+    "emptyTitle": "The store opens soon",
+    "empty": "No PDFs are on sale yet. The first ones are being checked carefully before they are listed.",
+    "view": "View details",
+    "previewHeading": "Look inside",
+    "previewCover": "Cover",
+    "previewOpen": "Page {n} (shown free)",
+    "previewLocked": "Pages {from} to {to} (unlocked after payment)",
+    "previewNote": "Only these pages are shown here. The full PDF is yours after you pay.",
+    "thanksChecking": "Checking your payment…",
+    "thanksWaiting": "Your payment is not confirmed yet. If you have paid, wait a minute and check again. You will not be charged twice.",
+    "thanksPaid": "Payment received. Thank you!",
+    "thanksDownload": "Download PDF",
+    "thanksLeft": "{n} downloads left. The link works for {days} more days.",
+    "thanksEmail": "We have also emailed you the link. Check your spam folder if you cannot find it.",
+    "thanksExpired": "This download has expired or reached its limit. Write to us and we will help.",
+    "thanksRefunded": "This order was refunded, so the download is closed.",
+    "thanksClosed": "This payment was not completed. You have not been charged.",
+    "thanksNone": "This page needs the link from your purchase. Open the link from your email, or go back to the store.",
+    "thanksUnverified": "We could not confirm the payment just now. Please try again in a minute.",
+    "thanksRetry": "Check again",
+    "thanksStore": "Back to the store",
+    "businessHeading": "Who sells",
+    "thanksSave": "You did not give an email, so we cannot send the link. Save this page now (bookmark it or press Copy link): it is the only place to download from.",
+    "thanksCopy": "Copy link",
+    "thanksCopied": "Link copied"
   }
 }

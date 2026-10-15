@@ -26,7 +26,7 @@ const SESSION_SECONDS = 8 * 3600;
 /** Wrong keys allowed per IP per hour before the form stops answering. */
 const LOGIN_TRIES = 10;
 
-const SECURITY = {
+export const SECURITY = {
   'Cache-Control': 'no-store',
   'X-Robots-Tag': 'noindex, nofollow',
   'Referrer-Policy': 'no-referrer',
@@ -36,7 +36,7 @@ const SECURITY = {
     "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
 };
 
-const esc = (v) =>
+export const esc = (v) =>
   String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 const enc = new TextEncoder();
@@ -57,8 +57,16 @@ async function same(a, b) {
   return diff === 0;
 }
 
-/** The session cookie's value: fixed per key, so changing ADMIN_KEY signs everyone out. */
-const sessionValue = (key) => hmac(key, 'mkd-admin-session-v1');
+/**
+ * The session cookie: "<expiry>.<signature>". The server checks the expiry itself, so a copied
+ * cookie stops working after SESSION_SECONDS even if the browser keeps it, and changing
+ * ADMIN_KEY signs everyone out at once.
+ */
+const sessionSignature = (key, exp) => hmac(key, `mkd-admin-session-v2|${exp}`);
+const sessionValue = async (key, nowMs = Date.now()) => {
+  const exp = Math.floor(nowMs / 1000) + SESSION_SECONDS;
+  return `${exp}.${await sessionSignature(key, exp)}`;
+};
 
 function cookie(request, name) {
   for (const part of (request.headers.get('Cookie') ?? '').split(';')) {
@@ -68,11 +76,25 @@ function cookie(request, name) {
   return null;
 }
 
-export async function isAuthorized(request, key) {
+export async function isAuthorized(request, key, nowMs = Date.now()) {
   const auth = request.headers.get('Authorization') ?? '';
   if (auth.startsWith('Bearer ') && (await same(auth.slice(7), key))) return true;
   const c = cookie(request, COOKIE);
-  return !!c && (await same(c, await sessionValue(key)));
+  const m = /^(\d{1,12})\.([0-9a-f]{64})$/.exec(c ?? '');
+  if (!m || Number(m[1]) * 1000 <= nowMs) return false;
+  return same(m[2], await sessionSignature(key, m[1]));
+}
+
+/**
+ * Wrong keys sent in an Authorization header count against the same per-IP limit as the login
+ * form, so the header is not a way round it. Returns a 429 Response or null.
+ */
+export async function bearerGuard(request, db, key, salt, now) {
+  const auth = request.headers.get('Authorization') ?? '';
+  if (!auth.startsWith('Bearer ')) return null;
+  if (await same(auth.slice(7), key)) return null;
+  const { hits } = await countHit(db, clientIp(request), salt, { scope: 'admin', now });
+  return hits > LOGIN_TRIES ? new Response('Too many tries', { status: 429, headers: { 'Retry-After': '3600', ...SECURITY } }) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,7 +104,7 @@ export async function isAuthorized(request, key) {
 const label = (group, id) => LABELS[group]?.[id] ?? id;
 const ratingName = (r) => `${RATING_EMOJI[r] ?? ''} ${LABELS.ratings[r] ?? r}`;
 
-function page(title, body, status = 200, extra = {}) {
+export function page(title, body, status = 200, extra = {}) {
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -170,6 +192,7 @@ function dashboard({ total, ratings, wants, used, latest, requestTotal, requests
   <div class="fa-actions">
     <a class="fa-button" href="?format=csv" download>Download CSV</a>
     <a class="fa-button" href="?format=csv&amp;table=requests" download>Tool requests CSV</a>
+    <a class="fa-link" href="/admin/orders">Orders</a>
     <form method="post"><button type="submit" name="logout" value="1" class="fa-link">Sign out</button></form>
   </div>
 </header>
@@ -290,7 +313,7 @@ export async function handleAdmin(request, env, { now } = {}) {
       status: 303,
       headers: {
         Location: '/admin/feedback',
-        'Set-Cookie': `${COOKIE}=${await sessionValue(key)}; Path=/admin; Max-Age=${SESSION_SECONDS}; HttpOnly; Secure; SameSite=Strict`,
+        'Set-Cookie': `${COOKIE}=${await sessionValue(key, now)}; Path=/admin; Max-Age=${SESSION_SECONDS}; HttpOnly; Secure; SameSite=Strict`,
         ...SECURITY,
       },
     });
@@ -299,7 +322,9 @@ export async function handleAdmin(request, env, { now } = {}) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST', ...SECURITY } });
   }
-  if (!(await isAuthorized(request, key))) return loginPage('', 401);
+  const guarded = await bearerGuard(request, db, key, env.RATE_LIMIT_SALT || key, now);
+  if (guarded) return guarded;
+  if (!(await isAuthorized(request, key, now))) return loginPage('', 401);
 
   const params = new URL(request.url).searchParams;
   if (params.get('format') === 'csv') {

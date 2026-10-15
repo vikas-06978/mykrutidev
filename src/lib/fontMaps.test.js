@@ -364,8 +364,17 @@ describe('english safety toggle', () => {
   });
 });
 
+describe('spreadsheet headings stay English', () => {
+  for (const w of ['Amount', 'Ram', 'Rate', 'Remarks', 'Gender', 'Male', 'Female', 'Price', 'Quantity', 'Balance']) {
+    test(w, () => assert.equal(convert(w, 'kruti-dev', 'unicode'), w));
+  }
+  test('while the Hindi beside them still converts', () => {
+    assert.equal(convert('Amount jkf\'k', 'kruti-dev', 'unicode'), 'Amount राशि');
+  });
+});
+
 describe('isWellFormedDevanagari', () => {
-  const ok = ['भारत', 'कि', 'कर्म', 'क्रम', 'क़', 'हिन्दी'];
+  const ok = ['भारत', 'कि', 'कर्म', 'क्रम', 'क़', 'हिन्दी', 'कीं', 'उं', 'है।', 'संदेश', 'दुःख'];
   const bad = [
     'ा', 'ेक', 'क्', 'ंक',
     // A halant with nothing to kill. This is what an English word decodes to
@@ -375,6 +384,10 @@ describe('isWellFormedDevanagari', () => {
     'आे',
     // A nukta with no consonant under it.
     '़',
+    // A nasal mark after a halant or another nasal mark: "Ram" is त्ंउ.
+    'त्ंउ', 'कंं',
+    // Letters straight after a danda at the start: "Amount" is ।उवनदज.
+    '।उवनदज', '।ंकींंत',
   ];
   for (const s of ok) test(`well formed: ${s}`, () => assert.ok(isWellFormedDevanagari(s)));
   for (const s of bad) test(`malformed: ${s}`, () => assert.ok(!isWellFormedDevanagari(s)));
@@ -643,5 +656,92 @@ describe('robustness', () => {
     const big = 'Hkkjr '.repeat(20000);
     const out = legacyToUnicode(big, KD);
     assert.equal(out.trim().split(/\s+/).length, 20000);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The colon. On the Kruti Dev keyboard the `:` key draws रू (checked by drawing
+// it in the font files of all eleven fonts on this layout); the colon people
+// see in "विषय:" is the visarga on the `%` key.
+// ---------------------------------------------------------------------------
+describe('a Unicode colon is typed as % on the Kruti Dev keyboard', () => {
+  const LAYOUT = ['kruti-dev', 'devlys', 'arjun', 'agra', 'aman', 'ajay', 'kundli', 'krishna', 'new-delhi'];
+  for (const key of LAYOUT) {
+    test(`${key}: विषय: gives the % key, never the : key`, () => {
+      assert.match(convert('विषय: अवकाश', 'unicode', key), /^fo"k;% /);
+      assert.doesNotMatch(convert('दिनांक: 12', 'unicode', key), /:/);
+    });
+  }
+
+  test('a time keeps its digits and gets the same key, with or without English-keeping', () => {
+    assert.equal(convert('समय 10:30 बजे', 'unicode', 'kruti-dev'), 'le; 10%30 cts');
+    assert.equal(convert('समय 10:30 बजे', 'unicode', 'kruti-dev', { keepEnglish: false }), 'le; 10%30 cts');
+  });
+
+  test('a visarga is the same key as the colon', () => {
+    assert.equal(convert('दुःख', 'unicode', 'kruti-dev'), 'nq%[k');
+  });
+
+  test('a web address keeps its colons: they are not typed', () => {
+    assert.equal(convert('http://a.com:8080/x', 'unicode', 'kruti-dev'), 'http://a.com:8080/x');
+  });
+
+  test('other keyboards are untouched', () => {
+    assert.equal(convert('विषय: अवकाश', 'unicode', 'preeti'), convert('विषय: अवकाश', 'unicode', 'preeti', { keepEnglish: false }));
+    assert.match(convert('विषय: अवकाश', 'unicode', 'preeti'), /:/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A corpus written by someone else: Hindi lines that must survive Unicode ->
+// Kruti Dev -> Unicode with no letter lost, and leave no Devanagari behind.
+// A colon comes back as a visarga (both are the % key), so both sides are
+// compared with the colon normalised.
+// ---------------------------------------------------------------------------
+describe('an outside Hindi corpus round-trips through Kruti Dev', () => {
+  const { lines } = JSON.parse(readFileSync(new URL('./__fixtures__/hindi-corpus.json', import.meta.url), 'utf8'));
+  // The colon is the % key, and a time such as 10:30 keeps that key when read back.
+  const norm = (s) => s.replace(/ः/g, ':').replace(/(\d)%(?=\d)/g, '$1:');
+  test('there are over a hundred lines', () => assert.ok(lines.length > 100));
+  for (const line of lines) {
+    test(line.slice(0, 40), () => {
+      for (const opts of [{}, { keepEnglish: false }]) {
+        const keys = convert(line, 'unicode', 'kruti-dev', opts);
+        assert.doesNotMatch(keys, /[ऀ-ॿ]/, 'a letter had no key');
+        assert.equal(norm(convert(keys, 'kruti-dev', 'unicode', opts)), norm(line));
+      }
+    });
+  }
+});
+
+describe('Unicode Hindi that is already in the input', () => {
+  // Found by the upload QA: a run set in Kruti Dev but holding Unicode text
+  // (pasted, then re-fonted) came back as करिण / नर्मिल, and a CSV cell
+  // "किरण, मोहन" as किरणए मोहन.
+  const kept = ['किरण की दृष्टि निर्मल है।', 'सिंहासन', 'शक्ति', 'कर्म', 'हिंदी', 'किरण, मोहन की सूची', 'किरण ने कहा "सूची तैयार है"।', 'किरण - मोहन', '  किरण  '];
+  for (const text of kept) {
+    test(`leaves ${text.trim()} as it is`, () => {
+      assert.equal(convert(text, 'kruti-dev', 'unicode'), text);
+      assert.equal(convert(text, 'kruti-dev', 'unicode', { keepEnglish: false }), text);
+    });
+  }
+  test('still converts the legacy text beside it', () => {
+    assert.equal(convert('किरण fdj.k', 'kruti-dev', 'unicode'), 'किरण किरण');
+    assert.equal(convert('fdj.k] eksgu', 'kruti-dev', 'unicode', { keepEnglish: false }), 'किरण, मोहन');
+  });
+});
+
+describe('long input', () => {
+  // Found by the upload QA: one 20 MB line of keys with no spaces took minutes,
+  // because the e-mail pattern was tried from every position of it.
+  test('a long run of letters with no space converts in linear time', () => {
+    const t = Date.now();
+    const out = convert('d'.repeat(200_000), 'kruti-dev', 'unicode', { keepEnglish: false });
+    assert.equal(out, 'क'.repeat(200_000));
+    assert.ok(Date.now() - t < 3000, `took ${Date.now() - t} ms`);
+  });
+  test('e-mail addresses are still kept', () => {
+    assert.equal(convert('dk ram.k@mail.com', 'kruti-dev', 'unicode'), 'का ram.k@mail.com');
+    assert.equal(convert('dk ram.k@mail.com', 'kruti-dev', 'unicode', { keepEnglish: false }), 'का ram.k@mail.com');
   });
 });

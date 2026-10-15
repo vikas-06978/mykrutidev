@@ -1,0 +1,86 @@
+---
+/**
+ * The free practice page: thirty Hindi passages in three levels, each with its
+ * hardest words and the Kruti Dev keys that type them (src/lib/practicePassages.js).
+ * Plain HTML: each passage is a <details>, so nothing needs a script and the
+ * page stays light. The same passages are in the free PDF.
+ */
+import { langOf, useT } from '../i18n/index.js';
+import { practiceList } from '../lib/practicePassages.build.js';
+import { productById, hasPage, price } from '../lib/store.js';
+
+const lang = langOf(Astro.url);
+const { t, path: to } = useT(lang);
+const list = practiceList();
+const levels = [1, 2, 3].map((level) => ({
+  level,
+  items: list.filter((p) => p.level === level),
+  min: Math.min(...list.filter((p) => p.level === level).map((p) => p.words)),
+  max: Math.max(...list.filter((p) => p.level === level).map((p) => p.words)),
+}));
+const PDF = '/downloads/mykrutidev-kruti-dev-typing-30-passages.pdf';
+// The paid starter book, suggested beside the free PDF only while it is on sale (or on a preview).
+const starter = productById('kruti-dev-7-day-starter');
+const showStarter = !!starter && hasPage(starter);
+---
+
+<section class="mt-8" aria-labelledby="pp-pdf">
+  <div class="card flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+    <div class="max-w-xl">
+      <h2 id="pp-pdf" class="text-lg">{t('practice.pdfTitle')}</h2>
+      <p class="mt-1 text-sm text-body">{t('practice.pdfNote')}</p>
+    </div>
+    <a class="btn btn-primary" href={PDF} download="mykrutidev-kruti-dev-typing-30-passages.pdf" type="application/pdf">
+      {t('practice.pdfButton')}
+    </a>
+  </div>
+</section>
+
+{
+  showStarter && (
+    <section class="mt-4" aria-labelledby="pp-starter" data-starter-promo>
+      <div class="card flex flex-wrap items-center justify-between gap-3 border-brick/40 p-4 sm:p-5">
+        <div class="max-w-xl">
+          <h2 id="pp-starter" class="text-lg">{t('practice.starterTitle')}</h2>
+          <p class="mt-1 text-sm text-body">{t('practice.starterNote')}</p>
+        </div>
+        <a class="btn btn-outline" href={to('/store/kruti-dev-7-day-starter')}>
+          {t('practice.starterButton', { price: price(starter.pricePaise) })}
+        </a>
+      </div>
+    </section>
+  )
+}
+
+{
+  levels.map((l) => (
+    <section class="mt-10" aria-labelledby={`pp-l${l.level}`}>
+      <h2 id={`pp-l${l.level}`} class="text-xl">{t(`practice.level${l.level}`)}</h2>
+      <p class="mt-1 text-sm text-mute">{t('practice.range', { min: l.min, max: l.max })}</p>
+      <div class="mt-3 space-y-3">
+        {l.items.map((p) => (
+          <details class="card p-4 sm:p-5">
+            <summary class="cursor-pointer text-base font-medium">
+              <span class="text-mute">{p.n}.</span> <span lang="hi">{p.title}</span>
+              <span class="ml-2 text-xs font-normal text-mute">{t('practice.words', { n: p.words })}</span>
+            </summary>
+            <p lang="hi" class="mt-3 text-lg leading-loose text-ink">{p.text}</p>
+            <h3 class="mt-4 text-sm font-semibold">{t('practice.tricky')}</h3>
+            <p class="text-xs text-mute">{t('practice.keysNote')}</p>
+            <ul class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {p.tricky.map((x) => (
+                <li class="rounded-(--radius-chrome) border border-hairline bg-surface px-2 py-1.5">
+                  <span lang="hi" class="block text-base">{x.word}</span>
+                  <code class="text-xs text-brick" translate="no">{x.keys}</code>
+                </li>
+              ))}
+            </ul>
+            <p class="mt-4 text-sm">
+              <a href={`${to('/hindi-typing-test')}#tool`}>{t('practice.practise')}</a>
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  ))
+}

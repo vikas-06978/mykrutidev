@@ -26,7 +26,7 @@ import { pairOf, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
 // and checked against checkFile() in i18n.test.js.
 export const TOO_LARGE_EN =
   'This file is larger than 20 MB. Please split it into smaller files and convert them one at a time.';
-export const ONLY_TYPES_EN = 'Only .docx (Word) and .txt files can be converted here.';
+export const ONLY_TYPES_EN = 'Only Word (.docx), Excel (.xlsx), .csv and .txt files can be converted here.';
 
 /**
  * @param {string} msg  what checkFile() / messageFor() returned
@@ -40,6 +40,10 @@ export function localizeDocMessage(msg, m, L) {
   if (msg === m.SAVE_AS_MESSAGE) return L.saveAs;
   if (msg.startsWith(m.SAVE_AS_MESSAGE)) return `${L.saveAs} ${L.passwordHint}`;
   if (msg === m.DAMAGED_MESSAGE) return L.damaged;
+  if (msg === m.SHEET_SAVE_AS_MESSAGE) return L.sheetSaveAs;
+  if (m.SHEET_SAVE_AS_MESSAGE && msg.startsWith(m.SHEET_SAVE_AS_MESSAGE)) return `${L.sheetSaveAs} ${L.sheetPasswordHint}`;
+  if (msg === m.SHEET_DAMAGED_MESSAGE) return L.sheetDamaged;
+  if (m.NOT_TEXT_MESSAGE && msg === m.NOT_TEXT_MESSAGE) return L.notText;
   if (msg === m.GENERIC_MESSAGE) return L.generic;
   if (msg === TOO_LARGE_EN) return L.tooLarge;
   if (msg === ONLY_TYPES_EN) return L.onlyTypes;
@@ -61,7 +65,13 @@ const fmt = (n) => n.toLocaleString('en-IN');
 export function localizeSummary(stats, direction, L) {
   const pair = pairOf(direction);
   const count = (n, one, many) => fill(n === 1 ? one : many, { n: fmt(n) });
-  const parts = [fill(L.summaryLine, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
+  // A spreadsheet counts cells and sheets (sheetConvert.js); a document, paragraphs and tables.
+  // Nothing converted: the file was only read, so the line says "Checked".
+  const verb = stats.convertedChars === 0 ? L.summaryChecked : L.summaryLine;
+  const parts =
+    'cells' in stats
+      ? [fill(verb, { paragraphs: count(stats.cells, L.cellOne, L.cellMany) }), count(stats.sheets, L.sheetOne, L.sheetMany)]
+      : [fill(verb, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
   if (stats.tables) parts.push(count(stats.tables, L.tableOne, L.tableMany));
   const line = parts.join(' · ');
 
@@ -71,11 +81,9 @@ export function localizeSummary(stats, direction, L) {
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    return {
-      line,
-      share: null,
-      warning: fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from }),
-    };
+    const base = fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from });
+    const fonts = stats.fonts?.length ? ` ${fill(L.fontsUsed, { fonts: stats.fonts.join(', ') })}` : '';
+    return { line, share: null, warning: base + fonts };
   }
   if (a === 0) return { line, share: L.allConverted, warning: null };
 

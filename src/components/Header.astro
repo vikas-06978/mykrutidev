@@ -2,6 +2,7 @@
 import { navMenus, getPage, isLive } from '../lib/routes.js';
 import { LOCALES, LOCALE_META, splitLocale, localizePath, useT } from '../i18n/index.js';
 import ThemePicker from './ThemePicker.astro';
+import { badgeFor } from '../lib/newBadges.js';
 
 // `path` is the route without any /hi prefix, so "is this the current page"
 // works the same in both languages. Every href below goes through `to()`.
@@ -12,6 +13,13 @@ const { t, render, path: to } = useT(lang);
 const label = (p: { path: string }) => render(t(`pages.${p.path}.nav`));
 const { maybe } = useT(lang);
 const sub = (p: { path: string }) => maybe(`pages.${p.path}.navSub`) as string | undefined;
+// "New" badges (src/lib/newBadges.js): beside a new page, and a dot on the menu that holds it.
+const nb = (p: { path: string }) => badgeFor(p.path);
+const menuBadge = (pages: { path: string }[]) => pages.map(nb).find(Boolean);
+const anyBadge = navMenus().map((m) => menuBadge(m.pages)).find(Boolean);
+const NEW = t('nav.new');
+const BADGE = 'ms-2 inline-block rounded-full bg-brick px-1.5 py-0.5 align-middle text-[0.6875rem] font-semibold leading-none text-on-brick';
+const DOT = 'inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brick';
 
 // The language switch - each entry links to THIS page in that language, never the home page.
 // The 404 page has no twin - it is one file for both languages - so from
@@ -36,6 +44,8 @@ const toAnchor = (href: string) => {
 };
 const allConverters = getPage('/all-converters');
 const showAll = allConverters && isLive(allConverters);
+const storePage = getPage('/store');
+const showStore = storePage && isLive(storePage);
 
 // Colour themes. The inline script in Base.astro applies them; this is only
 // the control (see ThemePicker.astro).
@@ -115,7 +125,10 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                     : 'text-body hover:bg-inset hover:text-ink',
                 ]}
               >
-                {t(`nav.menus.${m.key}`)}
+                <span class="flex items-center gap-1.5">
+                  {t(`nav.menus.${m.key}`)}
+                  {menuBadge(m.pages) && <span data-new-badge={menuBadge(m.pages)} class={DOT} aria-hidden="true" />}
+                </span>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 10 6"
@@ -144,6 +157,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                   <li data-route={p.path}>
                     <a
                       href={to(p.path)}
+                      data-new-link={nb(p) ?? undefined}
                       aria-current={isCurrent(p.path) ? 'page' : undefined}
                       class:list={[
                         'block rounded-(--radius-chrome) px-3 py-2.5 no-underline',
@@ -153,6 +167,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                       ]}
                     >
                       <span set:html={label(p)} />
+                      {nb(p) && <span data-new-badge={nb(p)} class={BADGE}>{NEW}</span>}
                       {sub(p) && <span class="block text-xs text-mute">{sub(p)}</span>}
                     </a>
                   </li>
@@ -168,6 +183,23 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
               </ul>
             </li>
           ))
+        }
+
+        {
+          showStore && (
+            <li>
+              <a
+                href={to('/store')}
+                aria-current={path.startsWith('/store') ? 'page' : undefined}
+                class:list={[
+                  'block rounded-(--radius-chrome) px-2.5 py-2 font-medium no-underline whitespace-nowrap',
+                  path.startsWith('/store') ? 'bg-inset text-ink' : 'text-brick hover:bg-inset',
+                ]}
+              >
+                {t('nav.store')}
+              </a>
+            </li>
+          )
         }
 
         {
@@ -355,9 +387,10 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       data-burger
       aria-expanded="false"
       aria-controls="mobile-nav"
-      class="-me-1 grid size-11 shrink-0 place-items-center rounded-(--radius-chrome) text-ink md:hidden"
+      class="relative -me-1 grid size-11 shrink-0 place-items-center rounded-(--radius-chrome) text-ink md:hidden"
     >
       <span class="sr-only">{t('nav.menu')}</span>
+      {anyBadge && <span data-new-badge={anyBadge} class={`absolute end-2 top-2 ${DOT}`} aria-hidden="true" />}
       <svg aria-hidden="true" viewBox="0 0 20 20" class="size-6" data-burger-icon>
         <path
           d="M3 5h14M3 10h14M3 15h14"
@@ -411,7 +444,10 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                   groupHasCurrent(m.pages) ? 'font-medium text-ink' : 'text-body',
                 ]}
               >
-                {t(`nav.menus.${m.key}`)}
+                <span class="flex items-center gap-1.5">
+                  {t(`nav.menus.${m.key}`)}
+                  {menuBadge(m.pages) && <span data-new-badge={menuBadge(m.pages)} class={DOT} aria-hidden="true" />}
+                </span>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 10 6"
@@ -433,13 +469,17 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
                   <li data-route={p.path}>
                     <a
                       href={to(p.path)}
+                      data-new-link={nb(p) ?? undefined}
                       aria-current={isCurrent(p.path) ? 'page' : undefined}
                       class:list={[
                         'flex min-h-11 flex-col justify-center rounded-(--radius-chrome) px-3 py-2.5 no-underline',
                         isCurrent(p.path) ? 'bg-inset font-medium text-brick' : 'text-body',
                       ]}
                     >
-                      <span class="text-base" set:html={label(p)} />
+                      <span class="flex items-center">
+                        <span class="text-base" set:html={label(p)} />
+                        {nb(p) && <span data-new-badge={nb(p)} class={BADGE}>{NEW}</span>}
+                      </span>
                       {sub(p) && <span class="text-xs text-mute">{sub(p)}</span>}
                     </a>
                   </li>
@@ -456,6 +496,20 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
             </details>
           </li>
         ))
+      }
+
+      {
+        showStore && (
+          <li>
+            <a
+              href={to('/store')}
+              aria-current={path.startsWith('/store') ? 'page' : undefined}
+              class="flex min-h-11 items-center py-3 text-base font-medium text-brick no-underline"
+            >
+              {t('nav.store')}
+            </a>
+          </li>
+        )
       }
 
       {

@@ -1,6 +1,6 @@
 ---
 import { FONTS, boxLabel, codeLabel } from '../lib/fontMaps.js';
-import { SCRIPTS, scriptOfPage } from '../lib/scripts.js';
+import { SCRIPTS, scriptOfPage, devaLangOfPage } from '../lib/scripts.js';
 import { previewFontFor } from '../lib/legacyFonts.js';
 import { langOf, useT } from '../i18n/index.js';
 import RecentStrip from './RecentStrip.astro';
@@ -29,8 +29,13 @@ const { t, render } = useT(langOf(Astro.url));
 const scriptKey = scriptOfPage(from, to);
 const script = SCRIPTS[scriptKey];
 const otherScript = scriptKey !== 'deva';
+// A Marathi or Nepali page: Devanagari fonts, but its own words on the Unicode box.
+const devaLang = otherScript ? null : devaLangOfPage(from, to);
+const suffix = devaLang ? devaLang.suffix : script.suffix;
 const boxName = (k: string) =>
-  otherScript && FONTS[k].kind === 'unicode' ? t(`converter.unicode${script.suffix}`) : t(`fontBox.${k}`);
+  (otherScript || (devaLang && k === 'unicode')) && FONTS[k].kind === 'unicode'
+    ? t(`converter.unicode${suffix}`)
+    : t(`fontBox.${k}`);
 const fromLabel = boxName(from);
 const toLabel = boxName(to);
 void boxLabel;
@@ -38,8 +43,11 @@ void boxLabel;
 // A legacy placeholder is a real code sample plus "(example)". The code stays
 // as it is in every language - only the word "example" is translated.
 const unicodeOther = fromFont.kind === 'unicode' && otherScript;
-const inputSample = unicodeOther ? script.sample : fromFont.sample;
-const placeholder = (unicodeOther ? script.placeholder : (fromFont.placeholder ?? '')).replace('(example)', t('converter.example'));
+const unicodeDevaLang = from === 'unicode' && devaLang;
+const inputSample = unicodeOther ? script.sample : unicodeDevaLang ? devaLang.sample : fromFont.sample;
+const placeholder = (
+  unicodeOther ? script.placeholder : unicodeDevaLang ? devaLang.placeholder : (fromFont.placeholder ?? '')
+).replace('(example)', t('converter.example'));
 
 // Every string the script below shows, in this page's language.
 const strings = {
@@ -107,7 +115,7 @@ const asciiIsScript = Boolean(fromFont.asciiIsScript || toFont.asciiIsScript);
 
 // Mangal has no Gujarati or Tamil: the Unicode .docx takes the script's own
 // Windows font (Shruti, Latha).
-const unicodeLang = script.lang;
+const unicodeLang = devaLang ? devaLang.lang : script.lang;
 const scriptClass = script.cls;
 const unicodeWordFont = script.wordFont;
 const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
@@ -193,7 +201,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
                 {t('converter.view')}
               </span>
               <button type="button" data-view="preview" aria-pressed="true">
-                {t(`converter.preview${script.suffix}`)}
+                {t(`converter.preview${suffix}`)}
               </button>
               <button type="button" data-view="raw" aria-pressed="false">
                 {t('converter.raw')}
@@ -247,7 +255,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
                 </div>
                 <div class="cv-copy">
                   <button type="button" data-role="copy-unicode" class="btn btn-outline">
-                    <span data-label>{t(`converter.copyUnicode${script.suffix}`)}</span>
+                    <span data-label>{t(`converter.copyUnicode${suffix}`)}</span>
                   </button>
                   <span class="cv-sub">{t('converter.forWeb')}</span>
                 </div>

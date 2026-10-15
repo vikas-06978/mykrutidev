@@ -13,6 +13,7 @@ const POPULAR_CONVERTERS = [
   '/unicode-to-kruti-dev',
   '/kruti-dev-to-mangal',
   '/mangal-to-kruti-dev',
+  '/kruti-dev-excel-to-unicode',
   '/devlys-to-unicode',
   '/unicode-to-devlys',
   '/abbasi-chanakya-to-unicode',
@@ -34,6 +35,7 @@ const live = (paths: string[]) => paths.map(getPage).filter((p) => p && isLive(p
 const typing = live([
   '/hindi-typing-test',
   '/hindi-typing-test-for-exams',
+  '/hindi-typing-practice-passages',
   '/remington-hindi-keyboard',
   '/english-to-hindi-typing',
   '/hindi-keyboard',
@@ -43,7 +45,7 @@ const typing = live([
 ]);
 const links = live(POPULAR_CONVERTERS);
 const tools = live(POPULAR_TOOLS);
-const site = live(['/about', '/contact', '/privacy-policy', '/terms']);
+const site = live(['/about', '/contact', '/store', '/privacy-policy', '/terms', '/refund-policy', '/delivery-policy']);
 // Only once UPI is configured (PUBLIC_UPI_QR or PUBLIC_UPI_ID, see src/lib/support.build.js).
 const support = readSupport(import.meta.env) !== null;
 const linkClass = 'text-body no-underline hover:underline';

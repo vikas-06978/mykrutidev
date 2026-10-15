@@ -371,6 +371,42 @@ describe('/admin/feedback', () => {
     assert.equal(page.status, 200);
   });
 
+  test('the session cookie expires on the server, and a changed one is refused', async () => {
+    const t0 = Date.UTC(2026, 9, 14, 12, 0, 0);
+    const login = await handleAdmin(
+      new Request('https://mykrutidev.com/admin/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'CF-Connecting-IP': '192.0.2.77' },
+        body: new URLSearchParams({ key: ADMIN_KEY }),
+      }),
+      env(),
+      { now: t0 },
+    );
+    const cookie = login.headers.get('Set-Cookie').split(';')[0];
+    const at = (now, c = cookie) =>
+      handleAdmin(new Request('https://mykrutidev.com/admin/feedback', { headers: { Cookie: c } }), env(), { now });
+    assert.equal((await at(t0 + 3600e3)).status, 200);
+    assert.equal((await at(t0 + 9 * 3600e3)).status, 401, 'after 8 hours the old cookie no longer works');
+    const [name, value] = cookie.split('=');
+    const [exp, sig] = value.split('.');
+    assert.equal((await at(t0 + 1000, `${name}=${Number(exp) + 86400 * 365}.${sig}`)).status, 401, 'a longer expiry is not accepted');
+    assert.equal((await at(t0 + 1000, `${name}=${exp}.${'0'.repeat(64)}`)).status, 401);
+    assert.equal((await at(t0 + 1000, `${name}=old-style-value`)).status, 401);
+  });
+
+  test('wrong keys in an Authorization header count against the login limit', async () => {
+    const guess = (i) =>
+      handleAdmin(
+        new Request('https://mykrutidev.com/admin/feedback', {
+          headers: { Authorization: `Bearer guess-${i}`, 'CF-Connecting-IP': '192.0.2.88' },
+        }),
+        env(),
+        { now: Date.UTC(2026, 9, 14, 12, 0, 0) },
+      );
+    for (let i = 0; i < 10; i++) assert.equal((await guess(i)).status, 401);
+    assert.equal((await guess(11)).status, 429);
+  });
+
   test('shows totals per rating, the top wants as bars, the latest messages - escaped', async () => {
     await post({ ...good, rating: 4, wants: ['exam-mode'], message: '<script>alert(1)</script>' });
     await post({ ...good, rating: 4, wants: ['exam-mode', 'mobile-app'] });

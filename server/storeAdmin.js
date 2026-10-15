@@ -1,0 +1,427 @@
+/**
+ * /admin/orders - the private page for the store's orders.
+ *
+ * Wired up by functions/admin/orders.js. Same login as /admin/feedback (the
+ * ADMIN_KEY session cookie covers all of /admin), same rules: no page file, in
+ * no sitemap, noindex, and a CSP that allows no script.
+ *
+ *   GET  /admin/orders              "ready to sell?", money in by period and by
+ *                                   product, the orders (filter: status, product,
+ *                                   q = order id / email / payment id; 50 a page)
+ *   GET  /admin/orders?format=csv   every order, as a spreadsheet
+ *   POST /admin/orders              action=check|resend|refund|extend, id=<order>
+ *
+ * The actions:
+ *   check    ask Razorpay again whether an unpaid order was paid (a buyer who
+ *            closed the tab, or a webhook that never came)
+ *   resend   send the download email again (only for an order that has an email)
+ *   (a paid order also shows its download link, to send to a buyer who gave no email)
+ *   refund   end the downloads of a refunded order. The money itself is
+ *            refunded in Razorpay's dashboard; when the webhook for it is set up
+ *            this happens by itself for a full refund
+ *   extend   give the buyer a fresh set of downloads and another 30 days
+ */
+import { ORDER_COLUMNS, STORE, PRODUCTS, price, productById } from '../src/lib/store.js';
+import { toCsv } from '../src/lib/feedback.js';
+import { SECURITY, bearerGuard, esc, isAuthorized, page } from './feedbackAdmin.js';
+import { ensureStoreSchema, downloadToken, siteOrigin, settleOrder, isLiveHost } from './storeApi.js';
+import { hasKeys, mode } from './razorpay.js';
+import { buyerMail, canMail, downloadPage, sendMail } from './storeMail.js';
+
+const PER_PAGE = 50;
+const STATUSES = ['paid', 'created', 'refunded', 'failed'];
+const STATUS_NAME = { paid: 'Paid', created: 'Started, not paid', refunded: 'Refunded', failed: 'Failed' };
+const ACTION_DONE = { check: 'Asked Razorpay again', resend: 'Email sent again', refund: 'Marked refunded: downloads are closed', extend: 'Downloads reset and 30 more days given' };
+const OK = '✓';
+const NO = '✗';
+
+const when = (iso) => esc(String(iso ?? '').slice(0, 16).replace('T', ' '));
+const isoUtc = (ms) => new Date(ms).toISOString().replace(/\.\d+Z$/, 'Z');
+const day = (unix) => (unix ? new Date(unix * 1000).toISOString().slice(0, 10) : '');
+
+const STYLE = `<style>
+.fa-check{list-style:none;margin:0;padding:0;display:grid;gap:.25rem}
+.fa-ok{color:#15803d;font-weight:600}.fa-no{color:#b91c1c;font-weight:600}
+.fa-mode{display:inline-block;padding:.1rem .5rem;border-radius:999px;background:var(--track);color:var(--ink);font-size:.8125rem}
+.fa-banner{padding:.625rem .875rem;border-radius:8px;background:var(--track);color:var(--ink)}
+.fa-act{display:inline;margin:0 .25rem 0 0}.fa-act button{border:0;background:none;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.fa-ready{padding:.75rem 1rem;border-radius:8px;border:1px solid var(--line)}
+.fa-ready.ok{border-color:#15803d}.fa-ready.no{border-color:var(--err)}
+.fa-ready h2{font-size:1.0625rem}.fa-ready ul{margin:.5rem 0 0;padding-left:1.25rem}
+.fa-warn{color:var(--ink)}.fa-warn::marker{content:'! '}
+.fa-filter{display:flex;flex-wrap:wrap;gap:.5rem;align-items:end}
+.fa-filter label{display:grid;gap:.125rem;font-size:.8125rem;color:var(--mute)}
+.fa-filter select,.fa-filter input{font:inherit;min-height:36px;padding:0 .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.fa-pill{white-space:nowrap;display:inline-block;padding:.05rem .5rem;border-radius:999px;font-size:.8125rem;background:var(--track);color:var(--ink)}
+.fa-pill.paid{background:#dcfce7;color:#14532d}.fa-pill.refunded{background:#fee2e2;color:#7f1d1d}
+.fa-flag{color:var(--err);font-weight:600}
+.fa-pages{display:flex;gap:1rem;align-items:center}
+.fa-sure{font-size:.75rem;color:var(--mute)}
+.fa-tiles+.fa-tiles{margin-top:.75rem}.fa-ids{word-break:break-all;min-width:12rem}
+.fa-ready h2{margin:0}.fa-filter{margin:.5rem 0}
+</style>`;
+
+/**
+ * The setup check and the verdict above it: can this deployment take real
+ * money? `problems` stop a sale; `warnings` are worth fixing.
+ */
+async function readiness(env, request) {
+  const live = isLiveHost(request);
+  const keys = hasKeys(env);
+  const rows = [
+    ['Database (D1) bound as DB', !!env.DB],
+    [`Razorpay keys (${keys ? mode(env) : 'not set'} mode)`, keys],
+    ['Razorpay webhook secret', !!env.RAZORPAY_WEBHOOK_SECRET],
+    ['Download link secret (STORE_TOKEN_SECRET, 16+ characters)', String(env.STORE_TOKEN_SECRET ?? '').length >= 16],
+    ['PDF bucket (R2) bound as STORE_FILES', !!env.STORE_FILES],
+    ['Emails to buyers (RESEND_API_KEY and NOTIFY_FROM)', canMail(env)],
+    ['Copy of each sale to you (NOTIFY_TO)', !!String(env.NOTIFY_TO ?? '').trim()],
+    ['Bot check (TURNSTILE_SECRET_KEY)', !!env.TURNSTILE_SECRET_KEY],
+  ];
+  const problems = [];
+  const warnings = [];
+  const need = { 'Database (D1) bound as DB': 1, 'Razorpay webhook secret': 1, 'PDF bucket (R2) bound as STORE_FILES': 1 };
+  for (const [name, ok] of rows) {
+    if (ok) continue;
+    if (need[name] || name.startsWith('Razorpay keys') || name.startsWith('Download link secret')) problems.push(`Missing: ${name}`);
+    else warnings.push(`Missing: ${name}`);
+  }
+  if (live && keys && mode(env) === 'test') {
+    problems.push('Razorpay TEST keys on the live site: the store refuses every sale here until the live keys (rzp_live_…) are set, so no test card can unlock a file.');
+  }
+  if (!live && keys && mode(env) === 'live') warnings.push('LIVE Razorpay keys on a preview: payments here are real money.');
+  if (live && String(env.STORE_TEST_PRODUCTS ?? '') === '1') {
+    warnings.push('STORE_TEST_PRODUCTS is 1 on the live site. It is ignored here (test products are never sold on mykrutidev.com), but remove it from the Production variables.');
+  }
+  let onSale = 0;
+  for (const p of PRODUCTS) {
+    let there = false;
+    try {
+      there = !!(env.STORE_FILES && (await env.STORE_FILES.head(p.file)));
+    } catch {
+      // not there
+    }
+    rows.push([`PDF uploaded: ${p.file} (${p.id}, ${p.status})`, there]);
+    const selling = p.status === 'live' || (!live && p.status === 'test' && String(env.STORE_TEST_PRODUCTS ?? '') === '1');
+    if (selling) {
+      onSale += 1;
+      if (!there) problems.push(`On sale but its PDF is not in the bucket: ${p.file}`);
+    }
+  }
+  if (!onSale) problems.push(live ? 'No product is on sale on the live site yet (none has status "live" in src/lib/store.js).' : 'No product is on sale on this deployment.');
+  const checks = `<ul class="fa-check">${rows
+    .map(([name, ok]) => `<li><span class="${ok ? 'fa-ok' : 'fa-no'}">${ok ? OK : NO}</span> ${esc(name)}</li>`)
+    .join('')}</ul>`;
+  return { checks, problems, warnings, live };
+}
+
+function verdict({ problems, warnings, live }, env) {
+  const ok = problems.length === 0;
+  const where = live ? 'the live site' : 'this preview';
+  const title = ok
+    ? hasKeys(env) && mode(env) === 'live'
+      ? `Ready: ${where} takes real payments`
+      : `Ready on ${where} (Razorpay test mode: no real money)`
+    : `Not ready: ${where} cannot take payments`;
+  const items = [...problems.map((p) => `<li class="fa-no">${esc(p)}</li>`), ...warnings.map((w) => `<li class="fa-warn">${esc(w)}</li>`)];
+  return `<section class="fa-ready ${ok ? 'ok' : 'no'}" aria-labelledby="h-ready">
+  <h2 id="h-ready"><span class="${ok ? 'fa-ok' : 'fa-no'}">${ok ? OK : NO}</span> ${esc(title)}</h2>
+  ${items.length ? `<ul>${items.join('')}</ul>` : ''}
+</section>`;
+}
+
+const tile = (n, label) => `<div class="fa-tile"><span class="fa-tile-n">${n}</span><span class="fa-tile-l">${esc(label)}</span></div>`;
+
+/** The Razorpay dashboard page of a payment. */
+const razorpayLink = (paymentId) => `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;
+
+function dashboard(env, { orders, totals, periods, byProduct, ready, links, filter, total, done }) {
+  const rows = orders
+    .map((o) => {
+      const product = productById(o.product_id);
+      const actions = [];
+      const act = (action, text, extra = '') =>
+        actions.push(
+          `<form method="post" class="fa-act"><input type="hidden" name="id" value="${esc(o.id)}">${extra}<button type="submit" name="action" value="${action}">${text}</button></form>`,
+        );
+      if (o.status === 'created') act('check', 'Check payment');
+      if (o.status === 'paid') {
+        // The buyer's own download page: for an order with no email, this is how you can send it to them yourself.
+        if (links[o.id]) actions.push(`<a class="fa-act" href="${esc(links[o.id])}">Download link</a>`);
+        if (o.email) act('resend', 'Resend email');
+        act('extend', 'Extend');
+        // No script on this page, so the browser itself asks: the box must be ticked.
+        act('refund', 'Mark refunded', '<label class="fa-sure"><input type="checkbox" name="sure" value="1" required> sure</label> ');
+      }
+      const mailFailed = o.status === 'paid' && o.mail_status === 'failed';
+      return `<tr>
+  <td class="fa-nowrap">${when(o.created_at)}${o.paid_at ? `<br><span class="fa-sub">paid ${when(o.paid_at)}</span>` : ''}</td>
+  <td><span class="fa-pill ${esc(o.status)}">${esc(STATUS_NAME[o.status] ?? o.status)}</span></td>
+  <td>${esc((product?.title ?? o.product_id).replace(/\s*\(.*\)$/, ''))}</td>
+  <td class="fa-nowrap">${esc(price(o.amount))}</td>
+  <td>${o.email ? `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : '<span class="fa-sub">no email</span>'}</td>
+  <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}</td>
+  <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
+  <td>${mailFailed ? '<span class="fa-flag">failed</span>' : esc(o.mail_status ?? '')}</td>
+  <td class="fa-sub fa-ids">${esc(o.id)}${o.payment_id ? `<br><a href="${esc(razorpayLink(o.payment_id))}">${esc(o.payment_id)}</a>` : ''}</td>
+  <td>${actions.join('')}</td>
+</tr>`;
+    })
+    .join('');
+
+  const qs = (over) => {
+    const p = new URLSearchParams();
+    const f = { ...filter, ...over };
+    for (const k of ['status', 'product', 'q']) if (f[k]) p.set(k, f[k]);
+    if (f.page > 1) p.set('page', String(f.page));
+    const str = p.toString();
+    return str ? `?${esc(str)}` : '?';
+  };
+  const from = total ? (filter.page - 1) * PER_PAGE + 1 : 0;
+  const to = Math.min(total, filter.page * PER_PAGE);
+  const pager = `<div class="fa-pages">
+  <span class="fa-sub">${from}–${to} of ${total}</span>
+  ${filter.page > 1 ? `<a href="${qs({ page: filter.page - 1 })}">← Newer</a>` : ''}
+  ${to < total ? `<a href="${qs({ page: filter.page + 1 })}">Older →</a>` : ''}
+</div>`;
+
+  const productRows = byProduct
+    .map(
+      (p) => `<tr><td>${esc(p.title)}</td><td class="fa-nowrap">${esc(price(p.pricePaise))}</td><td>${esc(p.status)}</td><td class="fa-nowrap">${p.paid}</td><td class="fa-nowrap">${esc(price(p.revenue))}</td><td class="fa-nowrap">${p.refunded}</td></tr>`,
+    )
+    .join('');
+
+  return page(
+    'Orders',
+    `${STYLE}<header class="fa-top">
+  <h1>Orders ${hasKeys(env) ? `<span class="fa-mode">${esc(mode(env))} mode</span>` : ''}</h1>
+  <div class="fa-actions">
+    <a class="fa-button" href="?format=csv" download>Download CSV</a>
+    <a class="fa-link" href="https://dashboard.razorpay.com/">Razorpay</a>
+    <a class="fa-link" href="/admin/feedback">Feedback</a>
+    <form method="post" action="/admin/feedback"><button type="submit" name="logout" value="1" class="fa-link">Sign out</button></form>
+  </div>
+</header>
+${done ? `<p class="fa-banner" role="status">${esc(done)}</p>` : ''}
+${verdict(ready, env)}
+
+<section aria-labelledby="h-totals">
+  <h2 id="h-totals">Money in <span class="fa-sub">paid orders, India time; refunds not counted</span></h2>
+  <div class="fa-tiles">
+    ${periods.map((p) => tile(`${esc(price(p.revenue))} <span class="fa-sub">· ${p.count}</span>`, p.label)).join('')}
+  </div>
+  <div class="fa-tiles">
+    ${tile(totals.paid, 'paid orders')}
+    ${tile(totals.refunded, 'refunded')}
+    ${tile(totals.open, 'started, not paid (kept 7 days)')}
+    ${tile(totals.mailFailed, 'paid, email failed')}
+  </div>
+</section>
+
+<section aria-labelledby="h-products">
+  <h2 id="h-products">By product</h2>
+  <div class="fa-scroll"><table>
+<thead><tr><th>Product</th><th>Price</th><th>Status</th><th>Paid</th><th>Money in</th><th>Refunded</th></tr></thead>
+<tbody>${productRows}</tbody></table></div>
+</section>
+
+<section aria-labelledby="h-orders">
+  <h2 id="h-orders">Orders</h2>
+  <form method="get" class="fa-filter" role="search">
+    <label>Status <select name="status"><option value="">All</option>${STATUSES.map((st) => `<option value="${st}"${filter.status === st ? ' selected' : ''}>${esc(STATUS_NAME[st])}</option>`).join('')}</select></label>
+    <label>Product <select name="product"><option value="">All</option>${PRODUCTS.map((p) => `<option value="${esc(p.id)}"${filter.product === p.id ? ' selected' : ''}>${esc(p.title)}</option>`).join('')}</select></label>
+    <label>Search <input type="search" name="q" value="${esc(filter.q)}" placeholder="order id, email or pay_…" maxlength="120"></label>
+    <button type="submit" class="fa-button">Show</button>
+    ${filter.status || filter.product || filter.q ? '<a href="?">Clear</a>' : ''}
+  </form>
+  ${pager}
+  ${
+    orders.length
+      ? `<div class="fa-scroll"><table>
+<thead><tr><th>Started (UTC)</th><th>Status</th><th>Product</th><th>Amount</th><th>Email</th><th>Downloads</th><th>Expires</th><th>Mail</th><th>Ids</th><th></th></tr></thead>
+<tbody>${rows}</tbody></table></div>`
+      : '<p class="fa-empty">No orders match.</p>'
+  }
+</section>
+
+<details>
+  <summary><h2 id="h-setup" style="display:inline">Setup check</h2></summary>
+  ${ready.checks}
+</details>`,
+  );
+}
+
+/** Is this form post from our own pages? (An unparsable Origin, such as "null", is not a crash.) */
+function sameSite(request) {
+  const origin = request.headers.get('Origin');
+  if (!origin) return true;
+  try {
+    return new URL(origin).host === new URL(request.url).host;
+  } catch {
+    return request.headers.get('Sec-Fetch-Site') === 'same-origin';
+  }
+}
+
+/**
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ now?: number, fetch?: typeof fetch }} [deps]
+ */
+export async function handleAdminOrders(request, env, deps = {}) {
+  const key = env.ADMIN_KEY;
+  if (!key || key.length < 16) {
+    return page('Orders', '<h1>Orders</h1><p>Not set up: add an ADMIN_KEY secret (16+ characters) in Cloudflare.</p>', 503);
+  }
+  if (!env.DB) return page('Orders', '<h1>Orders</h1><p>Not set up: bind the D1 database as DB.</p>', 503);
+  await ensureStoreSchema(env.DB);
+
+  // Signing in happens on /admin/feedback; the session cookie covers /admin.
+  const guarded = await bearerGuard(request, env.DB, key, env.RATE_LIMIT_SALT || key, deps.now);
+  if (guarded) return guarded;
+  if (!(await isAuthorized(request, key, deps.now))) {
+    return new Response(null, { status: 303, headers: { Location: '/admin/feedback', ...SECURITY } });
+  }
+  const db = env.DB;
+  const now = deps.now ?? Date.now();
+
+  if (request.method === 'POST') {
+    // Same-site forms only (the session cookie is SameSite=Strict as well). These pages send
+    // Referrer-Policy: no-referrer, so a browser posts a form from them with "Origin: null":
+    // that is accepted only when the browser says the request is from the same origin.
+    if (!sameSite(request)) return new Response('Forbidden', { status: 403, headers: SECURITY });
+    const form = await request.formData().catch(() => null);
+    const id = String(form?.get('id') ?? '');
+    const action = String(form?.get('action') ?? '');
+    if (/^o[a-z2-7]{24}$/.test(id)) {
+      try {
+      if (action === 'check') {
+        await settleOrder(env, id, { fetch: deps.fetch, now, origin: siteOrigin(request) });
+      } else if (action === 'resend') {
+        const order = await db.prepare("SELECT * FROM orders WHERE id = ? AND status = 'paid'").bind(id).first();
+        const product = order && productById(order.product_id);
+        if (order && product) {
+          const origin2 = siteOrigin(request);
+          const link = downloadPage(origin2, order.id, await downloadToken(env, order.id));
+          const sent = canMail(env) && (await sendMail(env, buyerMail(env, { order, product, link, origin: origin2 }), deps.fetch));
+          await db.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(sent ? 'sent' : 'failed', id).run();
+        }
+      } else if (action === 'refund') {
+        if (String(form?.get('sure') ?? '') !== '1') {
+          return new Response(null, { status: 303, headers: { Location: '/admin/orders?done=norefund', ...SECURITY } });
+        }
+        await db.prepare("UPDATE orders SET status = 'refunded' WHERE id = ? AND status = 'paid'").bind(id).run();
+      } else if (action === 'extend') {
+        await db
+          .prepare(
+            "UPDATE orders SET downloads = 0, expires_at = MAX(COALESCE(expires_at, 0), ?) + ? WHERE id = ? AND status = 'paid'",
+          )
+          .bind(Math.floor(now / 1000), STORE.downloadDays * 86400, id)
+          .run();
+      }
+      } catch (err) {
+        // Signed in already, so the reason can be shown: a bare 1101 page helps nobody.
+        console.error('admin order action failed', action, err);
+        return page('Orders', `<h1>Orders</h1><p>That did not work (${esc(action)}): ${esc(String(err?.message ?? err).slice(0, 300))}</p><p><a href="/admin/orders">Back to orders</a></p>`, 500);
+      }
+      if (ACTION_DONE[action]) {
+        return new Response(null, { status: 303, headers: { Location: `/admin/orders?done=${action}&q=${id}`, ...SECURITY } });
+      }
+    }
+    return new Response(null, { status: 303, headers: { Location: '/admin/orders', ...SECURITY } });
+  }
+
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST', ...SECURITY } });
+  }
+
+  if (new URL(request.url).searchParams.get('format') === 'csv') {
+    const { results } = await db.prepare(`SELECT ${ORDER_COLUMNS.join(', ')} FROM orders ORDER BY created_at`).all();
+    return new Response(toCsv(results, ORDER_COLUMNS), {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="mykrutidev-orders-${new Date(now).toISOString().slice(0, 10)}.csv"`,
+        ...SECURITY,
+      },
+    });
+  }
+
+  const params = new URL(request.url).searchParams;
+  const filter = {
+    status: STATUSES.includes(params.get('status') ?? '') ? params.get('status') : '',
+    product: productById(params.get('product') ?? '') ? params.get('product') : '',
+    q: String(params.get('q') ?? '').trim().slice(0, 120),
+    page: Math.max(1, Math.min(10000, Number.parseInt(params.get('page') ?? '1', 10) || 1)),
+  };
+  const where = [];
+  const binds = [];
+  if (filter.status) (where.push('status = ?'), binds.push(filter.status));
+  if (filter.product) (where.push('product_id = ?'), binds.push(filter.product));
+  if (filter.q) {
+    const q = filter.q.toLowerCase();
+    where.push("(id = ? OR payment_id = ? OR link_id = ? OR email LIKE ? ESCAPE '\\')");
+    binds.push(filter.q, filter.q, filter.q, `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`);
+  }
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  // "Today" and the other periods start at midnight India time.
+  const IST = 5.5 * 3600e3;
+  const midnight = Math.floor((now + IST) / 864e5) * 864e5 - IST;
+  const since = (ms) => isoUtc(ms);
+  const PERIODS = [
+    ['Today', since(midnight)],
+    ['Last 7 days', since(midnight - 6 * 864e5)],
+    ['Last 30 days', since(midnight - 29 * 864e5)],
+    ['All time', '0000'],
+  ];
+
+  const [orders, count, totals, periodRows, productRows] = await Promise.all([
+    db
+      .prepare(`SELECT * FROM orders ${whereSql} ORDER BY created_at DESC, id DESC LIMIT ${PER_PAGE} OFFSET ${(filter.page - 1) * PER_PAGE}`)
+      .bind(...binds)
+      .all(),
+    db.prepare(`SELECT COUNT(*) AS n FROM orders ${whereSql}`).bind(...binds).first(),
+    db
+      .prepare(
+        "SELECT SUM(status = 'paid') AS paid, SUM(status = 'refunded') AS refunded, SUM(status = 'created') AS open, SUM(status = 'paid' AND mail_status = 'failed') AS mailFailed FROM orders",
+      )
+      .first(),
+    db
+      .prepare(
+        `SELECT ${PERIODS.map((_, i) => `COALESCE(SUM(CASE WHEN paid_at >= ?${i + 1} THEN amount END), 0) AS r${i}, SUM(paid_at >= ?${i + 1}) AS c${i}`).join(', ')} FROM orders WHERE status = 'paid'`,
+      )
+      .bind(...PERIODS.map(([, t]) => t))
+      .first(),
+    db
+      .prepare(
+        "SELECT product_id, SUM(status = 'paid') AS paid, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS revenue, SUM(status = 'refunded') AS refunded FROM orders GROUP BY product_id",
+      )
+      .all(),
+  ]);
+  const origin = siteOrigin(request);
+  const links = {};
+  for (const o of orders.results) {
+    if (o.status === 'paid') links[o.id] = downloadPage(origin, o.id, await downloadToken(env, o.id));
+  }
+  const sold = Object.fromEntries(productRows.results.map((r) => [r.product_id, r]));
+  const byProduct = PRODUCTS.filter((p) => !p.unlisted || sold[p.id]).map((p) => ({
+    title: p.title,
+    pricePaise: p.pricePaise,
+    status: p.status,
+    paid: sold[p.id]?.paid ?? 0,
+    revenue: sold[p.id]?.revenue ?? 0,
+    refunded: sold[p.id]?.refunded ?? 0,
+  }));
+  const doneKey = params.get('done') ?? '';
+  const done = doneKey === 'norefund' ? 'Not refunded: tick "sure" first.' : (ACTION_DONE[doneKey] ?? '');
+  return dashboard(env, {
+    links,
+    orders: orders.results,
+    total: count?.n ?? 0,
+    filter,
+    done,
+    periods: PERIODS.map(([label], i) => ({ label, revenue: periodRows?.[`r${i}`] ?? 0, count: periodRows?.[`c${i}`] ?? 0 })),
+    byProduct,
+    totals: { paid: totals?.paid ?? 0, refunded: totals?.refunded ?? 0, open: totals?.open ?? 0, mailFailed: totals?.mailFailed ?? 0 },
+    ready: await readiness(env, request),
+  });
+}

@@ -389,14 +389,17 @@ describe('document messages', () => {
       docConvert.checkFile({ name: 'a.docx', size: 10, head: ole }),
       docConvert.checkFile({ name: 'a.docx', size: 10, head: junk }),
       docConvert.checkFile({ name: 'a.docx', size: 100 * 1024 * 1024 }),
-      docConvert.checkFile({ name: 'a.xlsx', size: 10 }),
+      docConvert.checkFile({ name: 'a.pptx', size: 10 }),
+      docConvert.checkFile({ name: 'a.xls', size: 10 }),
+      docConvert.checkFile({ name: 'a.xlsx', size: 10, head: ole }),
+      docConvert.checkFile({ name: 'a.xlsx', size: 10, head: junk }),
     ];
     const errors = outcomes.map((o) => o.error);
     assert.ok(errors.every(Boolean));
     assert.ok(errors.includes(TOO_LARGE_EN), 'TOO_LARGE_EN drifted from docConvert.js');
     assert.ok(errors.includes(ONLY_TYPES_EN), 'ONLY_TYPES_EN drifted from docConvert.js');
 
-    for (const msg of [...errors, docConvert.DAMAGED_MESSAGE, docConvert.GENERIC_MESSAGE]) {
+    for (const msg of [...errors, docConvert.DAMAGED_MESSAGE, docConvert.SHEET_DAMAGED_MESSAGE, docConvert.NOT_TEXT_MESSAGE, docConvert.GENERIC_MESSAGE]) {
       assert.equal(localizeDocMessage(msg, docConvert, L.en), msg, 'English must be unchanged');
       const inHindi = localizeDocMessage(msg, docConvert, L.hi);
       assert.notEqual(inHindi, msg, `not translated: ${msg}`);

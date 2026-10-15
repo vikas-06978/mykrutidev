@@ -20,7 +20,10 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const DIST = join(ROOT, 'dist');
 const PORT = 4431;
-const BASE = `http://localhost:${PORT}`;
+// 127.0.0.1, not localhost: "localhost" can resolve to ::1 for one request and
+// 127.0.0.1 for the next, and the rate limit counts per address, so the 6th
+// request could arrive from a "new" client and get 201 instead of 429 (seen in CI).
+const BASE = `http://127.0.0.1:${PORT}`;
 const ADMIN_KEY = 'dist-test-admin-key-0123456789';
 const WRANGLER = join(ROOT, 'node_modules/wrangler/bin/wrangler.js');
 /** In CI these tests must run: a missing wrangler there is a failure, not a skip. */
@@ -109,6 +112,7 @@ describe('through wrangler pages dev (local D1)', { skip: unavailable ?? false }
       [
         WRANGLER,
         'pages', 'dev', 'dist',
+        '--ip', '127.0.0.1',
         '--port', String(PORT),
         '--d1', 'DB',
         '--persist-to', state,

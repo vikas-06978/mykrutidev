@@ -6,6 +6,8 @@
  * the page, on phones too. Plain links and text - no script.
  */
 import { langOf, useT } from '../i18n/index.js';
+import { getPage, isLive } from '../lib/routes.js';
+import { badgeFor } from '../lib/newBadges.js';
 
 const { t, raw, render, path: to } = useT(langOf(Astro.url));
 
@@ -13,19 +15,27 @@ const { t, raw, render, path: to } = useT(langOf(Astro.url));
 // the top of this page (ConvertModes.astro switches the tab in place for a
 // ?mode= link to the page you are on); Word files come second because a whole
 // document is what many visitors actually have.
-const TASKS = [
+const ALL_TASKS = [
   ['krutiToUnicode', '/', 'text'],
   ['document', '/', 'file'],
+  ['excel', '/kruti-dev-excel-to-unicode'],
   ['unicodeToKruti', '/unicode-to-kruti-dev'],
   ['englishTyping', '/english-to-hindi-typing'],
   ['keyboard', '/hindi-keyboard'],
   ['tutor', '/hindi-typing-test'],
+  ['practice', '/hindi-typing-practice-passages'],
   ['printables', '/kruti-dev-keyboard'],
+  ['store', '/store'],
   ['amountWords', '/number-to-hindi-words'],
   ['hindiDate', '/english-date-to-hindi'],
   ['wordCounter', '/hindi-word-counter'],
   ['otherScripts', '/hindi-to-gujarati-script'],
 ] as const;
+// A card appears only while its page is live (the store is not, until it is on sale).
+const TASKS = ALL_TASKS.filter(([, href]) => {
+  const page = getPage(href);
+  return page && isLive(page);
+});
 const why: string[] = raw('home.why');
 ---
 
@@ -37,9 +47,20 @@ const why: string[] = raw('home.why');
         <li>
           <a
             href={mode ? `${to(href)}?mode=${mode}` : to(href)}
+            data-new-link={(!mode && badgeFor(href)) || undefined}
             class="block h-full card p-4 no-underline transition-colors hover:border-brick"
           >
-            <span class="block font-semibold text-ink" set:html={render(t(`home.tasks.${key}.title`))} />
+            <span class="block font-semibold text-ink">
+              <span set:html={render(t(`home.tasks.${key}.title`))} />
+              {!mode && badgeFor(href) && (
+                <span
+                  data-new-badge={badgeFor(href)}
+                  class="ms-2 inline-block rounded-full bg-brick px-1.5 py-0.5 align-middle text-[0.6875rem] font-semibold leading-none text-on-brick"
+                >
+                  {t('nav.new')}
+                </span>
+              )}
+            </span>
             <span class="mt-1 block text-sm text-body" set:html={render(t(`home.tasks.${key}.benefit`))} />
           </a>
         </li>
