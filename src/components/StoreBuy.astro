@@ -19,10 +19,10 @@ const product = PRODUCTS.find((p) => p.id === id);
 if (!product) throw new Error(`No store product ${id}`);
 
 const lang = langOf(Astro.url);
-const { t, render } = useT(lang);
+const { t, render, path: to } = useT(lang);
 const amount = price(product.pricePaise);
 const strings = Object.fromEntries(
-  ['errEmail', 'errAccept', 'errRate', 'errChallenge', 'errClosed', 'errProvider', 'errGeneric', 'working'].map((k) => [k, t(`store.${k}`)]),
+  ['errEmail', 'errAccept', 'errRate', 'errChallenge', 'errClosed', 'errProvider', 'errGeneric', 'working', 'thanksLeft'].map((k) => [k, t(`store.${k}`)]),
 );
 const buy = fill(t('store.buy'), { price: amount });
 ---
@@ -32,6 +32,19 @@ const buy = fill(t('store.buy'), { price: amount });
     <h2 id="sb-h" class="text-xl">{t('store.buyHeading')}</h2>
     <p class="text-sm text-mute">{fill(t('store.meta'), { pages: String(product.pages) })}</p>
   </div>
+  {/*
+    Bought in this browser (src/lib/storeClient.js), and the server says the
+    link still works: this box takes the place of the price and the form,
+    which stay one click away for a second copy.
+  */}
+  <div class="sb-owned mt-5" data-sb-owned hidden>
+    <p class="text-sm font-medium text-ink">✓ {t('store.ownedNote')}</p>
+    <p class="mt-1 text-sm text-body" data-sb-owned-left hidden></p>
+    <a class="btn btn-primary mt-3" href={to('/store/thanks')} data-sb-owned-link>{t('store.ownedButton')}</a>
+    <p class="mt-3 text-sm"><button type="button" class="sb-again" data-sb-again hidden>{t('store.buyAgain')}</button></p>
+  </div>
+
+  <div data-sb-buyarea>
   <p class="mt-3 text-sm text-mute">{t('store.price')}</p>
   <p class="text-3xl font-semibold text-ink" translate="no">{amount}</p>
 
@@ -74,6 +87,10 @@ const buy = fill(t('store.buy'), { price: amount });
       <button type="submit" class="btn btn-primary" data-sb-pay data-label={buy}>{buy}</button>
     </div>
   </form>
+  </div>
+
+  {/* For a buyer on another phone or browser: the download page has the "send my link" form. */}
+  <p class="mt-4 text-sm"><a href={`${to('/store/thanks')}#find`} data-sb-bought>{t('store.alreadyBought')}</a></p>
 
   <ul class="mt-5 grid gap-1.5 text-xs text-mute">
     <li set:html={render(t('store.payNote'))} />
@@ -98,6 +115,21 @@ const buy = fill(t('store.buy'), { price: amount });
     color: var(--color-ink);
     font: inherit;
   }
+  .sb-again {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--color-link, var(--color-brick));
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+  }
+  .sb-owned {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-ok);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+  }
   .sb-hp {
     position: absolute;
     left: -10000px;
@@ -113,10 +145,62 @@ const buy = fill(t('store.buy'), { price: amount });
 </style>
 
 <script>
-  import { checkoutError, payUrlOk } from '../lib/storeClient.js';
+  import { boughtHash, checkoutError, daysLeft, forgetPurchase, payUrlOk, readOrderFrom } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-sb-form]');
+
+  // Bought already in this browser: offer that download first. The server is
+  // asked whether the link still works (and how many downloads are left); if
+  // it does, the price and the form step aside behind "Buy another copy".
+  const owned = document.querySelector<HTMLElement>('[data-sb-owned]');
+  const ownedLink = owned?.querySelector<HTMLAnchorElement>('[data-sb-owned-link]');
+  const ownedLeft = owned?.querySelector<HTMLElement>('[data-sb-owned-left]');
+  const again = owned?.querySelector<HTMLButtonElement>('[data-sb-again]');
+  const buyArea = document.querySelector<HTMLElement>('[data-sb-buyarea]');
+  const product = form?.dataset.product ?? '';
+  if (owned && ownedLink && ownedLeft && again && buyArea && product) {
+    let hash: string | null = null;
+    try {
+      hash = boughtHash(localStorage, product);
+    } catch {
+      hash = null;
+    }
+    const link = hash ? readOrderFrom({ hash }) : null;
+    if (hash && link?.kind === 'link') {
+      ownedLink.href = ownedLink.pathname + hash;
+      owned.hidden = false;
+      const L0 = JSON.parse(form!.dataset.i18n ?? '{}');
+      fetch(`/api/store/order?o=${link.order}&t=${encodeURIComponent(link.token)}`, { headers: { Accept: 'application/json' } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d?.ok && d.state === 'paid' && d.remaining > 0) {
+            ownedLeft.textContent = String(L0.thanksLeft ?? '')
+              .replace('{n}', String(d.remaining))
+              .replace('{days}', String(daysLeft(d.expires)));
+            ownedLeft.hidden = false;
+            buyArea.hidden = true;
+            again.hidden = false;
+            // They are here already: "Already bought?" would only repeat the box.
+            document.querySelector<HTMLElement>('[data-sb-bought]')?.closest('p')?.setAttribute('hidden', '');
+          } else if (d?.ok) {
+            // Refunded, expired or used up: nothing to offer here any more.
+            try {
+              forgetPurchase(localStorage, product);
+            } catch {
+              // storage blocked: it simply stays
+            }
+            owned.hidden = true;
+          }
+          // No answer (offline): the box stays, and so does the form.
+        })
+        .catch(() => {});
+      again.addEventListener('click', () => {
+        buyArea.hidden = false;
+        again.hidden = true;
+      });
+    }
+  }
   if (form) {
     const L = JSON.parse(form.dataset.i18n ?? '{}');
     const lang = form.dataset.lang || 'en';

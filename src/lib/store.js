@@ -39,6 +39,10 @@ export const STORE = {
   unpaidDays: 7,
   /** Orders one IP address can start per hour. */
   checkoutPerHour: 8,
+  /** A buyer may correct their own email once, this many hours after paying (any time if our email to them bounced). */
+  emailChangeHours: 24,
+  /** "Send me my link again": emails one address can be sent per day. */
+  findPerDay: 3,
 };
 
 /**
@@ -154,6 +158,23 @@ export function newOrderId() {
   return s;
 }
 
+/** A typed email address, trimmed and lowercased, or null when it is not one. */
+export function cleanEmail(s) {
+  const email = typeof s === 'string' ? s.trim().toLowerCase() : '';
+  return email && email.length <= LIMITS.email && EMAIL_RE.test(email) ? email : null;
+}
+
+/**
+ * A phone number as wa.me wants it: digits with the country code, no "+".
+ * Razorpay gives "+919876543210"; a bare 10-digit Indian number gets 91.
+ * Null when it does not look like a phone number.
+ */
+export function waNumber(phone) {
+  let d = String(phone ?? '').replace(/[^\d]/g, '');
+  if (d.length === 10) d = `91${d}`;
+  return d.length >= 11 && d.length <= 15 ? d : null;
+}
+
 /**
  * Check what the buyer sent to start an order.
  * @param {any} body
@@ -194,11 +215,19 @@ export const STORE_SCHEMA = [
   max_downloads INTEGER NOT NULL,
   expires_at INTEGER,
   mail_status TEXT,
-  mode TEXT
+  mode TEXT,
+  phone TEXT,
+  mail_id TEXT,
+  email_prev TEXT,
+  email_changed_by TEXT,
+  email_changed_at TEXT,
+  buyer_email_changes INTEGER NOT NULL DEFAULT 0
 )`,
   `CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at)`,
   `CREATE INDEX IF NOT EXISTS orders_link_id ON orders (link_id)`,
   `CREATE INDEX IF NOT EXISTS orders_payment_id ON orders (payment_id)`,
+  `CREATE INDEX IF NOT EXISTS orders_mail_id ON orders (mail_id)`,
+  `CREATE INDEX IF NOT EXISTS orders_email ON orders (email)`,
 ];
 
 /**
@@ -207,8 +236,23 @@ export const STORE_SCHEMA = [
  * has them in STORE_SCHEMA already.
  *   mode: 'live' or 'test', the Razorpay keys the order was made with. Rows from
  *         before it existed are NULL and count as test (nothing was sold live then).
+ *   phone: the buyer's mobile as Razorpay has it (the payment's contact), for
+ *         the owner to reach a buyer whose email is wrong. Shown only to the owner.
+ *   mail_id: Resend's id for the last download email, so its delivery report
+ *         (delivered / bounced / complained) finds the order.
+ *   email_prev, email_changed_by ('buyer' | 'admin'), email_changed_at: the
+ *         address before the last change, and who changed it when.
+ *   buyer_email_changes: how many times the buyer changed it (allowed once).
  */
-export const ORDER_ADDED_COLUMNS = [['mode', 'TEXT']];
+export const ORDER_ADDED_COLUMNS = [
+  ['mode', 'TEXT'],
+  ['phone', 'TEXT'],
+  ['mail_id', 'TEXT'],
+  ['email_prev', 'TEXT'],
+  ['email_changed_by', 'TEXT'],
+  ['email_changed_at', 'TEXT'],
+  ['buyer_email_changes', 'INTEGER NOT NULL DEFAULT 0'],
+];
 
 /** Columns of the orders CSV, in order. */
 export const ORDER_COLUMNS = [
@@ -228,4 +272,8 @@ export const ORDER_COLUMNS = [
   'expires_at',
   'mail_status',
   'mode',
+  'phone',
+  'email_prev',
+  'email_changed_by',
+  'email_changed_at',
 ];

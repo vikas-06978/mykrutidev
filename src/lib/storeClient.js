@@ -75,3 +75,67 @@ export function daysLeft(expires, nowMs = Date.now()) {
   if (!expires) return 0;
   return Math.max(1, Math.ceil((expires * 1000 - nowMs) / 864e5));
 }
+
+/**
+ * Purchases remembered in this browser, so the product page can offer the
+ * download again: { [productId]: { o, t, exp } }. Only what the buyer's own
+ * thanks link already holds (order id, download token, expiry), in local
+ * storage on their device; nothing is sent anywhere. The server still decides
+ * on every download (paid, not refunded, not expired, downloads left).
+ */
+export const BOUGHT_KEY = 'mkd-bought';
+
+/** @param {Storage} storage */
+function readBought(storage) {
+  try {
+    const v = JSON.parse(storage.getItem(BOUGHT_KEY) || '{}');
+    return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Remember a paid order for its product (the newest one wins).
+ * @param {Storage} storage
+ * @param {string} productId
+ * @param {string} order
+ * @param {string} token
+ * @param {number | null} expires unix seconds, or null for no end
+ */
+export function rememberPurchase(storage, productId, order, token, expires) {
+  if (!/^[a-z0-9-]{1,64}$/.test(productId) || !readOrderFrom({ hash: `#o=${order}&t=${token}` })) return;
+  try {
+    const all = readBought(storage);
+    all[productId] = { o: order, t: token, exp: Number.isFinite(expires) ? expires : null };
+    storage.setItem(BOUGHT_KEY, JSON.stringify(all));
+  } catch {
+    // Private window or blocked storage: the email and the thanks link still work.
+  }
+}
+
+/**
+ * The thanks-page hash (#o=…&t=…) for a product bought in this browser and not
+ * yet expired, or null.
+ * @param {Storage} storage
+ * @param {string} productId
+ */
+export function boughtHash(storage, productId, nowMs = Date.now()) {
+  const p = readBought(storage)[productId];
+  if (!p || typeof p !== 'object') return null;
+  if (typeof p.exp === 'number' && p.exp * 1000 <= nowMs) return null;
+  const hash = `#o=${p.o}&t=${p.t}`;
+  return readOrderFrom({ hash }) ? hash : null;
+}
+
+/** Drop a remembered purchase (refunded, expired or used up). */
+export function forgetPurchase(storage, productId) {
+  try {
+    const all = readBought(storage);
+    if (!(productId in all)) return;
+    delete all[productId];
+    storage.setItem(BOUGHT_KEY, JSON.stringify(all));
+  } catch {
+    // blocked storage: nothing to drop
+  }
+}

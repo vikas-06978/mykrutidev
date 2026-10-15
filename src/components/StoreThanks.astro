@@ -15,6 +15,7 @@ const { t, path: to } = useT(lang);
 const keys = [
   'thanksChecking', 'thanksWaiting', 'thanksPaid', 'thanksLeft', 'thanksEmail', 'thanksExpired', 'thanksRefunded',
   'thanksClosed', 'thanksNone', 'thanksUnverified', 'thanksSave', 'thanksCopy', 'thanksCopied',
+  'sentTo', 'wrongEmail', 'addEmail', 'changeDone', 'changeFailed', 'bounced', 'errEmail', 'errRate', 'errGeneric', 'working',
 ];
 const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 // Rupees by product, for the purchase count in Google Analytics.
@@ -29,6 +30,21 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
     <input type="hidden" name="t" value="" />
     <button type="submit" class="btn btn-primary">{t('store.thanksDownload')}</button>
   </form>
+  {/* The address the link went to, so a mistyped one is noticed, and the one chance to correct it. */}
+  <div class="mt-4" data-st-mail hidden>
+    <p class="text-sm text-body" data-st-sent hidden></p>
+    <p class="text-sm font-medium st-bad" data-st-bounced role="alert" hidden></p>
+    <details class="mt-2" data-st-change hidden>
+      <summary class="st-summary" data-st-change-summary>{t('store.wrongEmail')}</summary>
+      <form class="mt-2 grid gap-2" novalidate data-st-change-form>
+        <label for="st-email" class="text-sm font-medium text-ink">{t('store.changeLabel')}</label>
+        <input id="st-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" required class="st-input" translate="no" />
+        <p class="text-xs text-mute">{t('store.changeNote')}</p>
+        <div><button type="submit" class="btn btn-outline" data-st-change-send data-label={t('store.changeButton')}>{t('store.changeButton')}</button></div>
+        <p class="text-sm" data-st-change-status role="status" hidden></p>
+      </form>
+    </details>
+  </div>
   <p class="mt-4 flex flex-wrap gap-3">
     <button type="button" class="btn btn-outline" data-st-retry hidden>{t('store.thanksRetry')}</button>
     <button type="button" class="btn btn-outline" data-st-copy hidden>{t('store.thanksCopy')}</button>
@@ -36,8 +52,34 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
   </p>
 </section>
 
+<style>
+  .st-bad {
+    color: var(--color-err);
+  }
+  .st-summary {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .st-input {
+    width: 100%;
+    max-width: 24rem;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+  }
+</style>
+
 <script>
-  import { daysLeft, readOrderFrom, thanksKey } from '../lib/storeClient.js';
+  import { daysLeft, readOrderFrom, rememberPurchase, thanksKey } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const root = document.querySelector<HTMLElement>('[data-store-thanks]');
@@ -56,7 +98,83 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       extra.textContent = more;
       extra.hidden = !more;
     };
-    const showPaid = (d: { token: string; remaining: number; expires: number | null; emailed?: boolean }, order: string) => {
+    const mailBox = $<HTMLElement>('[data-st-mail]');
+    const sent = $<HTMLElement>('[data-st-sent]');
+    const bouncedLine = $<HTMLElement>('[data-st-bounced]');
+    const change = $<HTMLDetailsElement>('[data-st-change]');
+    const changeSummary = $<HTMLElement>('[data-st-change-summary]');
+    const changeForm = $<HTMLFormElement>('[data-st-change-form]');
+    const changeInput = $<HTMLInputElement>('#st-email');
+    const changeSend = $<HTMLButtonElement>('[data-st-change-send]');
+    const changeStatus = $<HTMLElement>('[data-st-change-status]');
+    let current = { order: '', token: '' };
+
+    type Paid = {
+      token: string;
+      remaining: number;
+      expires: number | null;
+      emailed?: boolean;
+      productId?: string;
+      email?: string;
+      mailStatus?: string;
+      canChangeEmail?: boolean;
+    };
+    /** Where the link was emailed, a bounce, and the one chance to correct the address. */
+    const showMail = (d: Paid) => {
+      const email = String(d.email ?? '');
+      sent.hidden = !email;
+      sent.textContent = email ? L.sentTo.replace('{email}', email) : '';
+      bouncedLine.hidden = !d.mailStatus;
+      bouncedLine.textContent = d.mailStatus ? L.bounced.replace('{email}', email) : '';
+      change.hidden = !d.canChangeEmail;
+      changeSummary.textContent = email ? L.wrongEmail : L.addEmail;
+      if (d.mailStatus) change.open = true;
+      mailBox.hidden = sent.hidden && bouncedLine.hidden && change.hidden;
+    };
+
+    changeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const say = (text: string, bad = false) => {
+        changeStatus.textContent = text;
+        changeStatus.hidden = false;
+        changeStatus.classList.toggle('st-bad', bad);
+      };
+      const address = changeInput.value.trim();
+      if (!address || !changeInput.checkValidity()) return say(L.errEmail, true);
+      changeSend.disabled = true;
+      changeSend.textContent = L.working;
+      let res: Response | null = null;
+      let json: any = null;
+      try {
+        res = await fetch('/api/store/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ o: current.order, t: current.token, email: address }),
+        });
+        json = await res.json().catch(() => null);
+      } catch {
+        res = null;
+      }
+      changeSend.disabled = false;
+      changeSend.textContent = changeSend.dataset.label ?? '';
+      if (res?.ok && json?.ok) {
+        // Once only: the form goes, and the page says where the link went now.
+        showMail({ token: current.token, remaining: 0, expires: null, email: json.email, mailStatus: '', canChangeEmail: false });
+        sent.textContent = L.changeDone.replace('{email}', json.email);
+        return;
+      }
+      say(res?.status === 409 ? L.changeFailed : res?.status === 429 ? L.errRate : res?.status === 400 ? L.errEmail : L.errGeneric, true);
+    });
+
+    const showPaid = (d: Paid, order: string) => {
+      current = { order, token: d.token };
+      showMail(d);
+      // So the product page can offer this download again on this device.
+      try {
+        rememberPurchase(localStorage, String(d.productId ?? ''), order, d.token, d.expires);
+      } catch {
+        // No storage at all: the email and this page's link still work.
+      }
       // With an email the link is also in their inbox; without one, this page is the only copy, so say so.
       const where = d.emailed ? L.thanksEmail : L.thanksSave;
       say(L.thanksPaid, `${L.thanksLeft.replace('{n}', String(d.remaining)).replace('{days}', String(daysLeft(d.expires)))} ${where}`);
@@ -117,8 +235,10 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
         return showPaid(json, from?.kind === 'link' ? from.order : order);
       }
       const state = json?.ok ? String(json.state) : 'unverified';
-      // Just back from paying: Razorpay can take a few seconds to say "paid".
-      if (from?.kind === 'return' && (state === 'pending' || state === 'created') && tries < 4) {
+      // Just back from paying: Razorpay can take a while to say "paid" (a UPI
+      // payment often 10-30 seconds), so keep asking for about a minute
+      // before showing "not confirmed yet".
+      if (from?.kind === 'return' && (state === 'pending' || state === 'created' || state === 'unverified') && tries < 15) {
         say(L.thanksChecking);
         return void setTimeout(() => check(tries + 1), 4000);
       }

@@ -62,10 +62,11 @@ async function sha256Hex(s) {
  * written anywhere, the hash cannot be matched across hours, and each row is
  * deleted as soon as its hour is over (on the next request from anyone).
  */
-export async function countHit(db, ip, salt, { scope = 'feedback', now = Date.now() } = {}) {
+export async function countHit(db, ip, salt, { scope = 'feedback', now = Date.now(), windowSeconds = RATE.windowSeconds } = {}) {
   const nowS = Math.floor(now / 1000);
-  const hour = Math.floor(nowS / RATE.windowSeconds);
-  const expires = (hour + 1) * RATE.windowSeconds;
+  // The window is an hour unless the caller asks for another (the store's "send my link" counts per day).
+  const hour = Math.floor(nowS / windowSeconds);
+  const expires = (hour + 1) * windowSeconds;
   const bucket = await sha256Hex(`${salt}|${scope}|${hour}|${ip}`);
   const [, counted] = await db.batch([
     db.prepare('DELETE FROM feedback_rate WHERE expires <= ?').bind(nowS),

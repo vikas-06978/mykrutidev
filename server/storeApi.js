@@ -7,6 +7,9 @@
  *   POST /api/store/webhook    Razorpay's own call (signed)
  *   GET  /api/store/order      ?o=&t=   what the thanks page shows
  *   POST /api/store/download   o=&t=    the PDF (counts one download)
+ *   POST /api/store/email      {o, t, email}                        the buyer corrects their email (once)
+ *   POST /api/store/find       {email, token?}                      "send me my link again", to that email only
+ *   POST /api/store/mail-webhook  Resend's delivery report (signed): delivered / bounced / complained
  *
  * Wired up by functions/api/store/*.js; kept here as plain request ->
  * response functions so the tests can call them with a local D1 and R2.
@@ -28,6 +31,7 @@
  *   STORE_TEST_PRODUCTS         "1" on a preview deployment, to sell the test product
  *   TURNSTILE_SECRET_KEY, RATE_LIMIT_SALT                     as for the feedback form
  *   RESEND_API_KEY, NOTIFY_FROM, NOTIFY_TO                    the emails (storeMail.js)
+ *   RESEND_WEBHOOK_SECRET       the whsec_... secret of the Resend webhook (delivery reports)
  */
 import {
   LIMITS,
@@ -37,6 +41,7 @@ import {
   STORE_SCHEMA,
   ORDER_ADDED_COLUMNS,
   TOKEN_RE,
+  cleanEmail,
   newOrderId,
   productById,
   sellable,
@@ -45,7 +50,9 @@ import {
 import { clientIp, countHit, ensureSchema, rateSalt, reply, verifyTurnstile } from './feedbackApi.js';
 import {
   RazorpayError,
+  contactOf,
   createPaymentLink,
+  fetchPayment,
   fetchPaymentLink,
   hasKeys,
   hmacHex,
@@ -55,7 +62,19 @@ import {
   safeEqual,
   verifyWebhook,
 } from './razorpay.js';
-import { buyerMail, downloadPage, ownerMail, sendMail, canMail } from './storeMail.js';
+import {
+  alertMail,
+  buyerMail,
+  canMail,
+  changedMail,
+  downloadPage,
+  findMail,
+  owners,
+  ownerMail,
+  sendMail,
+  sendMailId,
+  verifyResendWebhook,
+} from './storeMail.js';
 import { stampPdf, stampText } from './storeStamp.js';
 
 // ---------------------------------------------------------------------------
@@ -238,22 +257,55 @@ export async function handleCheckout(request, env, deps = {}) {
 // Settling an order: the one place that decides "paid"
 // ---------------------------------------------------------------------------
 
+/**
+ * The buyer's mobile, from Razorpay's record of the payment, kept on the order
+ * for the owner (sale email, alerts, orders page). Never throws: without it
+ * the owner just has no WhatsApp button for this order.
+ */
+async function recordPhone(env, order, fetchImpl) {
+  if (order.phone || !order.payment_id) return order;
+  try {
+    const phone = contactOf(await fetchPayment(env, order.payment_id, fetchImpl));
+    if (!phone) return order;
+    await env.DB.prepare('UPDATE orders SET phone = ? WHERE id = ?').bind(phone, order.id).run();
+    return { ...order, phone };
+  } catch {
+    return order;
+  }
+}
+
+/**
+ * Send the buyer their download email and record it: mail_status 'sent' with
+ * Resend's id (so its delivery report finds the order), 'failed', or 'off'
+ * (no mail setup). Returns the status. Never throws.
+ */
+export async function sendBuyerLink(env, order, { fetchImpl = fetch, origin = SITE_URL } = {}) {
+  const product = productById(order.product_id);
+  if (!product || !order.email) return 'none';
+  let status = 'off';
+  let mailId = null;
+  if (canMail(env)) {
+    const link = downloadPage(origin, order.id, await downloadToken(env, order.id), order.lang);
+    mailId = await sendMailId(env, buyerMail(env, { order, product, link, origin }), fetchImpl);
+    status = mailId === null ? 'failed' : 'sent';
+  }
+  await env.DB.prepare('UPDATE orders SET mail_status = ?, mail_id = ? WHERE id = ?').bind(status, mailId || null, order.id).run();
+  return status;
+}
+
 async function sendOrderMails(env, order, { fetchImpl, origin }) {
   const product = productById(order.product_id);
   if (!product) return;
-  let status = 'off';
-  if (canMail(env)) {
+  const withPhone = await recordPhone(env, order, fetchImpl);
+  if (withPhone.email) {
+    await sendBuyerLink(env, withPhone, { fetchImpl, origin });
+  } else {
     // No email given: nothing to send to the buyer, the download is on the page they land on.
-    if (order.email) {
-      const link = downloadPage(origin, order.id, await downloadToken(env, order.id));
-      const sent = await sendMail(env, buyerMail(env, { order, product, link, origin }), fetchImpl);
-      status = sent ? 'sent' : 'failed';
-    } else {
-      status = 'none';
-    }
-    if (String(env.NOTIFY_TO ?? '').trim()) await sendMail(env, ownerMail(env, { order, product, origin }), fetchImpl);
+    await env.DB.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(canMail(env) ? 'none' : 'off', order.id).run();
   }
-  await env.DB.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(status, order.id).run();
+  if (canMail(env) && owners(env).length) {
+    await sendMail(env, ownerMail(env, { order: withPhone, product, origin, token: await downloadToken(env, order.id) }), fetchImpl);
+  }
 }
 
 /**
@@ -303,13 +355,30 @@ export async function settleOrder(env, orderId, deps = {}) {
   return { state: 'paid', order: paid };
 }
 
+/**
+ * May the buyer change this order's email themselves? Once, within
+ * STORE.emailChangeHours of paying, or at any time if our email to them
+ * bounced or was marked as spam. Never on a refunded order.
+ */
+export function canBuyerChangeEmail(order, nowMs = Date.now()) {
+  if (order.status !== 'paid' || (order.buyer_email_changes ?? 0) >= 1) return false;
+  if (order.mail_status === 'bounced' || order.mail_status === 'complained') return true;
+  const paid = Date.parse(order.paid_at ?? '');
+  return Number.isFinite(paid) && nowMs - paid <= STORE.emailChangeHours * 3600e3;
+}
+
 /** What the thanks page needs to know about a paid order. */
-async function paidView(env, order) {
+async function paidView(env, order, nowMs = Date.now()) {
   return {
     state: 'paid',
     productId: order.product_id,
     /** false: no email was given, so the page must tell the buyer to keep its link */
     emailed: !!order.email,
+    /** Shown to the holder of the link (the buyer), so a mistyped address is noticed. */
+    email: order.email || '',
+    /** 'bounced' or 'complained': our email did not reach them. */
+    mailStatus: order.mail_status === 'bounced' || order.mail_status === 'complained' ? order.mail_status : '',
+    canChangeEmail: canBuyerChangeEmail(order, nowMs),
     token: await downloadToken(env, order.id),
     remaining: Math.max(0, order.max_downloads - order.downloads),
     expires: order.expires_at,
@@ -338,7 +407,7 @@ export async function handleConfirm(request, env, deps = {}) {
 
   const result = await settleOrder(env, id, { ...deps, origin: siteOrigin(request) });
   if (result.state === 'unknown') return reply(404, { ok: false, error: 'unknown-order' });
-  if (result.state === 'paid') return reply(200, { ok: true, ...(await paidView(env, result.order)) });
+  if (result.state === 'paid') return reply(200, { ok: true, ...(await paidView(env, result.order, deps.now)) });
   return reply(200, { ok: true, state: result.state });
 }
 
@@ -411,7 +480,191 @@ export async function handleOrderStatus(request, env, deps = {}) {
   if (order.status !== 'paid') return reply(200, { ok: true, state: order.status });
   const now = Math.floor((deps.now ?? Date.now()) / 1000);
   const expired = order.expires_at !== null && order.expires_at <= now;
-  return reply(200, { ok: true, ...(await paidView(env, order)), state: expired ? 'expired' : 'paid' });
+  return reply(200, { ok: true, ...(await paidView(env, order, deps.now)), state: expired ? 'expired' : 'paid' });
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/store/email: the buyer corrects their email (once)
+// ---------------------------------------------------------------------------
+
+/**
+ * The holder of the download link (the buyer: the token is in their link)
+ * puts the right address on the order, and the link is sent there. Once per
+ * order, within STORE.emailChangeHours of paying (any time if our email
+ * bounced). It is the same link with the same downloads left, so a changed
+ * address never means another copy. The owner is told, with both addresses.
+ *
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ fetch?: typeof fetch, now?: number }} [deps]
+ */
+export async function handleChangeEmail(request, env, deps = {}) {
+  const fetchImpl = deps.fetch ?? fetch;
+  const now = deps.now ?? Date.now();
+  if (!env.DB || !tokenSecretOk(env)) return reply(503, { ok: false, error: 'not-configured' });
+  const got = await readJson(request);
+  if (got.fail) return got.fail;
+  await ensureStoreSchema(env.DB);
+  const busy = await limited(request, env, 'email', 20, now);
+  if (busy) return busy;
+
+  const { o, t } = got.body ?? {};
+  if (!(await tokenMatches(env, o, t))) return reply(404, { ok: false, error: 'unknown-order' });
+  const email = cleanEmail(got.body?.email);
+  if (!email) return reply(400, { ok: false, error: 'invalid' });
+
+  const db = env.DB;
+  const order = await db.prepare('SELECT * FROM orders WHERE id = ?').bind(o).first();
+  if (!order) return reply(404, { ok: false, error: 'unknown-order' });
+  if (order.email === email) return reply(400, { ok: false, error: 'same' });
+  if (!canBuyerChangeEmail(order, now)) return reply(409, { ok: false, error: 'not-allowed' });
+
+  // One UPDATE that checks the rule again, so two quick tries cannot both change it.
+  const since = isoNow(now - STORE.emailChangeHours * 3600e3);
+  const changed = await db
+    .prepare(
+      `UPDATE orders SET email_prev = email, email = ?, email_changed_by = 'buyer', email_changed_at = ?,
+         buyer_email_changes = buyer_email_changes + 1
+       WHERE id = ? AND status = 'paid' AND buyer_email_changes = 0
+         AND (paid_at >= ? OR mail_status IN ('bounced', 'complained'))
+       RETURNING *`,
+    )
+    .bind(email, isoNow(now), o, since)
+    .first();
+  if (!changed) return reply(409, { ok: false, error: 'not-allowed' });
+
+  const status = await sendBuyerLink(env, changed, { fetchImpl, origin: siteOrigin(request) });
+  const product = productById(changed.product_id);
+  if (product && canMail(env) && owners(env).length) {
+    await sendMail(env, changedMail(env, { order: changed, product, origin: siteOrigin(request) }), fetchImpl);
+  }
+  return reply(200, { ok: true, email, sent: status === 'sent' });
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/store/find: "send me my download link again"
+// ---------------------------------------------------------------------------
+
+/**
+ * Someone types an email: if it has paid, unexpired orders here (of this
+ * deployment's mode), their links are emailed to THAT address; the links are
+ * never shown on the page. The answer says plainly what happened, as the
+ * owner asked: `found` 'sent' (emailed), 'none' (no paid purchase with this
+ * email) or 'closed' (paid, but every link has expired, run out of downloads
+ * or been refunded). Limited per IP and per address (STORE.findPerDay, 429
+ * 'email-limit'), with the bot check when it is set up.
+ *
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ fetch?: typeof fetch, now?: number, verify?: typeof verifyTurnstile }} [deps]
+ */
+export async function handleFind(request, env, deps = {}) {
+  const fetchImpl = deps.fetch ?? fetch;
+  const now = deps.now ?? Date.now();
+  if (!env.DB || !tokenSecretOk(env)) return reply(503, { ok: false, error: 'not-configured' });
+  const got = await readJson(request);
+  if (got.fail) return got.fail;
+  await ensureStoreSchema(env.DB);
+  const busy = await limited(request, env, 'find', 10, now);
+  if (busy) return busy;
+
+  const body = got.body ?? {};
+  if (body.website !== undefined && body.website !== '') return reply(400, { ok: false, error: 'rejected' });
+  const email = cleanEmail(body.email);
+  if (!email) return reply(400, { ok: false, error: 'invalid' });
+  if (env.TURNSTILE_SECRET_KEY) {
+    const token = typeof body.token === 'string' ? body.token : '';
+    const verify = deps.verify ?? verifyTurnstile;
+    if (!token || token.length > 2048 || !(await verify(token, env.TURNSTILE_SECRET_KEY))) {
+      return reply(403, { ok: false, error: 'challenge-failed' });
+    }
+  }
+  // Per address, over a day: hourly buckets would let someone flood one inbox.
+  const { hits } = await countHit(env.DB, email, rateSalt(env), { scope: 'find-email', now, windowSeconds: 86400 });
+  if (hits > STORE.findPerDay) return reply(429, { ok: false, error: 'email-limit' });
+
+  const nowS = Math.floor(now / 1000);
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM orders WHERE email = ? AND status = 'paid' AND (expires_at IS NULL OR expires_at > ?) AND downloads < max_downloads AND COALESCE(mode, 'test') = ? ORDER BY paid_at DESC LIMIT 10",
+  )
+    .bind(email, nowS, mode(env))
+    .all();
+  if (!results.length) {
+    // Paid once, but nothing left to download: say so, rather than "not found".
+    const any = await env.DB.prepare(
+      "SELECT 1 AS x FROM orders WHERE email = ? AND status IN ('paid', 'refunded') AND COALESCE(mode, 'test') = ? LIMIT 1",
+    )
+      .bind(email, mode(env))
+      .first();
+    return reply(200, { ok: true, found: any ? 'closed' : 'none' });
+  }
+  if (canMail(env)) {
+    const origin = siteOrigin(request);
+    const lang = typeof body.lang === 'string' && /^[a-z]{2}$/.test(body.lang) ? body.lang : 'en';
+    const items = [];
+    for (const order of results) {
+      const product = productById(order.product_id);
+      if (product) items.push({ product, order, link: downloadPage(origin, order.id, await downloadToken(env, order.id), lang) });
+    }
+    if (items.length && (await sendMail(env, findMail(env, { email, items }), fetchImpl))) {
+      return reply(200, { ok: true, found: 'sent' });
+    }
+  }
+  // Found, but the email could not be sent (no mail setup, or Resend refused).
+  return reply(502, { ok: false, error: 'mail-failed' });
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/store/mail-webhook: Resend's delivery reports
+// ---------------------------------------------------------------------------
+
+const MAIL_EVENTS = { 'email.delivered': 'delivered', 'email.bounced': 'bounced', 'email.complained': 'complained' };
+
+/**
+ * delivered: the order's download email reached the inbox (a record, should a
+ * buyer later say it never came). bounced / complained: it did not, or was
+ * marked as spam; the order is flagged and the owner gets an alert with
+ * WhatsApp buttons carrying the link. Reports for other emails are ignored.
+ *
+ * @param {Request} request
+ * @param {Record<string, any>} env
+ * @param {{ fetch?: typeof fetch, now?: number }} [deps]
+ */
+export async function handleMailWebhook(request, env, deps = {}) {
+  const fetchImpl = deps.fetch ?? fetch;
+  if (!env.DB || !env.RESEND_WEBHOOK_SECRET || !tokenSecretOk(env)) return reply(503, { ok: false, error: 'not-configured' });
+  const raw = await request.text();
+  if (raw.length > 256 * 1024) return reply(413, { ok: false, error: 'too-large' });
+  if (!(await verifyResendWebhook(raw, request.headers, env.RESEND_WEBHOOK_SECRET, deps.now))) {
+    return reply(400, { ok: false, error: 'bad-signature' });
+  }
+  let event;
+  try {
+    event = JSON.parse(raw);
+  } catch {
+    return reply(400, { ok: false, error: 'bad-json' });
+  }
+  const status = MAIL_EVENTS[event?.type];
+  const mailId = event?.data?.email_id;
+  if (!status || typeof mailId !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(mailId)) return reply(200, { ok: true });
+  await ensureStoreSchema(env.DB);
+  const db = env.DB;
+  // "delivered" never hides a bounce or a complaint that came first.
+  const order =
+    status === 'delivered'
+      ? await db
+          .prepare("UPDATE orders SET mail_status = 'delivered' WHERE mail_id = ? AND (mail_status IS NULL OR mail_status = 'sent') RETURNING *")
+          .bind(mailId)
+          .first()
+      : await db.prepare('UPDATE orders SET mail_status = ? WHERE mail_id = ? AND (mail_status IS NULL OR mail_status != ?) RETURNING *').bind(status, mailId, status).first();
+  if (order && status !== 'delivered' && order.status === 'paid') {
+    const product = productById(order.product_id);
+    if (product && canMail(env) && owners(env).length) {
+      const token = await downloadToken(env, order.id);
+      await sendMail(env, alertMail(env, { order, product, origin: siteOrigin(request), token, what: status }), fetchImpl);
+    }
+  }
+  return reply(200, { ok: true });
 }
 
 // ---------------------------------------------------------------------------

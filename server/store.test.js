@@ -14,6 +14,9 @@ import { PDFDocument } from 'pdf-lib';
 import {
   downloadToken,
   ensureStoreSchema,
+  handleChangeEmail,
+  handleFind,
+  handleMailWebhook,
   handleCheckout,
   handleConfirm,
   handleDownload,
@@ -24,7 +27,8 @@ import {
 } from './storeApi.js';
 import { handleAdminOrders } from './storeAdmin.js';
 import { hmacHex, isPaidFor, verifyWebhook } from './razorpay.js';
-import { buyerMail, ownerMail } from './storeMail.js';
+import { buyerMail, ownerMail, verifyResendWebhook, waText } from './storeMail.js';
+import { createHmac } from 'node:crypto';
 import { PRODUCTS, STORE, ORDER_ID_RE } from '../src/lib/store.js';
 import { prepare } from '../scripts/prepare-store-pdf.mjs';
 import { STAMP_LEN, STAMP_SLOT, maskEmail, stampPdf, stampText } from './storeStamp.js';
@@ -69,12 +73,14 @@ function fakeNet() {
     mails: [],
     createFails: false,
     readFails: false,
+    /** The buyer's mobile on Razorpay's payment record; null: the payment cannot be read. */
+    contact: '+919876543210',
     link: { id: 'plink_test1', status: 'created', amount: PRODUCT.pricePaise, amount_paid: 0, currency: 'INR', reference_id: null },
     fetch: async (url, init = {}) => {
       const method = init.method ?? 'GET';
       if (url.startsWith('https://api.resend.com')) {
         net.mails.push(JSON.parse(init.body));
-        return new Response('{}', { status: 200 });
+        return new Response(JSON.stringify({ id: `re_mail_${net.mails.length}` }), { status: 200 });
       }
       net.calls.push({ url, method, body: init.body ? JSON.parse(init.body) : null, auth: init.headers?.Authorization });
       if (method === 'POST' && url.endsWith('/v1/payment_links')) {
@@ -82,6 +88,10 @@ function fakeNet() {
         const body = JSON.parse(init.body);
         net.link = { ...net.link, reference_id: body.reference_id, amount: body.amount, currency: body.currency };
         return new Response(JSON.stringify({ id: 'plink_test1', short_url: 'https://rzp.io/i/abc', ...net.link }), { status: 200 });
+      }
+      if (method === 'GET' && url.includes('/v1/payments/')) {
+        if (net.contact === null) return new Response('{}', { status: 500 });
+        return new Response(JSON.stringify({ id: 'pay_test1', contact: net.contact }), { status: 200 });
       }
       if (method === 'GET' && url.includes('/v1/payment_links/')) {
         if (net.readFails) return new Response('{}', { status: 500 });
@@ -418,7 +428,7 @@ describe('POST /api/store/confirm', () => {
     assert.equal(out.emailed, false);
     assert.equal(net.mails.length, 1, 'only the owner is mailed');
     assert.deepEqual(net.mails[0].to, ['owner@example.com']);
-    assert.match(net.mails[0].text, /no email given/);
+    assert.match(net.mails[0].text, /none given/);
     assert.equal(net.mails[0].reply_to, undefined);
     assert.equal((await orders())[0].mail_status, 'none');
   });
@@ -940,7 +950,7 @@ describe('/admin/orders: the organised view', () => {
     await row({ mail: 'failed' });
     const html = await get('/admin/orders');
     assert.match(html, /<span class="fa-flag">failed<\/span>/);
-    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email failed/);
+    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email not delivered/);
   });
 
   test('"Mark refunded" needs the box ticked; every action says what it did', async () => {
@@ -1049,7 +1059,7 @@ describe('/admin/orders: live and test orders apart', () => {
     assert.match(html, /href="\?mode=test" aria-current="page"/);
     // The CSV keeps every order, with its mode.
     const csv = await (await handleAdminOrders(new Request('https://mykrutidev.com/admin/orders?format=csv', { headers: { Authorization: `Bearer ${KEY}` } }), LIVE())).text();
-    assert.match(csv, /,mode\r?\n/);
+    assert.match(csv, /,mode,phone,email_prev,email_changed_by,email_changed_at\r?\n/);
     assert.match(csv, new RegExp(`${live}.*,live`));
   });
 
@@ -1089,5 +1099,403 @@ describe('storage', () => {
     await handleCheckout(post('/api/store/checkout', good, { ip: '198.51.100.9' }), ENV(), { fetch: net.fetch });
     const everything = JSON.stringify([await orders(), (await DB.prepare('SELECT * FROM feedback_rate').all()).results]);
     assert.doesNotMatch(everything, /198\.51\.100\.9/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reaching the buyer: phone, delivery reports, a corrected email, "send my link"
+// ---------------------------------------------------------------------------
+
+const RESEND_SECRET = `whsec_${Buffer.from('a-resend-webhook-signing-key-0123').toString('base64')}`;
+/** A Resend (Svix-signed) webhook request, signed the way Resend signs it. */
+function resendHook(event, { secret = RESEND_SECRET, ts = Math.floor(Date.now() / 1000), id = `msg_${Math.random().toString(36).slice(2)}`, sig } = {}) {
+  const raw = JSON.stringify(event);
+  const key = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+  const good = createHmac('sha256', key).update(`${id}.${ts}.${raw}`).digest('base64');
+  return new Request('https://mykrutidev.com/api/store/mail-webhook', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'svix-id': id, 'svix-timestamp': String(ts), 'svix-signature': sig ?? `v1,${good}` },
+    body: raw,
+  });
+}
+const MAIL_ENV = () => ({ ...ENV(), RESEND_WEBHOOK_SECRET: RESEND_SECRET });
+
+/** A paid order through checkout and settle; returns its id and the fake network. */
+async function paidOrder({ net = fakeNet(), body = good, now = Date.now() } = {}) {
+  const r = await handleCheckout(post('/api/store/checkout', body), MAIL_ENV(), { fetch: net.fetch, now });
+  const id = (await r.json()).order;
+  net.pay();
+  await settleOrder(MAIL_ENV(), id, { fetch: net.fetch, now });
+  return { id, net };
+}
+const one = async (id) => DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+
+describe('the buyer\'s phone and the owner\'s WhatsApp buttons', () => {
+  test('a paid order keeps the buyer\'s mobile from Razorpay; the sale email has it, with WhatsApp in Hindi and English', async () => {
+    const { id, net } = await paidOrder();
+    const o = await one(id);
+    assert.equal(o.phone, '+919876543210');
+    assert.equal(o.mail_id, 're_mail_1', 'Resend\'s id for the buyer\'s email is kept, for its delivery report');
+    const owner = net.mails.find((m) => m.to[0] === 'owner@example.com');
+    assert.match(owner.text, /Buyer phone: \+919876543210/);
+    const token = await downloadToken(ENV(), id);
+    const wa = [...owner.html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, '&'));
+    assert.equal(wa.length, 2);
+    const [hi, en] = wa.map((u) => new URL(u));
+    assert.equal(hi.pathname, '/919876543210');
+    assert.match(hi.searchParams.get('text'), /नमस्ते! MyKrutiDev से/);
+    assert.ok(hi.searchParams.get('text').includes(`/hi/store/thanks#o=${id}&t=${token}`));
+    assert.match(en.searchParams.get('text'), /^Hi! Thank you for buying/);
+    assert.ok(en.searchParams.get('text').includes(`/store/thanks#o=${id}&t=${token}`));
+    assert.match(owner.html, /WhatsApp: हिंदी/);
+    assert.match(owner.html, /WhatsApp: English/);
+  });
+
+  test('the buyer\'s link opens the page in the language they bought in', async () => {
+    const { id, net } = await paidOrder();
+    const buyer = net.mails.find((m) => m.to[0] === 'buyer@example.com');
+    assert.ok(buyer.text.includes(`/hi/store/thanks#o=${id}&t=`), 'good.lang is hi');
+  });
+
+  test('when Razorpay\'s payment cannot be read the order is still paid, just without a phone or buttons', async () => {
+    const net = fakeNet();
+    net.contact = null;
+    const { id } = await paidOrder({ net });
+    const o = await one(id);
+    assert.equal(o.status, 'paid');
+    assert.equal(o.phone, null);
+    const owner = net.mails.find((m) => m.to[0] === 'owner@example.com');
+    assert.doesNotMatch(owner.html, /wa\.me/);
+    assert.match(owner.html, /No phone number from Razorpay/);
+  });
+
+  test('the WhatsApp messages: thanks + link, or "your email looks wrong" + link, in both languages', () => {
+    const product = PRODUCTS[0];
+    const links = { hi: 'https://x/hi', en: 'https://x/en' };
+    const sale = waText('sale', { product, links });
+    assert.ok(sale.hi.includes('https://x/hi') && sale.en.includes('https://x/en'));
+    const wrong = waText('wrong-email', { product, email: 'a@gmial.com', links });
+    assert.match(wrong.hi, /a@gmial\.com/);
+    assert.match(wrong.hi, /ईमेल पर नहीं पहुँचा/);
+    assert.match(wrong.en, /looks wrong/);
+  });
+});
+
+describe('POST /api/store/mail-webhook: Resend\'s delivery reports', () => {
+  test('a genuine signature is accepted; a wrong one, a wrong secret or an old timestamp is not', async () => {
+    const ev = { type: 'email.delivered', data: { email_id: 're_x' } };
+    assert.equal((await handleMailWebhook(resendHook(ev), MAIL_ENV())).status, 200);
+    assert.equal((await handleMailWebhook(resendHook(ev, { sig: 'v1,AAAA' }), MAIL_ENV())).status, 400);
+    assert.equal((await handleMailWebhook(resendHook(ev, { secret: `whsec_${Buffer.from('another-key').toString('base64')}` }), MAIL_ENV())).status, 400);
+    assert.equal((await handleMailWebhook(resendHook(ev, { ts: Math.floor(Date.now() / 1000) - 3600 }), MAIL_ENV())).status, 400);
+    assert.equal((await handleMailWebhook(resendHook(ev), ENV())).status, 503, 'not set up without RESEND_WEBHOOK_SECRET');
+  });
+
+  test('verifyResendWebhook accepts any of several v1 signatures, as Svix sends during a key rotation', async () => {
+    const r = resendHook({ type: 'x' });
+    const sig = r.headers.get('svix-signature');
+    const h = new Headers(r.headers);
+    h.set('svix-signature', `v1,bm90IGl0 ${sig}`);
+    assert.equal(await verifyResendWebhook(await r.clone().text(), h, RESEND_SECRET), true);
+  });
+
+  test('delivered is recorded; a bounce flags the order and mails the owner once, with the "wrong email" WhatsApp message', async () => {
+    const { id, net } = await paidOrder();
+    const mailId = (await one(id)).mail_id;
+    const before = net.mails.length;
+    await handleMailWebhook(resendHook({ type: 'email.bounced', data: { email_id: mailId } }), MAIL_ENV(), { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'bounced');
+    const alert = net.mails[before];
+    assert.deepEqual(alert.to, ['owner@example.com']);
+    assert.match(alert.subject, /bounced: buyer@example\.com/);
+    const wa = [...alert.html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"/g)].map((m) => new URL(m[1].replace(/&amp;/g, '&')).searchParams.get('text'));
+    assert.match(wa[0], /सही नहीं लग रहा/);
+    assert.match(wa[1], /looks wrong/);
+    // The same report again (Resend retries): no second alert. A late "delivered" does not hide the bounce.
+    await handleMailWebhook(resendHook({ type: 'email.bounced', data: { email_id: mailId } }), MAIL_ENV(), { fetch: net.fetch });
+    await handleMailWebhook(resendHook({ type: 'email.delivered', data: { email_id: mailId } }), MAIL_ENV(), { fetch: net.fetch });
+    assert.equal(net.mails.length, before + 1);
+    assert.equal((await one(id)).mail_status, 'bounced');
+  });
+
+  test('delivered on its own is kept as a record; a complaint flags the order too', async () => {
+    const { id, net } = await paidOrder();
+    const mailId = (await one(id)).mail_id;
+    await handleMailWebhook(resendHook({ type: 'email.delivered', data: { email_id: mailId } }), MAIL_ENV(), { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'delivered');
+    await handleMailWebhook(resendHook({ type: 'email.complained', data: { email_id: mailId } }), MAIL_ENV(), { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'complained');
+    assert.match(net.mails.at(-1).subject, /marked our email as spam/);
+  });
+
+  test('reports for other emails (the owner\'s, the feedback) and other events are acknowledged and ignored', async () => {
+    const { id, net } = await paidOrder();
+    const before = net.mails.length;
+    for (const ev of [
+      { type: 'email.bounced', data: { email_id: 're_someone_else' } },
+      { type: 'email.opened', data: { email_id: (await one(id)).mail_id } },
+      { type: 'email.bounced', data: {} },
+    ]) {
+      assert.equal((await handleMailWebhook(resendHook(ev), MAIL_ENV(), { fetch: net.fetch })).status, 200);
+    }
+    assert.equal((await one(id)).mail_status, 'sent');
+    assert.equal(net.mails.length, before);
+  });
+});
+
+describe('POST /api/store/email: the buyer corrects their email', () => {
+  const change = async (id, email, { net = fakeNet(), now, token } = {}) =>
+    handleChangeEmail(post('/api/store/email', { o: id, t: token ?? (await downloadToken(ENV(), id)), email }), MAIL_ENV(), { fetch: net.fetch, now });
+
+  test('once, within a day of paying: the link goes to the new address, the owner is told, the downloads stay as they were', async () => {
+    const t0 = Date.UTC(2026, 9, 16, 10, 0, 0);
+    const { id } = await paidOrder({ now: t0 });
+    await DB.prepare('UPDATE orders SET downloads = 2 WHERE id = ?').bind(id).run();
+    const net = fakeNet();
+    const r = await change(id, '  Right@Example.com ', { net, now: t0 + 3600e3 });
+    assert.equal(r.status, 200);
+    assert.deepEqual(await r.json(), { ok: true, email: 'right@example.com', sent: true });
+    const o = await one(id);
+    assert.deepEqual(
+      [o.email, o.email_prev, o.email_changed_by, o.buyer_email_changes, o.downloads, o.mail_status],
+      ['right@example.com', 'buyer@example.com', 'buyer', 1, 2, 'sent'],
+    );
+    assert.deepEqual(net.mails.map((m) => m.to[0]), ['right@example.com', 'owner@example.com']);
+    assert.ok(net.mails[0].text.includes(`#o=${id}&t=`));
+    assert.match(net.mails[1].text, /Old email: buyer@example\.com/);
+    assert.match(net.mails[1].text, /Downloads so far: 2 \/ 5/);
+    // A second change is refused: one correction per order.
+    assert.equal((await change(id, 'third@example.com', { now: t0 + 2 * 3600e3 })).status, 409);
+    assert.equal((await one(id)).email, 'right@example.com');
+  });
+
+  test('after a day it is refused, unless our email bounced', async () => {
+    const t0 = Date.UTC(2026, 9, 16, 10, 0, 0);
+    const { id } = await paidOrder({ now: t0 });
+    const late = t0 + 25 * 3600e3;
+    assert.equal((await change(id, 'right@example.com', { now: late })).status, 409);
+    await DB.prepare("UPDATE orders SET mail_status = 'bounced' WHERE id = ?").bind(id).run();
+    assert.equal((await change(id, 'right@example.com', { now: late })).status, 200);
+  });
+
+  test('refuses a wrong token, a bad or unchanged address, a refunded or unpaid order', async () => {
+    const { id } = await paidOrder();
+    assert.equal((await change(id, 'x@example.com', { token: 'f'.repeat(64) })).status, 404);
+    assert.equal((await change(id, 'not an email')).status, 400);
+    assert.equal((await change(id, 'buyer@example.com')).status, 400);
+    await DB.prepare("UPDATE orders SET status = 'refunded' WHERE id = ?").bind(id).run();
+    assert.equal((await change(id, 'x@example.com')).status, 409);
+    const unpaid = await startOrder(fakeNet());
+    assert.equal((await change(unpaid, 'x@example.com')).status, 409);
+  });
+
+  test('two tries at the same moment change it once', async () => {
+    const { id } = await paidOrder();
+    const rs = await Promise.all(['a1@example.com', 'a2@example.com', 'a3@example.com'].map((e) => change(id, e)));
+    assert.equal(rs.filter((r) => r.status === 200).length, 1);
+    assert.equal((await one(id)).buyer_email_changes, 1);
+  });
+
+  test('the thanks page is told the address, whether it may be changed, and a bounce', async () => {
+    const t0 = Date.now();
+    const { id } = await paidOrder({ now: t0 });
+    const token = await downloadToken(ENV(), id);
+    const view = async (now) =>
+      (await handleOrderStatus(new Request(`https://test.mykrutidev.pages.dev/api/store/order?o=${id}&t=${token}`), MAIL_ENV(), { now })).json();
+    let v = await view(t0 + 1000);
+    assert.deepEqual([v.email, v.canChangeEmail, v.mailStatus], ['buyer@example.com', true, '']);
+    v = await view(t0 + 25 * 3600e3);
+    assert.equal(v.canChangeEmail, false);
+    await DB.prepare("UPDATE orders SET mail_status = 'bounced' WHERE id = ?").bind(id).run();
+    v = await view(t0 + 25 * 3600e3);
+    assert.deepEqual([v.canChangeEmail, v.mailStatus], [true, 'bounced']);
+  });
+});
+
+describe('POST /api/store/find: "send me my link again"', () => {
+  const find = (body, { net = fakeNet(), env = MAIL_ENV(), ip, now } = {}) =>
+    handleFind(post('/api/store/find', body, ip ? { ip } : {}), env, { fetch: net.fetch, now });
+
+  test('emails the links to that address only, and says so; an address with no purchase is told plainly', async () => {
+    const { id } = await paidOrder();
+    const net = fakeNet();
+    const r1 = await find({ email: 'Buyer@Example.com', lang: 'en' }, { net });
+    assert.deepEqual([r1.status, await r1.json()], [200, { ok: true, found: 'sent' }]);
+    assert.equal(net.mails.length, 1);
+    assert.deepEqual(net.mails[0].to, ['buyer@example.com']);
+    assert.ok(net.mails[0].text.includes(`/store/thanks#o=${id}&t=${await downloadToken(ENV(), id)}`));
+    const r2 = await find({ email: 'nobody@example.com' });
+    assert.deepEqual([r2.status, await r2.json()], [200, { ok: true, found: 'none' }]);
+  });
+
+  test('the link itself is never in the answer, only in the email', async () => {
+    const { id } = await paidOrder();
+    const text = await (await find({ email: 'buyer@example.com' })).text();
+    assert.ok(!text.includes(id) && !text.includes(await downloadToken(ENV(), id)));
+  });
+
+  test('paid but nothing left (refunded, expired, used up) says "closed"; an unpaid order counts as none', async () => {
+    const { id } = await paidOrder();
+    for (const sql of [
+      "UPDATE orders SET status = 'refunded' WHERE id = ?",
+      "UPDATE orders SET status = 'paid', expires_at = 1 WHERE id = ?",
+      "UPDATE orders SET expires_at = NULL, downloads = max_downloads WHERE id = ?",
+    ]) {
+      await DB.prepare(sql).bind(id).run();
+      const net = fakeNet();
+      const r = await find({ email: 'buyer@example.com' }, { net });
+      assert.deepEqual(await r.json(), { ok: true, found: 'closed' }, sql);
+      assert.equal(net.mails.length, 0);
+    }
+    await DB.prepare('DELETE FROM orders').run();
+    await startOrder(fakeNet());
+    // (the next day: three asks today used up this address's limit)
+    assert.deepEqual(await (await find({ email: 'buyer@example.com' }, { now: Date.now() + 864e5 })).json(), { ok: true, found: 'none' });
+  });
+
+  test('at most 3 emails a day to one address, from any number of IPs; then a clear "try tomorrow"', async () => {
+    await paidOrder();
+    const net = fakeNet();
+    const statuses = [];
+    for (let i = 0; i < 5; i++) statuses.push((await find({ email: 'buyer@example.com' }, { net })).status);
+    assert.equal(net.mails.length, STORE.findPerDay);
+    assert.deepEqual(statuses, [200, 200, 200, 429, 429]);
+  });
+
+  test('refuses a bad address and a honeypot, and asks Turnstile when it is set up', async () => {
+    assert.equal((await find({ email: 'nope' })).status, 400);
+    assert.equal((await find({ email: 'a@example.com', website: 'x' })).status, 400);
+    const env = { ...MAIL_ENV(), TURNSTILE_SECRET_KEY: 'ts' };
+    const r = await handleFind(post('/api/store/find', { email: 'a@example.com' }), env, { verify: async () => false });
+    assert.equal(r.status, 403);
+    const ok = await handleFind(post('/api/store/find', { email: 'a@example.com', token: 'tok' }), env, { verify: async () => true });
+    assert.equal(ok.status, 200);
+  });
+});
+
+describe('/admin/orders: phone, WhatsApp, delivery and a changed email', () => {
+  const KEY = ENV().ADMIN_KEY;
+  const get = () =>
+    handleAdminOrders(new Request('https://test.mykrutidev.pages.dev/admin/orders?mode=test', { headers: { Authorization: `Bearer ${KEY}` } }), MAIL_ENV()).then((r) => r.text());
+
+  test('each paid order shows the phone with WhatsApp in Hindi and English; a bounce turns the message to "wrong email"', async () => {
+    const { id } = await paidOrder();
+    let html = await get();
+    assert.ok(html.includes('+919876543210'));
+    const texts = () => [...html.matchAll(/class="fa-wa" href="([^"]+)"/g)].map((m) => new URL(m[1].replace(/&amp;/g, '&')).searchParams.get('text'));
+    assert.match(texts()[0], /खरीदने के लिए धन्यवाद/);
+    assert.match(texts()[1], /Thank you for buying/);
+    await DB.prepare("UPDATE orders SET mail_status = 'bounced' WHERE id = ?").bind(id).run();
+    html = await get();
+    assert.match(html, /<span class="fa-flag">bounced<\/span>/);
+    assert.match(texts()[0], /सही नहीं लग रहा/);
+    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email not delivered/);
+    await DB.prepare("UPDATE orders SET mail_status = 'delivered' WHERE id = ?").bind(id).run();
+    assert.match(await get(), /<span class="fa-good">delivered<\/span>/);
+  });
+
+  test('"Change email & send" puts the right address on, sends the link there, and keeps the old one', async () => {
+    const { id } = await paidOrder();
+    const net = fakeNet();
+    const form = new URLSearchParams({ action: 'email', id, email: 'Right@Example.com' });
+    const r = await handleAdminOrders(
+      new Request('https://test.mykrutidev.pages.dev/admin/orders', {
+        method: 'POST',
+        body: form,
+        headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      }),
+      MAIL_ENV(),
+      { fetch: net.fetch },
+    );
+    assert.equal(r.status, 303);
+    const o = await one(id);
+    assert.deepEqual([o.email, o.email_prev, o.email_changed_by, o.buyer_email_changes], ['right@example.com', 'buyer@example.com', 'admin', 0]);
+    assert.deepEqual(net.mails.map((m) => m.to[0]), ['right@example.com']);
+    const html = await get();
+    assert.match(html, /was <!--email_off-->buyer@example\.com<!--\/email_off-->, changed by admin/);
+    // A bad address changes nothing.
+    const bad = await handleAdminOrders(
+      new Request('https://test.mykrutidev.pages.dev/admin/orders', {
+        method: 'POST',
+        body: new URLSearchParams({ action: 'email', id, email: 'nope' }),
+        headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      }),
+      MAIL_ENV(),
+    );
+    assert.match(bad.headers.get('Location'), /done=bademail/);
+    assert.equal((await one(id)).email, 'right@example.com');
+  });
+
+  test('the setup check names the Resend webhook secret', async () => {
+    assert.match(await get(), /Email delivery reports from Resend/);
+  });
+});
+
+describe('one buyer, start to finish (the whole support path, in order)', () => {
+  test('buy with a typo, bounce, owner alerted, buyer corrects it, link on another phone, refund closes it', async () => {
+    const net = fakeNet();
+    const env = MAIL_ENV();
+    const t0 = Date.now();
+    await FILES.put(PRODUCT.file, PDF);
+
+    // 1. Checkout with a mistyped address, then Razorpay says paid; the buyer comes back.
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: t0 });
+    const id = (await r0.json()).order;
+    net.pay();
+    const back = await (await handleConfirm(post('/api/store/confirm', { order: id }), env, { fetch: net.fetch, now: t0 + 20e3 })).json();
+    assert.equal(back.state, 'paid');
+    assert.deepEqual([back.email, back.canChangeEmail, back.mailStatus], ['vikas926798@gmail.com', true, '']);
+    const token = back.token;
+    // The buyer's mail went to the typo; the owner's sale mail has the phone and both WhatsApp buttons.
+    assert.deepEqual(net.mails.map((m) => m.to[0]), ['vikas926798@gmail.com', 'owner@example.com']);
+    assert.match(net.mails[1].html, /WhatsApp: हिंदी[\s\S]*WhatsApp: English/);
+
+    // 2. The buyer downloads once from the thanks page.
+    const dl = await handleDownload(post('/api/store/download', null, { type: 'application/x-www-form-urlencoded', raw: new URLSearchParams({ o: id, t: token }).toString() }), env, { now: t0 + 30e3 });
+    assert.equal(dl.status, 200);
+
+    // 3. Gmail bounces the typo: the order is flagged and the owner alerted, with the "wrong email" message.
+    const mailId = (await one(id)).mail_id;
+    await handleMailWebhook(resendHook({ type: 'email.bounced', data: { email_id: mailId } }), env, { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'bounced');
+    assert.match(net.mails.at(-1).subject, /bounced: vikas926798@gmail\.com/);
+    assert.match(decodeURIComponent(net.mails.at(-1).html), /सही नहीं लग रहा/);
+
+    // 4. Next day (past 24 h, but it bounced) the buyer opens the link again: told, and corrects it once.
+    const later = t0 + 30 * 3600e3;
+    const view = await (await handleOrderStatus(new Request(`https://test.mykrutidev.pages.dev/api/store/order?o=${id}&t=${token}`), env, { now: later })).json();
+    assert.deepEqual([view.mailStatus, view.canChangeEmail, view.remaining], ['bounced', true, 4]);
+    const fixed = await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later });
+    assert.equal(fixed.status, 200);
+    assert.deepEqual(net.mails.slice(-2).map((m) => m.to[0]), ['vikas9267981@gmail.com', 'owner@example.com']);
+    let o = await one(id);
+    assert.deepEqual([o.email, o.email_prev, o.mail_status, o.downloads], ['vikas9267981@gmail.com', 'vikas926798@gmail.com', 'sent', 1]);
+    // ...and only once.
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'friend@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+
+    // 5. The new mail is delivered: recorded, should a buyer ever say it never came.
+    await handleMailWebhook(resendHook({ type: 'email.delivered', data: { email_id: (await one(id)).mail_id } }), env, { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'delivered');
+
+    // 6. On another phone: "lost link" sends it to the right address; the old typo finds nothing.
+    let found = await (await handleFind(post('/api/store/find', { email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'sent');
+    assert.deepEqual(net.mails.at(-1).to, ['vikas9267981@gmail.com']);
+    found = await (await handleFind(post('/api/store/find', { email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'none');
+
+    // 7. A full refund (Razorpay's webhook) closes the download and the "lost link" says so.
+    const raw = JSON.stringify({ event: 'refund.processed', payload: { refund: { entity: { payment_id: 'pay_test1', amount: PRODUCT.pricePaise } } } });
+    const sig = await hmacHex(WEBHOOK_SECRET, raw);
+    const hook = new Request('https://test.mykrutidev.pages.dev/api/store/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Razorpay-Signature': sig }, body: raw });
+    assert.equal((await handleWebhook(hook, env, { fetch: net.fetch })).status, 200);
+    o = await one(id);
+    assert.equal(o.status, 'refunded');
+    const after = await handleDownload(post('/api/store/download', null, { type: 'application/x-www-form-urlencoded', raw: new URLSearchParams({ o: id, t: token }).toString() }), env, { now: later });
+    assert.equal(after.status, 410);
+    found = await (await handleFind(post('/api/store/find', { email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'closed');
+    // A refunded order cannot have its email changed any more either.
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'x@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
   });
 });

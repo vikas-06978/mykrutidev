@@ -7,6 +7,10 @@
  * form once and a session cookie is set for 8 hours, or send it as
  * `Authorization: Bearer <key>` (curl, scripts).
  *
+ * Email addresses sit inside <!--email_off--> ... <!--/email_off-->: Cloudflare's
+ * Email Address Obfuscation would otherwise show "[email protected]", and these
+ * pages run no script to decode it.
+ *
  *   GET  /admin/feedback              totals, top requests, latest 50 messages,
  *                                     latest 100 tool requests (from /links)
  *   GET  /admin/feedback?format=csv   every row, as a spreadsheet
@@ -168,7 +172,7 @@ function dashboard({ total, ratings, wants, used, latest, requestTotal, requests
   <td class="fa-nowrap">${esc(r.created_at?.slice(0, 16).replace('T', ' '))}</td>
   <td class="fa-nowrap">${esc(RATING_EMOJI[r.rating] ?? r.rating)}</td>
   <td>${r.bug_text ? `<p class="fa-bug"><strong>Bug:</strong> ${esc(r.bug_text)}</p>` : ''}${r.message ? `<p>${esc(r.message)}</p>` : ''}${wantsList ? `<p class="fa-sub">Wants: ${esc(wantsList)}</p>` : ''}</td>
-  <td>${r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ''}</td>
+  <td>${r.email ? `<!--email_off--><a href="mailto:${esc(r.email)}">${esc(r.email)}</a><!--/email_off-->` : ''}</td>
   <td class="fa-sub">${esc(r.page)} · ${esc(r.lang)} · ${esc(r.device)} ${esc(r.width)}px · ${esc(r.browser)} · ${esc(r.theme)}</td>
 </tr>`;
     })
@@ -179,7 +183,7 @@ function dashboard({ total, ratings, wants, used, latest, requestTotal, requests
       (r) => `<tr>
   <td class="fa-nowrap">${esc(r.created_at?.slice(0, 16).replace('T', ' '))}</td>
   <td><p class="fa-idea">${esc(r.idea)}</p>${r.details ? `<p>${esc(r.details)}</p>` : ''}</td>
-  <td>${r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ''}</td>
+  <td>${r.email ? `<!--email_off--><a href="mailto:${esc(r.email)}">${esc(r.email)}</a><!--/email_off-->` : ''}</td>
   <td class="fa-sub">${esc(r.lang)} · ${esc(r.device)}</td>
 </tr>`,
     )
