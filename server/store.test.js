@@ -867,7 +867,7 @@ describe('/admin/orders', () => {
     assert.equal((await orders())[0].status, 'paid');
   });
 
-  test('resend sends the email again; refund ends the downloads; extend gives a fresh set', async () => {
+  test('resend sends the email again; close access ends the downloads; +30 days and reset are separate', async () => {
     const id = await startOrder(net);
     net.pay();
     await settleOrder(ENV(), id, { fetch: net.fetch });
@@ -876,14 +876,20 @@ describe('/admin/orders', () => {
     assert.equal(net.mails.length, before + 1);
     assert.equal(net.mails.at(-1).to[0], 'buyer@example.com');
 
-    await DB.prepare('UPDATE orders SET downloads = 5, expires_at = 1000 WHERE id = ?').bind(id).run();
+    await DB.prepare("UPDATE orders SET downloads = 5, expires_at = 1000, session_id = 's', session_at = 1 WHERE id = ?").bind(id).run();
     await act('extend', id);
-    const [row] = await orders();
-    assert.equal(row.downloads, 0);
+    let [row] = await orders();
+    assert.equal(row.downloads, 5, '+30 days leaves the downloads as they are');
     assert.ok(row.expires_at > Date.now() / 1000 + (STORE.downloadDays - 1) * 86400);
+    await act('reset', id);
+    [row] = await orders();
+    assert.equal(row.downloads, 0);
+    assert.equal(row.session_id, null);
 
     await act('refund', id);
     assert.equal((await orders())[0].status, 'refunded');
+    const log = (await DB.prepare('SELECT action FROM store_audit WHERE order_id = ? ORDER BY id').bind(id).all()).results.map((r) => r.action);
+    assert.deepEqual(log.filter((a) => a.startsWith('admin-')), ['admin-resend', 'admin-extend', 'admin-reset-downloads', 'admin-close-access']);
   });
 
   test('a form post from our own page with "Origin: null" (no-referrer) works, from elsewhere it does not', async () => {
@@ -904,7 +910,7 @@ describe('/admin/orders', () => {
     const broken = {
       ...ENV(),
       DB: new Proxy(DB, {
-        get: (t, k) => (k === 'prepare' ? (sql) => (/^UPDATE orders SET status/.test(sql) ? { bind: () => ({ run: async () => { throw new Error('D1_ERROR: boom'); } }) } : t.prepare(sql)) : k === 'batch' ? t.batch.bind(t) : t[k]),
+        get: (t, k) => (k === 'prepare' ? (sql) => (/^UPDATE orders SET status/.test(sql) ? { bind: () => ({ run: async () => { throw new Error('D1_ERROR: boom'); }, first: async () => { throw new Error('D1_ERROR: boom'); } }) } : t.prepare(sql)) : k === 'batch' ? t.batch.bind(t) : t[k]),
       }),
     };
     const form = new URLSearchParams({ action: 'refund', id, sure: '1' });
@@ -1021,7 +1027,7 @@ describe('/admin/orders: the organised view', () => {
     const yes = await form({ sure: '1' });
     assert.equal(yes.headers.get('Location'), `/admin/orders?done=refund&q=${id}&mode=test`);
     assert.equal((await orders())[0].status, 'refunded');
-    assert.match(await get(`/admin/orders?done=refund&q=${id}`), /Marked refunded: downloads are closed/);
+    assert.match(await get(`/admin/orders?done=refund&q=${id}`), /Access closed: downloads are off/);
   });
 
   test('ready or not: says plainly whether this deployment can take payments, and why not', async () => {
@@ -1463,6 +1469,8 @@ describe('/admin/orders: phone, WhatsApp, delivery and a changed email', () => {
 
   test('"Change email & send" puts the right address on, sends the link there, and keeps the old one', async () => {
     const { id } = await paidOrder();
+    await FILES.put(PRODUCT.file, PDF);
+    const oldKey = await downloadToken(ENV(), id);
     const net = fakeNet();
     const form = new URLSearchParams({ action: 'email', id, email: 'Right@Example.com' });
     const r = await handleAdminOrders(
@@ -1478,6 +1486,12 @@ describe('/admin/orders: phone, WhatsApp, delivery and a changed email', () => {
     const o = await one(id);
     assert.deepEqual([o.email, o.email_prev, o.email_changed_by, o.buyer_email_changes], ['right@example.com', 'buyer@example.com', 'admin', 0]);
     assert.deepEqual(net.mails.map((m) => m.to[0]), ['right@example.com']);
+    // The link sent to the wrong address stops working; the new one works.
+    const tryKey = (t) => handleDownload(post('/api/store/download', null, { type: 'application/x-www-form-urlencoded', raw: new URLSearchParams({ o: id, t }).toString() }), MAIL_ENV());
+    assert.equal((await tryKey(oldKey)).status, 404);
+    assert.equal(o.token_ver, 1);
+    assert.equal((await tryKey(await downloadToken(ENV(), id, 1))).status, 200);
+    assert.ok(net.mails[0].text.includes(await downloadToken(ENV(), id, 1)));
     const html = await get();
     assert.match(html, /was <!--email_off-->buyer@example\.com<!--\/email_off-->, changed by admin/);
     // A bad address changes nothing.
@@ -1740,5 +1754,52 @@ describe('Razorpay webhooks: repeats and refunds', () => {
   test('records when the last webhook came', async () => {
     await send({ event: 'payment.captured' }, 'evt_any');
     assert.ok((await DB.prepare("SELECT value FROM store_meta WHERE key = 'razorpay_webhook_at'").first()).value);
+  });
+});
+
+describe('/admin/orders: needs attention, run checks, audit trail', () => {
+  const KEY = ENV().ADMIN_KEY;
+  const get = (env = MAIL_ENV(), now) =>
+    handleAdminOrders(new Request('https://test.mykrutidev.pages.dev/admin/orders?mode=test', { headers: { Authorization: `Bearer ${KEY}` } }), env, { now }).then((r) => r.text());
+  const post = (body, net = fakeNet()) =>
+    handleAdminOrders(
+      new Request('https://test.mykrutidev.pages.dev/admin/orders', { method: 'POST', body: new URLSearchParams(body), headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' } }),
+      MAIL_ENV(),
+      { fetch: net.fetch },
+    );
+
+  test('lists a bounced email, a double payment and a partial refund, and says when the check last ran', async () => {
+    const a = await paidOrder();
+    const b = await paidOrder();
+    await DB.prepare("UPDATE orders SET mail_status = 'bounced' WHERE id = ?").bind(a.id).run();
+    await DB.prepare('UPDATE orders SET refunded_amount = 40 WHERE id = ?').bind(b.id).run();
+    const html = await get();
+    assert.match(html, /Needs attention \(\d+\)/);
+    assert.match(html, /Download email bounced/);
+    assert.match(html, /Paid 2 times for .* by the same email or phone/);
+    assert.match(html, /Partly refunded/);
+    assert.match(html, /The background check has not run for over an hour \(last: never\)/);
+    assert.match(html, /value="reconcile">Run checks now/);
+  });
+
+  test('nothing to look at says so', async () => {
+    const { id } = await paidOrder();
+    await DB.prepare("UPDATE orders SET mail_status = 'delivered' WHERE id = ?").bind(id).run();
+    await reconcile(MAIL_ENV(), { fetch: fakeNet().fetch });
+    assert.match(await get(), /Nothing needs attention/);
+  });
+
+  test('"Run checks now" runs the background check and logs it in the audit trail', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net, MAIL_ENV());
+    net.pay();
+    await DB.prepare('UPDATE orders SET created_at = ? WHERE id = ?').bind(new Date(Date.now() - 10 * 60e3).toISOString().replace(/\.\d+Z$/, 'Z'), id).run();
+    const r = await post({ action: 'reconcile', id: '-' }, net);
+    assert.equal(r.headers.get('Location'), '/admin/orders?done=reconcile');
+    assert.equal((await one(id)).status, 'paid');
+    const html = await get();
+    assert.match(html, /Audit trail/);
+    assert.match(html, /admin-run-checks/);
+    assert.match(html, /paid-by-background-check/);
   });
 });
