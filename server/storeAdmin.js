@@ -9,7 +9,8 @@
  *                                   product, the orders (filter: status, product,
  *                                   q = order id / email / payment id; 50 a page)
  *   GET  /admin/orders?format=csv   every order, as a spreadsheet
- *   POST /admin/orders              action=check|resend|email|refund|extend, id=<order>
+ *   POST /admin/orders              action=check|resend|email|refund|extend|reset, id=<order>
+ *                                   action=reconcile ("Run checks now", no id)
  *
  * The actions:
  *   check    ask Razorpay again whether an unpaid order was paid (a buyer who
@@ -18,10 +19,17 @@
  *   email    put the right address on the order (email=...) and send the link
  *            there; the old one is kept as email_prev
  *   (a paid order also shows its download link, to send to a buyer who gave no email)
- *   refund   end the downloads of a refunded order. The money itself is
- *            refunded in Razorpay's dashboard; when the webhook for it is set up
- *            this happens by itself for a full refund
- *   extend   give the buyer a fresh set of downloads and another 30 days
+ *   refund   "Close access": end the downloads of an order refunded in
+ *            Razorpay's dashboard. The money itself is refunded there; a full
+ *            refund is also picked up by itself (the webhook, or the background
+ *            check in server/storeJobs.js)
+ *   extend   another 30 days, same downloads left
+ *   reset    a fresh set of downloads (the date stays)
+ *
+ * Every action is written to the audit trail (store_audit), shown at the
+ * bottom of the page. "Needs attention" lists what a person should look at:
+ * paid orders whose email did not arrive, possible double payments, partial
+ * refunds, and a background check or webhook that has gone quiet.
  *
  * Email addresses sit inside <!--email_off--> ... <!--/email_off-->: Cloudflare's
  * Email Address Obfuscation would otherwise show "[email protected]", and these
@@ -30,7 +38,8 @@
 import { ORDER_COLUMNS, STORE, PRODUCTS, cleanEmail, price, productById } from '../src/lib/store.js';
 import { toCsv } from '../src/lib/feedback.js';
 import { SECURITY, bearerGuard, esc, isAuthorized, page } from './feedbackAdmin.js';
-import { ensureStoreSchema, downloadToken, siteOrigin, settleOrder, isLiveHost, sendBuyerLink } from './storeApi.js';
+import { audit, ensureStoreSchema, getMeta, keyFor, siteOrigin, settleOrder, isLiveHost, sendBuyerLink } from './storeApi.js';
+import { reconcile } from './storeJobs.js';
 import { hasKeys, mode } from './razorpay.js';
 import { canMail, downloadPage, waLinks, waText } from './storeMail.js';
 
@@ -44,9 +53,11 @@ const STATUS_NAME = { paid: 'Paid', created: 'Started, not paid', refunded: 'Ref
 const ACTION_DONE = {
   check: 'Asked Razorpay again',
   resend: 'Email sent again',
-  email: 'Email changed and the download link sent to it',
-  refund: 'Marked refunded: downloads are closed',
-  extend: 'Downloads reset and 30 more days given',
+  email: 'Email changed and a new download link sent to it (the old link no longer works)',
+  refund: 'Access closed: downloads are off',
+  extend: '30 more days given',
+  reset: 'Downloads reset to a fresh set',
+  reconcile: 'Checks run',
 };
 /** The mail column: what Resend last told us about the download email. */
 const MAIL_BAD = new Set(['failed', 'bounced', 'complained']);
@@ -86,6 +97,9 @@ const STYLE = `<style>
 .fa-wa{display:inline-block;margin:.25rem .25rem 0 0;padding:.15rem .5rem;border-radius:6px;background:#25d366;color:#fff;text-decoration:none;font-size:.8125rem;font-weight:600;white-space:nowrap}
 .fa-email-form{display:grid;gap:.25rem}.fa-email-form input{font:inherit;font-size:.8125rem;min-height:30px;padding:0 .375rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12rem}
 .fa-email-form button{justify-self:start}
+.fa-attn{padding:.75rem 1rem;border-radius:8px;border:1px solid var(--err)}.fa-attn h2{margin:0;font-size:1.0625rem}.fa-attn ul{margin:.5rem 0 0;padding-left:1.25rem}
+.fa-attn.ok{border-color:#15803d}
+.fa-log td{font-size:.8125rem}
 </style>`;
 
 /**
@@ -105,6 +119,7 @@ async function readiness(env, request) {
     ['Copy of each sale to you (NOTIFY_TO)', !!String(env.NOTIFY_TO ?? '').trim()],
     ['Email delivery reports from Resend (RESEND_WEBHOOK_SECRET)', !!env.RESEND_WEBHOOK_SECRET],
     ['Bot check (TURNSTILE_SECRET_KEY)', !!env.TURNSTILE_SECRET_KEY],
+    ['Scheduled background check (STORE_CRON_SECRET, see docs/STORE.md)', String(env.STORE_CRON_SECRET ?? '').length >= 16],
   ];
   const problems = [];
   const warnings = [];
@@ -163,7 +178,29 @@ const tile = (n, label) => `<div class="fa-tile"><span class="fa-tile-n">${n}</s
 /** The Razorpay dashboard page of a payment. */
 const razorpayLink = (paymentId) => `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;
 
-function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, filter, total, done, modeCounts }) {
+/** What a person should look at, with a link to each order. */
+function attention({ items, health }) {
+  const list = items.map((i) => `<li>${i.q ? `<a href="?q=${esc(i.q)}&amp;mode=${esc(i.mode)}">${esc(i.text)}</a>` : esc(i.text)}</li>`).join('');
+  const ok = items.length === 0;
+  return `<section class="fa-attn ${ok ? 'ok' : ''}" aria-labelledby="h-attn">
+  <h2 id="h-attn"><span class="${ok ? 'fa-ok' : 'fa-no'}">${ok ? OK : '!'}</span> ${ok ? 'Nothing needs attention' : `Needs attention (${items.length})`}</h2>
+  ${list ? `<ul>${list}</ul>` : ''}
+  <p class="fa-sub">Background check: ${esc(health.reconcile)} · Razorpay webhook: ${esc(health.razorpay)} · Resend webhook: ${esc(health.resend)}</p>
+  <form method="post" class="fa-act"><input type="hidden" name="id" value="-"><button type="submit" name="action" value="reconcile">Run checks now</button></form>
+</section>`;
+}
+
+function auditLog(rows) {
+  if (!rows.length) return '';
+  return `<details>
+  <summary><h2 id="h-audit" style="display:inline">Audit trail</h2> <span class="fa-sub">last ${rows.length}</span></summary>
+  <div class="fa-scroll"><table class="fa-log"><thead><tr><th>When (UTC)</th><th>Order</th><th>What</th><th>Detail</th></tr></thead><tbody>${rows
+    .map((r) => `<tr><td class="fa-nowrap">${when(r.at)}</td><td class="fa-sub">${r.order_id ? `<a href="?q=${esc(r.order_id)}">${esc(r.order_id)}</a>` : ''}</td><td>${esc(r.action)}</td><td><!--email_off-->${esc(r.detail)}<!--/email_off--></td></tr>`)
+    .join('')}</tbody></table></div>
+</details>`;
+}
+
+function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, filter, total, done, modeCounts, attn, log }) {
   const test = filter.mode === 'test';
   const rows = orders
     .map((o) => {
@@ -182,9 +219,10 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, 
         actions.push(
           `<form method="post" class="fa-act fa-email-form"><input type="hidden" name="id" value="${esc(o.id)}"><input type="email" name="email" required maxlength="254" placeholder="right email" aria-label="New email for ${esc(o.id)}"><button type="submit" name="action" value="email">Change email &amp; send</button></form>`,
         );
-        act('extend', 'Extend');
+        act('extend', '+30 days');
+        act('reset', 'Reset downloads');
         // No script on this page, so the browser itself asks: the box must be ticked.
-        act('refund', 'Mark refunded', '<label class="fa-sure"><input type="checkbox" name="sure" value="1" required> sure</label> ');
+        act('refund', 'Close access (refund done in Razorpay)', '<label class="fa-sure"><input type="checkbox" name="sure" value="1" required> sure</label> ');
       }
       const mailBad = o.status === 'paid' && MAIL_BAD.has(o.mail_status);
       const waBtns = wa[o.id] ? `<br><a class="fa-wa" href="${esc(wa[o.id].hi)}">WhatsApp हिंदी</a><a class="fa-wa" href="${esc(wa[o.id].en)}">WhatsApp English</a>` : '';
@@ -198,7 +236,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, 
   <td class="fa-nowrap">${esc(price(o.amount))}</td>
   <td>${o.email ? `<!--email_off--><a href="mailto:${esc(o.email)}">${esc(o.email)}</a><!--/email_off-->` : '<span class="fa-sub">no email</span>'}${changed}</td>
   <td class="fa-nowrap">${o.phone ? esc(o.phone) : '<span class="fa-sub">–</span>'}${waBtns}</td>
-  <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}</td>
+  <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}${o.refunded_amount > 0 && o.status === 'paid' ? `<br><span class="fa-flag">${esc(price(o.refunded_amount))} refunded</span>` : ''}</td>
   <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
   <td>${mailBad ? `<span class="fa-flag">${esc(o.mail_status)}</span>` : o.mail_status === 'delivered' ? '<span class="fa-good">delivered</span>' : esc(o.mail_status ?? '')}</td>
   <td class="fa-sub fa-ids">${esc(o.id)}${o.payment_id ? `<br><a href="${esc(razorpayLink(o.payment_id))}">${esc(o.payment_id)}</a>` : ''}</td>
@@ -242,6 +280,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, 
 </header>
 ${done ? `<p class="fa-banner" role="status">${esc(done)}</p>` : ''}
 ${verdict(ready, env)}
+${attention(attn)}
 
 <nav class="fa-tabs" aria-label="Live or test orders">
   ${MODES.map((m) => `<a href="?mode=${m}"${filter.mode === m ? ' aria-current="page"' : ''}>${m === 'live' ? 'Live orders' : 'Test orders'} <span class="fa-sub">${modeCounts[m] ?? 0}</span></a>`).join('')}
@@ -274,7 +313,7 @@ ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a p
     <input type="hidden" name="mode" value="${esc(filter.mode)}">
     <label>Status <select name="status"><option value="">All</option>${STATUSES.map((st) => `<option value="${st}"${filter.status === st ? ' selected' : ''}>${esc(STATUS_NAME[st])}</option>`).join('')}</select></label>
     <label>Product <select name="product"><option value="">All</option>${PRODUCTS.map((p) => `<option value="${esc(p.id)}"${filter.product === p.id ? ' selected' : ''}>${esc(p.title)}</option>`).join('')}</select></label>
-    <label>Search <input type="search" name="q" value="${esc(filter.q)}" placeholder="order id, email or pay_…" maxlength="120"></label>
+    <label>Search <input type="search" name="q" value="${esc(filter.q)}" placeholder="order id, email, phone or pay_…" maxlength="120"></label>
     <button type="submit" class="fa-button">Show</button>
     ${filter.status || filter.product || filter.q ? `<a href="?mode=${esc(filter.mode)}">Clear</a>` : ''}
   </form>
@@ -291,7 +330,8 @@ ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a p
 <details>
   <summary><h2 id="h-setup" style="display:inline">Setup check</h2></summary>
   ${ready.checks}
-</details>`,
+</details>
+${auditLog(log)}`,
   );
 }
 
@@ -336,35 +376,60 @@ export async function handleAdminOrders(request, env, deps = {}) {
     const form = await request.formData().catch(() => null);
     const id = String(form?.get('id') ?? '');
     const action = String(form?.get('action') ?? '');
+    if (action === 'reconcile') {
+      try {
+        const r = await reconcile(env, { fetch: deps.fetch, now, origin: siteOrigin(request) });
+        await audit(env, null, 'admin-run-checks', `checked ${r.checked}, settled ${r.settled}, mails ${r.mailsSent}/${r.mailsRetried}, refunds seen ${r.refunded} full ${r.partial} partial`, now);
+      } catch (err) {
+        console.error('admin run checks failed', err);
+        return page('Orders', `<h1>Orders</h1><p>The checks did not run: ${esc(String(err?.message ?? err).slice(0, 300))}</p><p><a href="/admin/orders">Back to orders</a></p>`, 500);
+      }
+      return new Response(null, { status: 303, headers: { Location: '/admin/orders?done=reconcile', ...SECURITY } });
+    }
     if (/^o[a-z2-7]{24}$/.test(id)) {
       try {
       if (action === 'check') {
-        await settleOrder(env, id, { fetch: deps.fetch, now, origin: siteOrigin(request) });
+        const r = await settleOrder(env, id, { fetch: deps.fetch, now, origin: siteOrigin(request) });
+        await audit(env, id, 'admin-check', `Razorpay says: ${r.state}`, now);
       } else if (action === 'resend') {
         const order = await db.prepare("SELECT * FROM orders WHERE id = ? AND status = 'paid'").bind(id).first();
-        if (order?.email) await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
+        if (order?.email) {
+          const sent = await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
+          await audit(env, id, 'admin-resend', `download email: ${sent}`, now);
+        }
       } else if (action === 'email') {
         const email = cleanEmail(form?.get('email'));
         if (!email) return new Response(null, { status: 303, headers: { Location: `/admin/orders?done=bademail&q=${id}`, ...SECURITY } });
         const order = await db
           .prepare(
-            "UPDATE orders SET email_prev = email, email = ?, email_changed_by = 'admin', email_changed_at = ? WHERE id = ? AND status = 'paid' RETURNING *",
+            // A new download key goes to the new address: a link already sent to
+            // the wrong one stops working (token_ver), as when the buyer changes it.
+            "UPDATE orders SET email_prev = email, email = ?, email_changed_by = 'admin', email_changed_at = ?, token_ver = token_ver + 1, mail_status = NULL, mail_id = NULL, mail_tries = 0, mail_next = NULL WHERE id = ? AND status = 'paid' RETURNING *",
           )
           .bind(email, isoUtc(now), id)
           .first();
-        if (order) await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
+        if (order) {
+          await audit(env, id, 'admin-email-change', `${order.email_prev || '(none)'} -> ${email}; old links stop working`, now);
+          await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
+        }
       } else if (action === 'refund') {
         if (String(form?.get('sure') ?? '') !== '1') {
           return new Response(null, { status: 303, headers: { Location: '/admin/orders?done=norefund', ...SECURITY } });
         }
-        await db.prepare("UPDATE orders SET status = 'refunded' WHERE id = ? AND status = 'paid'").bind(id).run();
+        const r = await db.prepare("UPDATE orders SET status = 'refunded' WHERE id = ? AND status = 'paid' RETURNING id").bind(id).first();
+        if (r) await audit(env, id, 'admin-close-access', 'Access closed by the owner (refund made in Razorpay)', now);
       } else if (action === 'extend') {
-        await db
-          .prepare(
-            "UPDATE orders SET downloads = 0, expires_at = MAX(COALESCE(expires_at, 0), ?) + ? WHERE id = ? AND status = 'paid'",
-          )
+        const r = await db
+          .prepare("UPDATE orders SET expires_at = MAX(COALESCE(expires_at, 0), ?) + ? WHERE id = ? AND status = 'paid' RETURNING expires_at")
           .bind(Math.floor(now / 1000), STORE.downloadDays * 86400, id)
-          .run();
+          .first();
+        if (r) await audit(env, id, 'admin-extend', `open until ${day(r.expires_at)}`, now);
+      } else if (action === 'reset') {
+        const r = await db
+          .prepare("UPDATE orders SET downloads = 0, session_id = NULL, session_at = NULL WHERE id = ? AND status = 'paid' RETURNING max_downloads")
+          .bind(id)
+          .first();
+        if (r) await audit(env, id, 'admin-reset-downloads', `${r.max_downloads} downloads again`, now);
       }
       } catch (err) {
         // Signed in already, so the reason can be shown: a bare 1101 page helps nobody.
@@ -410,8 +475,8 @@ export async function handleAdminOrders(request, env, deps = {}) {
   if (filter.product) (where.push('product_id = ?'), binds.push(filter.product));
   if (filter.q) {
     const q = filter.q.toLowerCase();
-    where.push("(id = ? OR payment_id = ? OR link_id = ? OR email LIKE ? ESCAPE '\\')");
-    binds.push(filter.q, filter.q, filter.q, `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`);
+    where.push("(id = ? OR payment_id = ? OR link_id = ? OR phone = ? OR email LIKE ? ESCAPE '\\')");
+    binds.push(filter.q, filter.q, filter.q, filter.q, `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`);
   }
   const whereSql = `WHERE ${where.join(' AND ')}`;
 
@@ -458,7 +523,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
   const wa = {};
   for (const o of orders.results) {
     if (o.status !== 'paid') continue;
-    const token = await downloadToken(env, o.id);
+    const token = await keyFor(env, o);
     links[o.id] = downloadPage(origin, o.id, token);
     const product = productById(o.product_id);
     if (product && o.phone) {
@@ -467,6 +532,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
       wa[o.id] = waLinks(o.phone, waText(kind, { product, email: o.email, links: { hi: downloadPage(origin, o.id, token, 'hi'), en: links[o.id] } }));
     }
   }
+  const [attn, log] = await Promise.all([needsAttention(env, filter.mode, now), db.prepare('SELECT * FROM store_audit ORDER BY id DESC LIMIT 50').all()]);
   const sold = Object.fromEntries(productRows.results.map((r) => [r.product_id, r]));
   const byProduct = PRODUCTS.filter((p) => !p.unlisted || sold[p.id]).map((p) => ({
     title: p.title,
@@ -495,5 +561,53 @@ export async function handleAdminOrders(request, env, deps = {}) {
     byProduct,
     totals: { paid: totals?.paid ?? 0, refunded: totals?.refunded ?? 0, open: totals?.open ?? 0, mailFailed: totals?.mailFailed ?? 0 },
     ready: await readiness(env, request),
+    attn,
+    log: log.results,
   });
+}
+
+/** How long ago, in words a person reads at a glance. */
+function ago(iso, now) {
+  const t = Date.parse(iso ?? '');
+  if (!Number.isFinite(t)) return 'never';
+  const m = Math.max(0, Math.round((now - t) / 60e3));
+  if (m < 60) return `${m} min ago`;
+  if (m < 48 * 60) return `${Math.round(m / 60)} h ago`;
+  return `${Math.round(m / 1440)} days ago`;
+}
+
+/** The "Needs attention" list for one mode (live or test). */
+async function needsAttention(env, m, now) {
+  const db = env.DB;
+  const items = [];
+  const [mail, dupes, partial, meta] = await Promise.all([
+    db
+      .prepare(`SELECT id, email, mail_status FROM orders WHERE status = 'paid' AND ${MODE_SQL} AND (mail_status IN ('failed', 'bounced', 'complained') OR (email != '' AND mail_status IS NULL AND paid_at < ?)) ORDER BY paid_at DESC LIMIT 20`)
+      .bind(m, isoUtc(now - 30 * 60e3))
+      .all(),
+    // The same person (email or phone) paying twice for one product.
+    db
+      .prepare(
+        `SELECT product_id, who, COUNT(*) AS n FROM (SELECT product_id, email AS who FROM orders WHERE status = 'paid' AND email != '' AND ${MODE_SQL} UNION ALL SELECT product_id, phone AS who FROM orders WHERE status = 'paid' AND phone IS NOT NULL AND phone != '' AND ${MODE_SQL}) GROUP BY product_id, who HAVING COUNT(*) > 1 LIMIT 20`,
+      )
+      .bind(m, m)
+      .all(),
+    db.prepare(`SELECT id, amount, refunded_amount FROM orders WHERE status = 'paid' AND refunded_amount > 0 AND ${MODE_SQL} LIMIT 20`).bind(m).all(),
+    Promise.all(['reconcile_at', 'razorpay_webhook_at', 'resend_webhook_at'].map((k) => getMeta(env, k))),
+  ]);
+  for (const o of mail.results) {
+    const why = o.mail_status === 'bounced' ? 'bounced (wrong address?)' : o.mail_status === 'complained' ? 'marked as spam by the buyer' : o.mail_status === 'failed' ? 'could not be sent (retrying)' : 'no delivery report yet';
+    items.push({ q: o.id, mode: m, text: `Download email ${why}: ${o.id}` });
+  }
+  for (const d of dupes.results) {
+    const product = productById(d.product_id);
+    items.push({ q: d.who, mode: m, text: `Paid ${d.n} times for ${product?.title ?? d.product_id} by the same email or phone: a double payment to refund?` });
+  }
+  for (const o of partial.results) items.push({ q: o.id, mode: m, text: `Partly refunded (${price(o.refunded_amount)} of ${price(o.amount)}), downloads still open: ${o.id}` });
+  const [reconcileAt, razorpayAt, resendAt] = meta;
+  const stale = !Number.isFinite(Date.parse(reconcileAt ?? '')) || now - Date.parse(reconcileAt) > 60 * 60e3;
+  if (stale && hasKeys(env) && mode(env) === m) {
+    items.push({ text: `The background check has not run for over an hour (last: ${ago(reconcileAt, now)}). Set up the schedule in docs/STORE.md, or press "Run checks now".` });
+  }
+  return { items, health: { reconcile: ago(reconcileAt, now), razorpay: ago(razorpayAt, now), resend: ago(resendAt, now) } };
 }

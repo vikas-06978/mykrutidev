@@ -60,6 +60,7 @@ import {
   isPaidFor,
   paymentIdOf,
   safeEqual,
+  verifyReturn,
   verifyWebhook,
 } from './razorpay.js';
 import {
@@ -98,9 +99,14 @@ export async function addColumns(db) {
 /** The orders table, once per database per worker (and the feedback tables the rate limit uses). */
 export function ensureStoreSchema(db) {
   if (!ready.has(db)) {
+    // Tables first, then the columns added since, then the indexes: an index on
+    // an added column (orders_mail_id) fails on a table that does not have it yet.
+    const tables = STORE_SCHEMA.filter((q) => !/^\s*CREATE INDEX/i.test(q));
+    const indexes = STORE_SCHEMA.filter((q) => /^\s*CREATE INDEX/i.test(q));
     const p = ensureSchema(db)
-      .then(() => db.batch(STORE_SCHEMA.map((s) => db.prepare(s))))
-      .then(() => addColumns(db));
+      .then(() => db.batch(tables.map((s) => db.prepare(s))))
+      .then(() => addColumns(db))
+      .then(() => db.batch(indexes.map((s) => db.prepare(s))));
     p.catch(() => ready.delete(db));
     ready.set(db, p);
   }
@@ -133,15 +139,92 @@ export function unsafeToSell(request, env) {
   return null;
 }
 
-/** The download token for an order: the HMAC of its id. */
-export const downloadToken = (env, orderId) => hmacHex(env.STORE_TOKEN_SECRET, `dl1|${orderId}`);
+/**
+ * The download key for an order: the HMAC of its id and key version. Version 0
+ * is the original form, so links sent before versions existed keep working.
+ * A changed email moves the version on (token_ver), and the old link stops.
+ */
+export const downloadToken = (env, orderId, ver = 0) =>
+  hmacHex(env.STORE_TOKEN_SECRET, ver ? `dl1|${orderId}|${ver}` : `dl1|${orderId}`);
 
-async function tokenMatches(env, orderId, token) {
-  if (!tokenSecretOk(env) || !ORDER_ID_RE.test(orderId ?? '') || !TOKEN_RE.test(token ?? '')) return false;
-  return safeEqual(await downloadToken(env, orderId), token);
+/** The current download key of an order row. */
+export const keyFor = (env, order) => downloadToken(env, order.id, order.token_ver ?? 0);
+
+/**
+ * The management key: only the browser that bought gets it (with its checkout
+ * secret, or Razorpay's signed return). It may change the order's email; the
+ * download key in an emailed or shared link may not.
+ */
+export const manageToken = (env, orderId) => hmacHex(env.STORE_TOKEN_SECRET, `mg1|${orderId}`);
+
+/** The order a download key belongs to (its current version), or null. */
+async function orderByToken(env, orderId, token) {
+  if (!tokenSecretOk(env) || !ORDER_ID_RE.test(orderId ?? '') || !TOKEN_RE.test(token ?? '')) return null;
+  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(orderId).first();
+  if (!order) return null;
+  return (await safeEqual(await keyFor(env, order), token)) ? order : null;
+}
+
+/** The order a management key belongs to, or null. */
+async function orderByManage(env, orderId, key) {
+  if (!tokenSecretOk(env) || !ORDER_ID_RE.test(orderId ?? '') || !TOKEN_RE.test(key ?? '')) return null;
+  if (!(await safeEqual(await manageToken(env, orderId), key))) return null;
+  return env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(orderId).first();
+}
+
+/** SHA-256 hex. */
+async function sha256(s) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** A random secret, 128 bits as hex. */
+function newSecret() {
+  return [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+const CLAIM_RE = /^[a-f0-9]{32}$/;
+
+/** Does this checkout secret belong to the order? */
+async function claimMatches(order, claim) {
+  if (!order?.claim_hash || typeof claim !== 'string' || !CLAIM_RE.test(claim)) return false;
+  return safeEqual(order.claim_hash, await sha256(claim));
 }
 
 const isoNow = (now) => new Date(now).toISOString().replace(/\.\d+Z$/, 'Z');
+
+/** One line in the audit trail (store_audit). Never a key or a secret. Never throws. */
+export async function audit(env, orderId, action, detail = '', now = Date.now()) {
+  try {
+    await env.DB.prepare('INSERT INTO store_audit (at, order_id, action, detail) VALUES (?, ?, ?, ?)')
+      .bind(isoNow(now), orderId ?? null, action, String(detail).slice(0, 300))
+      .run();
+  } catch (e) {
+    console.error('audit failed', action, e?.message || e);
+  }
+}
+
+/**
+ * Record a provider event id; false if it was seen before (a repeat delivery).
+ * Ids older than 30 days are forgotten. A missing id is treated as new.
+ */
+async function firstTime(env, eventId, nowMs = Date.now()) {
+  if (typeof eventId !== 'string' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(eventId)) return true;
+  const nowS = Math.floor(nowMs / 1000);
+  await env.DB.prepare('DELETE FROM store_events WHERE at < ?').bind(nowS - 30 * 86400).run();
+  const r = await env.DB.prepare('INSERT INTO store_events (id, at) VALUES (?, ?) ON CONFLICT (id) DO NOTHING RETURNING id').bind(eventId, nowS).first();
+  return !!r;
+}
+
+/** store_meta: a small note the store keeps (when a webhook last came, when the check last ran). */
+export async function setMeta(env, key, value) {
+  await env.DB.prepare('INSERT INTO store_meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value')
+    .bind(key, String(value))
+    .run();
+}
+export async function getMeta(env, key) {
+  return (await env.DB.prepare('SELECT value FROM store_meta WHERE key = ?').bind(key).first())?.value ?? null;
+}
 
 /** Rate-limit one kind of call from one IP. Returns a refusal Response or null. */
 async function limited(request, env, scope, max, now) {
@@ -221,13 +304,31 @@ export async function handleCheckout(request, env, deps = {}) {
   const cutoff = isoNow(now - STORE.unpaidDays * 864e5);
   await db.prepare("DELETE FROM orders WHERE status IN ('created', 'failed') AND created_at < ?").bind(cutoff).run();
 
+  // A second Pay from the same browser (a refresh, another tab, a lost answer):
+  // the unpaid order it started, and its still-open Razorpay page, are reused,
+  // so one person does not end up with two payment pages to pay.
+  const resume = body.resume;
+  if (resume && typeof resume === 'object' && ORDER_ID_RE.test(resume.order ?? '')) {
+    const open = await db.prepare("SELECT * FROM orders WHERE id = ? AND status = 'created'").bind(resume.order).first();
+    const fresh = open && Date.parse(open.created_at) > now - (STORE.linkMinutes - 10) * 60e3;
+    if (fresh && open.product_id === product.id && open.link_url && (await claimMatches(open, resume.claim))) {
+      if (checked.value.email && checked.value.email !== open.email) {
+        await db.prepare('UPDATE orders SET email = ? WHERE id = ?').bind(checked.value.email, open.id).run();
+      }
+      return reply(200, { ok: true, url: open.link_url, order: open.id, claim: resume.claim, reused: true });
+    }
+  }
+
   const id = newOrderId();
+  // The buying browser's own secret: it alone (with Razorpay's signed return)
+  // gets this order's download and management keys. Only its hash is stored.
+  const claim = newSecret();
   await db
     .prepare(
-      "INSERT INTO orders (id, created_at, status, product_id, amount, currency, email, lang, max_downloads, mode) VALUES (?, ?, 'created', ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO orders (id, created_at, status, product_id, amount, currency, email, lang, max_downloads, mode, claim_hash) VALUES (?, ?, 'created', ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     // mode: which keys made it, so test orders on a shared database never count as money in.
-    .bind(id, isoNow(now), product.id, product.pricePaise, STORE.currency, checked.value.email, checked.value.lang, STORE.maxDownloads, mode(env))
+    .bind(id, isoNow(now), product.id, product.pricePaise, STORE.currency, checked.value.email, checked.value.lang, STORE.maxDownloads, mode(env), await sha256(claim))
     .run();
 
   try {
@@ -239,13 +340,14 @@ export async function handleCheckout(request, env, deps = {}) {
         currency: STORE.currency,
         description: product.title,
         email: checked.value.email,
-        callbackUrl: `${siteOrigin(request)}/store/thanks`,
+        // Back to the thanks page in the buyer's own language.
+        callbackUrl: `${siteOrigin(request)}${checked.value.lang !== 'en' ? `/${checked.value.lang}` : ''}/store/thanks`,
         expireBy: Math.floor(now / 1000) + STORE.linkMinutes * 60,
       },
       fetchImpl,
     );
-    await db.prepare('UPDATE orders SET link_id = ? WHERE id = ?').bind(link.id, id).run();
-    return reply(201, { ok: true, url: link.url, order: id });
+    await db.prepare('UPDATE orders SET link_id = ?, link_url = ? WHERE id = ?').bind(link.id, link.url, id).run();
+    return reply(201, { ok: true, url: link.url, order: id, claim });
   } catch (e) {
     await db.prepare("UPDATE orders SET status = 'failed' WHERE id = ? AND status = 'created'").bind(id).run();
     console.error('payment link failed', e instanceof RazorpayError ? `${e.status} ${e.message}` : 'unknown');
@@ -285,11 +387,18 @@ export async function sendBuyerLink(env, order, { fetchImpl = fetch, origin = SI
   let status = 'off';
   let mailId = null;
   if (canMail(env)) {
-    const link = downloadPage(origin, order.id, await downloadToken(env, order.id), order.lang);
+    const link = downloadPage(origin, order.id, await keyFor(env, order), order.lang);
     mailId = await sendMailId(env, buyerMail(env, { order, product, link, origin }), fetchImpl);
     status = mailId === null ? 'failed' : 'sent';
   }
-  await env.DB.prepare('UPDATE orders SET mail_status = ?, mail_id = ? WHERE id = ?').bind(status, mailId || null, order.id).run();
+  // A failed send is retried by the background check with a growing wait
+  // (5 min, 10, 20, ... up to STORE.mailRetries tries); a sent one resets that.
+  const now = Math.floor(Date.now() / 1000);
+  const tries = status === 'failed' ? (order.mail_tries ?? 0) + 1 : 0;
+  const next = status === 'failed' ? now + 300 * 2 ** Math.min(tries - 1, 6) : null;
+  await env.DB.prepare('UPDATE orders SET mail_status = ?, mail_id = ?, mail_tries = ?, mail_next = ? WHERE id = ?')
+    .bind(status, mailId || null, tries, next, order.id)
+    .run();
   return status;
 }
 
@@ -304,7 +413,7 @@ async function sendOrderMails(env, order, { fetchImpl, origin }) {
     await env.DB.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(canMail(env) ? 'none' : 'off', order.id).run();
   }
   if (canMail(env) && owners(env).length) {
-    await sendMail(env, ownerMail(env, { order: withPhone, product, origin, token: await downloadToken(env, order.id) }), fetchImpl);
+    await sendMail(env, ownerMail(env, { order: withPhone, product, origin, token: await keyFor(env, order) }), fetchImpl);
   }
 }
 
@@ -326,6 +435,9 @@ export async function settleOrder(env, orderId, deps = {}) {
   if (order.status === 'paid' || order.status === 'refunded' || order.status === 'failed') {
     return { state: order.status, order };
   }
+  // An order made with the other keys (a test order seen by the live site, or
+  // the reverse) is never settled here: its link belongs to the other account.
+  if (order.mode && order.mode !== mode(env)) return { state: 'unverified', order };
   const linkId = order.link_id || deps.linkIdHint;
   if (!linkId) return { state: 'pending', order };
 
@@ -352,7 +464,7 @@ export async function settleOrder(env, orderId, deps = {}) {
   const job = sendOrderMails(env, paid, { fetchImpl, origin: deps.origin ?? SITE_URL });
   if (deps.waitUntil) deps.waitUntil(job);
   else await job;
-  return { state: 'paid', order: paid };
+  return { state: 'paid', order: paid, fresh: true };
 }
 
 /**
@@ -367,21 +479,41 @@ export function canBuyerChangeEmail(order, nowMs = Date.now()) {
   return Number.isFinite(paid) && nowMs - paid <= STORE.emailChangeHours * 3600e3;
 }
 
-/** What the thanks page needs to know about a paid order. */
-async function paidView(env, order, nowMs = Date.now()) {
+/**
+ * What the thanks page shows a key holder about their order: the download
+ * state, the receipt (kept after expiry or a refund too), and where the link
+ * was emailed. `manage` adds the management key: only for the browser that
+ * bought (its checkout secret or Razorpay's signed return), never for a link
+ * from an email or a lost-link request.
+ */
+async function orderView(env, order, nowMs = Date.now(), { manage = false } = {}) {
+  const nowS = Math.floor(nowMs / 1000);
+  const used = order.downloads >= order.max_downloads;
+  const expired = order.expires_at !== null && order.expires_at !== undefined && order.expires_at <= nowS;
+  const state = order.status === 'refunded' ? 'refunded' : order.status !== 'paid' ? order.status : expired ? 'expired' : used ? 'used' : 'paid';
   return {
-    state: 'paid',
+    state,
     productId: order.product_id,
     /** false: no email was given, so the page must tell the buyer to keep its link */
     emailed: !!order.email,
     /** Shown to the holder of the link (the buyer), so a mistyped address is noticed. */
     email: order.email || '',
-    /** 'bounced' or 'complained': our email did not reach them. */
-    mailStatus: order.mail_status === 'bounced' || order.mail_status === 'complained' ? order.mail_status : '',
-    canChangeEmail: canBuyerChangeEmail(order, nowMs),
-    token: await downloadToken(env, order.id),
+    /** What we know of the download email: sent, delivered, failed (will retry), bounced, complained, none, off. */
+    mailStatus: order.mail_status || '',
+    canChangeEmail: manage && canBuyerChangeEmail(order, nowMs),
+    token: await keyFor(env, order),
+    ...(manage ? { manage: await manageToken(env, order.id) } : {}),
     remaining: Math.max(0, order.max_downloads - order.downloads),
     expires: order.expires_at,
+    // The receipt: what was bought, for how much, when, and the references to quote.
+    receipt: {
+      order: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      paidAt: order.paid_at,
+      payment: order.payment_id,
+      refunded: order.refunded_amount || (order.status === 'refunded' ? order.amount : 0),
+    },
   };
 }
 
@@ -407,8 +539,22 @@ export async function handleConfirm(request, env, deps = {}) {
 
   const result = await settleOrder(env, id, { ...deps, origin: siteOrigin(request) });
   if (result.state === 'unknown') return reply(404, { ok: false, error: 'unknown-order' });
-  if (result.state === 'paid') return reply(200, { ok: true, ...(await paidView(env, result.order, deps.now)) });
-  return reply(200, { ok: true, state: result.state });
+  if (result.state !== 'paid') return reply(200, { ok: true, state: result.state });
+  // Paid. Knowing the order id is not enough to get its keys: the browser must
+  // hold the checkout secret, or bring Razorpay's signed return for THIS order
+  // and payment. Orders from before the secret existed have none to check.
+  const order = result.order;
+  const r = got.body?.rzp;
+  const signed =
+    r && typeof r === 'object' && r.linkId === order.link_id && r.referenceId === order.id && r.status === 'paid' &&
+    (!order.payment_id || r.paymentId === order.payment_id) &&
+    (await verifyReturn(env, r));
+  const owner = !order.claim_hash || signed || (await claimMatches(order, got.body?.claim));
+  if (!owner) {
+    // Paid, and the email (if any) has the link: say so, without the keys.
+    return reply(200, { ok: true, state: 'paid', locked: true, emailed: !!order.email });
+  }
+  return reply(200, { ok: true, ...(await orderView(env, order, deps.now, { manage: true })) });
 }
 
 // ---------------------------------------------------------------------------
@@ -436,6 +582,10 @@ export async function handleWebhook(request, env, deps = {}) {
     return reply(400, { ok: false, error: 'bad-json' });
   }
   await ensureStoreSchema(env.DB);
+  const nowMs = deps.now ?? Date.now();
+  await setMeta(env, 'razorpay_webhook_at', isoNow(nowMs));
+  // Razorpay may deliver one event more than once: a repeat does nothing.
+  if (!(await firstTime(env, request.headers.get('X-Razorpay-Event-Id'), nowMs))) return reply(200, { ok: true, repeat: true });
 
   if (event?.event === 'payment_link.paid') {
     const link = event?.payload?.payment_link?.entity;
@@ -447,11 +597,22 @@ export async function handleWebhook(request, env, deps = {}) {
     const refund = event?.payload?.refund?.entity;
     const paymentId = refund?.payment_id;
     if (typeof paymentId === 'string' && paymentId) {
-      const order = await env.DB.prepare("SELECT id, amount FROM orders WHERE payment_id = ? AND status = 'paid'").bind(paymentId).first();
-      // Only a full refund ends the downloads; a partial one leaves the buyer their book.
-      if (order && Number(refund?.amount) >= order.amount) {
-        await env.DB.prepare("UPDATE orders SET status = 'refunded' WHERE id = ? AND status = 'paid'").bind(order.id).run();
-      }
+      const amount = Math.max(0, Math.floor(Number(refund?.amount) || 0));
+      // Razorpay sends the payment with the refund: its amount_refunded is the
+      // running total, so a repeat or a total the background check already saw
+      // is not counted twice. Without it, each refund adds up. Only refunds
+      // reaching the full amount end the downloads: a partial (goodwill)
+      // refund leaves the buyer their book. A refunded order is never reopened
+      // by a late "paid" (settleOrder only moves an order on from 'created').
+      const total = Number(event?.payload?.payment?.entity?.amount_refunded);
+      const sum = Number.isFinite(total) && total >= 0 ? 'MAX(refunded_amount, ?)' : 'refunded_amount + ?';
+      const by = Number.isFinite(total) && total >= 0 ? Math.floor(total) : amount;
+      const order = await env.DB.prepare(
+        `UPDATE orders SET refunded_amount = MIN(amount, ${sum}), status = CASE WHEN ${sum} >= amount THEN 'refunded' ELSE status END WHERE payment_id = ? AND status IN ('paid', 'refunded') RETURNING id, status, refunded_amount, amount`,
+      )
+        .bind(by, by, paymentId)
+        .first();
+      if (order) await audit(env, order.id, order.status === 'refunded' ? 'refund-full' : 'refund-partial', `Razorpay refund ${amount} paise; refunded ${order.refunded_amount} of ${order.amount}`, nowMs);
     }
   }
   return reply(200, { ok: true });
@@ -472,15 +633,25 @@ export async function handleOrderStatus(request, env, deps = {}) {
   const busy = await limited(request, env, 'status', 120, deps.now);
   if (busy) return busy;
 
-  const params = new URL(request.url).searchParams;
-  const id = params.get('o') ?? '';
-  if (!(await tokenMatches(env, id, params.get('t') ?? ''))) return reply(404, { ok: false, error: 'unknown-order' });
-  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+  // POST {o, t, m}: the keys stay out of URLs and server logs. (GET ?o=&t= still
+  // answers, without the management key, for a page cached before this change.)
+  let keys;
+  if (request.method === 'POST') {
+    const got = await readJson(request);
+    if (got.fail) return got.fail;
+    keys = got.body && typeof got.body === 'object' ? got.body : {};
+  } else {
+    const q = new URL(request.url).searchParams;
+    keys = { o: q.get('o'), t: q.get('t') };
+  }
+  const id = String(keys.o ?? '');
+  const order = await orderByToken(env, id, String(keys.t ?? ''));
   if (!order) return reply(404, { ok: false, error: 'unknown-order' });
-  if (order.status !== 'paid') return reply(200, { ok: true, state: order.status });
-  const now = Math.floor((deps.now ?? Date.now()) / 1000);
-  const expired = order.expires_at !== null && order.expires_at <= now;
-  return reply(200, { ok: true, ...(await paidView(env, order, deps.now)), state: expired ? 'expired' : 'paid' });
+  // A refunded, expired or used-up order still shows its receipt and why it closed.
+  if (order.status !== 'paid' && order.status !== 'refunded') return reply(200, { ok: true, state: order.status });
+  // The management key travels with this request only if the page already has it.
+  const manage = request.method === 'POST' && !!(await orderByManage(env, id, String(keys.m ?? '')));
+  return reply(200, { ok: true, ...(await orderView(env, order, deps.now, { manage })) });
 }
 
 // ---------------------------------------------------------------------------
@@ -488,8 +659,11 @@ export async function handleOrderStatus(request, env, deps = {}) {
 // ---------------------------------------------------------------------------
 
 /**
- * The holder of the download link (the buyer: the token is in their link)
- * puts the right address on the order, and the link is sent there. Once per
+ * The buyer corrects their email. Only with the MANAGEMENT key, which only the
+ * browser that bought holds: a download link from an email (or one shared or
+ * misdelivered) cannot redirect the order's mail. The download key moves on to
+ * a new version, so a link that went to a wrong address stops working; the
+ * new address gets the new link, and the buying browser gets the new key back. Once per
  * order, within STORE.emailChangeHours of paying (any time if our email
  * bounced). It is the same link with the same downloads left, so a changed
  * address never means another copy. The owner is told, with both addresses.
@@ -508,14 +682,13 @@ export async function handleChangeEmail(request, env, deps = {}) {
   const busy = await limited(request, env, 'email', 20, now);
   if (busy) return busy;
 
-  const { o, t } = got.body ?? {};
-  if (!(await tokenMatches(env, o, t))) return reply(404, { ok: false, error: 'unknown-order' });
+  const { o, m } = got.body ?? {};
+  const order = await orderByManage(env, o, m);
+  if (!order) return reply(404, { ok: false, error: 'unknown-order' });
   const email = cleanEmail(got.body?.email);
   if (!email) return reply(400, { ok: false, error: 'invalid' });
 
   const db = env.DB;
-  const order = await db.prepare('SELECT * FROM orders WHERE id = ?').bind(o).first();
-  if (!order) return reply(404, { ok: false, error: 'unknown-order' });
   if (order.email === email) return reply(400, { ok: false, error: 'same' });
   if (!canBuyerChangeEmail(order, now)) return reply(409, { ok: false, error: 'not-allowed' });
 
@@ -524,7 +697,7 @@ export async function handleChangeEmail(request, env, deps = {}) {
   const changed = await db
     .prepare(
       `UPDATE orders SET email_prev = email, email = ?, email_changed_by = 'buyer', email_changed_at = ?,
-         buyer_email_changes = buyer_email_changes + 1
+         buyer_email_changes = buyer_email_changes + 1, token_ver = token_ver + 1
        WHERE id = ? AND status = 'paid' AND buyer_email_changes = 0
          AND (paid_at >= ? OR mail_status IN ('bounced', 'complained'))
        RETURNING *`,
@@ -532,13 +705,14 @@ export async function handleChangeEmail(request, env, deps = {}) {
     .bind(email, isoNow(now), o, since)
     .first();
   if (!changed) return reply(409, { ok: false, error: 'not-allowed' });
+  await audit(env, changed.id, 'email-changed-by-buyer', `${changed.email_prev || '(none)'} -> ${email}`, now);
 
   const status = await sendBuyerLink(env, changed, { fetchImpl, origin: siteOrigin(request) });
   const product = productById(changed.product_id);
   if (product && canMail(env) && owners(env).length) {
     await sendMail(env, changedMail(env, { order: changed, product, origin: siteOrigin(request) }), fetchImpl);
   }
-  return reply(200, { ok: true, email, sent: status === 'sent' });
+  return reply(200, { ok: true, email, sent: status === 'sent', token: await keyFor(env, changed) });
 }
 
 // ---------------------------------------------------------------------------
@@ -604,7 +778,7 @@ export async function handleFind(request, env, deps = {}) {
     const items = [];
     for (const order of results) {
       const product = productById(order.product_id);
-      if (product) items.push({ product, order, link: downloadPage(origin, order.id, await downloadToken(env, order.id), lang) });
+      if (product) items.push({ product, order, link: downloadPage(origin, order.id, await keyFor(env, order), lang) });
     }
     if (items.length && (await sendMail(env, findMail(env, { email, items }), fetchImpl))) {
       return reply(200, { ok: true, found: 'sent' });
@@ -644,10 +818,12 @@ export async function handleMailWebhook(request, env, deps = {}) {
   } catch {
     return reply(400, { ok: false, error: 'bad-json' });
   }
+  await ensureStoreSchema(env.DB);
+  await setMeta(env, 'resend_webhook_at', isoNow(deps.now ?? Date.now()));
+  if (!(await firstTime(env, `resend:${request.headers.get('svix-id') ?? ''}`, deps.now))) return reply(200, { ok: true, repeat: true });
   const status = MAIL_EVENTS[event?.type];
   const mailId = event?.data?.email_id;
   if (!status || typeof mailId !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(mailId)) return reply(200, { ok: true });
-  await ensureStoreSchema(env.DB);
   const db = env.DB;
   // "delivered" never hides a bounce or a complaint that came first.
   const order =
@@ -660,7 +836,7 @@ export async function handleMailWebhook(request, env, deps = {}) {
   if (order && status !== 'delivered' && order.status === 'paid') {
     const product = productById(order.product_id);
     if (product && canMail(env) && owners(env).length) {
-      const token = await downloadToken(env, order.id);
+      const token = await keyFor(env, order);
       await sendMail(env, alertMail(env, { order, product, origin: siteOrigin(request), token, what: status }), fetchImpl);
     }
   }
@@ -686,9 +862,16 @@ function problem(status, english, hindi) {
 }
 
 /**
- * Hand over the PDF and count one download. The count goes up in one UPDATE
- * that also checks the order is paid, not refunded, not expired and under its
- * limit, so two quick clicks can never get past the limit.
+ * Hand over the PDF, counting DOWNLOAD SESSIONS, not taps.
+ *
+ * 1. The key must be this order's current download key; the order must be
+ *    paid, not refunded, not expired, and have a session open or one left.
+ * 2. The buyer's stamped copy is prepared first. If the file is missing or
+ *    cannot be read, nothing is counted.
+ * 3. Then one UPDATE grants the session: a new one costs one download; within
+ *    STORE.sessionMinutes of the last one, a tap, a retry after a dropped
+ *    connection or a second click costs nothing. Two clicks at the same moment
+ *    with one download left get one session, never two.
  *
  * @param {Request} request
  * @param {Record<string, any>} env
@@ -709,57 +892,69 @@ export async function handleDownload(request, env, deps = {}) {
   } catch {
     return problem(400, 'This download link is not valid.', 'यह डाउनलोड लिंक सही नहीं है।');
   }
-  if (!(await tokenMatches(env, id, token))) return problem(404, 'This download link is not valid.', 'यह डाउनलोड लिंक सही नहीं है।');
+  const order = await orderByToken(env, id, token);
+  if (!order) return problem(404, 'This download link is not valid.', 'यह डाउनलोड लिंक सही नहीं है।');
 
   const now = Math.floor((deps.now ?? Date.now()) / 1000);
-  const db = env.DB;
-  const counted = await db
-    .prepare(
-      "UPDATE orders SET downloads = downloads + 1 WHERE id = ? AND status = 'paid' AND downloads < max_downloads AND (expires_at IS NULL OR expires_at > ?) RETURNING product_id, email",
-    )
-    .bind(id, now)
-    .first();
-  if (!counted) {
-    return problem(
+  const windowStart = now - STORE.sessionMinutes * 60;
+  const closed = () =>
+    problem(
       410,
-      'This download is no longer available: it has expired, reached its limit or been refunded. Write to us and we will help.',
-      'यह डाउनलोड अब उपलब्ध नहीं है: समय पूरा हो गया, सीमा पूरी हो गई या पैसे लौटा दिए गए। हमें लिखें, हम मदद करेंगे।',
+      'This download is no longer available: it has expired, reached its limit or been refunded. A copy you saved still works. Write to us and we will help.',
+      'यह डाउनलोड अब उपलब्ध नहीं है: समय पूरा हो गया, सीमा पूरी हो गई या पैसे लौटा दिए गए। आपकी सेव की हुई कॉपी चलती रहेगी। हमें लिखें, हम मदद करेंगे।',
     );
-  }
+  const inSession = order.session_at !== null && order.session_at !== undefined && order.session_at > windowStart;
+  const open = order.status === 'paid' && (order.expires_at === null || order.expires_at > now);
+  if (!open || (!inSession && order.downloads >= order.max_downloads)) return closed();
 
-  const product = productById(counted.product_id);
-  const object = product && env.STORE_FILES ? await env.STORE_FILES.get(product.file) : null;
-  if (!object) {
-    // Nothing was handed over, so it does not count.
-    await db.prepare('UPDATE orders SET downloads = downloads - 1 WHERE id = ? AND downloads > 0').bind(id).run();
-    console.error('store file missing', product?.file ?? counted.product_id);
-    return problem(503, 'The file is not available right now. Please try again later or write to us.', 'फ़ाइल अभी उपलब्ध नहीं है। थोड़ी देर बाद कोशिश करें या हमें लिखें।');
+  // Prepare the buyer's copy before anything is counted.
+  const product = productById(order.product_id);
+  const object = product && env.STORE_FILES ? await env.STORE_FILES.get(product.file).catch(() => null) : null;
+  let bytes = null;
+  try {
+    bytes = object ? new Uint8Array(await object.arrayBuffer()) : null;
+  } catch {
+    bytes = null;
+  }
+  if (!bytes || bytes.length === 0) {
+    console.error('store file missing or empty', product?.file ?? order.product_id);
+    await audit(env, id, 'download-file-missing', product?.file ?? order.product_id, deps.now);
+    return problem(503, 'The file is not available right now. Nothing was used up. Please try again later or write to us.', 'फ़ाइल अभी उपलब्ध नहीं है। कोई डाउनलोड नहीं कटा। थोड़ी देर बाद कोशिश करें या हमें लिखें।');
   }
   // The buyer's own copy: the file's stamp slots are overwritten with who it was sold to (server/storeStamp.js).
   // A file that was not prepared has no slot and is served as it is.
-  let body;
-  let size = object.size;
   if (product.stamp) {
-    // (read the object as bytes and never touch object.body: a body can be consumed once)
-    const bytes = new Uint8Array(await object.arrayBuffer());
-    body = bytes;
-    size = bytes.length;
     try {
-      const done = stampPdf(bytes, stampText({ id, email: counted.email }));
+      const done = stampPdf(bytes, stampText({ id, email: order.email }));
       if (done.count === 0) console.error('store file has no stamp slot, served unstamped:', product.file);
     } catch (e) {
       console.error('stamping failed, served unstamped:', e?.message || e);
     }
-  } else {
-    body = object.body;
   }
-  return new Response(body, {
+
+  // The file is ready: grant (or reuse) the session, in one statement.
+  const newSession = newSecret();
+  const granted = await env.DB.prepare(
+    `UPDATE orders SET
+       downloads = downloads + (CASE WHEN session_at IS NOT NULL AND session_at > ?2 THEN 0 ELSE 1 END),
+       session_id = CASE WHEN session_at IS NOT NULL AND session_at > ?2 THEN session_id ELSE ?3 END,
+       session_at = CASE WHEN session_at IS NOT NULL AND session_at > ?2 THEN session_at ELSE ?4 END
+     WHERE id = ?1 AND status = 'paid' AND (expires_at IS NULL OR expires_at > ?4)
+       AND ((session_at IS NOT NULL AND session_at > ?2) OR downloads < max_downloads)
+     RETURNING session_id`,
+  )
+    .bind(id, windowStart, newSession, now)
+    .first();
+  if (!granted) return closed();
+
+  return new Response(bytes, {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      ...(size ? { 'Content-Length': String(size) } : {}),
+      'Content-Length': String(bytes.length),
       'Content-Disposition': `attachment; filename="${product.fileName.replace(/[^A-Za-z0-9._-]/g, '_')}"`,
       'Cache-Control': 'private, no-store',
+      'Accept-Ranges': 'none',
       'X-Content-Type-Options': 'nosniff',
       'X-Robots-Tag': 'noindex',
       'Referrer-Policy': 'no-referrer',

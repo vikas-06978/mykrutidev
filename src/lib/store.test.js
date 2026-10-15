@@ -4,7 +4,29 @@ import { readFileSync } from 'node:fs';
 
 import { PRODUCTS, STORE, STORE_SCHEMA, liveProducts, shownProducts, price, rupees, sellable, isPreviewBuild, validateCheckout, newOrderId, ORDER_ID_RE } from './store.js';
 import { BUSINESS, businessLines } from './business.js';
-import { BOUGHT_KEY, boughtHash, checkoutError, forgetPurchase, daysLeft, payUrlOk, readOrderFrom, rememberPurchase, thanksKey } from './storeClient.js';
+import {
+  BOUGHT_KEY,
+  PENDING_DAYS,
+  boughtEntry,
+  boughtHash,
+  checkoutError,
+  claimFor,
+  forgetDevice,
+  forgetPending,
+  forgetPurchase,
+  daysLeft,
+  istDate,
+  latestPending,
+  manageFor,
+  payUrlOk,
+  pendingFor,
+  readOrderFrom,
+  readReturn,
+  recoveryText,
+  rememberPending,
+  rememberPurchase,
+  thanksKey,
+} from './storeClient.js';
 import { PAGES, getPage, isLive } from './routes.js';
 import { LOCALES } from '../i18n/locales.js';
 import { DICTS } from '../i18n/index.js';
@@ -205,5 +227,87 @@ describe('a purchase remembered in this browser', () => {
     const blocked = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
     assert.doesNotThrow(() => rememberPurchase(blocked, 'p', O, T, null));
     assert.equal(boughtHash(blocked, 'p', NOW), null);
+  });
+});
+
+describe('a payment started in this browser, and the keys it holds', () => {
+  const mem = () => {
+    const m = new Map();
+    return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m };
+  };
+  const O = 'o' + 'b'.repeat(24);
+  const O2 = 'o' + 'c'.repeat(24);
+  const C = 'a1'.repeat(16);
+  const M = 'f0'.repeat(32);
+  const T = 'e1'.repeat(32);
+  const NOW = Date.parse('2026-10-16T00:00:00Z');
+
+  test('the started payment is found by product and by order, for 3 days', () => {
+    const s = mem();
+    rememberPending(s, 'p', O, C, NOW);
+    assert.deepEqual(pendingFor(s, 'p', NOW + 1000), { o: O, c: C, at: NOW });
+    assert.equal(claimFor(s, O), C);
+    assert.equal(claimFor(s, O2), '');
+    assert.equal(latestPending(s, NOW)?.o, O);
+    assert.equal(pendingFor(s, 'p', NOW + (PENDING_DAYS * 864e5 + 1)), null);
+    forgetPending(s, O);
+    assert.equal(pendingFor(s, 'p', NOW), null);
+    assert.equal(s.m.size, 0, 'nothing left behind');
+  });
+
+  test('nothing malformed is stored', () => {
+    const s = mem();
+    rememberPending(s, 'p', 'bad', C, NOW);
+    rememberPending(s, 'p', O, 'short', NOW);
+    rememberPending(s, '../x', O, C, NOW);
+    assert.equal(s.m.size, 0);
+  });
+
+  test('the management key is kept with the purchase, and kept when a later answer has none', () => {
+    const s = mem();
+    rememberPurchase(s, 'p', O, T, null, M);
+    assert.equal(manageFor(s, O), M);
+    rememberPurchase(s, 'p', O, T, null);
+    assert.equal(manageFor(s, O), M);
+    assert.deepEqual(boughtEntry(s, 'p'), { o: O, t: T, m: M, exp: null });
+    // Another order for the product: the old key does not carry over.
+    rememberPurchase(s, 'p', O2, T, null);
+    assert.equal(boughtEntry(s, 'p').m, '');
+  });
+
+  test('an expired purchase is still handed to the product page, which asks the server what it is now', () => {
+    const s = mem();
+    rememberPurchase(s, 'p', O, T, NOW / 1000 - 10);
+    assert.equal(boughtHash(s, 'p', NOW), null);
+    assert.equal(boughtEntry(s, 'p').o, O);
+  });
+
+  test('"Forget this purchase on this device" drops the purchase and the started payment', () => {
+    const s = mem();
+    rememberPurchase(s, 'p', O, T, null, M);
+    rememberPending(s, 'p', O2, C, NOW);
+    forgetDevice(s, 'p');
+    assert.equal(boughtEntry(s, 'p'), null);
+    assert.equal(pendingFor(s, 'p', NOW), null);
+  });
+
+  test('Razorpay\'s signed return is read only when all of it is there', () => {
+    const q = `?razorpay_payment_id=pay_1&razorpay_payment_link_id=plink_1&razorpay_payment_link_reference_id=${O}&razorpay_payment_link_status=paid&razorpay_signature=${'ab'.repeat(32)}`;
+    assert.deepEqual(readReturn(q), { paymentId: 'pay_1', linkId: 'plink_1', referenceId: O, status: 'paid', signature: 'ab'.repeat(32) });
+    assert.equal(readReturn(q.replace(/&razorpay_signature=[^&]+/, '')), null);
+    assert.equal(readReturn(q.replace('pay_1', 'pay<1>')), null);
+  });
+
+  test('the receipt and recovery card', () => {
+    assert.equal(istDate('2026-10-15T20:00:00Z', 'en'), '16 October 2026', 'India time, past midnight');
+    assert.equal(istDate(null), '');
+    const L = { cardTitle: 'Card', receiptProduct: 'Product', receiptOrder: 'Order', receiptAmount: 'Amount', receiptPaid: 'Paid on', receiptPayment: 'Payment', receiptRefunded: 'Refunded', receiptUntil: 'Until', cardLink: 'Link:', cardHelp: 'Help {contact}' };
+    const text = recoveryText(L, { product: 'Starter', receipt: { order: O, amount: 3900, paidAt: '2026-10-15T10:00:00Z', payment: 'pay_1', refunded: 0 }, link: 'https://mykrutidev.com/store/thanks#o=x&t=y', until: '14 November 2026', contact: 'https://mykrutidev.com/contact', lang: 'en' });
+    assert.match(text, /Order: obbbb/);
+    assert.match(text, /Amount: ₹39\n/);
+    assert.match(text, /Until: 14 November 2026/);
+    assert.match(text, /Link:\nhttps:\/\/mykrutidev\.com\/store\/thanks#o=x&t=y/);
+    assert.doesNotMatch(text, /Refunded/);
+    assert.doesNotMatch(text, /\n\n\n/);
   });
 });

@@ -151,3 +151,22 @@ export async function verifyWebhook(rawBody, signature, secret) {
   if (!secret || !signature || typeof signature !== 'string') return false;
   return safeEqual(await hmacHex(secret, rawBody), signature.trim().toLowerCase());
 }
+
+/**
+ * Razorpay's signed return from a Payment Link: the browser comes back to
+ * /store/thanks with razorpay_payment_id, razorpay_payment_link_id,
+ * razorpay_payment_link_reference_id, razorpay_payment_link_status and
+ * razorpay_signature, the HMAC-SHA256 (hex) of
+ * "<link id>|<reference id>|<status>|<payment id>" keyed with our API secret.
+ * Only Razorpay can make it, so it proves this browser is the one that paid,
+ * even if a UPI app opened it in another browser.
+ * @param {Record<string, any>} env
+ * @param {{ paymentId?: string, linkId?: string, referenceId?: string, status?: string, signature?: string }} r
+ */
+export async function verifyReturn(env, r) {
+  if (!env.RAZORPAY_KEY_SECRET || !r) return false;
+  const parts = [r.linkId, r.referenceId, r.status, r.paymentId];
+  if (!parts.every((p) => typeof p === 'string' && /^[A-Za-z0-9_]{1,80}$/.test(p))) return false;
+  if (typeof r.signature !== 'string' || !/^[a-f0-9]{64}$/i.test(r.signature)) return false;
+  return safeEqual(await hmacHex(env.RAZORPAY_KEY_SECRET, parts.join('|')), r.signature.toLowerCase());
+}
