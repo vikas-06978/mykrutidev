@@ -74,7 +74,7 @@ Changing a price or a file later: edit `src/lib/store.js`. Already-created order
 
 | id | price | file in the bucket | status |
 | --- | --- | --- | --- |
-| `kruti-dev-7-day-starter` | ₹39 | `kruti-dev-7-day-starter.pdf` (32 pages, prepared for stamping) | test |
+| `kruti-dev-7-day-starter` | ₹39 | `kruti-dev-7-day-starter.pdf` (32 pages, prepared for stamping) | live |
 
 The 30 practice passages are NOT sold: they are a free page (`/hindi-typing-practice-passages`) and a free PDF in `public/downloads/`, because passages like these are free elsewhere and the book's value is in the keys and layout, which work better as free content. The data is `src/lib/practicePassages.js`.
 

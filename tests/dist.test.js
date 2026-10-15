@@ -283,7 +283,8 @@ describe('"Soon" badges come from the status flag, everywhere, in both languages
     // Soon rows are only on All tools, in every language; live rows are in
     // every page's menus too. Since October 2026 no page is "soon" (the
     // Walkman-Chanakya and Punjabi ones were removed), so none may show.
-    const anySoon = PAGES.some((x) => statusOf(x) === 'soon');
+    // The store's unlisted pages (the ₹1 test sample, the thanks page) are never listed, so they are not "soon".
+    const anySoon = PAGES.some((x) => statusOf(x) === 'soon' && !x.path.startsWith('/store'));
     assert.ok((anySoon ? soon >= 10 : soon === 0) && live > 100, `rows checked: ${soon} soon, ${live} live`);
   });
 

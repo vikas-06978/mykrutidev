@@ -73,10 +73,10 @@ export const PRODUCTS = [
   },
   {
     // Rs 39: a starter price, to learn whether people will pay before anything bigger is priced.
-    // 'test' = sold only where STORE_TEST_PRODUCTS=1 (a preview with Razorpay test keys). Change to 'live' when
-    // the file is in the bucket, the seller details are in src/lib/business.js and the preview test purchase worked.
+    // On sale: the file is in the bucket, the seller details are in src/lib/business.js, and the preview test
+    // purchase worked (paid, stamped download, unpaid order stays pending).
     id: 'kruti-dev-7-day-starter',
-    status: 'test',
+    status: 'live',
     title: 'Kruti Dev 7-Day Starter (PDF, 32 pages)',
     pricePaise: 3900,
     file: 'kruti-dev-7-day-starter.pdf',

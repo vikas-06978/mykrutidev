@@ -981,9 +981,15 @@ describe('/admin/orders: the organised view', () => {
     assert.match(html, /Razorpay TEST keys on the live site/);
     assert.match(html, /STORE_TEST_PRODUCTS is 1 on the live site/);
 
-    // Live keys on the live site, but nothing has status "live": not ready either.
+    // Live keys on the live site, with a live product and its PDF: ready for real money.
     html = await get('/admin/orders', { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x', STORE_TEST_PRODUCTS: '' }, 'https://mykrutidev.com');
-    assert.match(html, /No product is on sale on the live site yet/);
+    assert.match(html, /Ready: the live site takes real payments/);
+    // ...and not ready once that product's PDF is gone from the bucket.
+    const live = PRODUCTS.find((p) => p.status === 'live');
+    await FILES.delete(live.file);
+    html = await get('/admin/orders', { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x', STORE_TEST_PRODUCTS: '' }, 'https://mykrutidev.com');
+    assert.match(html, new RegExp(`On sale but its PDF is not in the bucket: ${live.file.replace(/\./g, '\\.')}`));
+    await FILES.put(live.file, PDF);
 
     // Live keys on a preview: a warning that payments are real.
     html = await get('/admin/orders', { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x' });
