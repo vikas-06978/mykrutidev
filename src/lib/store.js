@@ -193,12 +193,22 @@ export const STORE_SCHEMA = [
   downloads INTEGER NOT NULL DEFAULT 0,
   max_downloads INTEGER NOT NULL,
   expires_at INTEGER,
-  mail_status TEXT
+  mail_status TEXT,
+  mode TEXT
 )`,
   `CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at)`,
   `CREATE INDEX IF NOT EXISTS orders_link_id ON orders (link_id)`,
   `CREATE INDEX IF NOT EXISTS orders_payment_id ON orders (payment_id)`,
 ];
+
+/**
+ * Columns added after the table first went live, as [name, type]. An existing
+ * table gets them with ALTER TABLE on first use (server/storeApi.js); a new one
+ * has them in STORE_SCHEMA already.
+ *   mode: 'live' or 'test', the Razorpay keys the order was made with. Rows from
+ *         before it existed are NULL and count as test (nothing was sold live then).
+ */
+export const ORDER_ADDED_COLUMNS = [['mode', 'TEXT']];
 
 /** Columns of the orders CSV, in order. */
 export const ORDER_COLUMNS = [
@@ -217,4 +227,5 @@ export const ORDER_COLUMNS = [
   'max_downloads',
   'expires_at',
   'mail_status',
+  'mode',
 ];

@@ -5,11 +5,15 @@
 --
 -- Same statements as STORE_SCHEMA in src/lib/store.js (src/lib/store.test.js
 -- checks they match). Safe to run again: everything is IF NOT EXISTS.
+-- A table made before `mode` existed gets it from the Functions on first use
+-- (ALTER TABLE orders ADD COLUMN mode TEXT); there is nothing to run by hand.
 
 -- One row per order. `id` is the public order id: it is also Razorpay's
 -- reference_id and part of the buyer's download link, so it is random
 -- (120 bits). `amount` is in paise. `status`: created (payment link made, not
 -- paid yet), paid, failed (Razorpay refused to make the link), refunded.
+-- `mode`: 'live' or 'test', the Razorpay keys the order was made with (NULL on
+-- rows from before the column, which count as test).
 -- Stored about the buyer: the email, and the language of the page they used.
 -- Never an IP address or a user agent. Unpaid rows are deleted after 7 days.
 CREATE TABLE IF NOT EXISTS orders (
@@ -27,7 +31,8 @@ CREATE TABLE IF NOT EXISTS orders (
   downloads INTEGER NOT NULL DEFAULT 0,
   max_downloads INTEGER NOT NULL,
   expires_at INTEGER,
-  mail_status TEXT
+  mail_status TEXT,
+  mode TEXT
 );
 
 CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at);

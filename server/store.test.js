@@ -928,7 +928,7 @@ describe('/admin/orders: the organised view', () => {
     for (let i = 0; i < 55; i++) await row({ created: `2026-10-10T10:${String(i).padStart(2, '0')}:00Z` });
     const first = await get('/admin/orders');
     assert.match(first, /1–50 of 55/);
-    assert.match(first, /href="\?page=2">Older/);
+    assert.match(first, /href="\?mode=test&amp;page=2">Older/);
     assert.equal((first.match(/<tr>\n  <td class="fa-nowrap">/g) || []).length, 50);
     const second = await get('/admin/orders?page=2');
     assert.match(second, /51–55 of 55/);
@@ -960,7 +960,7 @@ describe('/admin/orders: the organised view', () => {
     assert.equal((await orders())[0].status, 'paid');
     assert.match(await get('/admin/orders?done=norefund'), /Not refunded: tick &quot;sure&quot; first\./);
     const yes = await form({ sure: '1' });
-    assert.equal(yes.headers.get('Location'), `/admin/orders?done=refund&q=${id}`);
+    assert.equal(yes.headers.get('Location'), `/admin/orders?done=refund&q=${id}&mode=test`);
     assert.equal((await orders())[0].status, 'refunded');
     assert.match(await get(`/admin/orders?done=refund&q=${id}`), /Marked refunded: downloads are closed/);
   });
@@ -1001,6 +1001,73 @@ describe('/admin/orders: the organised view', () => {
     assert.match(html, /<li class="fa-no">Missing: Razorpay webhook secret/);
     html = await get('/admin/orders', { ...ENV(), TURNSTILE_SECRET_KEY: '' });
     assert.match(html, /fa-ready ok/);
+  });
+});
+
+describe('/admin/orders: live and test orders apart', () => {
+  const KEY = ENV().ADMIN_KEY;
+  const get = (path, env = ENV(), host = 'https://mykrutidev.com') =>
+    handleAdminOrders(new Request(`${host}${path}`, { headers: { Authorization: `Bearer ${KEY}` } }), env).then((r) => r.text());
+  const LIVE = () => ({ ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x', STORE_TEST_PRODUCTS: '' });
+  let n = 0;
+  async function row(mode, amount) {
+    const id = `ozz${String(++n).padStart(22, 'a').replace(/\d/g, (d) => 'abcdefghij'[d])}`;
+    await DB.prepare(
+      "INSERT INTO orders (id, created_at, paid_at, status, product_id, amount, currency, email, max_downloads, mode) VALUES (?, '2026-10-15T10:00:00Z', '2026-10-15T10:00:00Z', 'paid', 'kruti-dev-7-day-starter', ?, 'INR', '', 5, ?)",
+    )
+      .bind(id, amount, mode)
+      .run();
+    return id;
+  }
+  const money = (html) => [...html.matchAll(/fa-tile-n">₹([\d,.]+) <span class="fa-sub">· (\d+)<\/span><\/span><span class="fa-tile-l">All time/g)].map((m) => [m[1], m[2]])[0];
+
+  test('a checkout records the mode of the keys that made it', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    assert.equal((await orders()).find((o) => o.id === id).mode, 'test');
+  });
+
+  test('live totals count only live orders; test and old (NULL) orders are on their own tab', async () => {
+    const live = await row('live', 3900);
+    const test = await row('test', 3900);
+    const old = await row(null, 100);
+    // The live site with live keys shows live orders by default.
+    let html = await get('/admin/orders', LIVE());
+    assert.deepEqual(money(html), ['39', '1']);
+    assert.ok(html.includes(live) && !html.includes(test) && !html.includes(old));
+    assert.match(html, /Live orders <span class="fa-sub">1<\/span>/);
+    assert.match(html, /Test orders <span class="fa-sub">2<\/span>/);
+    assert.doesNotMatch(html, /fa-pill fa-test/);
+    // The test tab: the other two, marked TEST, with their own totals and a banner.
+    html = await get('/admin/orders?mode=test', LIVE());
+    assert.deepEqual(money(html), ['40', '2']);
+    assert.ok(!html.includes(live) && html.includes(test) && html.includes(old));
+    assert.match(html, /<span class="fa-pill fa-test">TEST<\/span>/);
+    assert.match(html, /No real money moved/);
+    // A preview with test keys opens on the test tab.
+    html = await get('/admin/orders', ENV(), 'https://test.mykrutidev.pages.dev');
+    assert.match(html, /href="\?mode=test" aria-current="page"/);
+    // The CSV keeps every order, with its mode.
+    const csv = await (await handleAdminOrders(new Request('https://mykrutidev.com/admin/orders?format=csv', { headers: { Authorization: `Bearer ${KEY}` } }), LIVE())).text();
+    assert.match(csv, /,mode\r?\n/);
+    assert.match(csv, new RegExp(`${live}.*,live`));
+  });
+
+  test('an orders table made before the mode column gets it on first use, keeping its rows', async () => {
+    const { addColumns } = await import('./storeApi.js');
+    const { STORE_SCHEMA } = await import('../src/lib/store.js');
+    // The table as it was on the live site before the column existed.
+    await DB.prepare('DROP TABLE orders').run();
+    await DB.prepare(STORE_SCHEMA[0].replace(/,\s*mode TEXT/, '')).run();
+    let cols = (await DB.prepare('PRAGMA table_info(orders)').all()).results.map((c) => c.name);
+    assert.ok(!cols.includes('mode'));
+    await DB.prepare("INSERT INTO orders (id, status, product_id, amount, email, max_downloads) VALUES ('oold', 'paid', 'sample-test', 100, '', 5)").run();
+    await addColumns(DB);
+    await addColumns(DB); // twice is harmless
+    cols = (await DB.prepare('PRAGMA table_info(orders)').all()).results.map((c) => c.name);
+    assert.ok(cols.includes('mode'));
+    const [kept] = (await DB.prepare("SELECT id, mode FROM orders WHERE id = 'oold'").all()).results;
+    assert.deepEqual(kept, { id: 'oold', mode: null }, 'the old row is kept, and counts as test');
   });
 });
 
