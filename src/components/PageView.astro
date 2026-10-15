@@ -21,13 +21,13 @@ import ExcelConverter from './ExcelConverter.astro';
 import AdSlot from './AdSlot.astro';
 import PracticePassages from './PracticePassages.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
-import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
+import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL, SITE } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
 import StoreList from './StoreList.astro';
 import StoreBuy from './StoreBuy.astro';
 import StorePreview from './StorePreview.astro';
 import StoreThanks from './StoreThanks.astro';
-import { STORE } from '../lib/store.js';
+import { STORE, productById, rupees } from '../lib/store.js';
 import { BUSINESS, businessLines } from '../lib/business.js';
 import { ADS } from '../lib/ads.js';
 import { FONTS } from '../lib/fontMaps.js';
@@ -131,11 +131,34 @@ const tour: string[] | undefined = maybe(`pages.${path}.tour`);
 const printable = printableFor(path);
 const note = maybe(`pages.${path}.note`);
 const betaNote = maybe(`pages.${path}.betaNote`);
+
+// A product page that is on sale tells search engines its name, price and cover.
+const product = page.product ? productById(page.product) : null;
+const productLd =
+  product && live
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: text('h1'),
+          description: text('description'),
+          ...(product.images ? { image: `${SITE}/store-img/${product.images.cover}` } : {}),
+          brand: { '@type': 'Brand', name: 'MyKrutiDev' },
+          offers: {
+            '@type': 'Offer',
+            price: rupees(product.pricePaise),
+            priceCurrency: STORE.currency,
+            availability: 'https://schema.org/InStock',
+            url: new URL(to(path), SITE).href,
+          },
+        },
+      ]
+    : [];
 ---
 
 {/* The one page that is a table rather than an article. */}
 {path === '/all-converters' ? <AllConverters /> : (
-<Base title={text('title')} description={text('description')} noindex={!live} trail={trail} crumb={text('nav')}>
+<Base title={text('title')} description={text('description')} noindex={!live} trail={trail} crumb={text('nav')} jsonLd={productLd}>
   <div class="wrap py-8 sm:py-12">
     <div class="title-row flex items-start justify-between gap-3">
       <h1 class="text-3xl sm:text-4xl">

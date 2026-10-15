@@ -7,6 +7,7 @@
  */
 import { langOf, useT } from '../i18n/index.js';
 import { practiceList } from '../lib/practicePassages.build.js';
+import { productById, hasPage, price } from '../lib/store.js';
 
 const lang = langOf(Astro.url);
 const { t, path: to } = useT(lang);
@@ -18,6 +19,9 @@ const levels = [1, 2, 3].map((level) => ({
   max: Math.max(...list.filter((p) => p.level === level).map((p) => p.words)),
 }));
 const PDF = '/downloads/mykrutidev-kruti-dev-typing-30-passages.pdf';
+// The paid starter book, suggested beside the free PDF only while it is on sale (or on a preview).
+const starter = productById('kruti-dev-7-day-starter');
+const showStarter = !!starter && hasPage(starter);
 ---
 
 <section class="mt-8" aria-labelledby="pp-pdf">
@@ -31,6 +35,22 @@ const PDF = '/downloads/mykrutidev-kruti-dev-typing-30-passages.pdf';
     </a>
   </div>
 </section>
+
+{
+  showStarter && (
+    <section class="mt-4" aria-labelledby="pp-starter" data-starter-promo>
+      <div class="card flex flex-wrap items-center justify-between gap-3 border-brick/40 p-4 sm:p-5">
+        <div class="max-w-xl">
+          <h2 id="pp-starter" class="text-lg">{t('practice.starterTitle')}</h2>
+          <p class="mt-1 text-sm text-body">{t('practice.starterNote')}</p>
+        </div>
+        <a class="btn btn-outline" href={to('/store/kruti-dev-7-day-starter')}>
+          {t('practice.starterButton', { price: price(starter.pricePaise) })}
+        </a>
+      </div>
+    </section>
+  )
+}
 
 {
   levels.map((l) => (

@@ -267,7 +267,10 @@
     "practise": "Practise with the timed typing test",
     "pdfTitle": "Free PDF: all 30 passages",
     "pdfNote": "36 pages to print: each passage with its tricky words and keys, a score box, a joined-letters page and a progress log. Free to print and share.",
-    "pdfButton": "Download the free PDF"
+    "pdfButton": "Download the free PDF",
+    "starterTitle": "New to the Kruti Dev keyboard? Start with the 7-Day Starter",
+    "starterNote": "A 32-page day-by-day PDF: the keys row by row, drills that show the keys to press, and a 5-minute self-check each day. Try Day 1 free before you buy.",
+    "starterButton": "See the 7-Day Starter · {price}"
   },
   "translit": {
     "inputLabel": "English (Roman)",

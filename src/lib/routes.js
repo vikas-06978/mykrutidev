@@ -136,7 +136,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev', '/store/kruti-dev-7-day-starter'],
+    related: ['/hindi-typing-practice-passages', '/hindi-keyboard', '/english-to-hindi-typing', '/unicode-to-kruti-dev', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/hindi-keyboard',
@@ -972,7 +972,7 @@ export const PAGES = [
     // Not a menu `tool`: tools have no source font, and this page has one.
     // It is linked from the footer, the tutor and the keyboard chart instead.
     group: 'More',
-    related: ['/kruti-dev-keyboard', '/hindi-typing-test', '/hindi-keyboard'],
+    related: ['/kruti-dev-keyboard', '/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-keyboard'],
   },
   {
     path: '/how-to-type-hindi-in-ms-word',
@@ -1004,7 +1004,7 @@ export const PAGES = [
     from: null,
     to: null,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/kruti-dev-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
   },
   // ---- Printables: an HTML page + a PDF each, built from the tutor's data
   // (src/lib/printables.js). The keyboard chart carries the one menu entry;
@@ -1018,7 +1018,7 @@ export const PAGES = [
     printable: true,
     menu: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-finger-chart', '/hindi-keyboard'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-finger-chart', '/hindi-keyboard'],
   },
   {
     path: '/hindi-typing-finger-chart',
@@ -1038,7 +1038,7 @@ export const PAGES = [
     to: null,
     printable: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-progress-log', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-progress-log', '/kruti-dev-keyboard', '/store/kruti-dev-7-day-starter'],
   },
   {
     path: '/kruti-dev-matra-chart',
@@ -1078,7 +1078,7 @@ export const PAGES = [
     to: null,
     printable: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-passages', '/hindi-typing-practice-sheets', '/english-to-hindi-typing'],
   },
   // ---- Everyday Hindi tools (HindiTool.astro, src/lib/toolPages.js). Each has
   // exactly one right answer, so each is live without a Beta badge.

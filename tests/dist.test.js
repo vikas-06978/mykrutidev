@@ -1038,3 +1038,25 @@ describe('AdSense follows its build variables', () => {
     assert.match(headers(), /pagead2\.googlesyndication\.com/);
   });
 });
+
+describe('the 7-Day Starter beside the free practice passages', () => {
+  const starter = PAGES.find((p) => p.path === '/store/kruti-dev-7-day-starter');
+  const read = (p) => readFileSync(join(DIST, p, 'index.html'), 'utf8');
+  test('suggested on the passages page exactly when its page is live, in every language', () => {
+    for (const prefix of ['', 'hi/', 'ta/']) {
+      const html = read(`${prefix}hindi-typing-practice-passages`);
+      assert.equal(/data-starter-promo/.test(html), isLive(starter), prefix);
+    }
+  });
+  test('its page carries Product structured data with the price exactly when it is live', () => {
+    const html = read('store/kruti-dev-7-day-starter');
+    const product = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)]
+      .map((m) => JSON.parse(m[1]))
+      .find((d) => d['@type'] === 'Product');
+    assert.equal(Boolean(product), isLive(starter));
+    if (product) {
+      assert.equal(product.offers.priceCurrency, 'INR');
+      assert.equal(product.offers.url, `${SITE}/store/kruti-dev-7-day-starter/`);
+    }
+  });
+});
