@@ -958,7 +958,7 @@ export const PAGES = [
     to: null,
     tool: true,
     group: 'More',
-    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard', '/store/kruti-dev-typing-30-passages'],
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/remington-hindi-keyboard', '/hindi-typing-practice-passages'],
   },
   {
     path: '/remington-hindi-keyboard',
@@ -995,6 +995,16 @@ export const PAGES = [
     app: true,
     group: 'More',
     related: ['/', '/unicode-to-kruti-dev', '/kruti-dev-to-mangal'],
+  },
+  {
+    path: '/hindi-typing-practice-passages',
+    ready: true,
+    // Thirty passages to read and type, with the keys of the hardest words (PracticePassages).
+    kind: 'content',
+    from: null,
+    to: null,
+    group: 'More',
+    related: ['/hindi-typing-test', '/hindi-typing-practice-sheets', '/kruti-dev-keyboard'],
   },
   // ---- Printables: an HTML page + a PDF each, built from the tutor's data
   // (src/lib/printables.js). The keyboard chart carries the one menu entry;

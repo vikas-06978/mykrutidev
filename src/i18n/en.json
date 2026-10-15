@@ -251,6 +251,19 @@
   "ads": {
     "label": "Advertisement"
   },
+  "practice": {
+    "level1": "Level 1: short passages",
+    "level2": "Level 2: medium passages",
+    "level3": "Level 3: long passages",
+    "range": "{min} to {max} words each",
+    "words": "{n} words",
+    "tricky": "Tricky words",
+    "keysNote": "The Hindi, and the Kruti Dev keys that type it.",
+    "practise": "Practise with the timed typing test",
+    "pdfTitle": "Free PDF: all 30 passages",
+    "pdfNote": "36 pages to print: each passage with its tricky words and keys, a score box, a joined-letters page and a progress log. Free to print and share.",
+    "pdfButton": "Download the free PDF"
+  },
   "translit": {
     "inputLabel": "English (Roman)",
     "inputPlaceholder": "Type here in English... e.g. namaste",
@@ -2999,6 +3012,21 @@
         }
       ]
     },
+    "/hindi-typing-practice-passages": {
+      "nav": "30 Practice Passages",
+      "h1": "30 Hindi Typing Practice Passages (Free)",
+      "title": "30 Hindi Typing Passages with Kruti Dev Keys",
+      "description": "Thirty original Hindi passages in three levels for typing practice, with the Kruti Dev keys of each one’s hardest words. Read online or get the free PDF.",
+      "lede": "Thirty original Hindi passages, from 98 to 216 words, in three levels. Under each one are its hardest words and the Kruti Dev keys that type them. Free to read here, or download the whole set as a printable PDF.",
+      "body": [
+        "<h2>How to practise</h2>",
+        "<p>Open a passage and read it once. Look at its tricky words and their keys, then type the whole passage in Kruti Dev 010 with a timer running. The <a href=\"/hindi-typing-test\">typing test</a> times you and counts your mistakes. Count a word as a mistake if any letter or matra in it is wrong. Net speed is the words typed minus the mistakes, divided by the minutes.</p>",
+        "<h2>Two Kruti Dev rules behind most mistakes</h2>",
+        "<p>The ि sign is typed <strong>before</strong> its letter: कि is <code>fd</code>. The reph (र् over a letter) is typed <strong>after</strong> the letter it sits on: कर्म is <code>deZ</code>. New to the keyboard? The <a href=\"/store/kruti-dev-7-day-starter\">Kruti Dev 7-Day Starter</a> teaches it day by day.</p>",
+        "<h2>About these passages</h2>",
+        "<p>All thirty were written for this site. They are not taken from any exam paper. The nasal is written ं (गांव, पहुंचना), an accepted printed spelling, so every word can be typed without Alt codes. No typing speed or exam result is promised: exams set their own speeds, fonts and marking rules, so read your exam’s official notification.</p>"
+      ]
+    },
     "/kruti-dev-matra-chart": {
       "nav": "Matra & conjunct chart",
       "h1": "Kruti Dev Matra and Conjunct Chart - Free PDF",
@@ -3528,24 +3556,6 @@
         "<p><a href=\"/downloads/mykrutidev-kruti-dev-7-day-starter-day-1-sample.pdf\" download=\"mykrutidev-kruti-dev-7-day-starter-day-1-sample.pdf\" type=\"application/pdf\">Download the free Day 1 sample</a> (5 pages) and see exactly how the book works before you buy.</p>",
         "<h2>What it does not promise</h2>",
         "<p>No typing speed and no exam result. Exams set their own speeds, fonts and marking rules, so read your exam's official notification. You need the Kruti Dev 010 font in Word or Notepad, or you can practise on the <a href=\"/hindi-typing-test\">free typing tutor</a>.</p>",
-        "<h2>Delivery and refunds</h2>",
-        "<p>The download is ready right after payment, on screen and by email. A delivered, working file is not refundable. If the download fails, you pay twice or the file will not open, see the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
-      ]
-    },
-    "/store/kruti-dev-typing-30-passages": {
-      "nav": "30 Hindi Typing Passages",
-      "h1": "Kruti Dev Typing Practice: 30 Hindi Passages",
-      "title": "Kruti Dev Typing: 30 Hindi Passages (PDF)",
-      "description": "A 36-page PDF of 30 original Hindi passages for Kruti Dev typing practice, with the keys for each one’s hardest words. Try a free sample first.",
-      "lede": "Thirty original Hindi passages to type in Kruti Dev, in three levels from short to long. Each comes with its hardest words and their keys, and a box to score your speed and accuracy.",
-      "body": [
-        "<h2>What you get</h2>",
-        "<p>A 36-page A4 PDF in Hindi and English: 30 passages, one to a page, from 98 to 216 words. Level 1 has short passages with everyday words, level 2 medium ones on office and daily-life topics, and level 3 long ones with more joined letters.</p>",
-        "<ul><li>Every passage shows its word count and about how long it takes at 20 and at 30 words a minute.</li><li>Under each passage, its eight hardest words with the Kruti Dev keys that type them, and a box for the date, time, mistakes, net speed and accuracy.</li><li>A page of 24 joined letters with their keys, simple scoring formulas, and a progress log for all 30 passages.</li><li>Every passage and every key was checked with this site’s converter, and every key is on an ordinary keyboard: no Alt codes.</li></ul>",
-        "<h2>Try it free</h2>",
-        "<p><a href=\"/downloads/mykrutidev-kruti-dev-typing-30-passages-sample.pdf\" download=\"mykrutidev-kruti-dev-typing-30-passages-sample.pdf\" type=\"application/pdf\">Download the free sample</a> (5 pages: how it works, the joined letters and passage 1) and see exactly what you get before you buy.</p>",
-        "<h2>What it does not promise</h2>",
-        "<p>No typing speed and no exam result. The passages were written for this book and are not taken from any exam paper. Exams set their own speeds, fonts and marking rules, so read your exam’s official notification. You need the Kruti Dev 010 font in Word or Notepad, or you can practise on the <a href=\"/hindi-typing-test\">free typing tutor</a>.</p>",
         "<h2>Delivery and refunds</h2>",
         "<p>The download is ready right after payment, on screen and by email. A delivered, working file is not refundable. If the download fails, you pay twice or the file will not open, see the <a href=\"/refund-policy\">refund policy</a> and the <a href=\"/delivery-policy\">delivery policy</a>.</p>"
       ]

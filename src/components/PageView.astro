@@ -19,6 +19,7 @@ import FontStrip from './FontStrip.astro';
 import HindiTool from './HindiTool.astro';
 import ExcelConverter from './ExcelConverter.astro';
 import AdSlot from './AdSlot.astro';
+import PracticePassages from './PracticePassages.astro';
 import { TOOL_PAGES } from '../lib/toolPages.js';
 import { getPage, isLive, reversePage, statusOf, docPairFor, CONTACT_EMAIL } from '../lib/routes.js';
 import SoonBadge from './SoonBadge.astro';
@@ -169,6 +170,7 @@ const betaNote = maybe(`pages.${path}.betaNote`);
     {page.product && <StorePreview product={page.product} />}
     {page.product && <StoreBuy product={page.product} />}
     {path === '/store/thanks' && <StoreThanks />}
+    {path === '/hindi-typing-practice-passages' && <PracticePassages />}
 
     {
       Tool && (
