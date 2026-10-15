@@ -902,3 +902,20 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   30 passages: the same chips as the ladder, a level at a time
+   --------------------------------------------------------------------------- */
+.tt-pp .tt-level[hidden] {
+  display: none;
+}
+@media (width >= 30rem) {
+  .tt-pp {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (width >= 64rem) {
+  .tt-pp {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

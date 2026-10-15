@@ -40,6 +40,7 @@ const buy = fill(t('store.buy'), { price: amount });
     novalidate
     data-sb-form
     data-product={product.id}
+    data-price={String(product.pricePaise / 100)}
     data-lang={lang}
     data-i18n={JSON.stringify(strings)}
   >
@@ -113,6 +114,7 @@ const buy = fill(t('store.buy'), { price: amount });
 
 <script>
   import { checkoutError, payUrlOk } from '../lib/storeClient.js';
+  import { track } from '../scripts/track.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-sb-form]');
   if (form) {
@@ -123,6 +125,9 @@ const buy = fill(t('store.buy'), { price: amount });
     const website = form.querySelector<HTMLInputElement>('#sb-website')!;
     const err = form.querySelector<HTMLParagraphElement>('[data-sb-error]')!;
     const pay = form.querySelector<HTMLButtonElement>('[data-sb-pay]')!;
+    // Google Analytics' shop events: the product and its price, never the email.
+    const item = { currency: 'INR', value: Number(form.dataset.price), items: [{ item_id: form.dataset.product, price: Number(form.dataset.price) }] };
+    track('view_item', item);
 
     // Turnstile starts once someone begins filling in the form, not on page load.
     // Loaded on demand (not imported up front) so the shop adds nothing to the pages that share this script's chunks.
@@ -151,6 +156,7 @@ const buy = fill(t('store.buy'), { price: amount });
       if (!accept.checked) return fail(L.errAccept, accept);
 
       busy(true);
+      track('begin_checkout', item);
       let res: Response | null = null;
       let json: any = null;
       try {

@@ -45,3 +45,27 @@ test('upload_file: the file type and a size bucket, never its name', async ({ pa
   // Nothing in any event names the file.
   expect(JSON.stringify(await page.evaluate(() => window.__events))).not.toContain('kruti-test');
 });
+
+test('a practice passage: the start names which of the 30, nothing else', async ({ page }) => {
+  await page.goto('/hindi-typing-test/?passage=12#tool');
+  await expect(page.locator('[data-role="capture"]')).toBeEnabled();
+  await page.locator('[data-role="capture"]').focus();
+  const cap = await page.locator('.kbd-cap[data-next="true"]').getAttribute('data-cap');
+  await page.keyboard.type(cap);
+  await expect.poll(() => events(page, 'typing_test_start')).toHaveLength(1);
+  const [e] = await events(page, 'typing_test_start');
+  expect(e.params).toEqual({ mode: 'passages', minutes: 0, passage: 12 });
+});
+
+test('shop: product view and the Starter card, with product and price only', async ({ page }) => {
+  await page.goto('/store/kruti-dev-7-day-starter/');
+  await expect.poll(() => events(page, 'view_item')).toHaveLength(1);
+  const [v] = await events(page, 'view_item');
+  expect(v.params).toEqual({ currency: 'INR', value: 39, items: [{ item_id: 'kruti-dev-7-day-starter', price: 39 }] });
+
+  await page.goto('/hindi-typing-practice-passages/');
+  await page.locator('[data-track-promo]').evaluate((a) => a.addEventListener('click', (e) => e.preventDefault()));
+  await page.locator('[data-track-promo]').click();
+  const [p] = await events(page, 'select_promotion');
+  expect(p.params).toEqual({ promotion_id: 'practice-passages', items: [{ item_id: 'kruti-dev-7-day-starter' }] });
+});

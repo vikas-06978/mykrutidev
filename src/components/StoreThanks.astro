@@ -8,6 +8,7 @@
  * scanner opening the link cannot use up a download.
  */
 import { langOf, useT } from '../i18n/index.js';
+import { PRODUCTS } from '../lib/store.js';
 
 const lang = langOf(Astro.url);
 const { t, path: to } = useT(lang);
@@ -16,9 +17,11 @@ const keys = [
   'thanksClosed', 'thanksNone', 'thanksUnverified', 'thanksSave', 'thanksCopy', 'thanksCopied',
 ];
 const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
+// Rupees by product, for the purchase count in Google Analytics.
+const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]));
 ---
 
-<section class="mt-8 card p-5 sm:p-6" aria-live="polite" data-store-thanks data-i18n={JSON.stringify(strings)}>
+<section class="mt-8 card p-5 sm:p-6" aria-live="polite" data-store-thanks data-i18n={JSON.stringify(strings)} data-prices={JSON.stringify(prices)}>
   <p class="text-lg font-medium text-ink" data-st-status role="status">{t('store.thanksChecking')}</p>
   <p class="mt-2 text-sm text-body" data-st-extra hidden></p>
   <form method="post" action="/api/store/download" class="mt-4" data-st-download hidden>
@@ -35,6 +38,7 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 
 <script>
   import { daysLeft, readOrderFrom, thanksKey } from '../lib/storeClient.js';
+  import { track } from '../scripts/track.js';
 
   const root = document.querySelector<HTMLElement>('[data-store-thanks]');
   if (root) {
@@ -105,7 +109,13 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
       } catch {
         json = null;
       }
-      if (json?.ok && (json.state === 'paid')) return showPaid(json, from?.kind === 'link' ? from.order : order);
+      if (json?.ok && json.state === 'paid') {
+        // Counted once, on the return from Razorpay: a reload or the emailed
+        // link opens the #o= address instead. Product and price only - no
+        // order number or email goes to Google Analytics.
+        if (from?.kind !== 'link') countPurchase(String(json.productId ?? ''));
+        return showPaid(json, from?.kind === 'link' ? from.order : order);
+      }
       const state = json?.ok ? String(json.state) : 'unverified';
       // Just back from paying: Razorpay can take a few seconds to say "paid".
       if (from?.kind === 'return' && (state === 'pending' || state === 'created') && tries < 4) {
@@ -113,6 +123,19 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
         return void setTimeout(() => check(tries + 1), 4000);
       }
       showOther(state);
+    }
+    function countPurchase(id: string) {
+      const prices = JSON.parse(root!.dataset.prices ?? '{}');
+      const value = Number(prices[id]);
+      if (!id || !Number.isFinite(value)) return;
+      try {
+        // A second confirm in the same tab (Retry) is not a second sale.
+        if (sessionStorage.getItem('mkd-counted') === order) return;
+        sessionStorage.setItem('mkd-counted', order);
+      } catch {
+        // Counted anyway: storage only guards against a double count.
+      }
+      track('purchase', { currency: 'INR', value, items: [{ item_id: id, price: value }] });
     }
     retry.addEventListener('click', () => void check());
     copy.addEventListener('click', async () => {

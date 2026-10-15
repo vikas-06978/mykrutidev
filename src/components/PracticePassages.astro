@@ -44,7 +44,7 @@ const showStarter = !!starter && hasPage(starter);
           <h2 id="pp-starter" class="text-lg">{t('practice.starterTitle')}</h2>
           <p class="mt-1 text-sm text-body">{t('practice.starterNote')}</p>
         </div>
-        <a class="btn btn-outline" href={to('/store/kruti-dev-7-day-starter')}>
+        <a class="btn btn-outline" href={to('/store/kruti-dev-7-day-starter')} data-track-promo="practice-passages">
           {t('practice.starterButton', { price: price(starter.pricePaise) })}
         </a>
       </div>
@@ -76,7 +76,7 @@ const showStarter = !!starter && hasPage(starter);
               ))}
             </ul>
             <p class="mt-4 text-sm">
-              <a href={`${to('/hindi-typing-test')}#tool`}>{t('practice.practise')}</a>
+              <a href={`${to('/hindi-typing-test')}?passage=${p.n}#tool`}>{t('practice.practise')}</a>
             </p>
           </details>
         ))}
@@ -84,3 +84,13 @@ const showStarter = !!starter && hasPage(starter);
     </section>
   ))
 }
+
+<script>
+  import { track } from '../scripts/track.js';
+
+  // The 7-Day Starter card: counted as a promotion click in Google Analytics.
+  document.querySelector('[data-track-promo]')?.addEventListener('click', (e) => {
+    const a = e.currentTarget as HTMLElement;
+    track('select_promotion', { promotion_id: a.dataset.trackPromo ?? '', items: [{ item_id: 'kruti-dev-7-day-starter' }] });
+  });
+</script>

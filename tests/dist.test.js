@@ -1061,3 +1061,35 @@ describe('the 7-Day Starter beside the free practice passages', () => {
     }
   });
 });
+
+describe('30 passages in the typing tutor', () => {
+  const read = (p) => readFileSync(join(DIST, p, 'index.html'), 'utf8');
+  test('the tutor lists all 30, and its data file has each one as keystrokes', async () => {
+    const { PRACTICE_PASSAGES } = await import('../src/lib/practicePassages.js');
+    for (const prefix of ['', 'hi/', 'pa/']) {
+      const html = read(`${prefix}hindi-typing-test`);
+      assert.match(html, /data-mode="passages"/, prefix);
+      const chips = [...html.matchAll(/data-pp="(\d+)"/g)].map((m) => Number(m[1]));
+      assert.deepEqual(chips, PRACTICE_PASSAGES.map((_, i) => i + 1), prefix);
+      const meta = JSON.parse(/<script type="application\/json" data-tutor-pp>(.*?)<\/script>/s.exec(html)[1]);
+      assert.equal(meta.count, 30);
+      assert.match(meta.url, /^\/data\/practice-passages\.json\?v=[0-9a-f]{10}$/);
+    }
+    const data = JSON.parse(readFileSync(join(DIST, 'data/practice-passages.json'), 'utf8'));
+    assert.equal(data.length, PRACTICE_PASSAGES.length);
+    data.forEach((p, i) => {
+      assert.equal(p.n, i + 1);
+      assert.equal(p.units.map((u) => u.deva).join(''), PRACTICE_PASSAGES[i].text, `passage ${i + 1}`);
+      assert.ok(p.units.every((u) => u.keys.length > 0), `passage ${i + 1}`);
+    });
+  });
+
+  test('each passage on the practice page opens itself in the tutor, in every language', () => {
+    for (const prefix of ['', 'hi/', 'ta/']) {
+      const html = read(`${prefix}hindi-typing-practice-passages`);
+      const links = [...html.matchAll(/href="([^"]*hindi-typing-test\/\?passage=(\d+)#tool)"/g)];
+      assert.deepEqual(links.map((m) => Number(m[2])), Array.from({ length: 30 }, (_, i) => i + 1), prefix);
+      for (const m of links) assert.ok(m[1].startsWith(`/${prefix}hindi-typing-test/`), m[1]);
+    }
+  });
+});

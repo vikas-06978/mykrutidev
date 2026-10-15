@@ -265,7 +265,7 @@
     "words": "{n} words",
     "tricky": "Tricky words",
     "keysNote": "The Hindi, and the Kruti Dev keys that type it.",
-    "practise": "Practise with the timed typing test",
+    "practise": "Type this passage in the typing test",
     "pdfTitle": "Free PDF: all 30 passages",
     "pdfNote": "36 pages to print: each passage with its tricky words and keys, a score box, a joined-letters page and a progress log. Free to print and share.",
     "pdfButton": "Download the free PDF",
@@ -527,7 +527,19 @@
     "hands": {
       "left": "Left hand",
       "right": "Right hand"
-    }
+    },
+    "passages": "Passages",
+    "ppLevel": "Level {n}",
+    "ppAll": "All 30 passages with tricky words",
+    "ppNumber": "{n} · {words} words",
+    "ppTitle": "Passage {n} · {title}",
+    "ppNote": "The 30 passages from the free practice page, all open. Pick a level and a passage. The clock counts up and stops when you finish. A finished passage is ticked, and you can type it again.",
+    "ppLoading": "Loading the passage…",
+    "ppFailedTitle": "Could not load the passages",
+    "ppFailed": "The passages could not load. Check your internet connection, then pick a passage again.",
+    "ppDone": "Passage {n} finished ✓. It stays open: type it again any time.",
+    "ppPartial": "{acc}% accurate over the {through}% of the passage you typed. Type all of it to tick this passage.",
+    "ppNext": "Next: passage {n}"
   },
   "allConverters": {
     "intro": "{live} converters and tools, all free and working in your browser. Search by font, tool or task, or jump to a section.",
@@ -3469,7 +3481,7 @@
         "<ul><li>Your theme and colour choice, and your language choice.</li><li>In the converters: the text in the input box, so it is still there after a refresh, and the last 10 texts you converted with each tool, under <strong>Recent</strong> (each up to 50,000 characters). Clearing the box removes its draft, and <strong>Delete all</strong> empties Recent.</li><li>In the typing tutor: which lessons you have cleared, your best speed, your daily practice streak, badges, and your last 30 practice sessions.</li><li>A few interface preferences, such as whether key sounds are on.</li><li>The date you last sent feedback, so the feedback form does not ask again for 30 days.</li><li>Which new pages you have already opened, so their \"New\" label goes away.</li></ul>",
         "<p>These are kept in your browser's local storage, are never sent to us, and can be removed at any time by clearing this site's data in your browser settings. On a shared or office computer, use <strong>Delete all</strong> under Recent when you finish. {cookiesLine}</p><p>Your browser also keeps a copy of the site's own pages, scripts and fonts, so the converters open without an internet connection. That copy holds only the site's files, never your text.</p>",
         "<h2>Visit statistics (Google Analytics)</h2>",
-        "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself. It also counts which buttons in the tools are used, such as Copy, Download Word, Print or a finished lesson, with the fonts or the lesson involved. It counts the start of a typing test (its mode and length) and that a file was chosen for conversion (its type and rough size, never its name or contents).</p>",
+        "<p>To learn which pages and tools people use, and what to improve, mykrutidev.com uses Google Analytics. For each visit it records the pages you open, how far you scroll, clicks on links to other sites and on downloads, the site or search that brought you here, your device type, browser, screen size and language, and your approximate location (city or country), which Google works out from your IP address. Google Analytics does not store the IP address itself. It also counts which buttons in the tools are used, such as Copy, Download Word, Print or a finished lesson, with the fonts or the lesson involved. It counts the start of a typing test (its mode and length) and that a file was chosen for conversion (its type and rough size, never its name or contents). For a practice passage it counts which of the 30 was started. In the shop it counts that a product page was opened, that Pay was pressed and that a purchase went through, with the product and its price, never your email or order number. It also counts a click on a \"New\" label or on the 7-Day Starter card.</p>",
         "<p>It sets two cookies, <code>_ga</code> and <code>_ga_VZZRXNT8TQ</code>, so that a returning visitor is not counted as a new one. They last up to two years. It never receives the text you convert, your files or anything you type in the tools, because those never leave your device. We have switched off Google signals and ad personalisation, so this data is not used for advertising, and the reports do not tell us who you are.</p>",
         "<p>To opt out, block cookies for this site in your browser settings, use a tracker blocker, or install Google's <a href=\"https://tools.google.com/dlpage/gaoptout\">Analytics opt-out add-on</a>. The site works the same either way. Google's handling of this data is covered by <a href=\"https://policies.google.com/privacy\">Google's privacy policy</a>.</p>",
         "<h2>Feedback</h2>",
