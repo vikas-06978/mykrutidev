@@ -7,6 +7,7 @@
  */
 import { langOf, useT } from '../i18n/index.js';
 import { getPage, isLive } from '../lib/routes.js';
+import { badgeFor } from '../lib/newBadges.js';
 
 const { t, raw, render, path: to } = useT(langOf(Astro.url));
 
@@ -46,9 +47,20 @@ const why: string[] = raw('home.why');
         <li>
           <a
             href={mode ? `${to(href)}?mode=${mode}` : to(href)}
+            data-new-link={(!mode && badgeFor(href)) || undefined}
             class="block h-full card p-4 no-underline transition-colors hover:border-brick"
           >
-            <span class="block font-semibold text-ink" set:html={render(t(`home.tasks.${key}.title`))} />
+            <span class="block font-semibold text-ink">
+              <span set:html={render(t(`home.tasks.${key}.title`))} />
+              {!mode && badgeFor(href) && (
+                <span
+                  data-new-badge={badgeFor(href)}
+                  class="ms-2 inline-block rounded-full bg-brick px-1.5 py-0.5 align-middle text-[0.6875rem] font-semibold leading-none text-on-brick"
+                >
+                  {t('nav.new')}
+                </span>
+              )}
+            </span>
             <span class="mt-1 block text-sm text-body" set:html={render(t(`home.tasks.${key}.benefit`))} />
           </a>
         </li>

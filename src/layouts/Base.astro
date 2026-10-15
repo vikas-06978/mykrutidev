@@ -10,6 +10,7 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Feedback from '../components/Feedback.astro';
 import { SITE, CONTACT_EMAIL, getPage, isLive } from '../lib/routes.js';
 import { analyticsScript } from '../lib/analytics.js';
+import { badgeScript, badgeCss } from '../lib/newBadges.js';
 import { ADS, adsAllowedOn, adsScript } from '../lib/ads.js';
 import { brandTitle } from '../lib/seoTitle.js';
 import { ogImagePath, OG_SIZE } from '../lib/og.js';
@@ -181,6 +182,9 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     {/* AdSense: the site check once a publisher ID is set, the ad code once ads are on. */}
     {ADS && <meta name="google-adsense-account" content={ADS.client} />}
     {adsHere && <script is:inline set:html={adsScript(ADS!, SITE)} />}
+    {/* "New" badges (src/lib/newBadges.js): hidden before the first paint once seen or expired. */}
+    <script is:inline set:html={badgeScript()} />
+    <style set:html={badgeCss()}></style>
     <meta name="theme-color" content="#faf7f2" />
     <link rel="preload" href={devanagari400} as="font" type="font/woff2" crossorigin />
 
