@@ -25,6 +25,8 @@
 /** The live address (routes.js has it too, but that file cannot go in a Function). */
 export const SITE_URL = 'https://mykrutidev.com';
 
+import { LOCALES } from '../i18n/locales.js';
+
 export const STORE = {
   currency: 'INR',
   /** Days a buyer has to report a problem (failed delivery, double payment, broken file). There is no refund for a delivered, working file. Shown in the policy and the buyer's email. */
@@ -43,6 +45,10 @@ export const STORE = {
   emailChangeHours: 24,
   /** "Send me my link again": emails one address can be sent per day. */
   findPerDay: 3,
+  /** Taps, retries and resumed transfers within this many minutes are one download. */
+  sessionMinutes: 15,
+  /** A failed download email is retried in the background this many times. */
+  mailRetries: 6,
 };
 
 /**
@@ -189,7 +195,8 @@ export function validateCheckout(body) {
   // Optional: left empty, the buyer gets the download on the page after paying (and keeps that link).
   if (email && (email.length > LIMITS.email || !EMAIL_RE.test(email))) errors.push('email: not an email address');
   if (body.accept !== true) errors.push('accept: the terms were not accepted');
-  const lang = typeof body.lang === 'string' && /^[a-z]{2}$/.test(body.lang) ? body.lang : 'en';
+  // One of the site's languages: the buyer is sent back to the thanks page in it.
+  const lang = typeof body.lang === 'string' && LOCALES.includes(body.lang) ? body.lang : 'en';
   return errors.length ? { ok: false, errors } : { ok: true, value: { productId, email, lang } };
 }
 
@@ -221,13 +228,38 @@ export const STORE_SCHEMA = [
   email_prev TEXT,
   email_changed_by TEXT,
   email_changed_at TEXT,
-  buyer_email_changes INTEGER NOT NULL DEFAULT 0
+  buyer_email_changes INTEGER NOT NULL DEFAULT 0,
+  claim_hash TEXT,
+  link_url TEXT,
+  token_ver INTEGER NOT NULL DEFAULT 0,
+  session_id TEXT,
+  session_at INTEGER,
+  mail_tries INTEGER NOT NULL DEFAULT 0,
+  mail_next INTEGER,
+  refunded_amount INTEGER NOT NULL DEFAULT 0,
+  refund_checked_at INTEGER
 )`,
   `CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at)`,
   `CREATE INDEX IF NOT EXISTS orders_link_id ON orders (link_id)`,
   `CREATE INDEX IF NOT EXISTS orders_payment_id ON orders (payment_id)`,
   `CREATE INDEX IF NOT EXISTS orders_mail_id ON orders (mail_id)`,
   `CREATE INDEX IF NOT EXISTS orders_email ON orders (email)`,
+  `CREATE TABLE IF NOT EXISTS store_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT
+)`,
+  `CREATE TABLE IF NOT EXISTS store_events (
+  id TEXT PRIMARY KEY,
+  at INTEGER NOT NULL
+)`,
+  `CREATE TABLE IF NOT EXISTS store_audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL,
+  order_id TEXT,
+  action TEXT NOT NULL,
+  detail TEXT
+)`,
+  `CREATE INDEX IF NOT EXISTS store_audit_order ON store_audit (order_id)`,
 ];
 
 /**
@@ -243,6 +275,16 @@ export const STORE_SCHEMA = [
  *   email_prev, email_changed_by ('buyer' | 'admin'), email_changed_at: the
  *         address before the last change, and who changed it when.
  *   buyer_email_changes: how many times the buyer changed it (allowed once).
+ *   claim_hash: SHA-256 of the checkout secret the buying browser keeps. With it
+ *         (or Razorpay's signed return), that browser gets the download and
+ *         management keys; the order id alone gets neither.
+ *   link_url: the Razorpay page of an unpaid order, so a second "Pay" reuses it.
+ *   token_ver: the version of the download key. A changed email moves it on, so
+ *         a link that went to a wrong address stops working.
+ *   session_id, session_at: the current download session. Taps, retries and
+ *         resumes within STORE.sessionMinutes count as one download.
+ *   mail_tries, mail_next: the background retry of a failed download email.
+ *   refunded_amount, refund_checked_at: what Razorpay says was refunded (paise).
  */
 export const ORDER_ADDED_COLUMNS = [
   ['mode', 'TEXT'],
@@ -252,6 +294,15 @@ export const ORDER_ADDED_COLUMNS = [
   ['email_changed_by', 'TEXT'],
   ['email_changed_at', 'TEXT'],
   ['buyer_email_changes', 'INTEGER NOT NULL DEFAULT 0'],
+  ['claim_hash', 'TEXT'],
+  ['link_url', 'TEXT'],
+  ['token_ver', 'INTEGER NOT NULL DEFAULT 0'],
+  ['session_id', 'TEXT'],
+  ['session_at', 'INTEGER'],
+  ['mail_tries', 'INTEGER NOT NULL DEFAULT 0'],
+  ['mail_next', 'INTEGER'],
+  ['refunded_amount', 'INTEGER NOT NULL DEFAULT 0'],
+  ['refund_checked_at', 'INTEGER'],
 ];
 
 /** Columns of the orders CSV, in order. */

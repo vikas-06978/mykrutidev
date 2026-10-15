@@ -230,8 +230,9 @@ export function ownerMail(env, { order, product, origin = SITE_URL, token = '' }
  */
 export function alertMail(env, { order, product, origin = SITE_URL, token, what }) {
   const links = pageLinks(origin, order, token);
-  const wa = waLinks(order.phone, waText('wrong-email', { product, email: order.email, links }));
   const bounced = what === 'bounced';
+  // A spam complaint means the address works: no "your email looks wrong" message for it.
+  const wa = waLinks(order.phone, waText(bounced ? 'wrong-email' : 'sale', { product, email: order.email, links }));
   return {
     to: owners(env),
     subject: bounced
@@ -249,7 +250,7 @@ export function alertMail(env, { order, product, origin = SITE_URL, token, what 
       ],
       note: bounced
         ? 'The address is probably mistyped. Send the buyer their link on WhatsApp, or ask for the right address and use "Change email" on the orders page. The buyer can also correct it once on their download page.'
-        : 'The buyer may not see our emails. Send them their link on WhatsApp if they need it.',
+        : 'The address works, but the buyer may not see our emails from now on. Their access is unchanged. If they ask, send their link on WhatsApp.',
       wa,
       adminUrl: adminUrlFor(origin, order),
     }),

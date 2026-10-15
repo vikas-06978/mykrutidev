@@ -42,7 +42,16 @@ CREATE TABLE IF NOT EXISTS orders (
   email_prev TEXT,
   email_changed_by TEXT,
   email_changed_at TEXT,
-  buyer_email_changes INTEGER NOT NULL DEFAULT 0
+  buyer_email_changes INTEGER NOT NULL DEFAULT 0,
+  claim_hash TEXT,
+  link_url TEXT,
+  token_ver INTEGER NOT NULL DEFAULT 0,
+  session_id TEXT,
+  session_at INTEGER,
+  mail_tries INTEGER NOT NULL DEFAULT 0,
+  mail_next INTEGER,
+  refunded_amount INTEGER NOT NULL DEFAULT 0,
+  refund_checked_at INTEGER
 );
 
 CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at);
@@ -54,3 +63,29 @@ CREATE INDEX IF NOT EXISTS orders_payment_id ON orders (payment_id);
 CREATE INDEX IF NOT EXISTS orders_mail_id ON orders (mail_id);
 
 CREATE INDEX IF NOT EXISTS orders_email ON orders (email);
+
+-- Small key/value notes the store keeps for itself: when the background check
+-- last ran, when each provider's webhook last arrived, when the owner was last
+-- alerted. No personal data.
+CREATE TABLE IF NOT EXISTS store_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
+-- Provider webhook ids already handled, so a repeated delivery does nothing.
+CREATE TABLE IF NOT EXISTS store_events (
+  id TEXT PRIMARY KEY,
+  at INTEGER NOT NULL
+);
+
+-- What the owner did on /admin/orders (and what the background check changed):
+-- when, which order, which action, a short note. Never a token or a secret.
+CREATE TABLE IF NOT EXISTS store_audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL,
+  order_id TEXT,
+  action TEXT NOT NULL,
+  detail TEXT
+);
+
+CREATE INDEX IF NOT EXISTS store_audit_order ON store_audit (order_id);

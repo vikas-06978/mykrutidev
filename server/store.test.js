@@ -13,6 +13,7 @@ import { PDFDocument } from 'pdf-lib';
 
 import {
   downloadToken,
+  manageToken,
   ensureStoreSchema,
   handleChangeEmail,
   handleFind,
@@ -124,12 +125,18 @@ beforeEach(async () => {
   for (const o of (await FILES.list()).objects) await FILES.delete(o.key);
 });
 
-/** An order that went through checkout; returns its id. */
-async function startOrder(net, env = ENV()) {
-  const r = await handleCheckout(post('/api/store/checkout', good), env, { fetch: net.fetch });
+/** The checkout secret each test order's browser was given, by order id. */
+const CLAIMS = new Map();
+/** An order that went through checkout; returns its id (its secret is in CLAIMS). */
+async function startOrder(net, env = ENV(), body = good) {
+  const r = await handleCheckout(post('/api/store/checkout', body), env, { fetch: net.fetch });
   assert.equal(r.status, 201);
-  return (await r.json()).order;
+  const out = await r.json();
+  CLAIMS.set(out.order, out.claim);
+  return out.order;
 }
+/** What the buying browser sends to /api/store/confirm. */
+const asBuyer = (id) => ({ order: id, claim: CLAIMS.get(id) });
 
 describe('POST /api/store/checkout', () => {
   test('starts an order: Razorpay link made from OUR price and OUR reference, the buyer sent to it', async () => {
@@ -156,7 +163,8 @@ describe('POST /api/store/checkout', () => {
     assert.deepEqual(call.body.notify, { sms: false, email: false });
     assert.equal(call.body.reminder_enable, false);
     assert.equal(call.body.customer.email, 'buyer@example.com');
-    assert.equal(call.body.callback_url, 'https://test.mykrutidev.pages.dev/store/thanks');
+    // Back in the buyer's own language (good.lang is hi).
+    assert.equal(call.body.callback_url, 'https://test.mykrutidev.pages.dev/hi/store/thanks');
     assert.equal(call.body.callback_method, 'get');
     assert.equal(call.body.expire_by, Math.floor(Date.UTC(2026, 9, 14, 10, 0, 0) / 1000) + STORE.linkMinutes * 60);
   });
@@ -169,7 +177,7 @@ describe('POST /api/store/checkout', () => {
       body: JSON.stringify(good),
     });
     await handleCheckout(preview, ENV(), { fetch: net.fetch });
-    assert.equal(net.calls[0].body.callback_url, 'https://claude-store.mykrutidev.pages.dev/store/thanks');
+    assert.equal(net.calls[0].body.callback_url, 'https://claude-store.mykrutidev.pages.dev/hi/store/thanks');
 
     const other = new Request('https://evil.example/api/store/checkout', {
       method: 'POST',
@@ -177,7 +185,7 @@ describe('POST /api/store/checkout', () => {
       body: JSON.stringify(good),
     });
     await handleCheckout(other, ENV(), { fetch: net.fetch });
-    assert.equal(net.calls[1].body.callback_url, 'https://mykrutidev.com/store/thanks');
+    assert.equal(net.calls[1].body.callback_url, 'https://mykrutidev.com/hi/store/thanks');
   });
 
   test('the live site refuses Razorpay TEST keys: nobody can "pay" there with a test card', async () => {
@@ -400,7 +408,7 @@ describe('POST /api/store/confirm', () => {
   test('the buyer is back: pending, then paid with a token and the downloads left', async () => {
     const net = fakeNet();
     const id = await startOrder(net);
-    const confirm = (body = { order: id }) => handleConfirm(post('/api/store/confirm', body), ENV(), { fetch: net.fetch });
+    const confirm = (body = asBuyer(id)) => handleConfirm(post('/api/store/confirm', body), ENV(), { fetch: net.fetch });
 
     assert.deepEqual(await (await confirm()).json(), { ok: true, state: 'pending' });
     net.pay();
@@ -412,17 +420,38 @@ describe('POST /api/store/confirm', () => {
     assert.equal(out.remaining, STORE.maxDownloads);
     assert.equal(out.token, await downloadToken(ENV(), id));
     assert.match(out.token, /^[0-9a-f]{64}$/);
-    // Again (a refresh): the same answer.
-    assert.deepEqual(await (await confirm()).json(), out);
+    assert.match(out.manage, /^[0-9a-f]{64}$/, 'the buying browser also gets the management key');
+    assert.deepEqual(out.receipt, { order: id, amount: PRODUCT.pricePaise, currency: 'INR', paidAt: out.receipt.paidAt, payment: 'pay_test1', refunded: 0 });
+    // Again (a refresh): the same keys.
+    const again = await (await confirm()).json();
+    assert.deepEqual([again.token, again.manage, again.remaining], [out.token, out.manage, out.remaining]);
+  });
+
+  test('paid, but the order id alone unlocks nothing: no keys without the checkout secret or Razorpay\'s signed return', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    net.pay();
+    const run = (body) => handleConfirm(post('/api/store/confirm', body), ENV(), { fetch: net.fetch }).then((r) => r.json());
+    assert.deepEqual(await run({ order: id }), { ok: true, state: 'paid', locked: true, emailed: true });
+    assert.deepEqual(await run({ order: id, claim: 'f'.repeat(32) }), { ok: true, state: 'paid', locked: true, emailed: true });
+    // A forged return signature does not count either.
+    const fake = { paymentId: 'pay_test1', linkId: 'plink_test1', referenceId: id, status: 'paid', signature: 'a'.repeat(64) };
+    assert.equal((await run({ order: id, rzp: fake })).locked, true);
+    // Razorpay's real signature (HMAC of link|reference|status|payment with our API secret) does: another browser after a UPI app switch.
+    const signature = await hmacHex(ENV().RAZORPAY_KEY_SECRET, `plink_test1|${id}|paid|pay_test1`);
+    const ok = await run({ order: id, rzp: { ...fake, signature } });
+    assert.equal(ok.token, await downloadToken(ENV(), id));
+    // ...but only for this order and this payment.
+    const other = await hmacHex(ENV().RAZORPAY_KEY_SECRET, `plink_test1|${id}|paid|pay_other`);
+    assert.equal((await run({ order: id, rzp: { ...fake, paymentId: 'pay_other', signature: other } })).locked, true);
   });
 
   test('paid without an email: no mail to the buyer, the owner is told, and the page is told to say "save this link"', async () => {
     const net = fakeNet();
     const env = { ...ENV(), RESEND_API_KEY: 're_test', NOTIFY_FROM: 'MyKrutiDev <contact@mykrutidev.com>', NOTIFY_TO: 'owner@example.com' };
-    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: '' }), env, { fetch: net.fetch });
-    const id = (await r0.json()).order;
+    const id = await startOrder(net, env, { ...good, email: '' });
     net.pay();
-    const r = await handleConfirm(post('/api/store/confirm', { order: id }), env, { fetch: net.fetch });
+    const r = await handleConfirm(post('/api/store/confirm', asBuyer(id)), env, { fetch: net.fetch });
     const out = await r.json();
     assert.equal(out.state, 'paid');
     assert.equal(out.emailed, false);
@@ -437,7 +466,7 @@ describe('POST /api/store/confirm', () => {
     const net = fakeNet();
     const id = await startOrder(net);
     net.pay();
-    const out = await (await handleConfirm(post('/api/store/confirm', { order: id }), ENV(), { fetch: net.fetch })).json();
+    const out = await (await handleConfirm(post('/api/store/confirm', asBuyer(id)), ENV(), { fetch: net.fetch })).json();
     assert.equal(out.emailed, true);
   });
 
@@ -627,21 +656,38 @@ describe('download', () => {
     assert.deepEqual(plain, before);
   });
 
-  test('stops after the limit', async () => {
+  test('stops after the limit: five download SESSIONS, each one at least a session apart', async () => {
     const { id, token } = await paid();
-    for (let i = 0; i < STORE.maxDownloads; i++) assert.equal((await download(id, token)).status, 200);
-    const r = await download(id, token);
+    const t0 = Date.now();
+    const gap = (STORE.sessionMinutes + 1) * 60e3;
+    for (let i = 0; i < STORE.maxDownloads; i++) assert.equal((await download(id, token, { now: t0 + i * gap })).status, 200);
+    const r = await download(id, token, { now: t0 + STORE.maxDownloads * gap });
     assert.equal(r.status, 410);
     assert.match(await r.text(), /no longer available/);
     assert.equal(await left(id), STORE.maxDownloads);
   });
 
-  test('several clicks at once cannot get past the limit', async () => {
+  test('taps, retries and a dropped transfer within one session cost one download', async () => {
+    const { id, token } = await paid();
+    const t0 = Date.now();
+    for (const dt of [0, 1e3, 5e3, 60e3, (STORE.sessionMinutes - 1) * 60e3]) {
+      assert.equal((await download(id, token, { now: t0 + dt })).status, 200);
+    }
+    assert.equal(await left(id), 1);
+    // After the session ends, the next tap is a new session.
+    await download(id, token, { now: t0 + (STORE.sessionMinutes + 1) * 60e3 });
+    assert.equal(await left(id), 2);
+  });
+
+  test('the last download, clicked five times at once: one session, all served, the counter never past the limit', async () => {
     const { id, token } = await paid();
     await DB.prepare('UPDATE orders SET downloads = ? WHERE id = ?').bind(STORE.maxDownloads - 1, id).run();
-    const results = await Promise.all(Array.from({ length: 5 }, () => download(id, token)));
-    assert.deepEqual(results.map((r) => r.status).sort(), [200, 410, 410, 410, 410]);
+    const now = Date.now();
+    const results = await Promise.all(Array.from({ length: 5 }, () => download(id, token, { now })));
+    assert.deepEqual(results.map((r) => r.status), [200, 200, 200, 200, 200]);
     assert.equal(await left(id), STORE.maxDownloads);
+    // Used up: a new session later is refused.
+    assert.equal((await download(id, token, { now: now + (STORE.sessionMinutes + 1) * 60e3 })).status, 410);
   });
 
   test('stops when the link has expired, when the order is refunded, or when it was never paid', async () => {
@@ -1244,8 +1290,9 @@ describe('POST /api/store/mail-webhook: Resend\'s delivery reports', () => {
 });
 
 describe('POST /api/store/email: the buyer corrects their email', () => {
-  const change = async (id, email, { net = fakeNet(), now, token } = {}) =>
-    handleChangeEmail(post('/api/store/email', { o: id, t: token ?? (await downloadToken(ENV(), id)), email }), MAIL_ENV(), { fetch: net.fetch, now });
+  // The management key: only the buying browser has it (confirm gives it with the checkout secret).
+  const change = async (id, email, { net = fakeNet(), now, key } = {}) =>
+    handleChangeEmail(post('/api/store/email', { o: id, m: key ?? (await manageToken(ENV(), id)), email }), MAIL_ENV(), { fetch: net.fetch, now });
 
   test('once, within a day of paying: the link goes to the new address, the owner is told, the downloads stay as they were', async () => {
     const t0 = Date.UTC(2026, 9, 16, 10, 0, 0);
@@ -1254,14 +1301,20 @@ describe('POST /api/store/email: the buyer corrects their email', () => {
     const net = fakeNet();
     const r = await change(id, '  Right@Example.com ', { net, now: t0 + 3600e3 });
     assert.equal(r.status, 200);
-    assert.deepEqual(await r.json(), { ok: true, email: 'right@example.com', sent: true });
+    const out = await r.json();
+    const newKey = await downloadToken(ENV(), id, 1);
+    assert.deepEqual(out, { ok: true, email: 'right@example.com', sent: true, token: newKey });
     const o = await one(id);
     assert.deepEqual(
-      [o.email, o.email_prev, o.email_changed_by, o.buyer_email_changes, o.downloads, o.mail_status],
-      ['right@example.com', 'buyer@example.com', 'buyer', 1, 2, 'sent'],
+      [o.email, o.email_prev, o.email_changed_by, o.buyer_email_changes, o.downloads, o.mail_status, o.token_ver],
+      ['right@example.com', 'buyer@example.com', 'buyer', 1, 2, 'sent', 1],
     );
     assert.deepEqual(net.mails.map((m) => m.to[0]), ['right@example.com', 'owner@example.com']);
-    assert.ok(net.mails[0].text.includes(`#o=${id}&t=`));
+    assert.ok(net.mails[0].text.includes(`#o=${id}&t=${newKey}`), 'the new address gets the NEW key');
+    // The link that went to the old (wrong) address no longer opens the order.
+    const oldKey = await downloadToken(ENV(), id, 0);
+    const old = await handleOrderStatus(post('/api/store/order', { o: id, t: oldKey }), MAIL_ENV());
+    assert.equal(old.status, 404);
     assert.match(net.mails[1].text, /Old email: buyer@example\.com/);
     assert.match(net.mails[1].text, /Downloads so far: 2 \/ 5/);
     // A second change is refused: one correction per order.
@@ -1278,9 +1331,16 @@ describe('POST /api/store/email: the buyer corrects their email', () => {
     assert.equal((await change(id, 'right@example.com', { now: late })).status, 200);
   });
 
-  test('refuses a wrong token, a bad or unchanged address, a refunded or unpaid order', async () => {
+  test('a download link (from an email, shared or misdelivered) cannot change the email; only the management key can', async () => {
     const { id } = await paidOrder();
-    assert.equal((await change(id, 'x@example.com', { token: 'f'.repeat(64) })).status, 404);
+    const downloadKey = await downloadToken(ENV(), id);
+    assert.equal((await change(id, 'thief@example.com', { key: downloadKey })).status, 404);
+    assert.equal((await one(id)).email, 'buyer@example.com');
+  });
+
+  test('refuses a wrong key, a bad or unchanged address, a refunded or unpaid order', async () => {
+    const { id } = await paidOrder();
+    assert.equal((await change(id, 'x@example.com', { key: 'f'.repeat(64) })).status, 404);
     assert.equal((await change(id, 'not an email')).status, 400);
     assert.equal((await change(id, 'buyer@example.com')).status, 400);
     await DB.prepare("UPDATE orders SET status = 'refunded' WHERE id = ?").bind(id).run();
@@ -1296,14 +1356,18 @@ describe('POST /api/store/email: the buyer corrects their email', () => {
     assert.equal((await one(id)).buyer_email_changes, 1);
   });
 
-  test('the thanks page is told the address, whether it may be changed, and a bounce', async () => {
+  test('the thanks page is told the address, whether it may be changed (management key only), and a bounce', async () => {
     const t0 = Date.now();
     const { id } = await paidOrder({ now: t0 });
     const token = await downloadToken(ENV(), id);
-    const view = async (now) =>
-      (await handleOrderStatus(new Request(`https://test.mykrutidev.pages.dev/api/store/order?o=${id}&t=${token}`), MAIL_ENV(), { now })).json();
+    const m = await manageToken(ENV(), id);
+    const view = async (now, withKey = true) =>
+      (await handleOrderStatus(post('/api/store/order', { o: id, t: token, ...(withKey ? { m } : {}) }), MAIL_ENV(), { now })).json();
     let v = await view(t0 + 1000);
-    assert.deepEqual([v.email, v.canChangeEmail, v.mailStatus], ['buyer@example.com', true, '']);
+    assert.deepEqual([v.email, v.canChangeEmail, v.mailStatus, v.manage], ['buyer@example.com', true, 'sent', m]);
+    // The same download link without the management key: no change offered, no key handed out.
+    v = await view(t0 + 1000, false);
+    assert.deepEqual([v.canChangeEmail, v.manage], [false, undefined]);
     v = await view(t0 + 25 * 3600e3);
     assert.equal(v.canChangeEmail, false);
     await DB.prepare("UPDATE orders SET mail_status = 'bounced' WHERE id = ?").bind(id).run();
@@ -1439,13 +1503,14 @@ describe('one buyer, start to finish (the whole support path, in order)', () => 
     await FILES.put(PRODUCT.file, PDF);
 
     // 1. Checkout with a mistyped address, then Razorpay says paid; the buyer comes back.
-    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: t0 });
-    const id = (await r0.json()).order;
+    const r0 = await (await handleCheckout(post('/api/store/checkout', { ...good, email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: t0 })).json();
+    const id = r0.order;
     net.pay();
-    const back = await (await handleConfirm(post('/api/store/confirm', { order: id }), env, { fetch: net.fetch, now: t0 + 20e3 })).json();
+    const back = await (await handleConfirm(post('/api/store/confirm', { order: id, claim: r0.claim }), env, { fetch: net.fetch, now: t0 + 20e3 })).json();
     assert.equal(back.state, 'paid');
     assert.deepEqual([back.email, back.canChangeEmail, back.mailStatus], ['vikas926798@gmail.com', true, '']);
-    const token = back.token;
+    let token = back.token;
+    const manage = back.manage;
     // The buyer's mail went to the typo; the owner's sale mail has the phone and both WhatsApp buttons.
     assert.deepEqual(net.mails.map((m) => m.to[0]), ['vikas926798@gmail.com', 'owner@example.com']);
     assert.match(net.mails[1].html, /WhatsApp: हिंदी[\s\S]*WhatsApp: English/);
@@ -1463,15 +1528,16 @@ describe('one buyer, start to finish (the whole support path, in order)', () => 
 
     // 4. Next day (past 24 h, but it bounced) the buyer opens the link again: told, and corrects it once.
     const later = t0 + 30 * 3600e3;
-    const view = await (await handleOrderStatus(new Request(`https://test.mykrutidev.pages.dev/api/store/order?o=${id}&t=${token}`), env, { now: later })).json();
+    const view = await (await handleOrderStatus(post('/api/store/order', { o: id, t: token, m: manage }), env, { now: later })).json();
     assert.deepEqual([view.mailStatus, view.canChangeEmail, view.remaining], ['bounced', true, 4]);
-    const fixed = await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later });
+    const fixed = await handleChangeEmail(post('/api/store/email', { o: id, m: manage, email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later });
     assert.equal(fixed.status, 200);
+    token = (await fixed.json()).token; // the key moved on; the typo's link is dead
     assert.deepEqual(net.mails.slice(-2).map((m) => m.to[0]), ['vikas9267981@gmail.com', 'owner@example.com']);
     let o = await one(id);
     assert.deepEqual([o.email, o.email_prev, o.mail_status, o.downloads], ['vikas9267981@gmail.com', 'vikas926798@gmail.com', 'sent', 1]);
     // ...and only once.
-    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'friend@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, m: manage, email: 'friend@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
 
     // 5. The new mail is delivered: recorded, should a buyer ever say it never came.
     await handleMailWebhook(resendHook({ type: 'email.delivered', data: { email_id: (await one(id)).mail_id } }), env, { fetch: net.fetch });
@@ -1496,6 +1562,6 @@ describe('one buyer, start to finish (the whole support path, in order)', () => 
     found = await (await handleFind(post('/api/store/find', { email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
     assert.equal(found.found, 'closed');
     // A refunded order cannot have its email changed any more either.
-    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'x@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, m: manage, email: 'x@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
   });
 });
