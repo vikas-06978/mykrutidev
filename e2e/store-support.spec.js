@@ -56,34 +56,49 @@ test('no correction offered once it is used or the time is up; no email: "want i
   await expect(page.locator('[data-st-change-summary]')).toHaveText('Want the link by email too?');
 });
 
-test('"Lost your download link?": sent to that email, with the same answer either way; limits are explained', async ({ page }) => {
-  let body = null;
-  let status = 200;
-  await page.route('**/api/store/find', async (r) => {
-    body = JSON.parse(r.request().postData());
-    await r.fulfill({ status, json: status === 200 ? { ok: true } : { ok: false } });
-  });
+test('"Lost your download link?" is on the download page only; the product page links to it', async ({ page }) => {
   await page.goto('/store/kruti-dev-7-day-starter/');
-  await page.locator('[data-store-find] summary').click();
-  await page.locator('#sf-email').fill('nope');
-  await page.locator('[data-sf-send]').click();
-  await expect(page.locator('[data-sf-status]')).toBeVisible();
-  expect(body).toBeNull();
-  await page.locator('#sf-email').fill('buyer@gmail.com');
-  await page.locator('[data-sf-send]').click();
-  await expect(page.locator('[data-sf-status]')).toContainText('If this email has a purchase');
-  expect(body.email).toBe('buyer@gmail.com');
-  expect(body.lang).toBe('en');
-  status = 429;
-  await page.locator('[data-sf-send]').click();
-  await expect(page.locator('[data-sf-status]')).not.toContainText('If this email has a purchase');
+  await expect(page.locator('[data-store-find]')).toHaveCount(0);
+  await page.locator('[data-sb-bought]').click();
+  await expect(page).toHaveURL(/\/store\/thanks\/#find$/);
+  // No order link here, so the form is open and ready.
+  await expect(page.locator('#sf-email')).toBeVisible();
 });
 
-test('the form is also on the thanks page, and the pages stay accessible-width on a phone', async ({ page }) => {
+test('the form says plainly what happened: sent, no purchase, closed, too many today', async ({ page }) => {
+  let reply = { status: 200, json: { ok: true, found: 'sent' } };
+  let body = null;
+  await page.route('**/api/store/find', async (r) => {
+    body = JSON.parse(r.request().postData());
+    await r.fulfill(reply);
+  });
+  await page.goto('/store/thanks/#find');
+  const status = page.locator('[data-sf-status]');
+  await page.locator('#sf-email').fill('nope');
+  await page.locator('[data-sf-send]').click();
+  await expect(status).toBeVisible();
+  expect(body).toBeNull();
+  await page.locator('#sf-email').fill('Buyer@gmail.com');
+  await page.locator('[data-sf-send]').click();
+  await expect(status).toHaveText('Done. We sent your download link to buyer@gmail.com. Check your inbox and the spam folder.');
+  expect(body.email).toBe('Buyer@gmail.com');
+  reply = { status: 200, json: { ok: true, found: 'none' } };
+  await page.locator('[data-sf-send]').click();
+  await expect(status).toContainText('No paid purchase was found with this email');
+  reply = { status: 200, json: { ok: true, found: 'closed' } };
+  await page.locator('[data-sf-send]').click();
+  await expect(status).toContainText('We found your purchase, but its download link has expired');
+  reply = { status: 429, json: { ok: false, error: 'email-limit' } };
+  await page.locator('[data-sf-send]').click();
+  await expect(status).toContainText('3 times today');
+});
+
+test('with an order link the form stays folded; the page fits a phone', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   await page.route('**/api/store/order?*', (r) => r.fulfill({ json: paid({ email: 'buyer@gmail.com', canChangeEmail: true }) }));
   await page.goto(`/store/thanks/#o=${O}&t=${T}`);
   await expect(page.locator('[data-store-find]')).toBeVisible();
+  await expect(page.locator('#sf-email')).toBeHidden();
   await page.locator('[data-st-change-summary]').click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
 });

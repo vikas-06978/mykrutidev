@@ -1316,41 +1316,50 @@ describe('POST /api/store/find: "send me my link again"', () => {
   const find = (body, { net = fakeNet(), env = MAIL_ENV(), ip, now } = {}) =>
     handleFind(post('/api/store/find', body, ip ? { ip } : {}), env, { fetch: net.fetch, now });
 
-  test('emails the links to that address only; the answer is the same with or without an order', async () => {
+  test('emails the links to that address only, and says so; an address with no purchase is told plainly', async () => {
     const { id } = await paidOrder();
     const net = fakeNet();
     const r1 = await find({ email: 'Buyer@Example.com', lang: 'en' }, { net });
-    assert.deepEqual([r1.status, await r1.json()], [200, { ok: true }]);
+    assert.deepEqual([r1.status, await r1.json()], [200, { ok: true, found: 'sent' }]);
     assert.equal(net.mails.length, 1);
     assert.deepEqual(net.mails[0].to, ['buyer@example.com']);
     assert.ok(net.mails[0].text.includes(`/store/thanks#o=${id}&t=${await downloadToken(ENV(), id)}`));
-    const net2 = fakeNet();
-    const r2 = await find({ email: 'nobody@example.com' }, { net: net2 });
-    assert.deepEqual([r2.status, await r2.json()], [200, { ok: true }]);
-    assert.equal(net2.mails.length, 0);
+    const r2 = await find({ email: 'nobody@example.com' });
+    assert.deepEqual([r2.status, await r2.json()], [200, { ok: true, found: 'none' }]);
   });
 
-  test('a refunded, expired, used-up or unpaid order is not sent', async () => {
+  test('the link itself is never in the answer, only in the email', async () => {
     const { id } = await paidOrder();
-    const net = fakeNet();
+    const text = await (await find({ email: 'buyer@example.com' })).text();
+    assert.ok(!text.includes(id) && !text.includes(await downloadToken(ENV(), id)));
+  });
+
+  test('paid but nothing left (refunded, expired, used up) says "closed"; an unpaid order counts as none', async () => {
+    const { id } = await paidOrder();
     for (const sql of [
       "UPDATE orders SET status = 'refunded' WHERE id = ?",
       "UPDATE orders SET status = 'paid', expires_at = 1 WHERE id = ?",
       "UPDATE orders SET expires_at = NULL, downloads = max_downloads WHERE id = ?",
     ]) {
       await DB.prepare(sql).bind(id).run();
-      await find({ email: 'buyer@example.com' }, { net });
+      const net = fakeNet();
+      const r = await find({ email: 'buyer@example.com' }, { net });
+      assert.deepEqual(await r.json(), { ok: true, found: 'closed' }, sql);
+      assert.equal(net.mails.length, 0);
     }
+    await DB.prepare('DELETE FROM orders').run();
     await startOrder(fakeNet());
-    await find({ email: 'buyer@example.com' }, { net });
-    assert.equal(net.mails.length, 0);
+    // (the next day: three asks today used up this address's limit)
+    assert.deepEqual(await (await find({ email: 'buyer@example.com' }, { now: Date.now() + 864e5 })).json(), { ok: true, found: 'none' });
   });
 
-  test('at most 3 emails a day to one address, from any number of IPs', async () => {
+  test('at most 3 emails a day to one address, from any number of IPs; then a clear "try tomorrow"', async () => {
     await paidOrder();
     const net = fakeNet();
-    for (let i = 0; i < 5; i++) await find({ email: 'buyer@example.com' }, { net });
+    const statuses = [];
+    for (let i = 0; i < 5; i++) statuses.push((await find({ email: 'buyer@example.com' }, { net })).status);
     assert.equal(net.mails.length, STORE.findPerDay);
+    assert.deepEqual(statuses, [200, 200, 200, 429, 429]);
   });
 
   test('refuses a bad address and a honeypot, and asks Turnstile when it is set up', async () => {

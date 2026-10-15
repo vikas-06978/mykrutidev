@@ -547,10 +547,12 @@ export async function handleChangeEmail(request, env, deps = {}) {
 
 /**
  * Someone types an email: if it has paid, unexpired orders here (of this
- * deployment's mode), their links are emailed to THAT address. Nothing is
- * shown on the page, and the answer is the same whether or not there is an
- * order, so nobody can learn what someone else bought. Limited per IP and per
- * address (STORE.findPerDay), with the bot check when it is set up.
+ * deployment's mode), their links are emailed to THAT address; the links are
+ * never shown on the page. The answer says plainly what happened, as the
+ * owner asked: `found` 'sent' (emailed), 'none' (no paid purchase with this
+ * email) or 'closed' (paid, but every link has expired, run out of downloads
+ * or been refunded). Limited per IP and per address (STORE.findPerDay, 429
+ * 'email-limit'), with the bot check when it is set up.
  *
  * @param {Request} request
  * @param {Record<string, any>} env
@@ -579,8 +581,7 @@ export async function handleFind(request, env, deps = {}) {
   }
   // Per address, over a day: hourly buckets would let someone flood one inbox.
   const { hits } = await countHit(env.DB, email, rateSalt(env), { scope: 'find-email', now, windowSeconds: 86400 });
-  const answer = reply(200, { ok: true });
-  if (hits > STORE.findPerDay) return answer;
+  if (hits > STORE.findPerDay) return reply(429, { ok: false, error: 'email-limit' });
 
   const nowS = Math.floor(now / 1000);
   const { results } = await env.DB.prepare(
@@ -588,7 +589,16 @@ export async function handleFind(request, env, deps = {}) {
   )
     .bind(email, nowS, mode(env))
     .all();
-  if (results.length && canMail(env)) {
+  if (!results.length) {
+    // Paid once, but nothing left to download: say so, rather than "not found".
+    const any = await env.DB.prepare(
+      "SELECT 1 AS x FROM orders WHERE email = ? AND status IN ('paid', 'refunded') AND COALESCE(mode, 'test') = ? LIMIT 1",
+    )
+      .bind(email, mode(env))
+      .first();
+    return reply(200, { ok: true, found: any ? 'closed' : 'none' });
+  }
+  if (canMail(env)) {
     const origin = siteOrigin(request);
     const lang = typeof body.lang === 'string' && /^[a-z]{2}$/.test(body.lang) ? body.lang : 'en';
     const items = [];
@@ -596,9 +606,12 @@ export async function handleFind(request, env, deps = {}) {
       const product = productById(order.product_id);
       if (product) items.push({ product, order, link: downloadPage(origin, order.id, await downloadToken(env, order.id), lang) });
     }
-    if (items.length) await sendMail(env, findMail(env, { email, items }), fetchImpl);
+    if (items.length && (await sendMail(env, findMail(env, { email, items }), fetchImpl))) {
+      return reply(200, { ok: true, found: 'sent' });
+    }
   }
-  return answer;
+  // Found, but the email could not be sent (no mail setup, or Resend refused).
+  return reply(502, { ok: false, error: 'mail-failed' });
 }
 
 // ---------------------------------------------------------------------------

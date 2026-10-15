@@ -81,6 +81,9 @@ const buy = fill(t('store.buy'), { price: amount });
     </div>
   </form>
 
+  {/* For a buyer on another phone or browser: the download page has the "send my link" form. */}
+  <p class="mt-4 text-sm"><a href={`${to('/store/thanks')}#find`} data-sb-bought>{t('store.alreadyBought')}</a></p>
+
   <ul class="mt-5 grid gap-1.5 text-xs text-mute">
     <li set:html={render(t('store.payNote'))} />
     <li set:html={render(t('store.deliveryNote'))} />

@@ -1,20 +1,22 @@
 ---
 /**
- * "Lost your download link?": the buyer types the email they bought with and
- * the server emails the link to THAT address (POST /api/store/find). Nothing
- * is shown on the page, and the answer is the same whether or not there is a
- * purchase, so nobody learns what someone else bought. For another phone or
- * browser, where the product page has no memory of the purchase.
+ * "Lost your download link?", on the thanks page only (the product page links
+ * here: buying first, then this). The buyer types the email they bought with
+ * and the server emails the link to THAT address (POST /api/store/find); the
+ * link is never shown on the page. The page says plainly what happened: sent,
+ * no paid purchase with this email, or a purchase whose link has closed. For
+ * another phone or browser, where the product page has no memory of the
+ * purchase. Opened by itself when the page has no order link (#find, or none).
  */
 import { langOf, useT } from '../i18n/index.js';
 
 const lang = langOf(Astro.url);
 const { t } = useT(lang);
-const keys = ['findDone', 'errEmail', 'errRate', 'errChallenge', 'errGeneric', 'working'];
+const keys = ['findDone', 'findNone', 'findClosed', 'findLimit', 'errEmail', 'errRate', 'errChallenge', 'errGeneric', 'working'];
 const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 ---
 
-<details class="mt-6 card p-5 sm:p-6 sf" data-store-find>
+<details class="mt-6 card p-5 sm:p-6 sf" id="find" data-store-find>
   <summary class="sf-summary">{t('store.findTitle')}</summary>
   <p class="mt-2 text-sm text-body">{t('store.findNote')}</p>
   <form class="mt-3 grid gap-3" novalidate data-sf-form data-lang={lang} data-i18n={JSON.stringify(strings)}>
@@ -60,6 +62,9 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 
 <script>
   const form = document.querySelector<HTMLFormElement>('[data-sf-form]');
+  // No order link on this page (sent here from "Already bought?", or opened bare): the form is what they need.
+  const box = document.querySelector<HTMLDetailsElement>('[data-store-find]');
+  if (box && !/[#&]o=/.test(location.hash)) box.open = true;
   if (form) {
     const L = JSON.parse(form.dataset.i18n ?? '{}');
     const lang = form.dataset.lang || 'en';
@@ -98,9 +103,13 @@ const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
       }
       send.disabled = false;
       send.textContent = send.dataset.label ?? '';
-      if (res?.ok) return say(L.findDone);
+      const json: any = await res?.json().catch(() => null);
+      if (res?.ok && json?.found === 'sent') return say(L.findDone.replace('{email}', address.toLowerCase()));
+      if (res?.ok && json?.found === 'closed') return say(L.findClosed, true);
+      if (res?.ok) return say(L.findNone, true);
       if (res?.status === 403) void (await check)?.reset();
-      say(res?.status === 429 ? L.errRate : res?.status === 403 ? L.errChallenge : res?.status === 400 ? L.errEmail : L.errGeneric, true);
+      if (res?.status === 429) return say(json?.error === 'email-limit' ? L.findLimit : L.errRate, true);
+      say(res?.status === 403 ? L.errChallenge : res?.status === 400 ? L.errEmail : L.errGeneric, true);
     });
   }
 </script>
