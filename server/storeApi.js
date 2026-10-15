@@ -35,6 +35,7 @@ import {
   SITE_URL,
   STORE,
   STORE_SCHEMA,
+  ORDER_ADDED_COLUMNS,
   TOKEN_RE,
   newOrderId,
   productById,
@@ -61,10 +62,26 @@ import { stampPdf, stampText } from './storeStamp.js';
 // Setup
 // ---------------------------------------------------------------------------
 const ready = new WeakMap();
+/** Columns added since the table first went live (ORDER_ADDED_COLUMNS), on a table that lacks them. */
+export async function addColumns(db) {
+  const { results } = await db.prepare('PRAGMA table_info(orders)').all();
+  const have = new Set(results.map((c) => c.name));
+  for (const [name, type] of ORDER_ADDED_COLUMNS) {
+    if (have.has(name)) continue;
+    try {
+      await db.prepare(`ALTER TABLE orders ADD COLUMN ${name} ${type}`).run();
+    } catch (e) {
+      // Another worker added it at the same moment.
+      if (!/duplicate column/i.test(String(e?.message ?? e))) throw e;
+    }
+  }
+}
 /** The orders table, once per database per worker (and the feedback tables the rate limit uses). */
 export function ensureStoreSchema(db) {
   if (!ready.has(db)) {
-    const p = ensureSchema(db).then(() => db.batch(STORE_SCHEMA.map((s) => db.prepare(s))));
+    const p = ensureSchema(db)
+      .then(() => db.batch(STORE_SCHEMA.map((s) => db.prepare(s))))
+      .then(() => addColumns(db));
     p.catch(() => ready.delete(db));
     ready.set(db, p);
   }
@@ -188,9 +205,10 @@ export async function handleCheckout(request, env, deps = {}) {
   const id = newOrderId();
   await db
     .prepare(
-      "INSERT INTO orders (id, created_at, status, product_id, amount, currency, email, lang, max_downloads) VALUES (?, ?, 'created', ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO orders (id, created_at, status, product_id, amount, currency, email, lang, max_downloads, mode) VALUES (?, ?, 'created', ?, ?, ?, ?, ?, ?, ?)",
     )
-    .bind(id, isoNow(now), product.id, product.pricePaise, STORE.currency, checked.value.email, checked.value.lang, STORE.maxDownloads)
+    // mode: which keys made it, so test orders on a shared database never count as money in.
+    .bind(id, isoNow(now), product.id, product.pricePaise, STORE.currency, checked.value.email, checked.value.lang, STORE.maxDownloads, mode(env))
     .run();
 
   try {

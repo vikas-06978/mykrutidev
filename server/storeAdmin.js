@@ -29,6 +29,10 @@ import { hasKeys, mode } from './razorpay.js';
 import { buyerMail, canMail, downloadPage, sendMail } from './storeMail.js';
 
 const PER_PAGE = 50;
+const MODES = ['live', 'test'];
+/** An order's mode; rows from before the column count as test (nothing was sold live then). */
+const MODE_EXPR = "COALESCE(mode, 'test')";
+const MODE_SQL = `${MODE_EXPR} = ?`;
 const STATUSES = ['paid', 'created', 'refunded', 'failed'];
 const STATUS_NAME = { paid: 'Paid', created: 'Started, not paid', refunded: 'Refunded', failed: 'Failed' };
 const ACTION_DONE = { check: 'Asked Razorpay again', resend: 'Email sent again', refund: 'Marked refunded: downloads are closed', extend: 'Downloads reset and 30 more days given' };
@@ -57,7 +61,12 @@ const STYLE = `<style>
 .fa-flag{color:var(--err);font-weight:600}
 .fa-pages{display:flex;gap:1rem;align-items:center}
 .fa-sure{font-size:.75rem;color:var(--mute)}
-.fa-tiles+.fa-tiles{margin-top:.75rem}.fa-ids{word-break:break-all;min-width:12rem}
+.fa-tiles+.fa-tiles{margin-top:.75rem}
+.fa-acts{display:grid;gap:.375rem;min-width:9rem;justify-items:start}.fa-acts .fa-act{margin:0}
+.fa-tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line)}
+.fa-tabs a{padding:.5rem .875rem;text-decoration:none;color:var(--body);border-bottom:2px solid transparent}
+.fa-tabs a[aria-current]{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+.fa-pill.fa-test{background:#fef3c7;color:#78350f}.fa-ids{word-break:break-all;min-width:10rem;max-width:13rem}
 .fa-ready h2{margin:0}.fa-filter{margin:.5rem 0}
 </style>`;
 
@@ -135,7 +144,8 @@ const tile = (n, label) => `<div class="fa-tile"><span class="fa-tile-n">${n}</s
 /** The Razorpay dashboard page of a payment. */
 const razorpayLink = (paymentId) => `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;
 
-function dashboard(env, { orders, totals, periods, byProduct, ready, links, filter, total, done }) {
+function dashboard(env, { orders, totals, periods, byProduct, ready, links, filter, total, done, modeCounts }) {
+  const test = filter.mode === 'test';
   const rows = orders
     .map((o) => {
       const product = productById(o.product_id);
@@ -156,7 +166,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
       const mailFailed = o.status === 'paid' && o.mail_status === 'failed';
       return `<tr>
   <td class="fa-nowrap">${when(o.created_at)}${o.paid_at ? `<br><span class="fa-sub">paid ${when(o.paid_at)}</span>` : ''}</td>
-  <td><span class="fa-pill ${esc(o.status)}">${esc(STATUS_NAME[o.status] ?? o.status)}</span></td>
+  <td><span class="fa-pill ${esc(o.status)}">${esc(STATUS_NAME[o.status] ?? o.status)}</span>${test ? ' <span class="fa-pill fa-test">TEST</span>' : ''}</td>
   <td>${esc((product?.title ?? o.product_id).replace(/\s*\(.*\)$/, ''))}</td>
   <td class="fa-nowrap">${esc(price(o.amount))}</td>
   <td>${o.email ? `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : '<span class="fa-sub">no email</span>'}</td>
@@ -164,7 +174,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
   <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
   <td>${mailFailed ? '<span class="fa-flag">failed</span>' : esc(o.mail_status ?? '')}</td>
   <td class="fa-sub fa-ids">${esc(o.id)}${o.payment_id ? `<br><a href="${esc(razorpayLink(o.payment_id))}">${esc(o.payment_id)}</a>` : ''}</td>
-  <td>${actions.join('')}</td>
+  <td><div class="fa-acts">${actions.join('')}</div></td>
 </tr>`;
     })
     .join('');
@@ -172,7 +182,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
   const qs = (over) => {
     const p = new URLSearchParams();
     const f = { ...filter, ...over };
-    for (const k of ['status', 'product', 'q']) if (f[k]) p.set(k, f[k]);
+    for (const k of ['mode', 'status', 'product', 'q']) if (f[k]) p.set(k, f[k]);
     if (f.page > 1) p.set('page', String(f.page));
     const str = p.toString();
     return str ? `?${esc(str)}` : '?';
@@ -205,8 +215,13 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
 ${done ? `<p class="fa-banner" role="status">${esc(done)}</p>` : ''}
 ${verdict(ready, env)}
 
+<nav class="fa-tabs" aria-label="Live or test orders">
+  ${MODES.map((m) => `<a href="?mode=${m}"${filter.mode === m ? ' aria-current="page"' : ''}>${m === 'live' ? 'Live orders' : 'Test orders'} <span class="fa-sub">${modeCounts[m] ?? 0}</span></a>`).join('')}
+</nav>
+${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a preview, or before the live keys). No real money moved, and they are never counted in the live totals.</p>' : ''}
+
 <section aria-labelledby="h-totals">
-  <h2 id="h-totals">Money in <span class="fa-sub">paid orders, India time; refunds not counted</span></h2>
+  <h2 id="h-totals">Money in <span class="fa-sub">${test ? 'TEST orders only: no real money' : 'live orders only'}, paid, India time; refunds not counted</span></h2>
   <div class="fa-tiles">
     ${periods.map((p) => tile(`${esc(price(p.revenue))} <span class="fa-sub">· ${p.count}</span>`, p.label)).join('')}
   </div>
@@ -228,11 +243,12 @@ ${verdict(ready, env)}
 <section aria-labelledby="h-orders">
   <h2 id="h-orders">Orders</h2>
   <form method="get" class="fa-filter" role="search">
+    <input type="hidden" name="mode" value="${esc(filter.mode)}">
     <label>Status <select name="status"><option value="">All</option>${STATUSES.map((st) => `<option value="${st}"${filter.status === st ? ' selected' : ''}>${esc(STATUS_NAME[st])}</option>`).join('')}</select></label>
     <label>Product <select name="product"><option value="">All</option>${PRODUCTS.map((p) => `<option value="${esc(p.id)}"${filter.product === p.id ? ' selected' : ''}>${esc(p.title)}</option>`).join('')}</select></label>
     <label>Search <input type="search" name="q" value="${esc(filter.q)}" placeholder="order id, email or pay_…" maxlength="120"></label>
     <button type="submit" class="fa-button">Show</button>
-    ${filter.status || filter.product || filter.q ? '<a href="?">Clear</a>' : ''}
+    ${filter.status || filter.product || filter.q ? `<a href="?mode=${esc(filter.mode)}">Clear</a>` : ''}
   </form>
   ${pager}
   ${
@@ -324,7 +340,8 @@ export async function handleAdminOrders(request, env, deps = {}) {
         return page('Orders', `<h1>Orders</h1><p>That did not work (${esc(action)}): ${esc(String(err?.message ?? err).slice(0, 300))}</p><p><a href="/admin/orders">Back to orders</a></p>`, 500);
       }
       if (ACTION_DONE[action]) {
-        return new Response(null, { status: 303, headers: { Location: `/admin/orders?done=${action}&q=${id}`, ...SECURITY } });
+        const row = await db.prepare(`SELECT ${MODE_EXPR} AS m FROM orders WHERE id = ?`).bind(id).first();
+        return new Response(null, { status: 303, headers: { Location: `/admin/orders?done=${action}&q=${id}&mode=${row?.m ?? 'live'}`, ...SECURITY } });
       }
     }
     return new Response(null, { status: 303, headers: { Location: '/admin/orders', ...SECURITY } });
@@ -351,9 +368,12 @@ export async function handleAdminOrders(request, env, deps = {}) {
     product: productById(params.get('product') ?? '') ? params.get('product') : '',
     q: String(params.get('q') ?? '').trim().slice(0, 120),
     page: Math.max(1, Math.min(10000, Number.parseInt(params.get('page') ?? '1', 10) || 1)),
+    // Live or test orders: never both at once, so test payments are never counted as money in.
+    // The default is the mode of this deployment's keys (live on the live site).
+    mode: MODES.includes(params.get('mode') ?? '') ? params.get('mode') : hasKeys(env) ? mode(env) : 'live',
   };
-  const where = [];
-  const binds = [];
+  const where = [MODE_SQL];
+  const binds = [filter.mode];
   if (filter.status) (where.push('status = ?'), binds.push(filter.status));
   if (filter.product) (where.push('product_id = ?'), binds.push(filter.product));
   if (filter.q) {
@@ -361,7 +381,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
     where.push("(id = ? OR payment_id = ? OR link_id = ? OR email LIKE ? ESCAPE '\\')");
     binds.push(filter.q, filter.q, filter.q, `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`);
   }
-  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const whereSql = `WHERE ${where.join(' AND ')}`;
 
   // "Today" and the other periods start at midnight India time.
   const IST = 5.5 * 3600e3;
@@ -374,7 +394,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
     ['All time', '0000'],
   ];
 
-  const [orders, count, totals, periodRows, productRows] = await Promise.all([
+  const [orders, count, totals, periodRows, productRows, modeRows] = await Promise.all([
     db
       .prepare(`SELECT * FROM orders ${whereSql} ORDER BY created_at DESC, id DESC LIMIT ${PER_PAGE} OFFSET ${(filter.page - 1) * PER_PAGE}`)
       .bind(...binds)
@@ -382,21 +402,25 @@ export async function handleAdminOrders(request, env, deps = {}) {
     db.prepare(`SELECT COUNT(*) AS n FROM orders ${whereSql}`).bind(...binds).first(),
     db
       .prepare(
-        "SELECT SUM(status = 'paid') AS paid, SUM(status = 'refunded') AS refunded, SUM(status = 'created') AS open, SUM(status = 'paid' AND mail_status = 'failed') AS mailFailed FROM orders",
+        `SELECT SUM(status = 'paid') AS paid, SUM(status = 'refunded') AS refunded, SUM(status = 'created') AS open, SUM(status = 'paid' AND mail_status = 'failed') AS mailFailed FROM orders WHERE ${MODE_SQL}`,
       )
+      .bind(filter.mode)
       .first(),
     db
       .prepare(
-        `SELECT ${PERIODS.map((_, i) => `COALESCE(SUM(CASE WHEN paid_at >= ?${i + 1} THEN amount END), 0) AS r${i}, SUM(paid_at >= ?${i + 1}) AS c${i}`).join(', ')} FROM orders WHERE status = 'paid'`,
+        `SELECT ${PERIODS.map((_, i) => `COALESCE(SUM(CASE WHEN paid_at >= ?${i + 1} THEN amount END), 0) AS r${i}, SUM(paid_at >= ?${i + 1}) AS c${i}`).join(', ')} FROM orders WHERE status = 'paid' AND ${MODE_SQL.replace('?', `?${PERIODS.length + 1}`)}`,
       )
-      .bind(...PERIODS.map(([, t]) => t))
+      .bind(...PERIODS.map(([, t]) => t), filter.mode)
       .first(),
     db
       .prepare(
-        "SELECT product_id, SUM(status = 'paid') AS paid, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS revenue, SUM(status = 'refunded') AS refunded FROM orders GROUP BY product_id",
+        `SELECT product_id, SUM(status = 'paid') AS paid, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS revenue, SUM(status = 'refunded') AS refunded FROM orders WHERE ${MODE_SQL} GROUP BY product_id`,
       )
+      .bind(filter.mode)
       .all(),
+    db.prepare(`SELECT ${MODE_EXPR} AS m, COUNT(*) AS n FROM orders GROUP BY m`).all(),
   ]);
+  const modeCounts = Object.fromEntries(modeRows.results.map((r) => [r.m, r.n]));
   const origin = siteOrigin(request);
   const links = {};
   for (const o of orders.results) {
@@ -418,6 +442,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
     orders: orders.results,
     total: count?.n ?? 0,
     filter,
+    modeCounts,
     done,
     periods: PERIODS.map(([label], i) => ({ label, revenue: periodRows?.[`r${i}`] ?? 0, count: periodRows?.[`c${i}`] ?? 0 })),
     byProduct,

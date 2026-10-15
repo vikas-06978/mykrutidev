@@ -115,10 +115,11 @@ If the file in the bucket was not prepared, the download still works but is serv
 Sign in at `/admin/feedback` first (the same `ADMIN_KEY`). The page shows, top to bottom:
 
 1. **Ready or not**: green when this deployment can take payments; otherwise each reason in red (missing key, webhook secret or bucket, a product on sale whose PDF is not uploaded, test keys on the live site, nothing on sale). Warnings (no bot check, live keys on a preview, `STORE_TEST_PRODUCTS` on the live site) are listed under it.
-2. **Money in**: today, last 7 days, last 30 days and all time (India time, paid orders only), then paid / refunded / started-not-paid / email-failed counts.
-3. **By product**: price, status, paid, money in and refunds per product.
-4. **Orders**: filter by status and product, search an order id, a `pay_…` id or part of an email; 50 a page. A payment id links to that payment in Razorpay's dashboard. Actions: *Check payment*, *Download link*, *Resend email*, *Extend*, and *Mark refunded* (the "sure" box must be ticked). After each one the page says what it did.
-5. **Setup check** (folded): every setting, ✓ or ✗.
+2. **Live orders / Test orders** tabs. Each order records the mode of the Razorpay keys that made it (`mode`: `live` or `test`; orders from before the column count as test). Preview and live share one database, so test purchases land here too, but they are only ever on the Test tab and never in the live totals. The page opens on the tab of this deployment's keys.
+3. **Money in**: today, last 7 days, last 30 days and all time (India time, paid orders of the open tab only), then paid / refunded / started-not-paid / email-failed counts.
+4. **By product**: price, status, paid, money in and refunds per product.
+5. **Orders**: filter by status and product, search an order id, a `pay_…` id or part of an email; 50 a page. A payment id links to that payment in Razorpay's dashboard. Actions: *Check payment*, *Download link*, *Resend email*, *Extend*, and *Mark refunded* (the "sure" box must be ticked). After each one the page says what it did.
+6. **Setup check** (folded): every setting, ✓ or ✗.
 
 ## Before the first sale
 
