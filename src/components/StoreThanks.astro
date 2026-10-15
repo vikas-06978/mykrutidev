@@ -16,13 +16,17 @@ const keys = [
   'thanksChecking', 'thanksWaiting', 'thanksPaid', 'thanksLeft', 'thanksEmail', 'thanksExpired', 'thanksRefunded',
   'thanksClosed', 'thanksNone', 'thanksUnverified', 'thanksSave', 'thanksCopy', 'thanksCopied',
   'sentTo', 'wrongEmail', 'addEmail', 'changeDone', 'changeFailed', 'bounced', 'errEmail', 'errRate', 'errGeneric', 'working',
+  'thanksStill', 'thanksLocked', 'thanksLockedNoEmail', 'mailFailed', 'receiptProduct', 'receiptOrder', 'receiptAmount',
+  'receiptPaid', 'receiptPayment', 'receiptRefunded', 'receiptUntil', 'cardTitle', 'cardLink', 'cardHelp',
 ];
 const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
 // Rupees by product, for the purchase count in Google Analytics.
 const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]));
+// The product's name on the receipt.
+const titles = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.title.replace(/\s*\(.*\)$/, '')]));
 ---
 
-<section class="mt-8 card p-5 sm:p-6" aria-live="polite" data-store-thanks data-i18n={JSON.stringify(strings)} data-prices={JSON.stringify(prices)}>
+<section class="mt-8 card p-5 sm:p-6" aria-live="polite" data-store-thanks data-i18n={JSON.stringify(strings)} data-prices={JSON.stringify(prices)} data-titles={JSON.stringify(titles)} data-lang={lang} data-contact={to('/contact')}>
   <p class="text-lg font-medium text-ink" data-st-status role="status">{t('store.thanksChecking')}</p>
   <p class="mt-2 text-sm text-body" data-st-extra hidden></p>
   <form method="post" action="/api/store/download" class="mt-4" data-st-download hidden>
@@ -45,6 +49,12 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       </form>
     </details>
   </div>
+  {/* The receipt, kept after expiry or a refund too, and a file to save it with the link. */}
+  <div class="mt-5 st-receipt" data-st-receipt hidden>
+    <h2 class="text-base font-semibold text-ink">{t('store.receiptTitle')}</h2>
+    <dl class="mt-2 grid gap-1 text-sm" data-st-receipt-list></dl>
+    <button type="button" class="btn btn-outline mt-3" data-st-card>{t('store.saveCard')}</button>
+  </div>
   <p class="mt-4 flex flex-wrap gap-3">
     <button type="button" class="btn btn-outline" data-st-retry hidden>{t('store.thanksRetry')}</button>
     <button type="button" class="btn btn-outline" data-st-copy hidden>{t('store.thanksCopy')}</button>
@@ -65,6 +75,22 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
     display: flex;
     align-items: center;
   }
+  .st-receipt {
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-hairline);
+  }
+  .st-receipt :global(dl > div) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+  }
+  .st-receipt :global(dt) {
+    color: var(--color-mute);
+  }
+  .st-receipt :global(dd) {
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
   .st-input {
     width: 100%;
     max-width: 24rem;
@@ -79,12 +105,26 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
 </style>
 
 <script>
-  import { daysLeft, readOrderFrom, rememberPurchase, thanksKey } from '../lib/storeClient.js';
+  import {
+    claimFor,
+    daysLeft,
+    forgetPending,
+    istDate,
+    latestPending,
+    manageFor,
+    readOrderFrom,
+    readReturn,
+    recoveryText,
+    price,
+    rememberPurchase,
+    thanksKey,
+  } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const root = document.querySelector<HTMLElement>('[data-store-thanks]');
   if (root) {
     const L = JSON.parse(root.dataset.i18n ?? '{}');
+    const lang = root.dataset.lang || 'en';
     const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
     const status = $<HTMLElement>('[data-st-status]');
     const extra = $<HTMLElement>('[data-st-extra]');
@@ -92,6 +132,16 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
     const retry = $<HTMLButtonElement>('[data-st-retry]');
     const store = $<HTMLAnchorElement>('[data-st-store]');
     const copy = $<HTMLButtonElement>('[data-st-copy]');
+    const receiptBox = $<HTMLElement>('[data-st-receipt]');
+    const receiptList = $<HTMLElement>('[data-st-receipt-list]');
+    const cardButton = $<HTMLButtonElement>('[data-st-card]');
+    const ls = (): Storage | null => {
+      try {
+        return localStorage;
+      } catch {
+        return null;
+      }
+    };
 
     const say = (text: string, more = '') => {
       status.textContent = text;
@@ -107,10 +157,13 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
     const changeInput = $<HTMLInputElement>('#st-email');
     const changeSend = $<HTMLButtonElement>('[data-st-change-send]');
     const changeStatus = $<HTMLElement>('[data-st-change-status]');
-    let current = { order: '', token: '' };
+    let current = { order: '', token: '', manage: '' };
 
-    type Paid = {
+    type Receipt = { order: string; amount: number; currency: string; paidAt: string | null; payment: string | null; refunded: number };
+    type View = {
+      state: string;
       token: string;
+      manage?: string;
       remaining: number;
       expires: number | null;
       emailed?: boolean;
@@ -118,19 +171,75 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       email?: string;
       mailStatus?: string;
       canChangeEmail?: boolean;
+      receipt?: Receipt;
     };
-    /** Where the link was emailed, a bounce, and the one chance to correct the address. */
-    const showMail = (d: Paid) => {
+    let shown: View | null = null;
+
+    /** Where the link was emailed, what became of that email, and the one chance to correct the address. */
+    const showMail = (d: View) => {
       const email = String(d.email ?? '');
+      const ms = String(d.mailStatus ?? '');
       sent.hidden = !email;
       sent.textContent = email ? L.sentTo.replace('{email}', email) : '';
-      bouncedLine.hidden = !d.mailStatus;
-      bouncedLine.textContent = d.mailStatus ? L.bounced.replace('{email}', email) : '';
+      // A bounce: the address is wrong. Not sent yet: we retry. (A spam report means it arrived.)
+      const line = ms === 'bounced' ? L.bounced : ms === 'failed' ? L.mailFailed : '';
+      bouncedLine.hidden = !line || !email;
+      bouncedLine.textContent = line ? line.replace('{email}', email) : '';
       change.hidden = !d.canChangeEmail;
       changeSummary.textContent = email ? L.wrongEmail : L.addEmail;
-      if (d.mailStatus) change.open = true;
+      if (ms === 'bounced') change.open = true;
       mailBox.hidden = sent.hidden && bouncedLine.hidden && change.hidden;
     };
+
+    const showReceipt = (d: View) => {
+      const r = d.receipt;
+      receiptBox.hidden = !r;
+      if (!r) return;
+      const titles = JSON.parse(root.dataset.titles ?? '{}');
+      const rows: [string, string][] = [
+        [L.receiptProduct, titles[d.productId ?? ''] ?? d.productId ?? ''],
+        [L.receiptOrder, r.order],
+        [L.receiptAmount, price(r.amount)],
+        [L.receiptPaid, istDate(r.paidAt, lang)],
+      ];
+      if (r.payment) rows.push([L.receiptPayment, r.payment]);
+      if (r.refunded) rows.push([L.receiptRefunded, price(r.refunded)]);
+      if (d.state === 'paid' && d.expires) rows.push([L.receiptUntil, istDate(d.expires, lang)]);
+      receiptList.replaceChildren(
+        ...rows.map(([k, v]) => {
+          const div = document.createElement('div');
+          const dt = document.createElement('dt');
+          const dd = document.createElement('dd');
+          dt.textContent = k;
+          dd.textContent = v;
+          dd.translate = false;
+          div.append(dt, dd);
+          return div;
+        }),
+      );
+    };
+
+    cardButton.addEventListener('click', () => {
+      if (!shown?.receipt) return;
+      const titles = JSON.parse(root.dataset.titles ?? '{}');
+      const link = `${location.origin}${location.pathname}#o=${current.order}&t=${current.token}`;
+      const text = recoveryText(L, {
+        product: titles[shown.productId ?? ''] ?? shown.productId ?? '',
+        receipt: shown.receipt,
+        link,
+        until: shown.state === 'paid' && shown.expires ? istDate(shown.expires, lang) : '',
+        contact: `${location.origin}${root.dataset.contact ?? '/contact'}`,
+        lang,
+      });
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mykrutidev-${current.order}.txt`;
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    });
 
     changeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -149,7 +258,7 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
         res = await fetch('/api/store/email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ o: current.order, t: current.token, email: address }),
+          body: JSON.stringify({ o: current.order, m: current.manage, email: address }),
         });
         json = await res.json().catch(() => null);
       } catch {
@@ -158,22 +267,30 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       changeSend.disabled = false;
       changeSend.textContent = changeSend.dataset.label ?? '';
       if (res?.ok && json?.ok) {
+        // The link moves on to a new key (the one sent to the wrong address
+        // stops working): this page, and this device, keep the new one.
+        if (typeof json.token === 'string' && shown) {
+          shown = { ...shown, token: json.token, email: json.email, mailStatus: '', canChangeEmail: false };
+          showPaid(shown, current.order);
+        }
         // Once only: the form goes, and the page says where the link went now.
-        showMail({ token: current.token, remaining: 0, expires: null, email: json.email, mailStatus: '', canChangeEmail: false });
+        showMail({ ...(shown as View), email: json.email, mailStatus: '', canChangeEmail: false });
         sent.textContent = L.changeDone.replace('{email}', json.email);
         return;
       }
       say(res?.status === 409 ? L.changeFailed : res?.status === 429 ? L.errRate : res?.status === 400 ? L.errEmail : L.errGeneric, true);
     });
 
-    const showPaid = (d: Paid, order: string) => {
-      current = { order, token: d.token };
+    const showPaid = (d: View, order: string) => {
+      shown = d;
+      current = { order, token: d.token, manage: d.manage || current.manage };
       showMail(d);
+      showReceipt(d);
+      const storage = ls();
       // So the product page can offer this download again on this device.
-      try {
-        rememberPurchase(localStorage, String(d.productId ?? ''), order, d.token, d.expires);
-      } catch {
-        // No storage at all: the email and this page's link still work.
+      if (storage) {
+        rememberPurchase(storage, String(d.productId ?? ''), order, d.token, d.expires, current.manage);
+        forgetPending(storage, order);
       }
       // With an email the link is also in their inbox; without one, this page is the only copy, so say so.
       const where = d.emailed ? L.thanksEmail : L.thanksSave;
@@ -187,15 +304,33 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       // Keep a link that works after a reload; drop Razorpay's query from the address bar.
       history.replaceState(null, '', `${location.pathname}#o=${order}&t=${d.token}`);
     };
-    const showOther = (state: string) => {
+    /** Refunded, expired or used up: why it closed, and the receipt stays. */
+    const showClosed = (d: View, order: string) => {
+      shown = d;
+      current = { order, token: d.token, manage: d.manage || current.manage };
+      say(L[thanksKey(d.state === 'used' ? 'expired' : d.state)]);
+      showReceipt(d);
+      download.hidden = true;
+      retry.hidden = true;
+      store.hidden = false;
+      const storage = ls();
+      if (storage) forgetPending(storage, order);
+    };
+    const showOther = (state: string, more = '') => {
       const key = thanksKey(state);
-      say(L[key]);
+      say(L[key], more);
       download.hidden = true;
       retry.hidden = !(key === 'thanksWaiting' || key === 'thanksUnverified');
       store.hidden = false;
+      const storage = ls();
+      if (storage && (state === 'closed' || state === 'failed')) forgetPending(storage, order);
     };
 
     const from = readOrderFrom(location);
+    // Razorpay's signed return: with it (or this browser's checkout secret) the
+    // server hands over the download. Kept for the whole visit, so "Check
+    // again" still has it after the address bar was cleaned.
+    const signed = readReturn(location.search);
     let order = from?.order ?? '';
     if (!from) {
       try {
@@ -203,7 +338,16 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
       } catch {
         order = '';
       }
+      // Back on a payment started here, after the tab was closed.
+      if (!order) {
+        const storage = ls();
+        order = (storage && latestPending(storage)?.o) || '';
+      }
     }
+    const claim = () => {
+      const storage = ls();
+      return (storage && order && claimFor(storage, order)) || '';
+    };
 
     async function check(tries = 1) {
       if (!from && !order) {
@@ -211,38 +355,60 @@ const prices = Object.fromEntries(PRODUCTS.map((p) => [p.id, p.pricePaise / 100]
         store.hidden = false;
         return;
       }
-      say(L.thanksChecking);
+      if (tries === 1) say(L.thanksChecking);
       retry.hidden = true;
       let json: any = null;
       try {
+        const storage = ls();
         const r =
           from?.kind === 'link'
-            ? await fetch(`/api/store/order?o=${from.order}&t=${encodeURIComponent(from.token)}`, { headers: { Accept: 'application/json' } })
+            ? await fetch('/api/store/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ o: from.order, t: from.token, m: (storage && manageFor(storage, from.order)) || '' }),
+              })
             : await fetch('/api/store/confirm', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({ order }),
+                body: JSON.stringify({ order, claim: claim(), ...(signed && signed.referenceId === order ? { rzp: signed } : {}) }),
               });
         json = await r.json().catch(() => null);
       } catch {
         json = null;
+      }
+      const id = from?.kind === 'link' ? from.order : order;
+      if (json?.ok && json.state === 'paid' && json.locked) {
+        // Paid, but this browser holds neither the checkout secret nor
+        // Razorpay's return: the keys stay with the buyer (and their email).
+        say(json.emailed ? L.thanksLocked : L.thanksLockedNoEmail);
+        download.hidden = true;
+        store.hidden = false;
+        return;
       }
       if (json?.ok && json.state === 'paid') {
         // Counted once, on the return from Razorpay: a reload or the emailed
         // link opens the #o= address instead. Product and price only - no
         // order number or email goes to Google Analytics.
         if (from?.kind !== 'link') countPurchase(String(json.productId ?? ''));
-        return showPaid(json, from?.kind === 'link' ? from.order : order);
+        return showPaid(json, id);
+      }
+      if (json?.ok && json.receipt && (json.state === 'refunded' || json.state === 'expired' || json.state === 'used')) {
+        return showClosed(json, id);
       }
       const state = json?.ok ? String(json.state) : 'unverified';
       // Just back from paying: Razorpay can take a while to say "paid" (a UPI
-      // payment often 10-30 seconds), so keep asking for about a minute
-      // before showing "not confirmed yet".
-      if (from?.kind === 'return' && (state === 'pending' || state === 'created' || state === 'unverified') && tries < 15) {
-        say(L.thanksChecking);
-        return void setTimeout(() => check(tries + 1), 4000);
+      // payment often 10-30 seconds). Ask every 4 seconds for a minute, then
+      // every 20 seconds for 10 more minutes, saying plainly not to pay again.
+      const waiting = state === 'pending' || state === 'created' || state === 'unverified';
+      if (from?.kind !== 'link' && waiting && tries < 45) {
+        if (tries < 15) say(L.thanksChecking);
+        else {
+          say(L.thanksStill);
+          retry.hidden = false;
+        }
+        return void setTimeout(() => check(tries + 1), tries < 15 ? 4000 : 20000);
       }
-      showOther(state);
+      showOther(state, waiting && from?.kind !== 'link' ? L.thanksStill : '');
     }
     function countPurchase(id: string) {
       const prices = JSON.parse(root!.dataset.prices ?? '{}');

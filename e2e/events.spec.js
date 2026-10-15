@@ -74,7 +74,7 @@ test('a purchase kept in this browser: the product page offers the download agai
   const o = 'o' + 'a'.repeat(24);
   const t = 'tok_' + 'x'.repeat(30);
   let state = { ok: true, state: 'paid', remaining: 4, expires: Math.floor(Date.now() / 1000) + 86400 * 25 };
-  await page.route('**/api/store/order?*', (r) => r.fulfill({ json: state }));
+  await page.route('**/api/store/order', (r) => r.fulfill({ json: state }));
   await page.goto('/store/kruti-dev-7-day-starter/');
   await expect(page.locator('[data-sb-owned]')).toBeHidden();
   await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
@@ -88,10 +88,13 @@ test('a purchase kept in this browser: the product page offers the download agai
   await expect(page.locator('[data-sb-bought]')).toBeHidden();
   await page.locator('[data-sb-again]').click();
   await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
-  // Refunded: nothing is offered, the purchase is forgotten, the page is as for anyone.
-  state = { ok: true, state: 'refunded' };
+  // Refunded: it says so (the receipt is one click away), and the form is there as for anyone.
+  state = { ok: true, state: 'refunded', remaining: 4, expires: null, receipt: { order: o, amount: 3900 } };
   await page.reload();
-  await expect(page.locator('[data-sb-owned]')).toBeHidden();
+  await expect(page.locator('[data-sb-owned-closed]')).toHaveText('This order was refunded, so the download is closed.');
   await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
+  // "Forget this purchase on this device" removes it.
+  await page.locator('[data-sb-forget]').click();
+  await expect(page.locator('[data-sb-owned]')).toContainText('Removed from this device');
   expect(await page.evaluate(() => localStorage.getItem('mkd-bought'))).toBe('{}');
 });

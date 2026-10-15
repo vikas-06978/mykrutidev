@@ -7,7 +7,7 @@
  *
  * Only the buyer's email goes to our server; see the privacy policy.
  */
-import { PRODUCTS, price } from '../lib/store.js';
+import { PRODUCTS, STORE, price } from '../lib/store.js';
 import { langOf, useT, fill } from '../i18n/index.js';
 
 interface Props {
@@ -22,8 +22,12 @@ const lang = langOf(Astro.url);
 const { t, render, path: to } = useT(lang);
 const amount = price(product.pricePaise);
 const strings = Object.fromEntries(
-  ['errEmail', 'errAccept', 'errRate', 'errChallenge', 'errClosed', 'errProvider', 'errGeneric', 'working', 'thanksLeft'].map((k) => [k, t(`store.${k}`)]),
+  [
+    'errEmail', 'errAccept', 'errRate', 'errChallenge', 'errClosed', 'errProvider', 'errGeneric', 'working', 'thanksLeft',
+    'thanksRefunded', 'thanksExpired', 'pendingNote', 'forgotten',
+  ].map((k) => [k, t(`store.${k}`)]),
 );
+const limits = fill(t('store.limitsNote'), { n: String(STORE.maxDownloads), days: String(STORE.downloadDays) });
 const buy = fill(t('store.buy'), { price: amount });
 ---
 
@@ -38,10 +42,19 @@ const buy = fill(t('store.buy'), { price: amount });
     which stay one click away for a second copy.
   */}
   <div class="sb-owned mt-5" data-sb-owned hidden>
-    <p class="text-sm font-medium text-ink">✓ {t('store.ownedNote')}</p>
+    <p class="text-sm font-medium text-ink" data-sb-owned-note>✓ {t('store.ownedNote')}</p>
     <p class="mt-1 text-sm text-body" data-sb-owned-left hidden></p>
+    <p class="mt-1 text-sm text-body" data-sb-owned-closed hidden></p>
     <a class="btn btn-primary mt-3" href={to('/store/thanks')} data-sb-owned-link>{t('store.ownedButton')}</a>
-    <p class="mt-3 text-sm"><button type="button" class="sb-again" data-sb-again hidden>{t('store.buyAgain')}</button></p>
+    <p class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <button type="button" class="sb-again" data-sb-again hidden>{t('store.buyAgain')}</button>
+      <button type="button" class="sb-again" data-sb-forget>{t('store.forget')}</button>
+    </p>
+  </div>
+  {/* A payment started here and not yet seen paid: do not let a worried buyer pay twice. */}
+  <div class="sb-pending mt-5" data-sb-pending role="status" hidden>
+    <p class="text-sm font-medium text-ink" data-sb-pending-note></p>
+    <a class="btn btn-outline mt-3" href={to('/store/thanks')} data-sb-pending-link>{t('store.pendingCheck')}</a>
   </div>
 
   <div data-sb-buyarea>
@@ -93,6 +106,7 @@ const buy = fill(t('store.buy'), { price: amount });
   <p class="mt-4 text-sm"><a href={`${to('/store/thanks')}#find`} data-sb-bought>{t('store.alreadyBought')}</a></p>
 
   <ul class="mt-5 grid gap-1.5 text-xs text-mute">
+    <li>{limits}</li>
     <li set:html={render(t('store.payNote'))} />
     <li set:html={render(t('store.deliveryNote'))} />
     <li set:html={render(t('store.refundNote'))} />
@@ -130,6 +144,12 @@ const buy = fill(t('store.buy'), { price: amount });
     border-radius: var(--radius-chrome);
     background: var(--color-surface);
   }
+  .sb-pending {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-brick);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+  }
   .sb-hp {
     position: absolute;
     left: -10000px;
@@ -145,65 +165,140 @@ const buy = fill(t('store.buy'), { price: amount });
 </style>
 
 <script>
-  import { boughtHash, checkoutError, daysLeft, forgetPurchase, payUrlOk, readOrderFrom } from '../lib/storeClient.js';
+  import {
+    boughtEntry,
+    checkoutError,
+    daysLeft,
+    forgetDevice,
+    forgetPending,
+    forgetPurchase,
+    payUrlOk,
+    pendingFor,
+    rememberPending,
+    rememberPurchase,
+  } from '../lib/storeClient.js';
   import { track } from '../scripts/track.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-sb-form]');
+  const ls = (): Storage | null => {
+    try {
+      return localStorage;
+    } catch {
+      return null;
+    }
+  };
+  const L0 = JSON.parse(form?.dataset.i18n ?? '{}');
+  const pageLang = form?.dataset.lang || 'en';
+  /** "Buy another copy" pressed: the next Pay starts a new order instead of reusing the open one. */
+  let fresh = false;
 
   // Bought already in this browser: offer that download first. The server is
   // asked whether the link still works (and how many downloads are left); if
-  // it does, the price and the form step aside behind "Buy another copy".
+  // it does, the price and the form step aside behind "Buy another copy". A
+  // refunded or expired one says so, with its receipt on the download page.
   const owned = document.querySelector<HTMLElement>('[data-sb-owned]');
   const ownedLink = owned?.querySelector<HTMLAnchorElement>('[data-sb-owned-link]');
   const ownedLeft = owned?.querySelector<HTMLElement>('[data-sb-owned-left]');
+  const ownedClosed = owned?.querySelector<HTMLElement>('[data-sb-owned-closed]');
   const again = owned?.querySelector<HTMLButtonElement>('[data-sb-again]');
+  const forget = owned?.querySelector<HTMLButtonElement>('[data-sb-forget]');
   const buyArea = document.querySelector<HTMLElement>('[data-sb-buyarea]');
+  const pendingBox = document.querySelector<HTMLElement>('[data-sb-pending]');
   const product = form?.dataset.product ?? '';
-  if (owned && ownedLink && ownedLeft && again && buyArea && product) {
-    let hash: string | null = null;
-    try {
-      hash = boughtHash(localStorage, product);
-    } catch {
-      hash = null;
-    }
-    const link = hash ? readOrderFrom({ hash }) : null;
-    if (hash && link?.kind === 'link') {
-      ownedLink.href = ownedLink.pathname + hash;
-      owned.hidden = false;
-      const L0 = JSON.parse(form!.dataset.i18n ?? '{}');
-      fetch(`/api/store/order?o=${link.order}&t=${encodeURIComponent(link.token)}`, { headers: { Accept: 'application/json' } })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (d?.ok && d.state === 'paid' && d.remaining > 0) {
-            ownedLeft.textContent = String(L0.thanksLeft ?? '')
-              .replace('{n}', String(d.remaining))
-              .replace('{days}', String(daysLeft(d.expires)));
-            ownedLeft.hidden = false;
-            buyArea.hidden = true;
-            again.hidden = false;
-            // They are here already: "Already bought?" would only repeat the box.
-            document.querySelector<HTMLElement>('[data-sb-bought]')?.closest('p')?.setAttribute('hidden', '');
-          } else if (d?.ok) {
-            // Refunded, expired or used up: nothing to offer here any more.
-            try {
-              forgetPurchase(localStorage, product);
-            } catch {
-              // storage blocked: it simply stays
-            }
-            owned.hidden = true;
-          }
-          // No answer (offline): the box stays, and so does the form.
-        })
-        .catch(() => {});
-      again.addEventListener('click', () => {
-        buyArea.hidden = false;
-        again.hidden = true;
-      });
-    }
+  const storage = ls();
+  const entry = storage && product ? boughtEntry(storage, product) : null;
+
+  if (owned && ownedLink && ownedLeft && ownedClosed && again && forget && buyArea && product && entry) {
+    ownedLink.href = `${ownedLink.pathname}#o=${entry.o}&t=${entry.t}`;
+    owned.hidden = false;
+    fetch('/api/store/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ o: entry.o, t: entry.t, m: entry.m }),
+    })
+      .then((r) => (r.ok || r.status === 404 ? r.json().then((d) => ({ status: r.status, d })) : null))
+      .then((got) => {
+        if (!got) return; // No answer (offline, busy): the box stays, and so does the form.
+        const d = got.d;
+        if (d?.ok && d.state === 'paid' && d.remaining > 0) {
+          ownedLeft.textContent = String(L0.thanksLeft ?? '')
+            .replace('{n}', String(d.remaining))
+            .replace('{days}', String(daysLeft(d.expires)));
+          ownedLeft.hidden = false;
+          buyArea.hidden = true;
+          again.hidden = false;
+          // They are here already: "Already bought?" would only repeat the box.
+          document.querySelector<HTMLElement>('[data-sb-bought]')?.closest('p')?.setAttribute('hidden', '');
+        } else if (d?.ok && (d.state === 'refunded' || d.state === 'expired' || d.state === 'used')) {
+          // Closed: say why, keep the way to the receipt, and the form is there to buy again.
+          ownedClosed.textContent = d.state === 'refunded' ? L0.thanksRefunded : L0.thanksExpired;
+          ownedClosed.hidden = false;
+          owned.querySelector('[data-sb-owned-note]')?.setAttribute('hidden', '');
+          ownedLink.classList.replace('btn-primary', 'btn-outline');
+        } else if (got.status === 404) {
+          // The key is no longer valid here (it moved on to a corrected email): forget it.
+          if (storage) forgetPurchase(storage, product);
+          owned.hidden = true;
+        }
+      })
+      .catch(() => {});
+    again.addEventListener('click', () => {
+      buyArea.hidden = false;
+      again.hidden = true;
+      fresh = true;
+    });
   }
+  forget?.addEventListener('click', () => {
+    if (storage && product) forgetDevice(storage, product);
+    if (owned) {
+      owned.replaceChildren(Object.assign(document.createElement('p'), { className: 'text-sm text-body', textContent: L0.forgotten ?? '' }));
+    }
+    if (buyArea) buyArea.hidden = false;
+  });
+
+  // A payment started here and not yet seen paid (the tab closed during UPI,
+  // the bank was slow): ask once whether it went through. Paid: it becomes
+  // the bought box above on the next visit, and the download is one click
+  // away. Still open: "do not pay again", and Pay reuses the same payment page.
+  const pending = !entry && storage && product ? pendingFor(storage, product) : null;
+  if (pending && pendingBox && storage) {
+    fetch('/api/store/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ order: pending.o, claim: pending.c }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.ok) return;
+        const link = pendingBox.querySelector<HTMLAnchorElement>('[data-sb-pending-link]')!;
+        const note = pendingBox.querySelector<HTMLElement>('[data-sb-pending-note]')!;
+        if (d.state === 'paid' && d.token && !d.locked) {
+          rememberPurchase(storage, product, pending.o, d.token, d.expires, d.manage);
+          forgetPending(storage, pending.o);
+          location.reload();
+          return;
+        }
+        if (d.state === 'pending' || d.state === 'created' || d.state === 'unverified') {
+          let when = '';
+          try {
+            when = new Intl.DateTimeFormat(`${pageLang}-IN`, { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(pending.at);
+          } catch {
+            when = new Date(pending.at).toISOString().slice(0, 16).replace('T', ' ');
+          }
+          note.textContent = String(L0.pendingNote ?? '').replace('{time}', when);
+          link.href = `${link.pathname}?razorpay_payment_link_reference_id=${pending.o}`;
+          pendingBox.hidden = false;
+          return;
+        }
+        // Closed, failed or unknown: nothing to wait for.
+        forgetPending(storage, pending.o);
+      })
+      .catch(() => {});
+  }
+
   if (form) {
-    const L = JSON.parse(form.dataset.i18n ?? '{}');
-    const lang = form.dataset.lang || 'en';
+    const L = L0;
+    const lang = pageLang;
     const email = form.querySelector<HTMLInputElement>('#sb-email')!;
     const accept = form.querySelector<HTMLInputElement>('[data-sb-accept]')!;
     const website = form.querySelector<HTMLInputElement>('#sb-website')!;
@@ -243,12 +338,23 @@ const buy = fill(t('store.buy'), { price: amount });
       track('begin_checkout', item);
       let res: Response | null = null;
       let json: any = null;
+      // A payment page already open from this browser is reused, so one buyer
+      // never ends up with two to pay. "Buy another copy" starts a new one.
+      const open = !fresh && storage ? pendingFor(storage, product) : null;
       try {
         const token = await (await startCheck())?.token();
         res = await fetch('/api/store/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ productId: form.dataset.product, email: address, accept: true, lang, token, website: website.value }),
+          body: JSON.stringify({
+            productId: form.dataset.product,
+            email: address,
+            accept: true,
+            lang,
+            token,
+            website: website.value,
+            ...(open ? { resume: { order: open.o, claim: open.c } } : {}),
+          }),
         });
         json = /json/.test(res.headers.get('Content-Type') ?? '') ? await res.json().catch(() => null) : null;
       } catch {
@@ -260,10 +366,14 @@ const buy = fill(t('store.buy'), { price: amount });
         } catch {
           // fine without it: Razorpay sends the order id back in the address
         }
+        // The checkout secret: what lets this browser get the download even if
+        // the buyer never comes back from Razorpay's page.
+        if (storage) rememberPending(storage, product, String(json.order ?? ''), String(json.claim ?? ''), json.reused && open ? open.at : Date.now());
         location.assign(json.url);
         return;
       }
       busy(false);
+      // A failed robot check (common on some Android browsers): a fresh one for the next try.
       if (res?.status === 403) void (await check)?.reset();
       fail(L[checkoutError(res?.status ?? 0, json?.error)] ?? L.errGeneric);
     });
