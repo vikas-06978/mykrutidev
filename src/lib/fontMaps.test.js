@@ -658,3 +658,36 @@ describe('robustness', () => {
     assert.equal(out.trim().split(/\s+/).length, 20000);
   });
 });
+
+// ---------------------------------------------------------------------------
+// The colon. On the Kruti Dev keyboard the `:` key draws रू (checked by drawing
+// it in the font files of all eleven fonts on this layout); the colon people
+// see in "विषय:" is the visarga on the `%` key.
+// ---------------------------------------------------------------------------
+describe('a Unicode colon is typed as % on the Kruti Dev keyboard', () => {
+  const LAYOUT = ['kruti-dev', 'devlys', 'arjun', 'agra', 'aman', 'ajay', 'kundli', 'krishna', 'new-delhi'];
+  for (const key of LAYOUT) {
+    test(`${key}: विषय: gives the % key, never the : key`, () => {
+      assert.match(convert('विषय: अवकाश', 'unicode', key), /^fo"k;% /);
+      assert.doesNotMatch(convert('दिनांक: 12', 'unicode', key), /:/);
+    });
+  }
+
+  test('a time keeps its digits and gets the same key, with or without English-keeping', () => {
+    assert.equal(convert('समय 10:30 बजे', 'unicode', 'kruti-dev'), 'le; 10%30 cts');
+    assert.equal(convert('समय 10:30 बजे', 'unicode', 'kruti-dev', { keepEnglish: false }), 'le; 10%30 cts');
+  });
+
+  test('a visarga is the same key as the colon', () => {
+    assert.equal(convert('दुःख', 'unicode', 'kruti-dev'), 'nq%[k');
+  });
+
+  test('a web address keeps its colons: they are not typed', () => {
+    assert.equal(convert('http://a.com:8080/x', 'unicode', 'kruti-dev'), 'http://a.com:8080/x');
+  });
+
+  test('other keyboards are untouched', () => {
+    assert.equal(convert('विषय: अवकाश', 'unicode', 'preeti'), convert('विषय: अवकाश', 'unicode', 'preeti', { keepEnglish: false }));
+    assert.match(convert('विषय: अवकाश', 'unicode', 'preeti'), /:/);
+  });
+});

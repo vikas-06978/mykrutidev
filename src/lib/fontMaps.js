@@ -3945,12 +3945,15 @@ export function buildReverse(map) {
 export function unicodeToLegacy(
   text,
   map,
-  { keepEnglish = true, reverse = null, toVisual = toVisualOrder, missed } = {},
+  { keepEnglish = true, reverse = null, toVisual = toVisualOrder, missed, digitColon = '' } = {},
 ) {
   if (!text) return '';
   const trie = trieFor(reverse ?? buildReverse(map));
   return splitProtected(text, keepEnglish ? RE_PROTECT_ALL : RE_PROTECT_LINKS)
-    .map(({ skip, v }) => (skip ? v : transliterate(toVisual(v), trie, missed)))
+    .map(({ skip, v }) =>
+      // A kept number is not typed, but a time in it (10:30) still needs the font's colon key.
+      skip ? (digitColon ? v.replace(/(\d):(?=\d)/g, `$1${digitColon}`) : v) : transliterate(toVisual(v), trie, missed),
+    )
     .join('');
 }
 
@@ -3963,10 +3966,25 @@ export function unicodeToLegacy(
 const scriptOpts = (from, to, opts) =>
   from.asciiIsScript || to.asciiIsScript ? { ...opts, keepEnglish: false } : opts;
 
+/**
+ * On the Kruti Dev keyboard the `:` key draws रू (checked in the font files of
+ * every font on this layout), and the colon you see in "विषय:" is the visarga
+ * on the `%` key. So an ordinary colon in Unicode text must be typed as `%`,
+ * or the legacy text reads "विषयरू". The reverse direction cannot undo this: a
+ * `%` is a visarga there, since दुःख and a colon both type it.
+ */
+const colonReverse = new Map();
+function withColon(font, key) {
+  if (!KRUTI_KEYBOARD.has(key)) return font.reverse ?? null;
+  if (!colonReverse.has(key)) colonReverse.set(key, { ...(font.reverse ?? buildReverse(font.map)), ':': '%' });
+  return colonReverse.get(key);
+}
+
 /** The per-font overrides unicodeToLegacy() takes, read off the registry. */
-const reverseOpts = (font) => ({
-  reverse: font.reverse ?? null,
+const reverseOpts = (font, key) => ({
+  reverse: withColon(font, key),
   toVisual: font.toVisual ?? toVisualOrder,
+  digitColon: KRUTI_KEYBOARD.has(key) ? '%' : '',
 });
 
 // Passed through untouched and never worth a warning: whitespace, English
@@ -3986,7 +4004,7 @@ export function unmappedChars(text, toKey, opts = {}) {
   if (!text || !to?.warnUnmapped) return [];
   opts = scriptOpts(FONTS.unicode, to, opts);
   const missed = new Set();
-  unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to), missed });
+  unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to, toKey), missed });
   return [...missed].filter((ch) => !RE_EXPECTED_PASSTHROUGH.test(ch));
 }
 
@@ -4028,7 +4046,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
     return legacyToUnicode(text, from.readMap ?? from.map, readOpts);
   }
   if (from.kind === 'unicode' && to.kind === 'legacy') {
-    return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to) });
+    return unicodeToLegacy(text, to.map, { ...opts, ...reverseOpts(to, toKey) });
   }
   // Two fonts on one keyboard layout draw the same letter on every key, so the
   // keys ARE the answer. Going through Unicode would only lose detail it cannot
@@ -4039,7 +4057,7 @@ export function convert(text, fromKey, toKey, opts = {}) {
   // legacy -> legacy routes through Unicode.
   return unicodeToLegacy(legacyToUnicode(text, from.readMap ?? from.map, readOpts), to.map, {
     ...opts,
-    ...reverseOpts(to),
+    ...reverseOpts(to, toKey),
   });
 }
 
