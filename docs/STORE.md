@@ -89,6 +89,8 @@ Preview bindings needed: D1 `DB` (the feedback database) and R2 `STORE_FILES` (t
 ## Rules the code enforces
 
 * **Price and file never come from the browser.** The request names a product id, nothing else.
+* **Paid means Razorpay says so, exactly.** A payment link counts only when Razorpay's API, asked with our secret key, answers `status: paid` with our order id as `reference_id`, currency `INR`, and `amount` and `amount_paid` both equal to the order's amount. A missing field is a "no". A declined or fake card never reaches `paid`: Razorpay itself refuses it, and nothing the browser or a callback says can unlock a file.
+* **No test keys on the live site.** On `mykrutidev.com` the store refuses every sale while the keys are `rzp_test_…` (anyone could otherwise "pay" with Razorpay's published test cards and get the real file), and never sells a `test` product even if `STORE_TEST_PRODUCTS` is set. `/admin/orders` shows this as *Not ready*.
 * **Paid is decided once**: `UPDATE … WHERE status='created' RETURNING *`, so two racing webhook/return calls cannot both send the emails.
 * **Downloads** are POST-only (a mail scanner opening the link cannot use one up) and counted in a single `UPDATE` that also checks paid, not refunded, not expired, under the limit (`STORE.maxDownloads`, `STORE.downloadDays`). A missing file does not cost a download.
 * **The link** is `/store/thanks#o=<order>&t=<HMAC>`: the token is in the fragment, so it is never sent to a server or in a Referer, and `src/lib/analytics.js` also strips the query from what Google Analytics sees on that page.
@@ -108,9 +110,19 @@ How it stays cheap: opening and re-saving a PDF in the Function takes 50 to 130 
 
 If the file in the bucket was not prepared, the download still works but is served without a stamp, and `store file has no stamp slot` is logged. Check the Function's logs on the preview after the first test purchase.
 
+## /admin/orders
+
+Sign in at `/admin/feedback` first (the same `ADMIN_KEY`). The page shows, top to bottom:
+
+1. **Ready or not**: green when this deployment can take payments; otherwise each reason in red (missing key, webhook secret or bucket, a product on sale whose PDF is not uploaded, test keys on the live site, nothing on sale). Warnings (no bot check, live keys on a preview, `STORE_TEST_PRODUCTS` on the live site) are listed under it.
+2. **Money in**: today, last 7 days, last 30 days and all time (India time, paid orders only), then paid / refunded / started-not-paid / email-failed counts.
+3. **By product**: price, status, paid, money in and refunds per product.
+4. **Orders**: filter by status and product, search an order id, a `pay_…` id or part of an email; 50 a page. A payment id links to that payment in Razorpay's dashboard. Actions: *Check payment*, *Download link*, *Resend email*, *Extend*, and *Mark refunded* (the "sure" box must be ticked). After each one the page says what it did.
+5. **Setup check** (folded): every setting, ✓ or ✗.
+
 ## Before the first sale
 
 * Razorpay KYC is approved and the site's `/contact`, `/terms`, `/privacy-policy`, `/refund-policy` and `/delivery-policy` are live (Razorpay asks for them).
-* The first end-to-end payment was made in test mode on the preview.
+* The first end-to-end payment was made in test mode on the preview: pay with a Razorpay test card that succeeds (the order turns *Paid* in `/admin/orders`, the file downloads, the email arrives), then with one of Razorpay's failing test cards (it stays *Started, not paid*, nothing downloads). Razorpay lists its test cards and UPI ids in its docs (Payments → Test card details).
 * A ₹ live payment of the cheapest product was made by you and refunded by you, to see the whole path once with real keys.
 * Income tax (and GST above the threshold) can apply to digital sales even for a sole proprietor: check with a CA.

@@ -104,10 +104,11 @@ export const fetchPaymentLink = (env, linkId, fetchImpl = fetch) =>
  */
 export function isPaidFor(link, order) {
   if (!link || link.status !== 'paid') return false;
-  if (link.reference_id !== undefined && link.reference_id !== null && link.reference_id !== order.id) return false;
-  if (link.currency !== undefined && link.currency !== order.currency) return false;
-  const paid = link.amount_paid ?? link.amount;
-  return paid === order.amount;
+  // Every one of these must be there and match: we set the reference and the
+  // currency when the link was made, and Razorpay reports what was paid.
+  if (link.reference_id !== order.id) return false;
+  if (link.currency !== order.currency) return false;
+  return link.amount === order.amount && link.amount_paid === order.amount;
 }
 
 /** The payment id (pay_...) of a paid link, when Razorpay lists it. */

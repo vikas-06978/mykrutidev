@@ -48,6 +48,7 @@ import {
   fetchPaymentLink,
   hasKeys,
   hmacHex,
+  mode,
   isPaidFor,
   paymentIdOf,
   safeEqual,
@@ -79,6 +80,21 @@ const ALLOWED_ORIGIN = /^https:\/\/([a-z0-9-]+\.)*mykrutidev\.(com|pages\.dev)$/
 export function siteOrigin(request) {
   const origin = new URL(request.url).origin;
   return ALLOWED_ORIGIN.test(origin) ? origin : SITE_URL;
+}
+
+/** The live site's own address (not a preview). */
+export const isLiveHost = (request) => /^(www\.)?mykrutidev\.com$/.test(new URL(request.url).hostname);
+
+/**
+ * What would make a sale on this deployment unsafe, or null. On the live site,
+ * Razorpay TEST keys would let anyone "pay" with Razorpay's published test
+ * cards and get the real file, and STORE_TEST_PRODUCTS would put the test
+ * products on sale: both are refused there, whatever the settings say.
+ */
+export function unsafeToSell(request, env) {
+  if (!isLiveHost(request)) return null;
+  if (mode(env) === 'test') return 'test-keys-on-live-site';
+  return null;
 }
 
 /** The download token for an order: the HMAC of its id. */
@@ -117,8 +133,9 @@ async function readJson(request, max = LIMITS.body) {
 // ---------------------------------------------------------------------------
 
 /** GET /api/store/checkout: is the store open on this deployment? */
-export function handleStoreConfig(env) {
-  return reply(200, { ok: true, open: canSell(env), turnstileSiteKey: env.TURNSTILE_SITE_KEY || null });
+export function handleStoreConfig(env, request) {
+  const open = canSell(env) && !(request && unsafeToSell(request, env));
+  return reply(200, { ok: true, open, turnstileSiteKey: env.TURNSTILE_SITE_KEY || null });
 }
 
 /**
@@ -130,6 +147,11 @@ export async function handleCheckout(request, env, deps = {}) {
   const fetchImpl = deps.fetch ?? fetch;
   const now = deps.now ?? Date.now();
   if (!canSell(env)) return reply(503, { ok: false, error: 'not-configured' });
+  const unsafe = unsafeToSell(request, env);
+  if (unsafe) {
+    console.error('store refused a sale:', unsafe);
+    return reply(503, { ok: false, error: 'not-configured' });
+  }
 
   const got = await readJson(request);
   if (got.fail) return got.fail;
@@ -154,7 +176,9 @@ export async function handleCheckout(request, env, deps = {}) {
   }
 
   const product = productById(checked.value.productId);
-  if (!sellable(product, env)) return reply(404, { ok: false, error: 'unknown-product' });
+  // The test products are never sold on the live site, whatever STORE_TEST_PRODUCTS says.
+  const sellEnv = isLiveHost(request) ? { ...env, STORE_TEST_PRODUCTS: '' } : env;
+  if (!sellable(product, sellEnv)) return reply(404, { ok: false, error: 'unknown-product' });
 
   const db = env.DB;
   // Orders nobody paid are not kept: their emails are deleted after a week.

@@ -98,7 +98,8 @@ function fakeNet() {
 
 let ipN = 0;
 const post = (path, body, { ip = `203.0.113.${++ipN}`, type = 'application/json', raw } = {}) =>
-  new Request(`https://mykrutidev.com${path}`, {
+  // A preview deployment: the tests use Razorpay TEST keys, which the live site refuses.
+  new Request(`https://test.mykrutidev.pages.dev${path}`, {
     method: 'POST',
     headers: { 'Content-Type': type, 'CF-Connecting-IP': ip },
     body: raw ?? JSON.stringify(body),
@@ -145,7 +146,7 @@ describe('POST /api/store/checkout', () => {
     assert.deepEqual(call.body.notify, { sms: false, email: false });
     assert.equal(call.body.reminder_enable, false);
     assert.equal(call.body.customer.email, 'buyer@example.com');
-    assert.equal(call.body.callback_url, 'https://mykrutidev.com/store/thanks');
+    assert.equal(call.body.callback_url, 'https://test.mykrutidev.pages.dev/store/thanks');
     assert.equal(call.body.callback_method, 'get');
     assert.equal(call.body.expire_by, Math.floor(Date.UTC(2026, 9, 14, 10, 0, 0) / 1000) + STORE.linkMinutes * 60);
   });
@@ -167,6 +168,30 @@ describe('POST /api/store/checkout', () => {
     });
     await handleCheckout(other, ENV(), { fetch: net.fetch });
     assert.equal(net.calls[1].body.callback_url, 'https://mykrutidev.com/store/thanks');
+  });
+
+  test('the live site refuses Razorpay TEST keys: nobody can "pay" there with a test card', async () => {
+    const net = fakeNet();
+    const live = (body, ip) =>
+      new Request('https://mykrutidev.com/api/store/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+        body: JSON.stringify(body),
+      });
+    const r = await handleCheckout(live(good, '198.51.100.9'), ENV(), { fetch: net.fetch });
+    assert.equal(r.status, 503);
+    assert.equal(net.calls.length, 0, 'Razorpay is not even asked');
+    assert.equal((await orders()).length, 0);
+    const www = await handleCheckout(new Request('https://www.mykrutidev.com/api/store/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(good) }), ENV(), { fetch: net.fetch });
+    assert.equal(www.status, 503);
+    assert.equal((await handleStoreConfig(ENV(), new Request('https://mykrutidev.com/api/store/checkout')).json()).open, false);
+    assert.equal((await handleStoreConfig(ENV(), new Request('https://test.mykrutidev.pages.dev/api/store/checkout')).json()).open, true);
+
+    // With live keys the live site sells, but never a test product, whatever STORE_TEST_PRODUCTS says.
+    const liveEnv = { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_abc123', STORE_TEST_PRODUCTS: '1' };
+    const t = await handleCheckout(live(good, '198.51.100.10'), liveEnv, { fetch: net.fetch });
+    assert.equal(t.status, 404);
+    assert.equal(net.calls.length, 0);
   });
 
   test('says not-configured until the keys, the token secret and the database are there', async () => {
@@ -300,6 +325,20 @@ describe('settling an order: only Razorpay saying "paid" counts', () => {
     assert.equal((await settleOrder(ENV(), id, { fetch: net.fetch })).state, 'pending');
     assert.equal((await orders())[0].status, 'created');
     assert.equal(net.mails.length, 0);
+  });
+
+  test('isPaidFor: a "paid" answer missing its reference, currency or amount paid does not count', () => {
+    const order = { id: 'oaaaaaaaaaaaaaaaaaaaaaaaaa', amount: 3900, currency: 'INR' };
+    const paid = { status: 'paid', reference_id: order.id, currency: 'INR', amount: 3900, amount_paid: 3900 };
+    assert.equal(isPaidFor(paid, order), true);
+    for (const drop of ['reference_id', 'currency', 'amount_paid', 'amount']) {
+      const link = { ...paid };
+      delete link[drop];
+      assert.equal(isPaidFor(link, order), false, drop);
+    }
+    assert.equal(isPaidFor({ ...paid, reference_id: null }, order), false);
+    assert.equal(isPaidFor({ ...paid, amount_paid: 100 }, order), false, 'a part payment');
+    assert.equal(isPaidFor({ ...paid, status: 'partially_paid' }, order), false);
   });
 
   test('isPaidFor: only status "paid" for the exact amount, currency and reference', () => {
@@ -693,8 +732,8 @@ describe('/admin/orders', () => {
   const KEY = ENV().ADMIN_KEY;
   const req = (path = '/admin/orders', init = {}, authed = true) =>
     new Request(`https://mykrutidev.com${path}`, { ...init, headers: { ...(authed ? { Authorization: `Bearer ${KEY}` } : {}), ...init.headers } });
-  const act = (action, id, headers = {}) => {
-    const form = new URLSearchParams({ action, id });
+  const act = (action, id, headers = {}, extra = { sure: '1' }) => {
+    const form = new URLSearchParams({ action, id, ...extra });
     return handleAdminOrders(req('/admin/orders', { method: 'POST', body: form, headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...headers } }), ENV(), { fetch: net.fetch });
   };
   let net;
@@ -809,7 +848,7 @@ describe('/admin/orders', () => {
         get: (t, k) => (k === 'prepare' ? (sql) => (/^UPDATE orders SET status/.test(sql) ? { bind: () => ({ run: async () => { throw new Error('D1_ERROR: boom'); } }) } : t.prepare(sql)) : k === 'batch' ? t.batch.bind(t) : t[k]),
       }),
     };
-    const form = new URLSearchParams({ action: 'refund', id });
+    const form = new URLSearchParams({ action: 'refund', id, sure: '1' });
     const r = await handleAdminOrders(req('/admin/orders', { method: 'POST', body: form, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }), broken, { fetch: net.fetch });
     assert.equal(r.status, 500);
     assert.match(await r.text(), /That did not work \(refund\): D1_ERROR: boom/);
@@ -824,6 +863,138 @@ describe('/admin/orders', () => {
     assert.equal((await orders())[0].status, 'created');
     assert.equal((await act('refund', "o'; DROP TABLE orders; --")).status, 303);
     assert.equal((await orders()).length, 1);
+  });
+});
+
+describe('/admin/orders: the organised view', () => {
+  const KEY = ENV().ADMIN_KEY;
+  const get = (path, env = ENV(), host = 'https://test.mykrutidev.pages.dev', deps = {}) =>
+    handleAdminOrders(new Request(`${host}${path}`, { headers: { Authorization: `Bearer ${KEY}` } }), env, deps).then((r) => r.text());
+  /** An order row put straight into the database. */
+  let n = 0;
+  async function row({ status = 'paid', product = 'sample-test', email = 'a@example.com', created = '2026-10-10T10:00:00Z', paid = null, amount = 100, mail = 'sent', payment = null } = {}) {
+    const A = 'abcdefghijklmnopqrstuvwxyz234567';
+    let k = ++n;
+    let id = '';
+    for (let i = 0; i < 24; i++, k = Math.floor(k / 32)) id = A[k % 32] + id;
+    id = `o${id}`;
+    await DB.prepare(
+      'INSERT INTO orders (id, created_at, paid_at, status, product_id, amount, currency, email, max_downloads, mail_status, payment_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 5, ?, ?)',
+    )
+      .bind(id, created, paid ?? (status === 'paid' ? created : null), status, product, amount, 'INR', email, mail, payment)
+      .run();
+    return id;
+  }
+
+  test('money in today, 7 days, 30 days and all time, by India time; refunds and unpaid not counted', async () => {
+    // 15 Oct 2026, 09:00 India time = 03:30 UTC. "Today" began at 14 Oct 18:30 UTC.
+    const now = Date.parse('2026-10-15T03:30:00Z');
+    await row({ paid: '2026-10-14T19:00:00Z', amount: 3900 }); // today (00:30 India time)
+    await row({ paid: '2026-10-14T18:00:00Z', amount: 3900 }); // yesterday, India time
+    await row({ paid: '2026-09-20T10:00:00Z', amount: 3900 }); // within 30 days
+    await row({ paid: '2026-01-01T10:00:00Z', amount: 3900 }); // long ago
+    await row({ status: 'refunded', paid: '2026-10-14T20:00:00Z', amount: 3900 });
+    await row({ status: 'created', amount: 3900 });
+    const html = await get('/admin/orders', ENV(), undefined, { now });
+    const tiles = [...html.matchAll(/fa-tile-n">₹([\d,.]+) <span class="fa-sub">· (\d+)<\/span><\/span><span class="fa-tile-l">([^<]+)/g)].map((m) => [m[3], m[1], m[2]]);
+    assert.deepEqual(tiles, [
+      ['Today', '39', '1'],
+      ['Last 7 days', '78', '2'],
+      ['Last 30 days', '117', '3'],
+      ['All time', '156', '4'],
+    ]);
+  });
+
+  test('filters by status, product and a search for an order id, a payment id or part of an email', async () => {
+    const a = await row({ email: 'ram@example.com', payment: 'pay_ABC123' });
+    const b = await row({ status: 'created', email: 'shyam@example.com' });
+    const c = await row({ status: 'refunded', email: 'sita_100%@example.com', product: 'kruti-dev-7-day-starter' });
+    const ids = (html) => [a, b, c].filter((id) => html.includes(`>${id}<`) || html.includes(`>${id}<br>`));
+    assert.deepEqual(ids(await get('/admin/orders')), [a, b, c]);
+    assert.deepEqual(ids(await get('/admin/orders?status=paid')), [a]);
+    assert.deepEqual(ids(await get('/admin/orders?status=created')), [b]);
+    assert.deepEqual(ids(await get('/admin/orders?product=kruti-dev-7-day-starter')), [c]);
+    assert.deepEqual(ids(await get(`/admin/orders?q=${b}`)), [b]);
+    assert.deepEqual(ids(await get('/admin/orders?q=pay_ABC123')), [a]);
+    assert.deepEqual(ids(await get('/admin/orders?q=SHYAM')), [b]);
+    assert.deepEqual(ids(await get('/admin/orders?q=' + encodeURIComponent('_100%'))), [c], '% and _ are matched as themselves');
+    assert.deepEqual(ids(await get('/admin/orders?q=' + encodeURIComponent('%'))), [c]);
+    assert.deepEqual(ids(await get('/admin/orders?status=nonsense&product=nope')), [a, b, c], 'unknown filters are ignored');
+    const html = await get('/admin/orders?q=pay_ABC123');
+    assert.match(html, /href="https:\/\/dashboard\.razorpay\.com\/app\/payments\/pay_ABC123"/);
+  });
+
+  test('50 orders a page, newest first, with links to older and newer', async () => {
+    for (let i = 0; i < 55; i++) await row({ created: `2026-10-10T10:${String(i).padStart(2, '0')}:00Z` });
+    const first = await get('/admin/orders');
+    assert.match(first, /1–50 of 55/);
+    assert.match(first, /href="\?page=2">Older/);
+    assert.equal((first.match(/<tr>\n  <td class="fa-nowrap">/g) || []).length, 50);
+    const second = await get('/admin/orders?page=2');
+    assert.match(second, /51–55 of 55/);
+    assert.match(second, /2026-10-10 10:04/);
+    assert.doesNotMatch(second, /2026-10-10 10:54/);
+  });
+
+  test('a paid order whose email failed is flagged and counted', async () => {
+    await row({ mail: 'failed' });
+    const html = await get('/admin/orders');
+    assert.match(html, /<span class="fa-flag">failed<\/span>/);
+    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email failed/);
+  });
+
+  test('"Mark refunded" needs the box ticked; every action says what it did', async () => {
+    const id = await row();
+    assert.match(await get('/admin/orders'), /name="sure" value="1" required/);
+    const form = (extra) =>
+      handleAdminOrders(
+        new Request('https://test.mykrutidev.pages.dev/admin/orders', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ action: 'refund', id, ...extra }),
+        }),
+        ENV(),
+      );
+    const no = await form({});
+    assert.equal(no.headers.get('Location'), '/admin/orders?done=norefund');
+    assert.equal((await orders())[0].status, 'paid');
+    assert.match(await get('/admin/orders?done=norefund'), /Not refunded: tick &quot;sure&quot; first\./);
+    const yes = await form({ sure: '1' });
+    assert.equal(yes.headers.get('Location'), `/admin/orders?done=refund&q=${id}`);
+    assert.equal((await orders())[0].status, 'refunded');
+    assert.match(await get(`/admin/orders?done=refund&q=${id}`), /Marked refunded: downloads are closed/);
+  });
+
+  test('ready or not: says plainly whether this deployment can take payments, and why not', async () => {
+    // A preview with a product on sale and its PDF missing: not ready, and it names the file.
+    let missing = await get('/admin/orders');
+    assert.match(missing, /On sale but its PDF is not in the bucket: test-sample\.pdf/);
+    // Every PDF in the bucket: ready, in test mode.
+    for (const p of PRODUCTS) await FILES.put(p.file, PDF);
+    let html = await get('/admin/orders');
+    assert.match(html, /fa-ready ok/, html.match(/<section class="fa-ready[\s\S]*?<\/section>/)?.[0]);
+    assert.match(html, /Ready on this preview \(Razorpay test mode: no real money\)/);
+
+    // The live site with test keys: not ready, and it says the store refuses sales there.
+    html = await get('/admin/orders', ENV(), 'https://mykrutidev.com');
+    assert.match(html, /fa-ready no/);
+    assert.match(html, /Razorpay TEST keys on the live site/);
+    assert.match(html, /STORE_TEST_PRODUCTS is 1 on the live site/);
+
+    // Live keys on the live site, but nothing has status "live": not ready either.
+    html = await get('/admin/orders', { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x', STORE_TEST_PRODUCTS: '' }, 'https://mykrutidev.com');
+    assert.match(html, /No product is on sale on the live site yet/);
+
+    // Live keys on a preview: a warning that payments are real.
+    html = await get('/admin/orders', { ...ENV(), RAZORPAY_KEY_ID: 'rzp_live_x' });
+    assert.match(html, /LIVE Razorpay keys on a preview/);
+
+    // A missing webhook secret stops it; a missing bot check is only a warning.
+    html = await get('/admin/orders', { ...ENV(), RAZORPAY_WEBHOOK_SECRET: '' });
+    assert.match(html, /fa-ready no/);
+    assert.match(html, /<li class="fa-no">Missing: Razorpay webhook secret/);
+    html = await get('/admin/orders', { ...ENV(), TURNSTILE_SECRET_KEY: '' });
+    assert.match(html, /fa-ready ok/);
   });
 });
 
