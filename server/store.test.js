@@ -1803,3 +1803,46 @@ describe('/admin/orders: needs attention, run checks, audit trail', () => {
     assert.match(html, /paid-by-background-check/);
   });
 });
+
+describe('the database: a table from an older release is brought up to date', () => {
+  // The orders table as it first went live. Every later column is added by
+  // addColumns, and an index on an added column only after it exists.
+  const FIRST = `CREATE TABLE orders (
+  id TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  paid_at TEXT,
+  status TEXT NOT NULL CHECK (status IN ('created', 'paid', 'failed', 'refunded')),
+  product_id TEXT NOT NULL,
+  amount INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'INR',
+  email TEXT NOT NULL,
+  lang TEXT,
+  link_id TEXT,
+  payment_id TEXT,
+  downloads INTEGER NOT NULL DEFAULT 0,
+  max_downloads INTEGER NOT NULL,
+  expires_at INTEGER,
+  mail_status TEXT
+)`;
+  // A new handle on the same database, so the schema check runs again.
+  const fresh = () => ({ prepare: (q) => DB.prepare(q), batch: (b) => DB.batch(b) });
+
+  test('an old orders table gets every new column and index, and keeps its rows', async () => {
+    const id = 'o' + 'q'.repeat(24);
+    try {
+      await DB.prepare('DROP TABLE IF EXISTS orders').run();
+      await DB.prepare(FIRST).run();
+      await DB.prepare("INSERT INTO orders (id, status, product_id, amount, email, max_downloads, downloads) VALUES (?, 'paid', 'sample-test', 100, 'a@example.com', 5, 2)").bind(id).run();
+      await ensureStoreSchema(fresh());
+      const row = await one(id);
+      assert.equal(row.downloads, 2);
+      assert.equal(row.token_ver, 0);
+      assert.equal(row.refunded_amount, 0);
+      const indexes = (await DB.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'orders'").all()).results.map((r) => r.name);
+      for (const name of ['orders_mail_id', 'orders_email', 'orders_link_id']) assert.ok(indexes.includes(name), name);
+    } finally {
+      await DB.prepare('DROP TABLE IF EXISTS orders').run();
+      await ensureStoreSchema(fresh());
+    }
+  });
+});

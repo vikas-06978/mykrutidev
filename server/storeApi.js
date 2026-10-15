@@ -99,9 +99,14 @@ export async function addColumns(db) {
 /** The orders table, once per database per worker (and the feedback tables the rate limit uses). */
 export function ensureStoreSchema(db) {
   if (!ready.has(db)) {
+    // Tables first, then the columns added since, then the indexes: an index on
+    // an added column (orders_mail_id) fails on a table that does not have it yet.
+    const tables = STORE_SCHEMA.filter((q) => !/^\s*CREATE INDEX/i.test(q));
+    const indexes = STORE_SCHEMA.filter((q) => /^\s*CREATE INDEX/i.test(q));
     const p = ensureSchema(db)
-      .then(() => db.batch(STORE_SCHEMA.map((s) => db.prepare(s))))
-      .then(() => addColumns(db));
+      .then(() => db.batch(tables.map((s) => db.prepare(s))))
+      .then(() => addColumns(db))
+      .then(() => db.batch(indexes.map((s) => db.prepare(s))));
     p.catch(() => ready.delete(db));
     ready.set(db, p);
   }
