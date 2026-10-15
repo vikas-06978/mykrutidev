@@ -37,7 +37,7 @@ export const BADGES = [
 ];
 const BADGE_IDS = new Set(BADGES.map((b) => b.id));
 
-const MODES = new Set(['lesson', 'practice', 'daily', 'exam']);
+const MODES = new Set(['lesson', 'practice', 'daily', 'exam', 'passages']);
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A local date as 'YYYY-MM-DD'. */

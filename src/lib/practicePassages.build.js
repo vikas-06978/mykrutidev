@@ -4,7 +4,8 @@
  * imports the conversion engine, which the browser never loads here).
  */
 import { convert } from './fontMaps.js';
-import { typeable } from './tutor.build.js';
+import { createHash } from 'node:crypto';
+import { typeable, buildVerifiedUnits } from './tutor.build.js';
 import { PRACTICE_PASSAGES } from './practicePassages.js';
 
 const OPTS = { keepEnglish: false };
@@ -54,3 +55,19 @@ export const wordCount = (text) => text.split(/\s+/).filter(Boolean).length;
 /** Every passage with its word count and tricky words, in order. */
 export const practiceList = () =>
   PRACTICE_PASSAGES.map((p, i) => ({ ...p, n: i + 1, words: wordCount(p.text), tricky: trickyWords(p.text) }));
+
+/**
+ * The 30 passages as the typing tutor types them: each split into (akshara,
+ * keystrokes) units by the verified converter. buildVerifiedUnits throws if a
+ * passage needs a key that is not on the keyboard, so the build fails rather
+ * than a visitor being asked to type something wrong. Served as one JSON file
+ * (src/pages/data/practice-passages.json.ts), fetched only when the tutor's
+ * "30 passages" tab is opened: it is too big to sit in every tutor page.
+ */
+let units;
+export const practiceUnits = () =>
+  (units ??= PRACTICE_PASSAGES.map((p, i) => ({ n: i + 1, units: buildVerifiedUnits(p.text, `practice-${i + 1}`) })));
+
+/** The file's address, with a hash of its content so a changed passage is never served stale. */
+export const practiceDataUrl = () =>
+  `/data/practice-passages.json?v=${createHash('sha256').update(JSON.stringify(practiceUnits())).digest('hex').slice(0, 10)}`;

@@ -7,7 +7,7 @@ import { getPage, isLive } from './routes.js';
 const BADGES = [{ key: 'passages', path: '/hindi-typing-practice-passages', until: '2026-11-29' }];
 
 /** Runs the inline script on a page at `pathname`, with a localStorage that may be missing. */
-function run(pathname, { stored = null, now = Date.parse('2026-10-20T10:00:00+05:30'), storage = true } = {}) {
+function run(pathname, { stored = null, now = Date.parse('2026-10-20T10:00:00+05:30'), storage = true, gtag } = {}) {
   const store = new Map(stored ? [[SEEN_KEY, stored]] : []);
   const attrs = {};
   const listeners = {};
@@ -21,6 +21,7 @@ function run(pathname, { stored = null, now = Date.parse('2026-10-20T10:00:00+05
       addEventListener: (type, fn) => (listeners[type] = fn),
     },
     addEventListener: () => {},
+    ...(gtag ? { gtag } : {}),
     Date: class extends Date {
       static now() {
         return now;
@@ -70,6 +71,19 @@ describe('"New" badges', () => {
     const other = run('/');
     other.click({ target: { closest: () => null } });
     assert.equal(other.attrs['data-new-hide'], '');
+  });
+
+  test('a click on a badge still showing is counted once in analytics, with the badge key only', () => {
+    const calls = [];
+    const page = run('/', { gtag: (...a) => calls.push(a) });
+    const ev = { target: { closest: () => ({ getAttribute: () => 'passages' }) } };
+    page.click(ev);
+    page.click(ev);
+    assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['event', 'new_badge_click', { badge: 'passages' }]]);
+    // Without gtag (dev, preview, tests) the click still hides the badge.
+    const plain = run('/');
+    plain.click(ev);
+    assert.equal(plain.attrs['data-new-hide'], 'passages');
   });
 
   test('after the last day it is hidden even on a page built before', () => {

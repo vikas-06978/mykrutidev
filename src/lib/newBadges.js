@@ -39,7 +39,8 @@ export const badgeCss = (badges = NEW_BADGES) =>
 /**
  * The inline script, the same text on every page (its hash is in the CSP):
  * marks the page being opened as seen, hides seen and expired badges, and
- * marks a badge seen the moment its link is clicked.
+ * marks a badge seen the moment its link is clicked (and counts that click
+ * in Google Analytics, where gtag exists: the badge's key, nothing else).
  */
 export function badgeScript(badges = NEW_BADGES) {
   const list = JSON.stringify(badges.map((b) => ({ k: b.key, p: b.path, e: endOf(b.until) })));
@@ -67,7 +68,12 @@ export function badgeScript(badges = NEW_BADGES) {
   addEventListener('pageshow', function (ev) { if (ev.persisted) apply(); });
   document.addEventListener('click', function (ev) {
     var a = ev.target && ev.target.closest ? ev.target.closest('[data-new-link]') : null;
-    if (a) { mark(a.getAttribute('data-new-link')); apply(); }
+    if (!a) return;
+    var k = a.getAttribute('data-new-link');
+    load();
+    // Counted in Google Analytics while the badge still showed: which badge only.
+    if (seen.indexOf(k) < 0) { try { if (typeof gtag === 'function') gtag('event', 'new_badge_click', { badge: k }); } catch (e) {} }
+    mark(k); apply();
   }, true);
 })();`;
 }
