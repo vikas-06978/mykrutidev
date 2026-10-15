@@ -528,7 +528,7 @@
       "left": "Left hand",
       "right": "Right hand"
     },
-    "passages": "30 passages",
+    "passages": "Passages",
     "ppLevel": "Level {n}",
     "ppAll": "All 30 passages with tricky words",
     "ppNumber": "{n} · {words} words",

@@ -80,9 +80,10 @@ const strings = raw(lang, 'tutor');
         <span id="tt-mode" class="cv-seg-label">{t('tutor.mode')}</span>
         <button type="button" data-mode="lesson" aria-pressed="true">{t('tutor.lessons')}</button>
         <button type="button" data-mode="practice" aria-pressed="false">{t('tutor.practice')}</button>
+        {/* Second after Practice test: on a 390px phone this keeps the row at two lines. */}
+        <button type="button" data-mode="passages" aria-pressed="false">{t('tutor.passages')}</button>
         <button type="button" data-mode="daily" aria-pressed="false">{t('tutor.today')}</button>
         <button type="button" data-mode="exam" aria-pressed="false">{t('tutor.exam')}</button>
-        <button type="button" data-mode="passages" aria-pressed="false">{t('tutor.passages')}</button>
       </div>
 
       {/* Practice only: a lesson ends when the drill does, not on a clock. */}
