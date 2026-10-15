@@ -1430,3 +1430,72 @@ describe('/admin/orders: phone, WhatsApp, delivery and a changed email', () => {
     assert.match(await get(), /Email delivery reports from Resend/);
   });
 });
+
+describe('one buyer, start to finish (the whole support path, in order)', () => {
+  test('buy with a typo, bounce, owner alerted, buyer corrects it, link on another phone, refund closes it', async () => {
+    const net = fakeNet();
+    const env = MAIL_ENV();
+    const t0 = Date.now();
+    await FILES.put(PRODUCT.file, PDF);
+
+    // 1. Checkout with a mistyped address, then Razorpay says paid; the buyer comes back.
+    const r0 = await handleCheckout(post('/api/store/checkout', { ...good, email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: t0 });
+    const id = (await r0.json()).order;
+    net.pay();
+    const back = await (await handleConfirm(post('/api/store/confirm', { order: id }), env, { fetch: net.fetch, now: t0 + 20e3 })).json();
+    assert.equal(back.state, 'paid');
+    assert.deepEqual([back.email, back.canChangeEmail, back.mailStatus], ['vikas926798@gmail.com', true, '']);
+    const token = back.token;
+    // The buyer's mail went to the typo; the owner's sale mail has the phone and both WhatsApp buttons.
+    assert.deepEqual(net.mails.map((m) => m.to[0]), ['vikas926798@gmail.com', 'owner@example.com']);
+    assert.match(net.mails[1].html, /WhatsApp: हिंदी[\s\S]*WhatsApp: English/);
+
+    // 2. The buyer downloads once from the thanks page.
+    const dl = await handleDownload(post('/api/store/download', null, { type: 'application/x-www-form-urlencoded', raw: new URLSearchParams({ o: id, t: token }).toString() }), env, { now: t0 + 30e3 });
+    assert.equal(dl.status, 200);
+
+    // 3. Gmail bounces the typo: the order is flagged and the owner alerted, with the "wrong email" message.
+    const mailId = (await one(id)).mail_id;
+    await handleMailWebhook(resendHook({ type: 'email.bounced', data: { email_id: mailId } }), env, { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'bounced');
+    assert.match(net.mails.at(-1).subject, /bounced: vikas926798@gmail\.com/);
+    assert.match(decodeURIComponent(net.mails.at(-1).html), /सही नहीं लग रहा/);
+
+    // 4. Next day (past 24 h, but it bounced) the buyer opens the link again: told, and corrects it once.
+    const later = t0 + 30 * 3600e3;
+    const view = await (await handleOrderStatus(new Request(`https://test.mykrutidev.pages.dev/api/store/order?o=${id}&t=${token}`), env, { now: later })).json();
+    assert.deepEqual([view.mailStatus, view.canChangeEmail, view.remaining], ['bounced', true, 4]);
+    const fixed = await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later });
+    assert.equal(fixed.status, 200);
+    assert.deepEqual(net.mails.slice(-2).map((m) => m.to[0]), ['vikas9267981@gmail.com', 'owner@example.com']);
+    let o = await one(id);
+    assert.deepEqual([o.email, o.email_prev, o.mail_status, o.downloads], ['vikas9267981@gmail.com', 'vikas926798@gmail.com', 'sent', 1]);
+    // ...and only once.
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'friend@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+
+    // 5. The new mail is delivered: recorded, should a buyer ever say it never came.
+    await handleMailWebhook(resendHook({ type: 'email.delivered', data: { email_id: (await one(id)).mail_id } }), env, { fetch: net.fetch });
+    assert.equal((await one(id)).mail_status, 'delivered');
+
+    // 6. On another phone: "lost link" sends it to the right address; the old typo finds nothing.
+    let found = await (await handleFind(post('/api/store/find', { email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'sent');
+    assert.deepEqual(net.mails.at(-1).to, ['vikas9267981@gmail.com']);
+    found = await (await handleFind(post('/api/store/find', { email: 'vikas926798@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'none');
+
+    // 7. A full refund (Razorpay's webhook) closes the download and the "lost link" says so.
+    const raw = JSON.stringify({ event: 'refund.processed', payload: { refund: { entity: { payment_id: 'pay_test1', amount: PRODUCT.pricePaise } } } });
+    const sig = await hmacHex(WEBHOOK_SECRET, raw);
+    const hook = new Request('https://test.mykrutidev.pages.dev/api/store/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Razorpay-Signature': sig }, body: raw });
+    assert.equal((await handleWebhook(hook, env, { fetch: net.fetch })).status, 200);
+    o = await one(id);
+    assert.equal(o.status, 'refunded');
+    const after = await handleDownload(post('/api/store/download', null, { type: 'application/x-www-form-urlencoded', raw: new URLSearchParams({ o: id, t: token }).toString() }), env, { now: later });
+    assert.equal(after.status, 410);
+    found = await (await handleFind(post('/api/store/find', { email: 'vikas9267981@gmail.com' }), env, { fetch: net.fetch, now: later })).json();
+    assert.equal(found.found, 'closed');
+    // A refunded order cannot have its email changed any more either.
+    assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, t: token, email: 'x@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+  });
+});
