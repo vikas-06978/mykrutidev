@@ -691,3 +691,25 @@ describe('a Unicode colon is typed as % on the Kruti Dev keyboard', () => {
     assert.match(convert('विषय: अवकाश', 'unicode', 'preeti'), /:/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// A corpus written by someone else: Hindi lines that must survive Unicode ->
+// Kruti Dev -> Unicode with no letter lost, and leave no Devanagari behind.
+// A colon comes back as a visarga (both are the % key), so both sides are
+// compared with the colon normalised.
+// ---------------------------------------------------------------------------
+describe('an outside Hindi corpus round-trips through Kruti Dev', () => {
+  const { lines } = JSON.parse(readFileSync(new URL('./__fixtures__/hindi-corpus.json', import.meta.url), 'utf8'));
+  // The colon is the % key, and a time such as 10:30 keeps that key when read back.
+  const norm = (s) => s.replace(/ः/g, ':').replace(/(\d)%(?=\d)/g, '$1:');
+  test('there are over a hundred lines', () => assert.ok(lines.length > 100));
+  for (const line of lines) {
+    test(line.slice(0, 40), () => {
+      for (const opts of [{}, { keepEnglish: false }]) {
+        const keys = convert(line, 'unicode', 'kruti-dev', opts);
+        assert.doesNotMatch(keys, /[ऀ-ॿ]/, 'a letter had no key');
+        assert.equal(norm(convert(keys, 'kruti-dev', 'unicode', opts)), norm(line));
+      }
+    });
+  }
+});
