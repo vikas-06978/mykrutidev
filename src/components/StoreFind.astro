@@ -1,0 +1,106 @@
+---
+/**
+ * "Lost your download link?": the buyer types the email they bought with and
+ * the server emails the link to THAT address (POST /api/store/find). Nothing
+ * is shown on the page, and the answer is the same whether or not there is a
+ * purchase, so nobody learns what someone else bought. For another phone or
+ * browser, where the product page has no memory of the purchase.
+ */
+import { langOf, useT } from '../i18n/index.js';
+
+const lang = langOf(Astro.url);
+const { t } = useT(lang);
+const keys = ['findDone', 'errEmail', 'errRate', 'errChallenge', 'errGeneric', 'working'];
+const strings = Object.fromEntries(keys.map((k) => [k, t(`store.${k}`)]));
+---
+
+<details class="mt-6 card p-5 sm:p-6 sf" data-store-find>
+  <summary class="sf-summary">{t('store.findTitle')}</summary>
+  <p class="mt-2 text-sm text-body">{t('store.findNote')}</p>
+  <form class="mt-3 grid gap-3" novalidate data-sf-form data-lang={lang} data-i18n={JSON.stringify(strings)}>
+    <label for="sf-email" class="text-sm font-medium text-ink">{t('store.findLabel')}</label>
+    <input id="sf-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" required class="sf-input" translate="no" />
+    <div class="sf-hp" aria-hidden="true">
+      <label for="sf-website">Website</label>
+      <input id="sf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+    <div data-sf-turnstile></div>
+    <div><button type="submit" class="btn btn-outline" data-sf-send data-label={t('store.findButton')}>{t('store.findButton')}</button></div>
+    <p class="text-sm" data-sf-status role="status" hidden></p>
+  </form>
+</details>
+
+<style>
+  .sf-summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-ink);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .sf-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-chrome);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+  }
+  .sf-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-sf-form]');
+  if (form) {
+    const L = JSON.parse(form.dataset.i18n ?? '{}');
+    const lang = form.dataset.lang || 'en';
+    const email = form.querySelector<HTMLInputElement>('#sf-email')!;
+    const website = form.querySelector<HTMLInputElement>('#sf-website')!;
+    const status = form.querySelector<HTMLElement>('[data-sf-status]')!;
+    const send = form.querySelector<HTMLButtonElement>('[data-sf-send]')!;
+    type Check = Awaited<ReturnType<(typeof import('../scripts/turnstile.js'))['challenge']>>;
+    let check: Promise<Check> | null = null;
+    const startCheck = () =>
+      (check ??= import('../scripts/turnstile.js').then((m) => m.challenge(form.querySelector('[data-sf-turnstile]')!, lang)));
+    form.addEventListener('focusin', startCheck, { once: true });
+
+    const say = (text: string, bad = false) => {
+      status.textContent = text;
+      status.hidden = false;
+      status.style.color = bad ? 'var(--color-err)' : '';
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const address = email.value.trim();
+      if (!address || !email.checkValidity()) return say(L.errEmail, true);
+      send.disabled = true;
+      send.textContent = L.working;
+      let res: Response | null = null;
+      try {
+        const token = await (await startCheck())?.token();
+        res = await fetch('/api/store/find', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ email: address, lang, token, website: website.value }),
+        });
+      } catch {
+        res = null;
+      }
+      send.disabled = false;
+      send.textContent = send.dataset.label ?? '';
+      if (res?.ok) return say(L.findDone);
+      if (res?.status === 403) void (await check)?.reset();
+      say(res?.status === 429 ? L.errRate : res?.status === 403 ? L.errChallenge : res?.status === 400 ? L.errEmail : L.errGeneric, true);
+    });
+  }
+</script>

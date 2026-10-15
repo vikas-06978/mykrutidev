@@ -14,8 +14,12 @@
 -- paid yet), paid, failed (Razorpay refused to make the link), refunded.
 -- `mode`: 'live' or 'test', the Razorpay keys the order was made with (NULL on
 -- rows from before the column, which count as test).
--- Stored about the buyer: the email, and the language of the page they used.
--- Never an IP address or a user agent. Unpaid rows are deleted after 7 days.
+-- Stored about the buyer: the email, the language of the page they used, and
+-- once paid, the mobile number Razorpay has for the payment (`phone`, for the
+-- owner only). `mail_id` is Resend's id for the last download email; the
+-- email_* columns record a corrected address (who changed it, when, and the
+-- one before). Never an IP address or a user agent. Unpaid rows are deleted
+-- after 7 days. Columns added later are added by the Functions on first use.
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
@@ -32,7 +36,13 @@ CREATE TABLE IF NOT EXISTS orders (
   max_downloads INTEGER NOT NULL,
   expires_at INTEGER,
   mail_status TEXT,
-  mode TEXT
+  mode TEXT,
+  phone TEXT,
+  mail_id TEXT,
+  email_prev TEXT,
+  email_changed_by TEXT,
+  email_changed_at TEXT,
+  buyer_email_changes INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at);
@@ -40,3 +50,7 @@ CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at);
 CREATE INDEX IF NOT EXISTS orders_link_id ON orders (link_id);
 
 CREATE INDEX IF NOT EXISTS orders_payment_id ON orders (payment_id);
+
+CREATE INDEX IF NOT EXISTS orders_mail_id ON orders (mail_id);
+
+CREATE INDEX IF NOT EXISTS orders_email ON orders (email);

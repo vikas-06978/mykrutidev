@@ -3494,7 +3494,8 @@
         "<p>To keep robots out, the feedback form and the tool request form use Cloudflare Turnstile, an invisible check that runs only after you open or start filling in a form (Cloudflare's own privacy policy covers it). To limit each visitor to 5 messages an hour on each form, the server keeps a one-way code made from your IP address and the current hour. The IP address itself is never saved, and the code is deleted once the hour is over.</p>",
         "<h2>Buying a PDF</h2>",
         "<p>If you buy a PDF, we ask for an email address, but you may leave it empty. We keep what the order needs (what you bought, the amount and the Razorpay payment reference) and, if you gave one, your email, so we can send the download link, let you download again and handle a refund. We do not use it for marketing and we never sell or share it.</p>",
-        "<p>You pay on Razorpay's own page. Razorpay handles your UPI, card or bank details under its own privacy policy, and we never see or store them. The order form uses the same invisible Cloudflare Turnstile check described above, and the download link is sent by email through Resend, an email delivery service. Razorpay also asks for your mobile number on its page. It shows with the payment in our Razorpay account, but this website does not store it, and we use it only to deal with that payment.</p>",
+        "<p>You pay on Razorpay's own page. Razorpay handles your UPI, card or bank details under its own privacy policy, and we never see or store them. The order form uses the same invisible Cloudflare Turnstile check described above, and the download link is sent by email through Resend, an email delivery service. Resend tells us whether that email was delivered, bounced or marked as spam, and we keep that with the order. Razorpay also asks for your mobile number on its page. After you pay, we keep that number with your order, so that we can reach you (for example on WhatsApp) if the download email does not reach you. Only the site's owner sees it, and it is used for nothing else.</p>",
+        "<p>If your email address was mistyped, you can correct it once on your download page, within 24 hours of paying. Both the old and the new address are kept with the order. If you lose your link, you can ask for it again with your email address: it is sent only to that address, and the page never shows whether an address has bought anything.</p>",
         "<p>Each PDF you buy carries a small line at the foot of every page with part of your order number and, if you gave one, a shortened form of your email address (for example ab***@gmail.com). It is there so that a copy shared without permission can be traced to its order. Your full email address is never printed in the file.</p>",
         "<p>Orders that are never paid are deleted after {unpaidDays} days. Paid orders are kept for as long as refunds and our accounts require, which can be several years. To ask about your order, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
         "<h2>Server logs</h2>",
@@ -6081,6 +6082,20 @@
     "thanksCopy": "Copy link",
     "thanksCopied": "Link copied",
     "ownedNote": "You bought this on this device. Your download link is still open.",
-    "ownedButton": "Download my PDF again"
+    "ownedButton": "Download my PDF again",
+    "sentTo": "We emailed the link to {email}.",
+    "wrongEmail": "Wrong email address?",
+    "addEmail": "Want the link by email too?",
+    "changeLabel": "Your correct email",
+    "changeButton": "Send the link here",
+    "changeNote": "You can correct it once, within 24 hours of paying. It is the same link, with the same downloads left.",
+    "changeDone": "Done. We sent the link to {email}.",
+    "changeFailed": "The email cannot be changed again here. Write to us and we will help.",
+    "bounced": "Our email to {email} could not be delivered. Please enter your correct email below.",
+    "findTitle": "Lost your download link?",
+    "findNote": "Enter the email you used when buying. If it has a purchase, we will send the link to that email.",
+    "findLabel": "Your email",
+    "findButton": "Send my link",
+    "findDone": "If this email has a purchase, the link is on its way. Check your inbox and the spam folder."
   }
 }

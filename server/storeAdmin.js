@@ -9,12 +9,14 @@
  *                                   product, the orders (filter: status, product,
  *                                   q = order id / email / payment id; 50 a page)
  *   GET  /admin/orders?format=csv   every order, as a spreadsheet
- *   POST /admin/orders              action=check|resend|refund|extend, id=<order>
+ *   POST /admin/orders              action=check|resend|email|refund|extend, id=<order>
  *
  * The actions:
  *   check    ask Razorpay again whether an unpaid order was paid (a buyer who
  *            closed the tab, or a webhook that never came)
  *   resend   send the download email again (only for an order that has an email)
+ *   email    put the right address on the order (email=...) and send the link
+ *            there; the old one is kept as email_prev
  *   (a paid order also shows its download link, to send to a buyer who gave no email)
  *   refund   end the downloads of a refunded order. The money itself is
  *            refunded in Razorpay's dashboard; when the webhook for it is set up
@@ -25,12 +27,12 @@
  * Email Address Obfuscation would otherwise show "[email protected]", and these
  * pages run no script to decode it.
  */
-import { ORDER_COLUMNS, STORE, PRODUCTS, price, productById } from '../src/lib/store.js';
+import { ORDER_COLUMNS, STORE, PRODUCTS, cleanEmail, price, productById } from '../src/lib/store.js';
 import { toCsv } from '../src/lib/feedback.js';
 import { SECURITY, bearerGuard, esc, isAuthorized, page } from './feedbackAdmin.js';
-import { ensureStoreSchema, downloadToken, siteOrigin, settleOrder, isLiveHost } from './storeApi.js';
+import { ensureStoreSchema, downloadToken, siteOrigin, settleOrder, isLiveHost, sendBuyerLink } from './storeApi.js';
 import { hasKeys, mode } from './razorpay.js';
-import { buyerMail, canMail, downloadPage, sendMail } from './storeMail.js';
+import { canMail, downloadPage, waLinks, waText } from './storeMail.js';
 
 const PER_PAGE = 50;
 const MODES = ['live', 'test'];
@@ -39,7 +41,15 @@ const MODE_EXPR = "COALESCE(mode, 'test')";
 const MODE_SQL = `${MODE_EXPR} = ?`;
 const STATUSES = ['paid', 'created', 'refunded', 'failed'];
 const STATUS_NAME = { paid: 'Paid', created: 'Started, not paid', refunded: 'Refunded', failed: 'Failed' };
-const ACTION_DONE = { check: 'Asked Razorpay again', resend: 'Email sent again', refund: 'Marked refunded: downloads are closed', extend: 'Downloads reset and 30 more days given' };
+const ACTION_DONE = {
+  check: 'Asked Razorpay again',
+  resend: 'Email sent again',
+  email: 'Email changed and the download link sent to it',
+  refund: 'Marked refunded: downloads are closed',
+  extend: 'Downloads reset and 30 more days given',
+};
+/** The mail column: what Resend last told us about the download email. */
+const MAIL_BAD = new Set(['failed', 'bounced', 'complained']);
 const OK = '✓';
 const NO = '✗';
 
@@ -72,6 +82,10 @@ const STYLE = `<style>
 .fa-tabs a[aria-current]{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
 .fa-pill.fa-test{background:#fef3c7;color:#78350f}.fa-ids{word-break:break-all;min-width:10rem;max-width:13rem}
 .fa-ready h2{margin:0}.fa-filter{margin:.5rem 0}
+.fa-good{color:#15803d;font-weight:600}
+.fa-wa{display:inline-block;margin:.25rem .25rem 0 0;padding:.15rem .5rem;border-radius:6px;background:#25d366;color:#fff;text-decoration:none;font-size:.8125rem;font-weight:600;white-space:nowrap}
+.fa-email-form{display:grid;gap:.25rem}.fa-email-form input{font:inherit;font-size:.8125rem;min-height:30px;padding:0 .375rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12rem}
+.fa-email-form button{justify-self:start}
 </style>`;
 
 /**
@@ -89,6 +103,7 @@ async function readiness(env, request) {
     ['PDF bucket (R2) bound as STORE_FILES', !!env.STORE_FILES],
     ['Emails to buyers (RESEND_API_KEY and NOTIFY_FROM)', canMail(env)],
     ['Copy of each sale to you (NOTIFY_TO)', !!String(env.NOTIFY_TO ?? '').trim()],
+    ['Email delivery reports from Resend (RESEND_WEBHOOK_SECRET)', !!env.RESEND_WEBHOOK_SECRET],
     ['Bot check (TURNSTILE_SECRET_KEY)', !!env.TURNSTILE_SECRET_KEY],
   ];
   const problems = [];
@@ -148,7 +163,7 @@ const tile = (n, label) => `<div class="fa-tile"><span class="fa-tile-n">${n}</s
 /** The Razorpay dashboard page of a payment. */
 const razorpayLink = (paymentId) => `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;
 
-function dashboard(env, { orders, totals, periods, byProduct, ready, links, filter, total, done, modeCounts }) {
+function dashboard(env, { orders, totals, periods, byProduct, ready, links, wa, filter, total, done, modeCounts }) {
   const test = filter.mode === 'test';
   const rows = orders
     .map((o) => {
@@ -163,20 +178,29 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
         // The buyer's own download page: for an order with no email, this is how you can send it to them yourself.
         if (links[o.id]) actions.push(`<a class="fa-act" href="${esc(links[o.id])}">Download link</a>`);
         if (o.email) act('resend', 'Resend email');
+        // A buyer's address was wrong: put the right one on and send the link there.
+        actions.push(
+          `<form method="post" class="fa-act fa-email-form"><input type="hidden" name="id" value="${esc(o.id)}"><input type="email" name="email" required maxlength="254" placeholder="right email" aria-label="New email for ${esc(o.id)}"><button type="submit" name="action" value="email">Change email &amp; send</button></form>`,
+        );
         act('extend', 'Extend');
         // No script on this page, so the browser itself asks: the box must be ticked.
         act('refund', 'Mark refunded', '<label class="fa-sure"><input type="checkbox" name="sure" value="1" required> sure</label> ');
       }
-      const mailFailed = o.status === 'paid' && o.mail_status === 'failed';
+      const mailBad = o.status === 'paid' && MAIL_BAD.has(o.mail_status);
+      const waBtns = wa[o.id] ? `<br><a class="fa-wa" href="${esc(wa[o.id].hi)}">WhatsApp हिंदी</a><a class="fa-wa" href="${esc(wa[o.id].en)}">WhatsApp English</a>` : '';
+      const changed = o.email_prev !== null && o.email_prev !== undefined
+        ? `<br><span class="fa-sub">was <!--email_off-->${esc(o.email_prev || '(none)')}<!--/email_off-->, changed by ${esc(o.email_changed_by ?? '?')} ${when(o.email_changed_at)}</span>`
+        : '';
       return `<tr>
   <td class="fa-nowrap">${when(o.created_at)}${o.paid_at ? `<br><span class="fa-sub">paid ${when(o.paid_at)}</span>` : ''}</td>
   <td><span class="fa-pill ${esc(o.status)}">${esc(STATUS_NAME[o.status] ?? o.status)}</span>${test ? ' <span class="fa-pill fa-test">TEST</span>' : ''}</td>
   <td>${esc((product?.title ?? o.product_id).replace(/\s*\(.*\)$/, ''))}</td>
   <td class="fa-nowrap">${esc(price(o.amount))}</td>
-  <td>${o.email ? `<!--email_off--><a href="mailto:${esc(o.email)}">${esc(o.email)}</a><!--/email_off-->` : '<span class="fa-sub">no email</span>'}</td>
+  <td>${o.email ? `<!--email_off--><a href="mailto:${esc(o.email)}">${esc(o.email)}</a><!--/email_off-->` : '<span class="fa-sub">no email</span>'}${changed}</td>
+  <td class="fa-nowrap">${o.phone ? esc(o.phone) : '<span class="fa-sub">–</span>'}${waBtns}</td>
   <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}</td>
   <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
-  <td>${mailFailed ? '<span class="fa-flag">failed</span>' : esc(o.mail_status ?? '')}</td>
+  <td>${mailBad ? `<span class="fa-flag">${esc(o.mail_status)}</span>` : o.mail_status === 'delivered' ? '<span class="fa-good">delivered</span>' : esc(o.mail_status ?? '')}</td>
   <td class="fa-sub fa-ids">${esc(o.id)}${o.payment_id ? `<br><a href="${esc(razorpayLink(o.payment_id))}">${esc(o.payment_id)}</a>` : ''}</td>
   <td><div class="fa-acts">${actions.join('')}</div></td>
 </tr>`;
@@ -233,7 +257,7 @@ ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a p
     ${tile(totals.paid, 'paid orders')}
     ${tile(totals.refunded, 'refunded')}
     ${tile(totals.open, 'started, not paid (kept 7 days)')}
-    ${tile(totals.mailFailed, 'paid, email failed')}
+    ${tile(totals.mailFailed, 'paid, email not delivered')}
   </div>
 </section>
 
@@ -258,7 +282,7 @@ ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a p
   ${
     orders.length
       ? `<div class="fa-scroll"><table>
-<thead><tr><th>Started (UTC)</th><th>Status</th><th>Product</th><th>Amount</th><th>Email</th><th>Downloads</th><th>Expires</th><th>Mail</th><th>Ids</th><th></th></tr></thead>
+<thead><tr><th>Started (UTC)</th><th>Status</th><th>Product</th><th>Amount</th><th>Email</th><th>Phone</th><th>Downloads</th><th>Expires</th><th>Mail</th><th>Ids</th><th></th></tr></thead>
 <tbody>${rows}</tbody></table></div>`
       : '<p class="fa-empty">No orders match.</p>'
   }
@@ -318,13 +342,17 @@ export async function handleAdminOrders(request, env, deps = {}) {
         await settleOrder(env, id, { fetch: deps.fetch, now, origin: siteOrigin(request) });
       } else if (action === 'resend') {
         const order = await db.prepare("SELECT * FROM orders WHERE id = ? AND status = 'paid'").bind(id).first();
-        const product = order && productById(order.product_id);
-        if (order && product) {
-          const origin2 = siteOrigin(request);
-          const link = downloadPage(origin2, order.id, await downloadToken(env, order.id));
-          const sent = canMail(env) && (await sendMail(env, buyerMail(env, { order, product, link, origin: origin2 }), deps.fetch));
-          await db.prepare('UPDATE orders SET mail_status = ? WHERE id = ?').bind(sent ? 'sent' : 'failed', id).run();
-        }
+        if (order?.email) await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
+      } else if (action === 'email') {
+        const email = cleanEmail(form?.get('email'));
+        if (!email) return new Response(null, { status: 303, headers: { Location: `/admin/orders?done=bademail&q=${id}`, ...SECURITY } });
+        const order = await db
+          .prepare(
+            "UPDATE orders SET email_prev = email, email = ?, email_changed_by = 'admin', email_changed_at = ? WHERE id = ? AND status = 'paid' RETURNING *",
+          )
+          .bind(email, isoUtc(now), id)
+          .first();
+        if (order) await sendBuyerLink(env, order, { fetchImpl: deps.fetch, origin: siteOrigin(request) });
       } else if (action === 'refund') {
         if (String(form?.get('sure') ?? '') !== '1') {
           return new Response(null, { status: 303, headers: { Location: '/admin/orders?done=norefund', ...SECURITY } });
@@ -406,7 +434,7 @@ export async function handleAdminOrders(request, env, deps = {}) {
     db.prepare(`SELECT COUNT(*) AS n FROM orders ${whereSql}`).bind(...binds).first(),
     db
       .prepare(
-        `SELECT SUM(status = 'paid') AS paid, SUM(status = 'refunded') AS refunded, SUM(status = 'created') AS open, SUM(status = 'paid' AND mail_status = 'failed') AS mailFailed FROM orders WHERE ${MODE_SQL}`,
+        `SELECT SUM(status = 'paid') AS paid, SUM(status = 'refunded') AS refunded, SUM(status = 'created') AS open, SUM(status = 'paid' AND mail_status IN ('failed', 'bounced', 'complained')) AS mailFailed FROM orders WHERE ${MODE_SQL}`,
       )
       .bind(filter.mode)
       .first(),
@@ -427,8 +455,17 @@ export async function handleAdminOrders(request, env, deps = {}) {
   const modeCounts = Object.fromEntries(modeRows.results.map((r) => [r.m, r.n]));
   const origin = siteOrigin(request);
   const links = {};
+  const wa = {};
   for (const o of orders.results) {
-    if (o.status === 'paid') links[o.id] = downloadPage(origin, o.id, await downloadToken(env, o.id));
+    if (o.status !== 'paid') continue;
+    const token = await downloadToken(env, o.id);
+    links[o.id] = downloadPage(origin, o.id, token);
+    const product = productById(o.product_id);
+    if (product && o.phone) {
+      // Our email did not reach them: the message says so and carries the link.
+      const kind = o.mail_status === 'bounced' || o.mail_status === 'complained' ? 'wrong-email' : 'sale';
+      wa[o.id] = waLinks(o.phone, waText(kind, { product, email: o.email, links: { hi: downloadPage(origin, o.id, token, 'hi'), en: links[o.id] } }));
+    }
   }
   const sold = Object.fromEntries(productRows.results.map((r) => [r.product_id, r]));
   const byProduct = PRODUCTS.filter((p) => !p.unlisted || sold[p.id]).map((p) => ({
@@ -440,9 +477,15 @@ export async function handleAdminOrders(request, env, deps = {}) {
     refunded: sold[p.id]?.refunded ?? 0,
   }));
   const doneKey = params.get('done') ?? '';
-  const done = doneKey === 'norefund' ? 'Not refunded: tick "sure" first.' : (ACTION_DONE[doneKey] ?? '');
+  const done =
+    doneKey === 'norefund'
+      ? 'Not refunded: tick "sure" first.'
+      : doneKey === 'bademail'
+        ? 'Not changed: that is not an email address.'
+        : (ACTION_DONE[doneKey] ?? '');
   return dashboard(env, {
     links,
+    wa,
     orders: orders.results,
     total: count?.n ?? 0,
     filter,

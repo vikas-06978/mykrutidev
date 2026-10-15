@@ -97,6 +97,16 @@ export async function createPaymentLink(env, p, fetchImpl = fetch) {
 export const fetchPaymentLink = (env, linkId, fetchImpl = fetch) =>
   call(env, 'GET', `/payment_links/${encodeURIComponent(linkId)}`, null, fetchImpl);
 
+/** Read one payment (pay_...) back from Razorpay: its `contact` is the buyer's mobile. */
+export const fetchPayment = (env, paymentId, fetchImpl = fetch) =>
+  call(env, 'GET', `/payments/${encodeURIComponent(paymentId)}`, null, fetchImpl);
+
+/** The buyer's mobile from a payment, "+919876543210"-like, or null. */
+export function contactOf(payment) {
+  const c = String(payment?.contact ?? '').trim();
+  return /^\+?[0-9 -]{8,20}$/.test(c) ? c.replace(/[ -]/g, '') : null;
+}
+
 /**
  * Was this link paid in full, for this order?
  * @param {any} link  Razorpay's payment link

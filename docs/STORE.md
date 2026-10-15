@@ -48,7 +48,8 @@ product page ──POST /api/store/checkout──▶ order (D1) + Razorpay payme
 
 4. **Razorpay webhook**: Razorpay dashboard → Account & Settings → Webhooks → *Add*:
    URL `https://mykrutidev.com/api/store/webhook`, the secret from step 3, events **`payment_link.paid`** and **`refund.processed`**.
-5. **Check**: open `/admin/orders` (signing in at `/admin/feedback` first). The *Setup check* lists what is connected and what is missing.
+5. **Resend webhook** (delivery reports): resend.com → Webhooks → *Add webhook*: URL `https://mykrutidev.com/api/store/mail-webhook`, events **`email.delivered`**, **`email.bounced`** and **`email.complained`**. Copy its signing secret (`whsec_…`) into Cloudflare as the secret **`RESEND_WEBHOOK_SECRET`** (Production). Without it the store still works; you just do not hear about a bounced download email.
+6. **Check**: open `/admin/orders` (signing in at `/admin/feedback` first). The *Setup check* lists what is connected and what is missing.
 
 ## Test before real money (Preview environment)
 
@@ -119,10 +120,17 @@ Sign in at `/admin/feedback` first (the same `ADMIN_KEY`). The page shows, top t
 
 1. **Ready or not**: green when this deployment can take payments; otherwise each reason in red (missing key, webhook secret or bucket, a product on sale whose PDF is not uploaded, test keys on the live site, nothing on sale). Warnings (no bot check, live keys on a preview, `STORE_TEST_PRODUCTS` on the live site) are listed under it.
 2. **Live orders / Test orders** tabs. Each order records the mode of the Razorpay keys that made it (`mode`: `live` or `test`; orders from before the column count as test). Preview and live share one database, so test purchases land here too, but they are only ever on the Test tab and never in the live totals. The page opens on the tab of this deployment's keys.
-3. **Money in**: today, last 7 days, last 30 days and all time (India time, paid orders of the open tab only), then paid / refunded / started-not-paid / email-failed counts.
+3. **Money in**: today, last 7 days, last 30 days and all time (India time, paid orders of the open tab only), then paid / refunded / started-not-paid / email-not-delivered (failed, bounced or marked as spam) counts.
 4. **By product**: price, status, paid, money in and refunds per product.
-5. **Orders**: filter by status and product, search an order id, a `pay_…` id or part of an email; 50 a page. A payment id links to that payment in Razorpay's dashboard. Actions: *Check payment*, *Download link*, *Resend email*, *Extend*, and *Mark refunded* (the "sure" box must be ticked). After each one the page says what it did.
+5. **Orders**: filter by status and product, search an order id, a `pay_…` id or part of an email; 50 a page. A payment id links to that payment in Razorpay's dashboard. Each paid order shows the buyer's **phone** (from Razorpay) with **WhatsApp हिंदी / WhatsApp English** buttons: WhatsApp opens with the message typed in and the download link in it (a "thank you" message, or, after a bounce, "your email looks wrong"). The **Mail** column says `sent`, `delivered` (green) or `bounced` / `complained` / `failed` (red). An email changed by the buyer or by you shows the old address under it. Actions: *Check payment*, *Download link*, *Resend email*, *Change email & send* (puts the right address on the order and sends the link there), *Extend*, and *Mark refunded* (the "sure" box must be ticked). After each one the page says what it did.
 6. **Setup check** (folded): every setting, ✓ or ✗.
+
+## Reaching a buyer whose email is wrong
+
+* **Your emails** (English): every sale, every bounce or spam complaint, and every email a buyer corrects comes to `NOTIFY_TO`, with the buyer's phone and the two WhatsApp buttons (not on the correction note). A tap on a button opens WhatsApp with the message ready; you press Send.
+* **The buyer** sees on their download page where the link was emailed. They can correct the address **once**, within `STORE.emailChangeHours` (24) of paying, or at any time after a bounce (`POST /api/store/email`, allowed only with their download token). It is the same link with the same downloads left, so a changed address is never another copy; the old address is kept (`email_prev`) and you are told.
+* **Lost link** (another phone or browser): the form under the buy box and on the thanks page (`POST /api/store/find`) emails the links of that address's paid, unexpired orders to that address only. The answer is the same with or without an order, and one address gets at most `STORE.findPerDay` (3) such emails a day.
+* **Refund claims**: the order keeps the downloads count, whether the email was delivered, and any address change with who made it and when. A delivered email plus a used download means the file was delivered (the refund policy covers failed delivery, not a change of mind).
 
 ## Before the first sale
 
