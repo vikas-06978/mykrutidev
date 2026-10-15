@@ -3,7 +3,11 @@
 // of URLs and logs; GET answers pages cached before that. See server/storeApi.js.
 import { reply } from '../../../server/feedbackApi.js';
 import { handleOrderStatus } from '../../../server/storeApi.js';
+import { maybeReconcile } from '../../../server/storeJobs.js';
 
-export const onRequestPost = (ctx) => handleOrderStatus(ctx.request, ctx.env);
+export const onRequestPost = (ctx) => {
+  ctx.waitUntil(maybeReconcile(ctx.env, { request: ctx.request }));
+  return handleOrderStatus(ctx.request, ctx.env);
+};
 export const onRequestGet = (ctx) => handleOrderStatus(ctx.request, ctx.env);
 export const onRequest = () => reply(405, { ok: false, error: 'method-not-allowed' }, { Allow: 'GET, POST' });

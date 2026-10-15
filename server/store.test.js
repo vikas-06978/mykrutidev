@@ -27,6 +27,7 @@ import {
   settleOrder,
 } from './storeApi.js';
 import { handleAdminOrders } from './storeAdmin.js';
+import { handleReconcile, maybeReconcile, reconcile, RECONCILE_EVERY } from './storeJobs.js';
 import { hmacHex, isPaidFor, verifyWebhook } from './razorpay.js';
 import { buyerMail, ownerMail, verifyResendWebhook, waText } from './storeMail.js';
 import { createHmac } from 'node:crypto';
@@ -76,6 +77,8 @@ function fakeNet() {
     readFails: false,
     /** The buyer's mobile on Razorpay's payment record; null: the payment cannot be read. */
     contact: '+919876543210',
+    /** What Razorpay says was refunded on the payment, in paise. */
+    refunded: 0,
     link: { id: 'plink_test1', status: 'created', amount: PRODUCT.pricePaise, amount_paid: 0, currency: 'INR', reference_id: null },
     fetch: async (url, init = {}) => {
       const method = init.method ?? 'GET';
@@ -92,7 +95,7 @@ function fakeNet() {
       }
       if (method === 'GET' && url.includes('/v1/payments/')) {
         if (net.contact === null) return new Response('{}', { status: 500 });
-        return new Response(JSON.stringify({ id: 'pay_test1', contact: net.contact }), { status: 200 });
+        return new Response(JSON.stringify({ id: 'pay_test1', contact: net.contact, amount: net.link.amount, amount_refunded: net.refunded }), { status: 200 });
       }
       if (method === 'GET' && url.includes('/v1/payment_links/')) {
         if (net.readFails) return new Response('{}', { status: 500 });
@@ -121,7 +124,7 @@ const orders = async () => (await DB.prepare('SELECT * FROM orders ORDER BY crea
 
 beforeEach(async () => {
   await ensureStoreSchema(DB);
-  await DB.batch(['orders', 'feedback_rate'].map((t) => DB.prepare(`DELETE FROM ${t}`)));
+  await DB.batch(['orders', 'feedback_rate', 'store_meta', 'store_events', 'store_audit'].map((t) => DB.prepare(`DELETE FROM ${t}`)));
   for (const o of (await FILES.list()).objects) await FILES.delete(o.key);
 });
 
@@ -1563,5 +1566,179 @@ describe('one buyer, start to finish (the whole support path, in order)', () => 
     assert.equal(found.found, 'closed');
     // A refunded order cannot have its email changed any more either.
     assert.equal((await handleChangeEmail(post('/api/store/email', { o: id, m: manage, email: 'x@gmail.com' }), env, { fetch: net.fetch, now: later })).status, 409);
+  });
+});
+
+describe('the background check (reconcile)', () => {
+  const later = () => Date.now() + 5 * 60e3;
+
+  test('settles a payment whose buyer closed the tab and whose webhook never came, and mails them', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net, MAIL_ENV());
+    net.pay();
+    const out = await reconcile(MAIL_ENV(), { fetch: net.fetch, now: later() });
+    assert.equal(out.checked, 1);
+    assert.equal(out.settled, 1);
+    assert.equal((await one(id)).status, 'paid');
+    // The buyer's link, the owner's sale mail, and the "webhook may be off" alert.
+    assert.equal(net.mails.length, 3);
+    assert.match(net.mails[2].subject, /background check/);
+    const log = (await DB.prepare('SELECT action FROM store_audit WHERE order_id = ?').bind(id).all()).results.map((r) => r.action);
+    assert.ok(log.includes('paid-by-background-check'));
+    // Running again does nothing twice: no second settle, no second alert.
+    const again = await reconcile(MAIL_ENV(), { fetch: net.fetch, now: later() + 60e3 });
+    assert.equal(again.settled, 0);
+    assert.equal(net.mails.length, 3);
+  });
+
+  test('an order still unpaid on Razorpay stays unpaid, and an order just started is left alone', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    assert.equal((await reconcile(ENV(), { fetch: net.fetch, now: Date.now() })).checked, 0);
+    const out = await reconcile(ENV(), { fetch: net.fetch, now: later() });
+    assert.equal(out.checked, 1);
+    assert.equal(out.settled, 0);
+    assert.equal((await one(id)).status, 'created');
+  });
+
+  test('retries a download email that failed, after its wait, and stops after the retry limit', async () => {
+    const { id, net } = await paidOrder();
+    await DB.prepare("UPDATE orders SET mail_status = 'failed', mail_tries = 1, mail_next = ? WHERE id = ?").bind(Math.floor(Date.now() / 1000) + 300, id).run();
+    const before = net.mails.length;
+    assert.equal((await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() })).mailsRetried, 0, 'not before its wait');
+    const out = await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 600e3 });
+    assert.equal(out.mailsRetried, 1);
+    assert.equal(out.mailsSent, 1);
+    assert.equal(net.mails.length, before + 1);
+    assert.equal((await one(id)).mail_status, 'sent');
+    await DB.prepare("UPDATE orders SET mail_status = 'failed', mail_tries = ?, mail_next = NULL WHERE id = ?").bind(STORE.mailRetries, id).run();
+    assert.equal((await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 1200e3 })).mailsRetried, 0, 'gives up after the limit');
+  });
+
+  test('picks up a full refund made in the Razorpay dashboard, and records a partial one without ending the downloads', async () => {
+    const { id, net } = await paidOrder();
+    net.refunded = 40;
+    let out = await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() });
+    assert.equal(out.refundsChecked, 1);
+    assert.equal(out.partial, 1);
+    let o = await one(id);
+    assert.equal(o.status, 'paid');
+    assert.equal(o.refunded_amount, 40);
+    // Looked at again only after 6 hours.
+    assert.equal((await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 3600e3 })).refundsChecked, 0);
+    net.refunded = PRODUCT.pricePaise;
+    out = await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 7 * 3600e3 });
+    assert.equal(out.refunded, 1);
+    o = await one(id);
+    assert.equal(o.status, 'refunded');
+    assert.equal(o.refunded_amount, PRODUCT.pricePaise);
+  });
+
+  test('records when it ran, for the admin page', async () => {
+    const net = fakeNet();
+    await reconcile(ENV(), { fetch: net.fetch, now: Date.UTC(2026, 0, 2, 3, 4, 5) });
+    const at = (await DB.prepare("SELECT value FROM store_meta WHERE key = 'reconcile_at'").first()).value;
+    assert.equal(at, '2026-01-02T03:04:05Z');
+  });
+
+  test('maybeReconcile runs at most once per slot, even when called at the same moment', async () => {
+    const net = fakeNet();
+    const now = Date.now();
+    const runs = await Promise.all([1, 2, 3, 4].map(() => maybeReconcile(ENV(), { fetch: net.fetch, now })));
+    assert.equal(runs.filter(Boolean).length, 1);
+    assert.equal(await maybeReconcile(ENV(), { fetch: net.fetch, now: now + 60e3 }), null);
+    assert.ok(await maybeReconcile(ENV(), { fetch: net.fetch, now: now + (RECONCILE_EVERY + 1) * 60e3 }));
+  });
+
+  test('POST /api/store/reconcile needs the cron secret or the admin key, and answers with counts only', async () => {
+    const net = fakeNet();
+    const env = { ...ENV(), STORE_CRON_SECRET: 'a-long-cron-secret-0123456789' };
+    const call = (auth, method = 'POST') =>
+      handleReconcile(new Request('https://mykrutidev.com/api/store/reconcile', { method, headers: auth ? { Authorization: auth } : {} }), env, { fetch: net.fetch });
+    assert.equal((await call()).status, 401);
+    assert.equal((await call('Bearer wrong-wrong-wrong-wrong')).status, 401);
+    assert.equal((await call('Bearer a-long-cron-secret-0123456789', 'GET')).status, 405);
+    const r = await call('Bearer a-long-cron-secret-0123456789');
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.ok, true);
+    assert.deepEqual(Object.keys(body).sort(), ['checked', 'mailsRetried', 'mailsSent', 'ok', 'partial', 'refunded', 'refundsChecked', 'settled']);
+    assert.equal((await call(`Bearer ${env.ADMIN_KEY}`)).status, 200);
+    const unset = await handleReconcile(new Request('https://mykrutidev.com/api/store/reconcile', { method: 'POST' }), { DB }, {});
+    assert.equal(unset.status, 503);
+  });
+});
+
+describe('one Pay, one payment page', () => {
+  test('a second Pay from the same browser reuses the open order and its Razorpay page', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    const r = await handleCheckout(post('/api/store/checkout', { ...good, resume: asBuyer(id) }), ENV(), { fetch: net.fetch });
+    assert.equal(r.status, 200);
+    const out = await r.json();
+    assert.equal(out.order, id);
+    assert.equal(out.reused, true);
+    assert.equal(out.url, 'https://rzp.io/i/abc');
+    assert.equal((await orders()).length, 1);
+    assert.equal(net.calls.filter((c) => c.method === 'POST').length, 1, 'no second payment link');
+  });
+
+  test('a wrong secret, a paid order or an old link starts a new order instead', async () => {
+    const net = fakeNet();
+    const id = await startOrder(net);
+    const wrong = await handleCheckout(post('/api/store/checkout', { ...good, resume: { order: id, claim: 'f'.repeat(32) } }), ENV(), { fetch: net.fetch });
+    assert.equal(wrong.status, 201);
+    const old = await handleCheckout(post('/api/store/checkout', { ...good, resume: asBuyer(id) }), ENV(), { fetch: net.fetch, now: Date.now() + STORE.linkMinutes * 60e3 });
+    assert.equal(old.status, 201);
+    net.pay({ reference_id: id });
+    await settleOrder(ENV(), id, { fetch: net.fetch });
+    const paid = await handleCheckout(post('/api/store/checkout', { ...good, resume: asBuyer(id) }), ENV(), { fetch: net.fetch });
+    assert.equal(paid.status, 201);
+    assert.equal((await orders()).length, 4);
+  });
+});
+
+describe('Razorpay webhooks: repeats and refunds', () => {
+  const send = async (event, eventId) => {
+    const raw = JSON.stringify(event);
+    const headers = { 'Content-Type': 'application/json', 'X-Razorpay-Signature': await hmacHex(WEBHOOK_SECRET, raw) };
+    if (eventId) headers['X-Razorpay-Event-Id'] = eventId;
+    return handleWebhook(new Request('https://mykrutidev.com/api/store/webhook', { method: 'POST', headers, body: raw }), ENV(), {});
+  };
+  const refund = (amount, total) => ({
+    event: 'refund.processed',
+    payload: { refund: { entity: { id: 'rfnd_1', payment_id: 'pay_test1', amount } }, ...(total === undefined ? {} : { payment: { entity: { id: 'pay_test1', amount_refunded: total } } }) },
+  });
+
+  test('the same event delivered twice is counted once', async () => {
+    const { id } = await paidOrder();
+    await send(refund(40), 'evt_1');
+    const r = await send(refund(40), 'evt_1');
+    assert.equal((await r.json()).repeat, true);
+    const o = await one(id);
+    assert.equal(o.refunded_amount, 40);
+    assert.equal(o.status, 'paid', 'a partial refund leaves the downloads');
+  });
+
+  test('partial refunds add up to a full one, which ends the downloads', async () => {
+    const { id } = await paidOrder();
+    await send(refund(40), 'evt_a');
+    await send(refund(PRODUCT.pricePaise - 40), 'evt_b');
+    const o = await one(id);
+    assert.equal(o.refunded_amount, PRODUCT.pricePaise);
+    assert.equal(o.status, 'refunded');
+  });
+
+  test('Razorpay\'s running total wins, so a refund the background check already saw is not counted twice', async () => {
+    const { id } = await paidOrder();
+    await DB.prepare('UPDATE orders SET refunded_amount = 40 WHERE id = ?').bind(id).run();
+    await send(refund(40, 40), 'evt_x');
+    assert.equal((await one(id)).refunded_amount, 40);
+    assert.equal((await one(id)).status, 'paid');
+  });
+
+  test('records when the last webhook came', async () => {
+    await send({ event: 'payment.captured' }, 'evt_any');
+    assert.ok((await DB.prepare("SELECT value FROM store_meta WHERE key = 'razorpay_webhook_at'").first()).value);
   });
 });

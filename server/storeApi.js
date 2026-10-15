@@ -459,7 +459,7 @@ export async function settleOrder(env, orderId, deps = {}) {
   const job = sendOrderMails(env, paid, { fetchImpl, origin: deps.origin ?? SITE_URL });
   if (deps.waitUntil) deps.waitUntil(job);
   else await job;
-  return { state: 'paid', order: paid };
+  return { state: 'paid', order: paid, fresh: true };
 }
 
 /**
@@ -593,14 +593,19 @@ export async function handleWebhook(request, env, deps = {}) {
     const paymentId = refund?.payment_id;
     if (typeof paymentId === 'string' && paymentId) {
       const amount = Math.max(0, Math.floor(Number(refund?.amount) || 0));
-      // Each refund adds up; only refunds reaching the full amount end the
-      // downloads. A partial (goodwill) refund leaves the buyer their book. A
-      // refunded order is never reopened by a late "paid" (settleOrder only
-      // moves an order on from 'created').
+      // Razorpay sends the payment with the refund: its amount_refunded is the
+      // running total, so a repeat or a total the background check already saw
+      // is not counted twice. Without it, each refund adds up. Only refunds
+      // reaching the full amount end the downloads: a partial (goodwill)
+      // refund leaves the buyer their book. A refunded order is never reopened
+      // by a late "paid" (settleOrder only moves an order on from 'created').
+      const total = Number(event?.payload?.payment?.entity?.amount_refunded);
+      const sum = Number.isFinite(total) && total >= 0 ? 'MAX(refunded_amount, ?)' : 'refunded_amount + ?';
+      const by = Number.isFinite(total) && total >= 0 ? Math.floor(total) : amount;
       const order = await env.DB.prepare(
-        "UPDATE orders SET refunded_amount = MIN(amount, refunded_amount + ?), status = CASE WHEN refunded_amount + ? >= amount THEN 'refunded' ELSE status END WHERE payment_id = ? AND status IN ('paid', 'refunded') RETURNING id, status, refunded_amount, amount",
+        `UPDATE orders SET refunded_amount = MIN(amount, ${sum}), status = CASE WHEN ${sum} >= amount THEN 'refunded' ELSE status END WHERE payment_id = ? AND status IN ('paid', 'refunded') RETURNING id, status, refunded_amount, amount`,
       )
-        .bind(amount, amount, paymentId)
+        .bind(by, by, paymentId)
         .first();
       if (order) await audit(env, order.id, order.status === 'refunded' ? 'refund-full' : 'refund-partial', `Razorpay refund ${amount} paise; refunded ${order.refunded_amount} of ${order.amount}`, nowMs);
     }
