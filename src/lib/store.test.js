@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 import { PRODUCTS, STORE, STORE_SCHEMA, liveProducts, shownProducts, price, rupees, sellable, isPreviewBuild, validateCheckout, newOrderId, ORDER_ID_RE } from './store.js';
 import { BUSINESS, businessLines } from './business.js';
-import { BOUGHT_KEY, boughtHash, checkoutError, daysLeft, payUrlOk, readOrderFrom, rememberPurchase, thanksKey } from './storeClient.js';
+import { BOUGHT_KEY, boughtHash, checkoutError, forgetPurchase, daysLeft, payUrlOk, readOrderFrom, rememberPurchase, thanksKey } from './storeClient.js';
 import { PAGES, getPage, isLive } from './routes.js';
 import { LOCALES } from '../i18n/locales.js';
 import { DICTS } from '../i18n/index.js';
@@ -191,6 +191,14 @@ describe('a purchase remembered in this browser', () => {
     assert.equal(boughtHash(s, 'p', NOW), null);
     s.setItem(BOUGHT_KEY, '{not json');
     assert.equal(boughtHash(s, 'p', NOW), null);
+  });
+
+  test('a purchase that is refunded or used up is forgotten', () => {
+    const s = mem();
+    rememberPurchase(s, 'p', O, T, null);
+    forgetPurchase(s, 'p');
+    assert.equal(boughtHash(s, 'p', NOW), null);
+    assert.doesNotThrow(() => forgetPurchase(s, 'never-bought'));
   });
 
   test('blocked storage never throws', () => {

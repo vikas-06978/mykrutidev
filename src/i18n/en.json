@@ -6100,6 +6100,7 @@
     "findNone": "No paid purchase was found with this email. Check the spelling, or use the email you gave when paying. Still stuck? Write to us from the contact page.",
     "findClosed": "We found your purchase, but its download link has expired, run out of downloads or been refunded. Write to us from the contact page and we will help.",
     "findLimit": "This email has asked for its link 3 times today. Please try again tomorrow, or write to us.",
-    "alreadyBought": "Already bought? Get your download link"
+    "alreadyBought": "Already bought? Get your download link",
+    "buyAgain": "Buy another copy"
   }
 }

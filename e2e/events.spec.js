@@ -70,13 +70,28 @@ test('shop: product view and the Starter card, with product and price only', asy
   expect(p.params).toEqual({ promotion_id: 'practice-passages', items: [{ item_id: 'kruti-dev-7-day-starter' }] });
 });
 
-test('a purchase kept in this browser: the product page offers the download again', async ({ page }) => {
-  await page.goto('/store/kruti-dev-7-day-starter/');
-  await expect(page.locator('[data-sb-owned]')).toBeHidden();
+test('a purchase kept in this browser: the product page offers the download again, and puts the price aside', async ({ page }) => {
   const o = 'o' + 'a'.repeat(24);
   const t = 'tok_' + 'x'.repeat(30);
-  await page.evaluate(([o, t]) => localStorage.setItem('mkd-bought', JSON.stringify({ 'kruti-dev-7-day-starter': { o, t, exp: Math.floor(Date.now() / 1000) + 86400 } })), [o, t]);
+  let state = { ok: true, state: 'paid', remaining: 4, expires: Math.floor(Date.now() / 1000) + 86400 * 25 };
+  await page.route('**/api/store/order?*', (r) => r.fulfill({ json: state }));
+  await page.goto('/store/kruti-dev-7-day-starter/');
+  await expect(page.locator('[data-sb-owned]')).toBeHidden();
+  await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
+  await page.evaluate(([o, t]) => localStorage.setItem('mkd-bought', JSON.stringify({ 'kruti-dev-7-day-starter': { o, t, exp: Math.floor(Date.now() / 1000) + 86400 * 25 } })), [o, t]);
   await page.reload();
   await expect(page.locator('[data-sb-owned]')).toBeVisible();
   await expect(page.locator('[data-sb-owned-link]')).toHaveAttribute('href', `/store/thanks/#o=${o}&t=${t}`);
+  await expect(page.locator('[data-sb-owned-left]')).toContainText('4 downloads left');
+  // The price and the form step aside, one click away.
+  await expect(page.locator('[data-sb-buyarea]')).toBeHidden();
+  await expect(page.locator('[data-sb-bought]')).toBeHidden();
+  await page.locator('[data-sb-again]').click();
+  await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
+  // Refunded: nothing is offered, the purchase is forgotten, the page is as for anyone.
+  state = { ok: true, state: 'refunded' };
+  await page.reload();
+  await expect(page.locator('[data-sb-owned]')).toBeHidden();
+  await expect(page.locator('[data-sb-buyarea]')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('mkd-bought'))).toBe('{}');
 });

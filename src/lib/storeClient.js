@@ -127,3 +127,15 @@ export function boughtHash(storage, productId, nowMs = Date.now()) {
   const hash = `#o=${p.o}&t=${p.t}`;
   return readOrderFrom({ hash }) ? hash : null;
 }
+
+/** Drop a remembered purchase (refunded, expired or used up). */
+export function forgetPurchase(storage, productId) {
+  try {
+    const all = readBought(storage);
+    if (!(productId in all)) return;
+    delete all[productId];
+    storage.setItem(BOUGHT_KEY, JSON.stringify(all));
+  } catch {
+    // blocked storage: nothing to drop
+  }
+}
