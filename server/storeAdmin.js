@@ -20,6 +20,10 @@
  *            refunded in Razorpay's dashboard; when the webhook for it is set up
  *            this happens by itself for a full refund
  *   extend   give the buyer a fresh set of downloads and another 30 days
+ *
+ * Email addresses sit inside <!--email_off--> ... <!--/email_off-->: Cloudflare's
+ * Email Address Obfuscation would otherwise show "[email protected]", and these
+ * pages run no script to decode it.
  */
 import { ORDER_COLUMNS, STORE, PRODUCTS, price, productById } from '../src/lib/store.js';
 import { toCsv } from '../src/lib/feedback.js';
@@ -169,7 +173,7 @@ function dashboard(env, { orders, totals, periods, byProduct, ready, links, filt
   <td><span class="fa-pill ${esc(o.status)}">${esc(STATUS_NAME[o.status] ?? o.status)}</span>${test ? ' <span class="fa-pill fa-test">TEST</span>' : ''}</td>
   <td>${esc((product?.title ?? o.product_id).replace(/\s*\(.*\)$/, ''))}</td>
   <td class="fa-nowrap">${esc(price(o.amount))}</td>
-  <td>${o.email ? `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : '<span class="fa-sub">no email</span>'}</td>
+  <td>${o.email ? `<!--email_off--><a href="mailto:${esc(o.email)}">${esc(o.email)}</a><!--/email_off-->` : '<span class="fa-sub">no email</span>'}</td>
   <td class="fa-nowrap">${o.downloads} / ${o.max_downloads}</td>
   <td class="fa-nowrap">${esc(day(o.expires_at))}</td>
   <td>${mailFailed ? '<span class="fa-flag">failed</span>' : esc(o.mail_status ?? '')}</td>
