@@ -1405,6 +1405,7 @@ export const NAV_MENUS = [
       '/english-to-hindi-typing',
       '/hindi-typing-test',
       '/hindi-typing-test-for-exams',
+      '/hindi-typing-practice-passages',
       '/hindi-keyboard',
       '/remington-hindi-keyboard',
       '/kruti-dev-keyboard',

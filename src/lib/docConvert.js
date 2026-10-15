@@ -867,13 +867,12 @@ export function summarize(stats, direction) {
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    return {
-      line,
-      share: null,
-      warning: isUnicodeKey(pair.from)
-        ? `No Unicode Hindi text found in this document. Is it already in ${docLabel(pair.to)}?`
-        : `No ${from} text found in this document. Is it already Unicode?`,
-    };
+    const base = isUnicodeKey(pair.from)
+      ? `No Unicode Hindi text found in this document. Is it already in ${docLabel(pair.to)}?`
+      : `No ${from} text found in this document. Is it already Unicode?`;
+    // A workbook says which fonts its cells are set in: a Hindi font this page does not read shows up here.
+    const fonts = stats.fonts?.length ? ` Fonts used in the cells: ${stats.fonts.join(', ')}.` : '';
+    return { line, share: null, warning: base + fonts };
   }
   if (a === 0) return { line, share: 'All Hindi text converted.', warning: null };
 

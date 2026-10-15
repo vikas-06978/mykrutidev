@@ -78,11 +78,9 @@ export function localizeSummary(stats, direction, L) {
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    return {
-      line,
-      share: null,
-      warning: fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from }),
-    };
+    const base = fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from });
+    const fonts = stats.fonts?.length ? ` ${fill(L.fontsUsed, { fonts: stats.fonts.join(', ') })}` : '';
+    return { line, share: null, warning: base + fonts };
   }
   if (a === 0) return { line, share: L.allConverted, warning: null };
 

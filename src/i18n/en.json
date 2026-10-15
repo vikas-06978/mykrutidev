@@ -245,6 +245,7 @@
     "fontUnicode": "Unicode",
     "noLegacy": "No {font} text found in this document. Is it already Unicode?",
     "noUnicode": "No Unicode Hindi text found in this document. Is it already in {font}?",
+    "fontsUsed": "Fonts used in the cells: {fonts}.",
     "allConverted": "All Hindi text converted.",
     "partial": "{pct}% of the Hindi text was in {from} and has been converted. {rest}% was already {to} and was left as it is."
   },
@@ -3014,6 +3015,7 @@
     },
     "/hindi-typing-practice-passages": {
       "nav": "30 Practice Passages",
+      "navSub": "30 free passages, with the keys",
       "h1": "30 Hindi Typing Practice Passages (Free)",
       "title": "30 Hindi Typing Passages with Kruti Dev Keys",
       "description": "Thirty original Hindi passages in three levels for typing practice, with the Kruti Dev keys of each one’s hardest words. Read online or get the free PDF.",
@@ -5331,6 +5333,18 @@
       "otherScripts": {
         "title": "Hindi in other scripts",
         "benefit": "Write Hindi in Gujarati, Bengali, Odia, Telugu, Kannada or Malayalam letters."
+      },
+      "excel": {
+        "title": "Kruti Dev Excel → Unicode",
+        "benefit": "Convert a whole .xlsx or .csv sheet. Numbers, formulas and formatting stay."
+      },
+      "practice": {
+        "title": "30 practice passages",
+        "benefit": "Free Hindi passages with the Kruti Dev keys of the hardest words, and a PDF."
+      },
+      "store": {
+        "title": "Store",
+        "benefit": "Typing PDFs to learn and practise, checked key by key."
       }
     },
     "why": [

@@ -384,7 +384,15 @@ export async function convertXlsx(bytes, { direction, unicodeFont = 'Mangal', on
   const variants = new Map(); // idx -> Map(variantKey -> { inner, chars, already, changed, wholeCell })
   const sp = sst ? prefixOf(sst.name) : '';
 
-  const stats = { cells: 0, sheets: 0, convertedChars: 0, alreadyChars: 0 };
+  const stats = { cells: 0, sheets: 0, convertedChars: 0, alreadyChars: 0, fonts: [] };
+  // The fonts the text cells are set in, so that a file with nothing to convert can say what it does use.
+  const fontsSeen = new Set();
+  const noteFonts = (xml, node, s) => {
+    const str = readString(xml, node);
+    if (!str.runs.some((r) => /\S/.test(r.text))) return;
+    const cellFont = fontOfStyle(s);
+    for (const r of str.runs) if (/\S/.test(r.text)) fontsSeen.add((r.font || cellFont || '').trim());
+  };
 
   // New cell styles for Unicode -> legacy cells: style number -> new number.
   const newXf = new Map();
@@ -463,6 +471,7 @@ export async function convertXlsx(bytes, { direction, unicodeFont = 'Mangal', on
         const v = kid(c, 'v');
         const idx = v ? Number(inner(xml, v).trim()) : NaN;
         if (!Number.isInteger(idx) || !sis[idx]) continue;
+        noteFonts(sstXml, sis[idx], s);
         const key = variantKey(s);
         let m = variants.get(idx);
         if (!m) variants.set(idx, (m = new Map()));
@@ -471,6 +480,7 @@ export async function convertXlsx(bytes, { direction, unicodeFont = 'Mangal', on
       } else if (t === 'inlineStr') {
         const is = kid(c, 'is');
         if (!is) continue;
+        noteFonts(xml, is, s);
         const r = convertFor(xml, is, s);
         cells.push({ c, a, s, inline: is, r });
       }
@@ -601,6 +611,8 @@ export async function convertXlsx(bytes, { direction, unicodeFont = 'Mangal', on
     grow(styles.xfsNode, addedXfs, styles.xfFont.length + addedXfs.length);
     files['xl/styles.xml'] = strToU8(applyEdits(sx, edits));
   }
+
+  stats.fonts = [...fontsSeen].filter(Boolean).sort().slice(0, 8);
 
   // Excel keeps a cache of formula results; it is recalculated on open, and
   // nothing here changes a formula, so the cache stays valid.
