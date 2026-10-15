@@ -223,7 +223,9 @@ function legacyText(text, key, name, pair) {
   if (/kruti\s*dev/i.test(name ?? '')) s = krutiWordRun(s, name);
   const opts = { keepEnglish: false };
   const unicode = convert(s, key, 'unicode', opts);
-  return { out: isUnicodeKey(pair.to) ? unicode : convert(s, key, pair.to, opts), chars: countDeva(unicode) };
+  // Hindi already in Unicode in a legacy-font cell comes through as it is.
+  const already = countDeva(s);
+  return { out: isUnicodeKey(pair.to) ? unicode : convert(s, key, pair.to, opts), chars: countDeva(unicode) - already, already };
 }
 
 /**
@@ -244,6 +246,7 @@ function legacyString(xml, node, cellFont, pair, target) {
     const text = group.runs.map((r) => r.text).join('');
     const r = legacyText(text, group.key, group.name, pair);
     chars += r.chars;
+    already += r.already;
     const first = group.runs[0];
     const rPr = first.font ? withRFont(first.rPr, target, str.p) : first.rPr;
     out.push({ rPr, font: first.font ? target : null, text: r.out });

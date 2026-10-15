@@ -3645,7 +3645,10 @@ function toVisualOrder(s) {
 // ONE alternation, not three passes - a placeholder for an email contains a
 // digit, so a later number pass would happily chew a hole in it.
 const URL_SRC = '(?:[Hh][Tt][Tt][Pp][Ss]?://|[Ww][Ww][Ww]\\.)[^\\s<>"\']+';
-const EMAIL_SRC = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
+// The lookbehind starts a match only where an address can start: without it a
+// long run of letters with no @ (a 20 MB line of keys) was tried from every
+// position, which took minutes.
+const EMAIL_SRC = '(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
 // Numbers, dates, times, percentages, decimals: 21, 3.14, 15/08/1947, 10:30, 99%
 const NUMBER_SRC = '\\d+(?:[.,:/-]\\d+)*%?';
 
@@ -3875,6 +3878,44 @@ function splitProtected(text, re) {
   return parts;
 }
 
+// Letters and signs only: a danda or a Hindi digit can stand in legacy text too,
+// where a font has no key for it and it passed through (Abbasi's ॥).
+const RE_HAS_DEVANAGARI = /[\u0900-\u0963\u0971-\u097F]/;
+const RE_PUNCT_ONLY = /^[^\sA-Za-z0-9]+$/;
+/**
+ * Hindi that is already Unicode, split off so it comes through as it is. No
+ * legacy font has a key for a Devanagari letter or sign, so a word with one is
+ * Unicode, and so is its punctuation: left to the maps, the ि of किरण hops over
+ * the next letter (करिण), and the comma in "किरण, मोहन" reads as ए. A token of
+ * punctuation alone goes with the Unicode words on both sides of it. Text with
+ * no Devanagari (all real legacy text) comes back as one piece, unchanged.
+ *
+ * @returns {{ skip: boolean, v: string }[]}
+ */
+function splitUnicodeHindi(text) {
+  if (!RE_HAS_DEVANAGARI.test(text)) return [{ skip: false, v: text }];
+  const pieces = text.split(/(\s+)/);
+  const words = [];
+  for (let i = 0; i < pieces.length; i += 2) if (pieces[i]) words.push(i);
+  const keep = new Set(words.filter((i) => RE_HAS_DEVANAGARI.test(pieces[i])));
+  words.forEach((i, n) => {
+    if (RE_PUNCT_ONLY.test(pieces[i]) && keep.has(words[n - 1]) && keep.has(words[n + 1])) keep.add(i);
+  });
+  const parts = [];
+  const push = (skip, v) => {
+    const last = parts[parts.length - 1];
+    if (last && last.skip === skip) last.v += v;
+    else parts.push({ skip, v });
+  };
+  for (let i = 0; i < pieces.length; i += 1) {
+    if (!pieces[i]) continue;
+    // Space between two kept words stays with them; any other space is the legacy text's.
+    const skip = i % 2 === 0 ? keep.has(i) : keep.has(i - 1) && keep.has(i + 1);
+    push(skip, pieces[i]);
+  }
+  return parts;
+}
+
 // ============================================================================
 // Direction implementations
 // ============================================================================
@@ -3886,10 +3927,8 @@ export function legacyToUnicode(
 ) {
   if (!text) return '';
   const trie = trieFor(map);
-  const parts = splitProtected(
-    text,
-    keepEnglish ? RE_PROTECT_ALL : RE_PROTECT_LINKS,
-  );
+  const re = keepEnglish ? RE_PROTECT_ALL : RE_PROTECT_LINKS;
+  const parts = splitUnicodeHindi(text).flatMap((p) => (p.skip ? [p] : splitProtected(p.v, re)));
 
   const out = parts
     .map(({ skip, v }) => {

@@ -87,3 +87,20 @@ test('the Excel page has no accessibility violations and fits a phone', async ({
   const top = await page.locator(`${D}[data-role="drop"]`).boundingBox();
   expect(top.y).toBeLessThan(780);
 });
+
+test('a Word file renamed .txt is refused, and a two-file drop says only one is converted', async ({ page }) => {
+  await page.goto('/kruti-dev-excel-to-unicode/');
+  await page.setInputFiles(`${D}input[type=file]`, { name: 'notice.docx.txt', mimeType: 'text/plain', buffer: Buffer.from([0x50, 0x4b, 3, 4, 0, 0, 0, 0]) });
+  await expect(page.locator(`${D}[data-role="error"]`)).toHaveText(/not a plain text file/);
+  await expect(page.locator(`${D}[data-role="download"]`)).toBeHidden();
+
+  const files = await page.evaluateHandle(() => {
+    const t = new DataTransfer();
+    t.items.add(new File(['fdj.k'], 'one.txt', { type: 'text/plain' }));
+    t.items.add(new File(['eksgu'], 'two.txt', { type: 'text/plain' }));
+    return t;
+  });
+  await page.dispatchEvent(`${D}[data-role="drop"]`, 'drop', { dataTransfer: files });
+  await expect(page.locator(`${D}[data-role="file-name"]`)).toHaveText('one.txt');
+  await expect(page.locator(`${D}[data-role="note"]`)).toHaveText(/only this file is being converted.*other 1/);
+});

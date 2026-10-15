@@ -399,7 +399,7 @@ describe('document messages', () => {
     assert.ok(errors.includes(TOO_LARGE_EN), 'TOO_LARGE_EN drifted from docConvert.js');
     assert.ok(errors.includes(ONLY_TYPES_EN), 'ONLY_TYPES_EN drifted from docConvert.js');
 
-    for (const msg of [...errors, docConvert.DAMAGED_MESSAGE, docConvert.SHEET_DAMAGED_MESSAGE, docConvert.GENERIC_MESSAGE]) {
+    for (const msg of [...errors, docConvert.DAMAGED_MESSAGE, docConvert.SHEET_DAMAGED_MESSAGE, docConvert.NOT_TEXT_MESSAGE, docConvert.GENERIC_MESSAGE]) {
       assert.equal(localizeDocMessage(msg, docConvert, L.en), msg, 'English must be unchanged');
       const inHindi = localizeDocMessage(msg, docConvert, L.hi);
       assert.notEqual(inHindi, msg, `not translated: ${msg}`);

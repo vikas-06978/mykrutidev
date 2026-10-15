@@ -713,3 +713,35 @@ describe('an outside Hindi corpus round-trips through Kruti Dev', () => {
     });
   }
 });
+
+describe('Unicode Hindi that is already in the input', () => {
+  // Found by the upload QA: a run set in Kruti Dev but holding Unicode text
+  // (pasted, then re-fonted) came back as करिण / नर्मिल, and a CSV cell
+  // "किरण, मोहन" as किरणए मोहन.
+  const kept = ['किरण की दृष्टि निर्मल है।', 'सिंहासन', 'शक्ति', 'कर्म', 'हिंदी', 'किरण, मोहन की सूची', 'किरण ने कहा "सूची तैयार है"।', 'किरण - मोहन', '  किरण  '];
+  for (const text of kept) {
+    test(`leaves ${text.trim()} as it is`, () => {
+      assert.equal(convert(text, 'kruti-dev', 'unicode'), text);
+      assert.equal(convert(text, 'kruti-dev', 'unicode', { keepEnglish: false }), text);
+    });
+  }
+  test('still converts the legacy text beside it', () => {
+    assert.equal(convert('किरण fdj.k', 'kruti-dev', 'unicode'), 'किरण किरण');
+    assert.equal(convert('fdj.k] eksgu', 'kruti-dev', 'unicode', { keepEnglish: false }), 'किरण, मोहन');
+  });
+});
+
+describe('long input', () => {
+  // Found by the upload QA: one 20 MB line of keys with no spaces took minutes,
+  // because the e-mail pattern was tried from every position of it.
+  test('a long run of letters with no space converts in linear time', () => {
+    const t = Date.now();
+    const out = convert('d'.repeat(200_000), 'kruti-dev', 'unicode', { keepEnglish: false });
+    assert.equal(out, 'क'.repeat(200_000));
+    assert.ok(Date.now() - t < 3000, `took ${Date.now() - t} ms`);
+  });
+  test('e-mail addresses are still kept', () => {
+    assert.equal(convert('dk ram.k@mail.com', 'kruti-dev', 'unicode'), 'का ram.k@mail.com');
+    assert.equal(convert('dk ram.k@mail.com', 'kruti-dev', 'unicode', { keepEnglish: false }), 'का ram.k@mail.com');
+  });
+});

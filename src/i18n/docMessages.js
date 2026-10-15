@@ -43,6 +43,7 @@ export function localizeDocMessage(msg, m, L) {
   if (msg === m.SHEET_SAVE_AS_MESSAGE) return L.sheetSaveAs;
   if (m.SHEET_SAVE_AS_MESSAGE && msg.startsWith(m.SHEET_SAVE_AS_MESSAGE)) return `${L.sheetSaveAs} ${L.sheetPasswordHint}`;
   if (msg === m.SHEET_DAMAGED_MESSAGE) return L.sheetDamaged;
+  if (m.NOT_TEXT_MESSAGE && msg === m.NOT_TEXT_MESSAGE) return L.notText;
   if (msg === m.GENERIC_MESSAGE) return L.generic;
   if (msg === TOO_LARGE_EN) return L.tooLarge;
   if (msg === ONLY_TYPES_EN) return L.onlyTypes;
@@ -65,10 +66,12 @@ export function localizeSummary(stats, direction, L) {
   const pair = pairOf(direction);
   const count = (n, one, many) => fill(n === 1 ? one : many, { n: fmt(n) });
   // A spreadsheet counts cells and sheets (sheetConvert.js); a document, paragraphs and tables.
+  // Nothing converted: the file was only read, so the line says "Checked".
+  const verb = stats.convertedChars === 0 ? L.summaryChecked : L.summaryLine;
   const parts =
     'cells' in stats
-      ? [fill(L.summaryLine, { paragraphs: count(stats.cells, L.cellOne, L.cellMany) }), count(stats.sheets, L.sheetOne, L.sheetMany)]
-      : [fill(L.summaryLine, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
+      ? [fill(verb, { paragraphs: count(stats.cells, L.cellOne, L.cellMany) }), count(stats.sheets, L.sheetOne, L.sheetMany)]
+      : [fill(verb, { paragraphs: count(stats.paragraphs, L.paragraphOne, L.paragraphMany) })];
   if (stats.tables) parts.push(count(stats.tables, L.tableOne, L.tableMany));
   const line = parts.join(' · ');
 

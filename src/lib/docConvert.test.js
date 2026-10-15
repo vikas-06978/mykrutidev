@@ -25,6 +25,7 @@ import {
   UserError,
   messageFor,
   KRUTI_FONT,
+  NOT_TEXT_MESSAGE,
 } from './docConvert.js';
 import { buildDocxBytes } from './docx.js';
 import { parseXml, descendants, inner, decodeText, attrs, child } from './xmlScan.js';
@@ -449,6 +450,34 @@ describe('.txt files', () => {
     assert.equal(decodeTextFile(u16).text, 'भ');
   });
 
+  test('Unicode Hindi in a Kruti Dev run comes back as it is, counted as already Unicode', async () => {
+    // Found by the upload QA: किरण came back as करिण and the page said "All Hindi text converted".
+    const { text, stats } = await run(buildDocxBytes('किरण, मोहन fdj.k', { fontName: KRUTI_FONT }), 'to-unicode');
+    assert.equal(runsOf(text('word/document.xml'))[0].map(([t]) => t).join(''), 'किरण, मोहन किरण');
+    assert.equal(stats.alreadyChars, 8);
+    assert.equal(stats.convertedChars, 4);
+  });
+
+  test('UTF-16 saved without its byte-order mark is still read as UTF-16', () => {
+    const text = 'Name,नाम\r\nRam,राम\r\n';
+    const le = new Uint8Array(text.length * 2);
+    for (let i = 0; i < text.length; i += 1) [le[2 * i], le[2 * i + 1]] = [text.charCodeAt(i) & 0xff, text.charCodeAt(i) >> 8];
+    const be = le.map((_, i) => le[i ^ 1]);
+    assert.deepEqual(decodeTextFile(le), { text, encoding: 'utf-16le' });
+    assert.deepEqual(decodeTextFile(be), { text, encoding: 'utf-16be' });
+  });
+
+  test('a binary file named .txt or .csv is refused, not "converted"', () => {
+    const zip = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0, 0, 0, 0]);
+    const ole = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
+    for (const name of ['notice.docx.txt', 'list.csv']) {
+      for (const head of [zip, ole]) assert.deepEqual(checkFile({ name, size: 100, head }), { error: NOT_TEXT_MESSAGE });
+    }
+    // Zero bytes scattered through it, not UTF-16: refused too.
+    const junk = new Uint8Array([0x6a, 0, 0, 0x6b, 0x41, 0, 0x42, 0x43, 0, 0, 0x44, 0x45]);
+    assert.throws(() => decodeTextFile(junk), (e) => e instanceof UserError && e.message === NOT_TEXT_MESSAGE);
+  });
+
   test('the .docx offered for a Kruti .txt has Kruti Dev 010 on the Hindi only', async () => {
     const unicode = buildDocxBytes('Hello हिन्दी', { fontName: 'Mangal' });
     const { text } = await run(unicode, 'to-kruti');
@@ -486,6 +515,8 @@ describe('helpers', () => {
     assert.equal(summarize({ paragraphs: 1, tables: 0, convertedChars: 5, alreadyChars: 0 }, 'to-unicode').share, 'All Hindi text converted.');
     assert.equal(summarize({ paragraphs: 1, tables: 0, convertedChars: 5, alreadyChars: 0 }, 'to-unicode').line, 'Converted 1 paragraph');
     assert.match(summarize({ paragraphs: 0, tables: 0, convertedChars: 0, alreadyChars: 0 }, 'to-kruti').warning, /No Unicode Hindi/);
+    // Found by the upload QA: "Converted 3 paragraphs" next to "No Kruti Dev text found".
+    assert.equal(summarize({ paragraphs: 3, tables: 0, convertedChars: 0, alreadyChars: 9 }, 'to-unicode').line, 'Checked 3 paragraphs');
   });
 });
 

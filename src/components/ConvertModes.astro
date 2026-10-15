@@ -234,7 +234,8 @@ const fileHref = `${to(path)}?mode=file`;
       if (!file || !docRoot) return;
       setMode('file');
       reveal();
-      docRoot.dispatchEvent(new CustomEvent('mkd:doc-file', { detail: file }));
+      const others = (e.dataTransfer?.files?.length ?? 1) - 1;
+      docRoot.dispatchEvent(new CustomEvent('mkd:doc-file', { detail: { file, others } }));
     });
   }
 </script>
