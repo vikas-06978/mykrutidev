@@ -1,4 +1,6 @@
-# Local security and quality audit, 16 October 2026
+# Final local security and quality audit, 16 October 2026
+
+**Final result:** the required local checks pass with the official pinned Playwright browser. Two verified server issues were fixed. The complete final browser run passed 1,712 cases with zero failures and 288 existing conditional skips. Main branch protection requires owner action. Production-only settings outside the supplied screenshots remain explicitly unverified.
 
 Baseline: `d36feb88a5de7c83e1a46708d6912f5fc640c92e`. This report was written before application changes. Evidence line numbers refer to that baseline. No requests, attacks, purchases or load tests were made against the live site. Review and local tests cannot establish the state of production bindings or provider dashboards.
 
@@ -19,8 +21,24 @@ No verified Critical or High application vulnerability was found in this review.
 
 | ID / severity | Evidence | Realistic scenario and verification | Smallest fix | Risk and disposition |
 | --- | --- | --- | --- | --- |
-| A07 / Low | `e2e/tools.spec.js:129`, `:136`, `src/components/Converter.astro:596`, `:653` | The test waits for any nonempty output, then immediately reads its value for a strict equality check. Conversion output is debounced. The full run read intermediate prefixes on the Punjabi and Tamil Abbasi Chanakya-to-Kruti Dev pages. Both unchanged assertions passed on an isolated single-worker rerun after the full suite. This does not demonstrate a mapping defect. | Await the complete expected value rather than merely nonempty output, keeping the equality assertion intact. | Deferred under the instruction to fix only Critical, High and clearly safe Medium findings. No test assertion or converter code was changed. |
-| A08 / Low | `e2e/security.spec.js:126` | The test assumes that a blocked iframe contains no h1. Chromium 154 instead renders a local-network blocking error page with its own h1 when about:blank frames localhost. The snapshot shows the browser error, not the app. A separate cross-origin parent served locally exercised the actual CSP and confirmed a frame-ancestors refusal with no converter rendered. The existing sweep also passed for all 896 built pages without a CSP violation. | Serve the cross-origin parent locally and assert actual CSP refusal, distinguishing browser error markup from application rendering. Recheck with Playwright's pinned browser when its download is available. | Deferred. This is a test/runtime compatibility issue, not evidence of a missing frame restriction. The existing test and security headers are unchanged. |
+| A07 / Low | `e2e/tools.spec.js:129`, `:136`, `src/components/Converter.astro:596`, `:653` | The test waits for any nonempty output, then immediately reads its value for a strict equality check. Conversion output is debounced. The full run read intermediate prefixes on the Punjabi and Tamil Abbasi Chanakya-to-Kruti Dev pages. Both unchanged assertions passed on an isolated single-worker rerun after the initial suite and in the final complete pinned-browser run. This does not demonstrate a mapping defect. | Await the complete expected value rather than merely nonempty output, keeping the equality assertion intact. | Retained as a Low test-timing observation under the requested severity restriction. The final supported-browser run passed without changing any assertion or converter code. |
+| A08 / Low | `e2e/security.spec.js:126` | The test assumes that a blocked iframe contains no h1. Chromium 154 instead renders a local-network blocking error page with its own h1 when about:blank frames localhost. The snapshot shows the browser error, not the app. A separate cross-origin parent served locally exercised the actual CSP and confirmed a frame-ancestors refusal with no converter rendered. The existing sweep also passed for all 896 built pages without a CSP violation. | Serve the cross-origin parent locally and assert actual CSP refusal, distinguishing browser error markup from application rendering. The official Chromium 153 is now installed, and the unchanged iframe check passed on its focused rerun. | Resolved for the supported browser environment by installing the official pinned Chromium. This was a test/runtime compatibility issue, not evidence of a missing frame restriction. The existing test and security headers are unchanged. |
+
+## Dashboard evidence supplied by the owner
+
+The following checks were added after the owner supplied three dashboard screenshots on 16 October 2026. Screenshots establish what is displayed, rather than proving backend connectivity, saved permissions or all deployment scopes.
+
+| Check | Evidence and result | Remaining action or limit |
+| --- | --- | --- |
+| GitHub Actions default token permission | The Workflow permissions screenshot shows **Read repository contents and packages permissions** selected. This is the appropriate restrictive default for the current test workflow. | The integration cannot read this administration setting through the API, which returns 403. Keep this selection saved. |
+| Actions creating and approving PRs | The same screenshot shows **Allow GitHub Actions to create and approve pull requests** checked. The current `test.yml` does not create or approve PRs. | Optional hardening: uncheck this if no other trusted Actions workflow needs it. This setting is separate from Codex's GitHub integration access. |
+| Main branch protection | The screenshot says classic branch protections have not been configured. A fresh successful `GET /repos/vikas-06978/mykrutidev/rules/branches/main` returned `[]`, so no active matching ruleset rules were returned either. | See A09. The integration cannot read the separate classic-protection administration endpoint. |
+| Cloudflare D1 binding | The bindings screenshot shows `DB` pointing to `mykrutidev-feedback`. The binding name matches the handlers. | Actual production DB connectivity and deployment scope were not tested. |
+| Cloudflare R2 binding | The screenshot shows `STORE_FILES` pointing to `mykrutidev-store`. The binding name matches the download handler. | This does not establish that the bucket is private, that the paid PDF exists, or that Production and Preview scopes are configured correctly. |
+
+| ID / severity | Evidence | Realistic scenario and verification | Smallest fix | Risk and disposition |
+| --- | --- | --- | --- | --- |
+| A09 / Medium, repository configuration | Owner's Branch protection rules screenshot, plus the successful effective-rules API response `[]` for `main` | The provided evidence shows no classic protection and no active matching ruleset rules. A writer can bypass the intended PR/check review process, allowing a mistaken direct change onto the deployment branch. No bypass or force push was attempted. | Have the owner enforce a ruleset for `main` requiring pull requests and the existing test status check, blocking force pushes and deletion. Consider bypass permissions explicitly. | Owner action. Enforcing rules can affect collaborator access and merges, so no repository settings were changed. Repository source and GitHub integration permissions were left intact. |
 
 ## Already done well, do not change
 
@@ -47,13 +65,13 @@ No Cloudflare, Razorpay or Resend dashboard change is required by these fixes. N
 ## Limits and remaining checks
 
 - Credential-pattern scans of current tracked text and historical diffs across available local Git refs found no private-key blocks, common GitHub/AWS credentials or long live Razorpay/Stripe key patterns. This is not proof that every possible secret format or binary credential is absent. No credential values were printed.
-- CI uses version tags for actions and declares no explicit token permissions. Actual default permissions and branch protection are **not verified**. Recommend read-only repository defaults in GitHub settings. No speculative workflow change was made.
+- CI uses version tags for actions and declares no explicit token permissions. The owner supplied evidence of the selected read-only default and absent classic protection. The active-rules API returned no matching ruleset rules for main. See the dashboard evidence and A09 for the precise limits. No workflow or repository settings were changed.
 - Reconciliation batches orders and refunds, but one run can perform many database operations, mail calls and provider reads. Plan-specific Cloudflare CPU/subrequest limits, maximum PDF size, dashboard access, R2 privacy, Turnstile configuration and production scheduled jobs are **not verified**. No production limit or readiness claim is made.
-- Git read access works. GitHub API access currently returns Forbidden, despite an injected authentication binding. No additional token was requested and no credential was exposed. This may block PR creation after local validation.
+- Ordinary repository API access now works with the existing authentication. Direct HTTPS Git access to github.com currently receives a proxy CONNECT 403 under the updated network settings. Administration endpoints for workflow permissions and classic branch protection still return Resource not accessible by integration. No additional token was requested and no credential was exposed.
 - Existing tests were not deleted, skipped or weakened by this branch. Built-in conditional skips remain distinct from passing checks.
 
 
-## Final validation
+## Initial validation with system Chromium 154
 
 Commands ran in `/workspace/mykrutidev` after sourcing the workspace cache configuration. Node was v24.19.0 and npm was 11.9.0. Browser checks and asset generation used the machine's Chromium 154.0.8037.57 through a workspace browser path. Playwright's expected Chromium 153 download was blocked by the network proxy. The default Playwright configuration was used for the complete suite, with four workers and no test filter. The existing CI fixture `PUBLIC_UPI_ID` was supplied for build and built-site checks.
 
@@ -72,8 +90,43 @@ The new A01 regression cases both failed before the fix with HTTP 200 instead of
 
 `npm audit --json` reports two High affected-package entries through the TOML advisories described in A06. No automatic dependency fix was applied. Credential-pattern checks of current tracked text and available local Git history returned no matches for the checked patterns.
 
-## Review and PR status
+## Final validation with official pinned Chromium 153
 
-The required browser gate is failing, so no PR was opened. No merge or push to main was attempted. The audit report was committed before either application fix, and A01 and A02 each have their own small commit. A prepared PR description is retained outside the checkout at `/workspace/.cloud-setup/AUDIT-PR-DESCRIPTION.md` for use after the gate is resolved.
+Browser download access was restored. `npx playwright install chromium` successfully installed the official Chrome for Testing and Chrome Headless Shell 153.0.8010.12, Playwright revision 1243, plus FFmpeg. These are real downloaded browser binaries in a separate workspace cache, rather than the earlier system-browser substitutes.
 
-Git push access works, but a fresh GitHub API read still fails with a proxy CONNECT 403 for `api.github.com`. To complete the workflow, allow that host for PR API access and `cdn.playwright.dev` for the pinned-browser installation, then recheck the affected operations. Existing authentication should be reused. The Low test findings remain unfixed under the requested severity restriction. The browser gate must pass before opening the PR.
+The three previously failing checks first passed unchanged on a focused run, three passed in 6.2 seconds. Then the entire unfiltered desktop/mobile suite passed with the default repository configuration and four workers. The final command was:
+
+```sh
+cd /workspace/mykrutidev
+source /workspace/.cloud-setup/env.sh
+export PLAYWRIGHT_BROWSERS_PATH=/workspace/.cloud-setup/playwright-pinned
+PUBLIC_UPI_ID=mykrutidev.test@upi npx playwright test --workers=4 --output /workspace/.cloud-setup/pinned-full-results
+```
+
+| Required command | Final result |
+| --- | --- |
+| `npm ci` | PASS, earlier validation of the same application source and unchanged lockfile |
+| `npm test` | PASS, 2,413 passed, zero failed or skipped |
+| `npm run test:functions` | PASS with Wrangler 4.149.0 and 3.114.17 |
+| `npm run build` | PASS, including PDF/OG generation and 24 SEO checks |
+| `CI=true npm run test:dist` | PASS, 101 passed, three existing configuration-dependent skips |
+| `npx playwright test --workers=4` | PASS with the official pinned browser, 1,712 passed, zero failed, 288 existing conditional skips, 11.3 minutes |
+
+All 2,000 selected browser cases reached an outcome. The final run included the iframe assertion, the two previously intermittent converter comparisons, all 896 built pages under the CSP sweep, mobile store recovery, downloads, accessibility, typing and converters. Existing assertions, retry settings and built-in skip conditions were unchanged. No application source, dependency or lockfile changed between the earlier passing non-browser commands and this final browser run. The earlier system-browser failure remains recorded above as historical evidence and is superseded for the browser gate by this complete supported-browser pass.
+
+## Owner actions and evidence still outstanding
+
+1. **Protect main, A09:** configure an enforced rule for `main` requiring PRs and the existing test status check, and block force pushes and deletion. Review bypass roles. No repository settings were changed by this audit.
+2. **Optional Actions hardening:** disable Actions creating/approving PRs if no trusted workflow needs it. Keep the selected read-only token default.
+3. **R2 privacy and objects:** the binding is shown, but bucket settings proving public development access and custom-domain access are disabled, and the paid object's existence/size, have not been supplied or tested.
+4. **Production services:** Cloudflare plan/limits, Production versus Preview scope, variable/secret presence by name, Turnstile hostnames, scheduled reconciliation, and Razorpay/Resend webhook enablement and delivery history remain unverified without read-only dashboard evidence. Secret values are not needed for these configuration checks.
+5. **Live behavior:** no live purchase, real customer email delivery, attack or load test was performed. These are separate from the verified local workflow. Provider settings must not be inferred from source or binding names alone.
+6. **Deferred findings:** A03 through A07 retain their documented dispositions. The upstream TOML advisories are not resolved by passing tests. No dependency upgrade or existing product behavior was changed to hide them.
+
+## Review status
+
+The required local validation gate now passes. The report and two isolated server fixes are on the review branch `security/audit-verified-fixes`, with the application fixes in `2e78750` and `edb3ac4`. The initial audit report was committed before application changes. There was no merge or push to main.
+
+Ordinary GitHub API access works with existing authentication. Direct Git HTTPS currently receives a proxy CONNECT 403 for github.com under the latest network settings. The GitHub API is available for publication, so no new credential is requested. For future native Git operations, restore the GitHub network destination or preset in environment settings. Administration endpoints remain inaccessible to the integration, and the owner's screenshots are identified separately from API-verified evidence.
+
+The prepared PR description is retained outside the checkout at `/workspace/.cloud-setup/AUDIT-PR-DESCRIPTION.md`. It contains this audit report, both changes, validation results, owner dashboard actions and deferred findings. Repository settings and production configuration remain for owner review.
