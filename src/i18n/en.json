@@ -2981,7 +2981,7 @@
         "<h2>Your text stays on your computer</h2>",
         "<p>The converters and the typing tutor run entirely in your browser. What you paste or type is not uploaded, logged or stored by us. The one feature that uses an outside service is English to Hindi typing in Hinglish mode, which asks Google's input service how to spell each word. The <a href=\"/privacy-policy\">privacy policy</a> sets out exactly what that means.</p>",
         "<h2>Who we are</h2>",
-        "<p>The MyKrutiDev team is a small group of developers and Hindi typists who have spent years moving office documents between Kruti Dev and Unicode. We are not affiliated with the makers of Kruti Dev, DevLys, Chanakya or Mangal, or with any exam body. To report a wrong conversion or suggest a feature, <a href=\"/contact\">contact us</a>.</p>"
+        "<p>MyKrutiDev is independently developed and maintained by Vikas Rathore. We are not affiliated with the makers of Kruti Dev, DevLys, Chanakya or Mangal, or with any exam body. To report a wrong conversion or suggest a feature, <a href=\"/contact\">contact us</a>.</p>"
       ]
     },
     "/hindi-typing-finger-chart": {
@@ -3469,7 +3469,7 @@
       "h1": "Privacy Policy",
       "title": "Privacy Policy: Files Stay on Your Device",
       "description": "MyKrutiDev converts text and files in your browser, so nothing you paste or upload is sent to us. What is stored on your device, and what Analytics counts.",
-      "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. There are no accounts and no advertising. Google Analytics counts visits, and never sees your text or files.",
+      "lede": "Short version: the converters and the typing tutor work inside your browser, so your text and your files never leave your computer. No account is needed. Google Analytics counts visits, and never sees your text or files.",
       "body": [
         "<h2>Who runs this site</h2>",
         "<p>MyKrutiDev is run by {seller}. For anything about this policy or your data, write to <a href=\"mailto:{email}\">{email}</a>.</p>",
