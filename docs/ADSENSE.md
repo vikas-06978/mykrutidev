@@ -1,6 +1,31 @@
 # Google AdSense: switching it on
 
-Everything for AdSense is already in the site, and all of it is **off**. Three
+## Current plan: product sales, advertising off
+
+Product sales do not require AdSense. Leave `PUBLIC_ADSENSE_CLIENT`,
+`PUBLIC_ADSENSE_ADS` and `PUBLIC_ADSENSE_SLOT` unset while the site is funded
+through the store. Do not use a sample publisher ID on production.
+
+The existing integration supports applying and enabling advertising through
+deployment settings, without editing source files. The policy introduction
+does not promise permanent absence of advertising; its advertising disclosure
+is added automatically when a valid publisher ID is configured. About names
+the independent maintainer rather than claiming a development team.
+
+Before enabling ads in the future, review the then-current Google publisher
+policies and confirm that disclosures match the actual deployment. Configure
+and publish a Google-certified consent management solution where required,
+then verify its behavior on the live site, including Analytics consent where
+applicable. Allowing consent-message domains in CSP does not by itself collect
+consent or establish compliance. Dashboard configuration, consent verification
+and Google's site review cannot be completed in advance by this repository.
+Approval and permanent compatibility with future policies are not guaranteed.
+
+Follow the steps below when you decide to apply. Keep the ad switch off until
+approval and the applicable consent setup are complete. Switching to ads does
+not change product pricing, checkout or download access.
+
+The optional AdSense integration is in the site, and all of it is **off**. Three
 Cloudflare Pages variables turn it on in steps. Without them the site is the
 same as it is today: no ad code, no `/ads.txt`, no ad addresses in the
 Content-Security-Policy, and no advertising section in the privacy policy.
@@ -39,12 +64,15 @@ AdSense does not allow ads on pages with no content of their own.
    **Meta tag** (or ads.txt) way of verifying the site, and request a review.
 4. **Consent message for Europe.** In AdSense → Privacy & messaging, create
    the **European regulations** message. It is Google's own certified consent
-   tool. Google requires it for personalised ads to visitors from the EEA,
-   the UK and Switzerland. The CSP already allows it once ads are on.
+   tool. Review Google's current consent requirements for visitors from the
+   EEA, the UK and Switzerland, including the selected ad-serving mode. The
+   CSP already allows the consent-message host once ads are on; test that
+   the message actually appears and the user's choice is respected.
 5. **After approval.** Add `PUBLIC_ADSENSE_ADS` = `on` (Production) and
    deploy again. In AdSense → Ads, switch on Auto ads for the site. If you
-   want ads only in the fixed places, create a display ad unit under Ads → By
-   ad unit and put its 10-digit `data-ad-slot` number in `PUBLIC_ADSENSE_SLOT`.
+   want ads only in the fixed places, leave Auto ads off, create a display ad
+   unit under Ads → By ad unit and put its 10-digit `data-ad-slot` number in
+   `PUBLIC_ADSENSE_SLOT`.
 6. **Check.** Open a converter page on your phone and on a computer. Ads
    should sit below the tools. In the browser's developer console there
    should be no red "Content-Security-Policy" errors.
