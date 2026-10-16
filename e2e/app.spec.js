@@ -353,7 +353,8 @@ test.describe('typing tutor: progress', () => {
     await page.locator('[data-tutor] [data-mode="exam"]').click();
     await expect(page.locator('[data-tutor] [data-role="time"]')).toHaveText('10:00');
     await expect(page.locator('[data-tutor] [data-role="duration"]')).toBeHidden();
-    await expect(page.locator('[data-tutor] [data-role="mode-note"]')).toContainText('SSC');
+    await expect(page.locator('[data-tutor] [data-role="mode-note"]')).toContainText('आधिकारिक परीक्षा का अनुकरण नहीं');
+    await expect(page.locator('[data-tutor] [data-role="mode-note"]')).toContainText('÷ 5');
     await capture(page).focus();
     await page.keyboard.type('kjlkjlkjlkjl');
     await expect(page.locator('[data-tutor] [data-role="pause"]')).toBeHidden();

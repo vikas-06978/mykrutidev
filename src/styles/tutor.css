@@ -919,3 +919,55 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
+
+/* Focus view keeps tutor controls in the document and hides distractions visually.
+   The script makes outside content inert and restores its previous state on exit. */
+.tt[data-focus-mode='true'] {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 0;
+  background: var(--color-paper);
+}
+.tt[data-focus-mode='true'] .tt-focusbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-paper);
+}
+.tt button[data-role^='coach-'],
+.tt [data-role='focus-toggle'] {
+  max-width: 100%;
+  white-space: normal;
+  padding-block: .5rem;
+  text-align: center;
+}
+
+/* Native Unicode practice uses the learner's Hindi input method, not the
+   legacy Remington key-to-glyph guide. Mangal is used only when installed. */
+.tt[data-mode='unicode'] :is(.tt-prompt, .tt-kbd-bar, .kbd, .tt-phone-note, [data-hands], .tt-result-grid),
+.tt[data-mode='unicode'] .tt-stats .tt-stat:not([data-role='stat-time']),
+.tt[data-mode='unicode'] label:has([data-role='backspace']),
+.tt[data-mode='unicode'] label:has([data-role='highlight']) {
+  display: none;
+}
+.tt[data-mode='unicode'] .tt-stats { grid-template-columns: 1fr; }
+.tt[data-mode='unicode'] :is(.tt-line, .tt-capture) {
+  font-family: Mangal, 'Nirmala UI', var(--font-deva);
+}
+.tt[data-mode='unicode'] .tt-capture {
+  position: relative;
+  display: block;
+  min-height: 10rem;
+  max-height: 22rem;
+  height: 12rem;
+  overflow: auto;
+  color: var(--color-ink);
+  caret-color: var(--color-ink);
+  border-top: 1px solid var(--color-hairline);
+}
+.tt[data-mode='unicode'] .tt-capture:focus-visible { outline: 2px solid var(--color-brick); outline-offset: -2px; }
+.tt[data-mode='unicode'] .tt-capture::selection { background: var(--color-inset); }
+.tt [data-role='native-tab'] { max-width: 100%; white-space: normal; }
