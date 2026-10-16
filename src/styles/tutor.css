@@ -919,3 +919,28 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
+
+/* Focus view keeps tutor controls in the document and hides distractions visually.
+   The script makes outside content inert and restores its previous state on exit. */
+.tt[data-focus-mode='true'] {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 0;
+  background: var(--color-paper);
+}
+.tt[data-focus-mode='true'] .tt-focusbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-paper);
+}
+.tt button[data-role^='coach-'],
+.tt [data-role='focus-toggle'] {
+  max-width: 100%;
+  white-space: normal;
+  padding-block: .5rem;
+  text-align: center;
+}

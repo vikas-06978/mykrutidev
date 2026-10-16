@@ -73,6 +73,10 @@ const strings = raw(lang, 'tutor');
 ---
 
 <div class="tt card" data-tutor data-state="idle" data-focused="false">
+  <div class="cv-strip tt-focusbar flex flex-wrap items-center justify-between gap-3">
+    <span class="text-sm text-body">{t('tutor.coachFocusHint')}</span>
+    <button type="button" class="btn btn-outline" data-role="focus-toggle" aria-pressed="false">{t('tutor.coachFocus')}</button>
+  </div>
   {/* ------------------------------ Settings ----------------------------- */}
   <div class="cv-strip bg-inset">
     <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -103,6 +107,14 @@ const strings = raw(lang, 'tutor');
           ))
         }
       </div>
+    </div>
+    <div data-role="exam-presets" class="mt-3" hidden>
+      <label class="text-sm" for="tt-preset">{t('tutor.coachPreset')}</label>
+      <select id="tt-preset" data-role="exam-preset" class="mt-2 block max-w-full rounded border border-hairline bg-surface p-2 text-ink">
+        <option value="custom">{t('tutor.coachCustom')}</option>
+        <option value="guided">{t('tutor.coachGuided')}</option>
+        <option value="strict">{t('tutor.coachStrict')}</option>
+      </select>
     </div>
     {/* What Today's practice and the Exam are, shown in those modes only. */}
     <p data-role="mode-note" class="tt-mode-note" hidden></p>
@@ -424,6 +436,16 @@ const strings = raw(lang, 'tutor');
       <div data-role="missed" class="kb-hints mt-2" translate="no"></div>
     </div>
 
+    <section class="mt-4" aria-labelledby="tt-coach-title">
+      <h4 id="tt-coach-title" class="font-medium">{t('tutor.coachTitle')}</h4>
+      <p data-role="coach-advice" class="mt-2 text-sm text-body"></p>
+      <ol data-role="coach-explanations" class="mt-2 space-y-2 text-sm text-body"></ol>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline" data-role="coach-drill" hidden>{t('tutor.coachDrill')}</button>
+        <button type="button" class="btn btn-outline" data-role="coach-next">{t('tutor.coachNext')}</button>
+      </div>
+      <p class="mt-2 text-xs text-mute">{t('tutor.coachSession')}</p>
+    </section>
     {/* An image of the result, shared through the phone's own share sheet
         (WhatsApp is one tap away there) or downloaded where there is none. */}
     <button type="button" data-role="share" class="btn btn-outline mt-4 gap-2" hidden>
@@ -521,6 +543,7 @@ const strings = raw(lang, 'tutor');
 <script type="application/json" data-tutor-i18n set:html={JSON.stringify(strings)} />
 
 <script>
+  import { mistakeUnits, targetedDrill, nextPractice } from '../lib/tutorCoaching.js';
   import { clusterStates, formatClock } from '../lib/typing.js';
   import {
     unitsToKeys,
@@ -550,11 +573,11 @@ const strings = raw(lang, 'tutor');
   /**
    * lesson: the ladder. practice: a timed test of the chosen length.
    * daily: "Today's practice", one passage per date, the same for everyone.
-   * exam: a fixed 10-minute test with no pause, scored like SSC / CPCT.
+   * exam: independent 10-minute practice with no pause; not an official exam replica.
    * passages: one of the free practice page's 30 passages, picked by the
    * typist; the clock counts up and stops when the passage is typed.
    */
-  type Mode = 'lesson' | 'practice' | 'daily' | 'exam' | 'passages';
+  type Mode = 'lesson' | 'practice' | 'daily' | 'exam' | 'passages' | 'targeted';
   type Practice = { n: number; units: Unit[] };
   /** Best try at each of the 30 passages, by number. This browser only. */
   type PracticeRecord = Record<string, { pct: number; wpm: number; acc: number }>;
@@ -689,6 +712,8 @@ const strings = raw(lang, 'tutor');
       levelChips.set(chip.dataset.level!, chip);
     }
 
+    let coachingUnits: Unit[] = [];
+    let recommendedLevel = LEVELS[0].id;
     let mode: Mode = 'lesson';
     /** Today's practice: whose date's passage is on screen (today, or one picked from the list). */
     let dailyDay = dayKey();
@@ -824,7 +849,10 @@ const strings = raw(lang, 'tutor');
     // ----------------------------------------------------------------------
 
     function buildLesson() {
-      if (mode === 'lesson') {
+      if (mode === 'targeted') {
+        units = coachingUnits;
+        titleEl.textContent = L.coachDrill;
+      } else if (mode === 'lesson') {
         const level = levelOf(levelId);
         units = level.units;
         titleEl.textContent = level.title;
@@ -1476,11 +1504,14 @@ const strings = raw(lang, 'tutor');
       // A best speed is only meaningful over a run that went the distance.
       // Submitting after four words would otherwise post a flattering number
       // that no full-length attempt could ever beat.
-      const ranks =
-        mode === 'lesson' || mode === 'daily' || mode === 'passages' ? s.complete : reason !== 'submitted' || s.complete;
+      const ranks = mode !== 'targeted' && (
+        mode === 'lesson' || mode === 'daily' || mode === 'passages' ? s.complete : reason !== 'submitted' || s.complete);
       const acc = Math.round(s.accuracy);
 
-      if (mode === 'lesson') {
+      if (mode === 'targeted') {
+        q('result-title').textContent = L.coachDrill;
+        note.textContent = fill(L.examScore, { wpm: net, acc });
+      } else if (mode === 'lesson') {
         recordLesson(s, net, note, reason);
       } else if (mode === 'passages') {
         const through = Math.round((s.typed / expected.length) * 100);
@@ -1527,10 +1558,28 @@ const strings = raw(lang, 'tutor');
         }
       }
 
+      const mistakes = mistakeUnits(units, capture.value);
+      const nextDrill = targetedDrill(mistakes);
+      if (nextDrill.length) coachingUnits = nextDrill;
+      q('coach-drill').hidden = coachingUnits.length === 0;
+      recommendedLevel = nextPractice(LEVELS, progress.done, levelId, s);
+      q('coach-advice').textContent = mistakes.length
+        ? L.coachAccuracy
+        : fill(L.coachRecommendation, { lesson: levelOf(recommendedLevel).title });
+      const explanations = q('coach-explanations');
+      explanations.replaceChildren();
+      for (const mistake of mistakes.slice(0, 3)) {
+        const item = document.createElement('li');
+        const shift = [...mistake.keys].some(k => locate(k)?.shift);
+        const detail = shift ? L.coachShift : /[िीुूृेैोौंँ्]/u.test(mistake.deva) ? L.coachMatra : L.coachSequence;
+        item.textContent = fill(L.coachExample, { text: mistake.deva, keys: mistake.keys }) + ' ' + detail;
+        explanations.append(item);
+      }
+
       // Into the long-term record: streak, minutes, chart, badges.
       me.record(
         {
-          mode,
+          mode: mode === 'targeted' ? 'practice' : mode,
           wpm: net,
           acc,
           ms: elapsed(),
@@ -1543,7 +1592,7 @@ const strings = raw(lang, 'tutor');
       );
       if (mode === 'daily') renderDays();
       lastResult = { wpm: net, acc };
-      shareBtn.hidden = net <= 0;
+      shareBtn.hidden = net <= 0 || mode === 'targeted';
 
       result.hidden = false;
       result.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -1857,6 +1906,7 @@ const strings = raw(lang, 'tutor');
 
       const lesson = next === 'lesson';
       levelsWrap.hidden = !lesson;
+      q('exam-presets').hidden = next !== 'exam';
       ppWrap.hidden = next !== 'passages';
       if (next === 'passages') {
         if (!ppN) ppN = firstUndone();
@@ -1871,7 +1921,7 @@ const strings = raw(lang, 'tutor');
       // "New passage" makes no sense on a fixed drill - a lesson is the same
       // text every time, which is the point of practising it - nor on
       // today's passage, which is the one for today.
-      newBtn.hidden = lesson || next === 'daily' || next === 'passages';
+      newBtn.hidden = lesson || next === 'targeted' || next === 'daily' || next === 'passages';
       modeNote.hidden = next !== 'daily' && next !== 'exam' && next !== 'passages';
       modeNote.textContent =
         next === 'passages'
@@ -1897,6 +1947,72 @@ const strings = raw(lang, 'tutor');
     // ----------------------------------------------------------------------
     // Wiring
     // ----------------------------------------------------------------------
+
+    q('coach-drill').addEventListener('click', () => {
+      if (!coachingUnits.length) return;
+      setMode('targeted');
+      capture.focus();
+    });
+    q('coach-next').addEventListener('click', () => {
+      setMode('lesson');
+      setLevel(recommendedLevel);
+    });
+    q<HTMLSelectElement>('exam-preset').addEventListener('change', (event) => {
+      const preset = (event.target as HTMLSelectElement).value;
+      if (preset === 'custom') return;
+      for (const role of ['backspace', 'highlight']) {
+        const box = q<HTMLInputElement>(role);
+        box.checked = preset === 'guided';
+        box.dispatchEvent(new Event('change'));
+      }
+      q<HTMLSelectElement>('exam-preset').value = preset;
+      reset({ newPassage: true });
+      capture.focus();
+    });
+    for (const role of ['backspace', 'highlight']) q(role).addEventListener('change', () => {
+      q<HTMLSelectElement>('exam-preset').value = 'custom';
+    });
+    const focusButton = q<HTMLButtonElement>('focus-toggle');
+    let inertSiblings: { el: HTMLElement; inert: boolean }[] = [];
+    let previousOverflow = '';
+    function focusMode(on: boolean) {
+      root.dataset.focusMode = String(on);
+      focusButton.setAttribute('aria-pressed', String(on));
+      focusButton.textContent = on ? L.coachExitFocus : L.coachFocus;
+      if (on) {
+        previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        let node: HTMLElement = root;
+        while (node.parentElement) {
+          for (const sibling of node.parentElement.children) {
+            if (sibling !== node && sibling instanceof HTMLElement) {
+              inertSiblings.push({ el: sibling, inert: sibling.inert });
+              sibling.inert = true;
+            }
+          }
+          node = node.parentElement;
+          if (node === document.body) break;
+        }
+      } else {
+        for (const entry of inertSiblings) entry.el.inert = entry.inert;
+        inertSiblings = [];
+        document.body.style.overflow = previousOverflow;
+      }
+      focusButton.focus();
+    }
+    focusButton.addEventListener('click', () => focusMode(root.dataset.focusMode !== 'true'));
+    root.addEventListener('keydown', event => {
+      if (root.dataset.focusMode !== 'true') return;
+      if (event.key === 'Escape') {
+        event.preventDefault(); event.stopPropagation(); focusMode(false);
+      } else if (event.key === 'Tab') {
+        const controls = [...root.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], summary')]
+          .filter(el => !el.closest('[hidden]') && !el.matches(':disabled') && el.getClientRects().length);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
+    }, true);
 
     capture.addEventListener('input', () => {
       // Paused disables the field, so this cannot normally fire - but an
@@ -2020,6 +2136,8 @@ const strings = raw(lang, 'tutor');
       // best speed, and the streak / minutes / chart / badges. Not the sound
       // setting - that is a preference, not progress.
       progress = { done: [], best: {} };
+      coachingUnits = [];
+      recommendedLevel = LEVELS[0].id;
       try {
         localStorage.removeItem(PROGRESS_KEY);
         localStorage.removeItem(BEST_KEY);
