@@ -1654,6 +1654,26 @@ describe('the background check (reconcile)', () => {
     assert.equal((await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 1200e3 })).mailsRetried, 0, 'gives up after the limit');
   });
 
+  test('mail retries stay in their deployment mode, including legacy test orders', async () => {
+    const { id, net } = await paidOrder();
+    const markFailed = () => DB.prepare("UPDATE orders SET mail_status = 'failed', mail_tries = 0, mail_next = NULL WHERE id = ?").bind(id).run();
+    const live = { ...MAIL_ENV(), RAZORPAY_KEY_ID: ENV().RAZORPAY_KEY_ID.replace('_test_', '_live_') };
+    for (const orderMode of ['test', null, 'live']) {
+      await DB.prepare('UPDATE orders SET mode = ? WHERE id = ?').bind(orderMode, id).run();
+      await markFailed();
+      const matching = orderMode === 'live' ? live : MAIL_ENV();
+      const other = orderMode === 'live' ? MAIL_ENV() : live;
+      const before = net.mails.length;
+      assert.equal((await reconcile(other, { fetch: net.fetch })).mailsRetried, 0, 'the other mode leaves the mail alone');
+      assert.equal(net.mails.length, before);
+      assert.equal((await one(id)).mail_status, 'failed');
+      const result = await reconcile(matching, { fetch: net.fetch });
+      assert.equal(result.mailsRetried, 1);
+      assert.equal(result.mailsSent, 1);
+      assert.equal(net.mails.length, before + 1);
+    }
+  });
+
   test('picks up a full refund made in the Razorpay dashboard, and records a partial one without ending the downloads', async () => {
     const { id, net } = await paidOrder();
     net.refunded = 40;
