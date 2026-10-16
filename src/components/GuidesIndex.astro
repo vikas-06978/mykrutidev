@@ -23,6 +23,13 @@ const date = (iso: string) =>
   <div class="wrap py-8 sm:py-12" data-guides-index>
     <h1 class="text-3xl sm:text-4xl">{t('guidesIndex.h1')}</h1>
     <p class="mt-3 max-w-2xl text-base text-body" set:html={render(t('guidesIndex.lede'))} />
+    <nav class="mt-5" aria-labelledby="guides-converters" data-guide-converters>
+      <p id="guides-converters" class="text-sm font-medium text-ink">{t('guidesIndex.needConverter')}</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <a href={to('/')} class="btn btn-outline">{t('pages./.nav')}</a>
+        <a href={to('/unicode-to-kruti-dev')} class="btn btn-outline">{t('pages./unicode-to-kruti-dev.nav')}</a>
+      </div>
+    </nav>
     <ul class="mt-8 grid gap-4 md:grid-cols-2">
       {
         GUIDES.map((g) => (

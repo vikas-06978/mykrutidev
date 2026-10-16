@@ -5486,6 +5486,7 @@
     "guides": "All guides"
   },
   "guidesIndex": {
+    "needConverter": "Need a converter?",
     "nav": "Guides",
     "h1": "Hindi Typing and Font Guides",
     "title": "Hindi Typing & Kruti Dev Guides | Install, Convert, Type Faster",
