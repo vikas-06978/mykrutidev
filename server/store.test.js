@@ -585,6 +585,31 @@ describe('download', () => {
   };
   const left = async (id) => (await DB.prepare('SELECT downloads FROM orders WHERE id = ?').bind(id).first()).downloads;
 
+  for (const activeSession of [false, true]) {
+    test(`a key rotated while preparing the PDF cannot download${activeSession ? ' within an active session' : ''}`, async () => {
+      const { id, token } = await paid();
+      if (activeSession) assert.equal((await download(id, token)).status, 200);
+      const before = await left(id);
+      const env = {
+        ...ENV(),
+        STORE_FILES: {
+          async get(key) {
+            // An email correction revokes the validated key while R2 is being read.
+            await DB.prepare('UPDATE orders SET token_ver = token_ver + 1 WHERE id = ?').bind(id).run();
+            return FILES.get(key);
+          },
+        },
+      };
+      const form = new URLSearchParams({ o: id, t: token });
+      const r = await handleDownload(new Request('https://mykrutidev.com/api/store/download', { method: 'POST', body: form }), env);
+      assert.equal(r.status, 410);
+      assert.doesNotMatch(r.headers.get('Content-Type'), /application\/pdf/);
+      assert.equal(await left(id), before, 'a revoked key consumes no download');
+      assert.equal((await download(id, await downloadToken(ENV(), id, 1))).status, 200, 'the new key still works');
+      assert.equal(await left(id), activeSession ? before : before + 1);
+    });
+  }
+
   test('hands over the PDF with download headers and counts one', async () => {
     const { id, token } = await paid();
     const r = await download(id, token);
@@ -1627,6 +1652,26 @@ describe('the background check (reconcile)', () => {
     assert.equal((await one(id)).mail_status, 'sent');
     await DB.prepare("UPDATE orders SET mail_status = 'failed', mail_tries = ?, mail_next = NULL WHERE id = ?").bind(STORE.mailRetries, id).run();
     assert.equal((await reconcile(MAIL_ENV(), { fetch: net.fetch, now: Date.now() + 1200e3 })).mailsRetried, 0, 'gives up after the limit');
+  });
+
+  test('mail retries stay in their deployment mode, including legacy test orders', async () => {
+    const { id, net } = await paidOrder();
+    const markFailed = () => DB.prepare("UPDATE orders SET mail_status = 'failed', mail_tries = 0, mail_next = NULL WHERE id = ?").bind(id).run();
+    const live = { ...MAIL_ENV(), RAZORPAY_KEY_ID: ENV().RAZORPAY_KEY_ID.replace('_test_', '_live_') };
+    for (const orderMode of ['test', null, 'live']) {
+      await DB.prepare('UPDATE orders SET mode = ? WHERE id = ?').bind(orderMode, id).run();
+      await markFailed();
+      const matching = orderMode === 'live' ? live : MAIL_ENV();
+      const other = orderMode === 'live' ? MAIL_ENV() : live;
+      const before = net.mails.length;
+      assert.equal((await reconcile(other, { fetch: net.fetch })).mailsRetried, 0, 'the other mode leaves the mail alone');
+      assert.equal(net.mails.length, before);
+      assert.equal((await one(id)).mail_status, 'failed');
+      const result = await reconcile(matching, { fetch: net.fetch });
+      assert.equal(result.mailsRetried, 1);
+      assert.equal(result.mailsSent, 1);
+      assert.equal(net.mails.length, before + 1);
+    }
   });
 
   test('picks up a full refund made in the Razorpay dashboard, and records a partial one without ending the downloads', async () => {

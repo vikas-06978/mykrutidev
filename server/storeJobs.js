@@ -69,9 +69,9 @@ export async function reconcile(env, deps = {}) {
   if (canMail(env)) {
     const { results: failed } = await db
       .prepare(
-        "SELECT * FROM orders WHERE status = 'paid' AND email != '' AND mail_status = 'failed' AND mail_tries < ? AND (mail_next IS NULL OR mail_next <= ?) LIMIT ?",
+        "SELECT * FROM orders WHERE status = 'paid' AND email != '' AND mail_status = 'failed' AND mail_tries < ? AND (mail_next IS NULL OR mail_next <= ?) AND COALESCE(mode, 'test') = ? LIMIT ?",
       )
-      .bind(STORE.mailRetries, nowS, limit)
+      .bind(STORE.mailRetries, nowS, modeOf(env), limit)
       .all();
     for (const order of failed) {
       out.mailsRetried += 1;

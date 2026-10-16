@@ -933,6 +933,7 @@ export async function handleDownload(request, env, deps = {}) {
   }
 
   // The file is ready: grant (or reuse) the session, in one statement.
+  // Recheck the key version too: an email correction may have revoked it during the R2 read.
   const newSession = newSecret();
   const granted = await env.DB.prepare(
     `UPDATE orders SET
@@ -940,10 +941,11 @@ export async function handleDownload(request, env, deps = {}) {
        session_id = CASE WHEN session_at IS NOT NULL AND session_at > ?2 THEN session_id ELSE ?3 END,
        session_at = CASE WHEN session_at IS NOT NULL AND session_at > ?2 THEN session_at ELSE ?4 END
      WHERE id = ?1 AND status = 'paid' AND (expires_at IS NULL OR expires_at > ?4)
+       AND token_ver = ?5
        AND ((session_at IS NOT NULL AND session_at > ?2) OR downloads < max_downloads)
      RETURNING session_id`,
   )
-    .bind(id, windowStart, newSession, now)
+    .bind(id, windowStart, newSession, now, order.token_ver ?? 0)
     .first();
   if (!granted) return closed();
 
