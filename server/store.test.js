@@ -585,6 +585,31 @@ describe('download', () => {
   };
   const left = async (id) => (await DB.prepare('SELECT downloads FROM orders WHERE id = ?').bind(id).first()).downloads;
 
+  for (const activeSession of [false, true]) {
+    test(`a key rotated while preparing the PDF cannot download${activeSession ? ' within an active session' : ''}`, async () => {
+      const { id, token } = await paid();
+      if (activeSession) assert.equal((await download(id, token)).status, 200);
+      const before = await left(id);
+      const env = {
+        ...ENV(),
+        STORE_FILES: {
+          async get(key) {
+            // An email correction revokes the validated key while R2 is being read.
+            await DB.prepare('UPDATE orders SET token_ver = token_ver + 1 WHERE id = ?').bind(id).run();
+            return FILES.get(key);
+          },
+        },
+      };
+      const form = new URLSearchParams({ o: id, t: token });
+      const r = await handleDownload(new Request('https://mykrutidev.com/api/store/download', { method: 'POST', body: form }), env);
+      assert.equal(r.status, 410);
+      assert.doesNotMatch(r.headers.get('Content-Type'), /application\/pdf/);
+      assert.equal(await left(id), before, 'a revoked key consumes no download');
+      assert.equal((await download(id, await downloadToken(ENV(), id, 1))).status, 200, 'the new key still works');
+      assert.equal(await left(id), activeSession ? before : before + 1);
+    });
+  }
+
   test('hands over the PDF with download headers and counts one', async () => {
     const { id, token } = await paid();
     const r = await download(id, token);
