@@ -17,6 +17,7 @@ import { SITE, PAGES, isLive, isIndexable, statusOf, navMenus } from '../src/lib
 import { convert, FONTS, krutiWordRun } from '../src/lib/fontMaps.js';
 import { THEMES, readThemes } from '../src/lib/themeColors.js';
 import { PRINTABLES, chartRows, practiceSheets, matraRows, alphabetRows, altCodeRows, pdfFile, pdfHref, qrUrl, QR_PAGE } from '../src/lib/printables.js';
+import { CHSL_HINDI_2026 } from '../src/lib/examProfiles.js';
 import { wholeKeys } from '../src/lib/tutor.build.js';
 import { MAX_BYTES, OPEN_FONTS, embeddedFonts } from '../scripts/build-pdfs.mjs';
 import { PDFDocument } from 'pdf-lib';
@@ -398,11 +399,24 @@ describe('printable charts and PDFs', () => {
     }
   });
 
-  test('every PDF link on every page is a real PDF in the build, downloaded under its own name', () => {
+  test('PDF links are verified local downloads or explicitly allowed official SSC references', () => {
     let links = 0;
+    let references = 0;
+    const official = new Set([CHSL_HINDI_2026.notice, CHSL_HINDI_2026.evaluation]);
     for (const [p, html] of pages) {
+      const pageReferences = [];
       for (const [tag] of html.matchAll(/<a\b(?:[^>"]|"[^"]*")*\bhref="[^"]*\.pdf"(?:[^>"]|"[^"]*")*>/g)) {
         const href = attr(tag, 'href');
+        if (official.has(href)) {
+          assert.equal(new URL(href).origin, 'https://ssc.gov.in');
+          assert.equal(attr(tag, 'type'), 'application/pdf');
+          assert.equal(attr(tag, 'target'), '_blank');
+          assert.match(attr(tag, 'rel'), /\bnoopener\b/);
+          assert.match(attr(tag, 'rel'), /\bnoreferrer\b/);
+          references++;
+          pageReferences.push(href);
+          continue;
+        }
         assert.match(href, /^\/downloads\/mykrutidev-[a-z0-9-]+\.pdf$/, `${p}: ${href}`);
         assert.equal(attr(tag, 'download'), href.slice('/downloads/'.length), `${p}: download name for ${href}`);
         assert.equal(attr(tag, 'type'), 'application/pdf', `${p}: type for ${href}`);
@@ -410,8 +424,12 @@ describe('printable charts and PDFs', () => {
         assert.ok(existsSync(file) && statSync(file).size > 10 * 1024, `${p}: ${href} is missing or tiny`);
         links++;
       }
+      if (/<div\b[^>]*\bdata-tutor(?:\s|=|>)/.test(html)) {
+        assert.deepEqual(pageReferences.sort(), [...official].sort(), `${p}: both source references exactly once`);
+      } else assert.equal(pageReferences.length, 0, `${p}: references only on tutor pages`);
     }
     assert.ok(links >= PRINTABLES.length * 2, `only ${links} PDF links`);
+    assert.ok(references >= LOCALES.length * 2, 'official references available in every tutor language');
   });
 
   test('the PDFs are committed in public/downloads, so they exist in dev too', () => {

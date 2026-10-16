@@ -31,9 +31,9 @@ custom. The original scoring remains: net WPM is correct positional keystrokes
 / 5 / minutes, gross WPM counts all typed keystrokes, and accuracy is correct /
 typed. Corrected mistakes are not a cumulative penalty under this model.
 
-These presets are not certified replicas of SSC, CPCT, court, or other exams.
-Current official-source access was blocked during implementation. Named exam
-profiles remain deferred until their current duration, error categories,
-correction policy, scoring formula and publication date can be verified and
-covered by fixtures. No claim of competitive superiority or improved learning
-outcomes has been established by these software tests.
+The guided/strict presets are not certified replicas of SSC, CPCT, court or
+other exams. A separate native Unicode SSC CHSL 2026 Hindi practice path now
+uses verified published duration/font requirements and an independent estimate
+of the published error categories. See [exam profiles](EXAM-PROFILES.md) for
+sources, scope, limits and CPCT's still-unverified status. No claim of
+competitive superiority or improved learning outcomes has been established.

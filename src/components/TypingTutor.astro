@@ -1,4 +1,5 @@
 ---
+import { CHSL_HINDI_2026 } from '../lib/examProfiles.js';
 import { PASSAGES, DURATIONS } from '../lib/passages.js';
 import { LEVELS, levelText } from '../lib/lessons.js';
 import { buildVerifiedUnits } from '../lib/tutor.build.js';
@@ -73,10 +74,6 @@ const strings = raw(lang, 'tutor');
 ---
 
 <div class="tt card" data-tutor data-state="idle" data-focused="false">
-  <div class="cv-strip tt-focusbar flex flex-wrap items-center justify-between gap-3">
-    <span class="text-sm text-body">{t('tutor.coachFocusHint')}</span>
-    <button type="button" class="btn btn-outline" data-role="focus-toggle" aria-pressed="false">{t('tutor.coachFocus')}</button>
-  </div>
   {/* ------------------------------ Settings ----------------------------- */}
   <div class="cv-strip bg-inset">
     <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -116,6 +113,20 @@ const strings = raw(lang, 'tutor');
         <option value="strict">{t('tutor.coachStrict')}</option>
       </select>
     </div>
+    <section data-role="native-profile" class="mt-3" hidden>
+      <label for="tt-native-duration" class="text-sm font-medium">{t('tutor.nativeHeading')}</label>
+      <select id="tt-native-duration" data-role="native-duration" class="mt-2 block max-w-full rounded border border-hairline bg-surface p-2 text-ink">
+        <option value={CHSL_HINDI_2026.seconds}>{t('tutor.nativeStandard')}</option>
+        <option value={CHSL_HINDI_2026.eligibleSeconds}>{t('tutor.nativeEligible')}</option>
+      </select>
+      <p id="tt-native-help" class="mt-2 text-sm text-body" set:html={render(t('tutor.nativeInstructions'))} />
+      <p class="mt-2 text-xs text-mute" set:html={render(t('tutor.nativeTarget'))} />
+      <p class="mt-2 flex flex-wrap gap-3 text-sm">
+        <a href={CHSL_HINDI_2026.notice} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeNotice')}</a>
+        <a href={CHSL_HINDI_2026.evaluation} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeEvaluation')}</a>
+      </p>
+      <button type="button" data-role="native-tab" class="btn btn-outline mt-2">{t('tutor.nativeTab')}</button>
+    </section>
     {/* What Today's practice and the Exam are, shown in those modes only. */}
     <p data-role="mode-note" class="tt-mode-note" hidden></p>
     {/*
@@ -196,6 +207,12 @@ const strings = raw(lang, 'tutor');
     <p data-role="level-focus" class="tt-level-focus"></p>
   </div>
 
+  <div class="cv-strip tt-focusbar flex flex-wrap items-center justify-between gap-3">
+    <span class="text-sm text-body">{t('tutor.coachFocusHint')}</span>
+    <button type="button" class="btn btn-outline" data-role="focus-toggle" aria-pressed="false">{t('tutor.coachFocus')}</button>
+    <button type="button" class="btn btn-outline" data-role="coach-unicode" aria-pressed="false">{t('tutor.nativeLabel')}</button>
+  </div>
+
   {/* --------------------------- 30 passages ----------------------------- */}
   {/*
     The free practice page's passages, by level. All open: the same passages
@@ -267,7 +284,7 @@ const strings = raw(lang, 'tutor');
   */}
   <div class="tt-progress">
     <div class="tt-progress-head">
-      <span data-role="passage-title" class="cv-eyebrow">{t('tutor.practicePassage')}</span>
+      <span id="tt-passage-title" data-role="passage-title" class="cv-eyebrow">{t('tutor.practicePassage')}</span>
 
       {/*
         Pause lives HERE, not down in the controls strip.
@@ -412,6 +429,7 @@ const strings = raw(lang, 'tutor');
     <h3 class="text-xl" data-role="result-title">{t('tutor.testComplete')}</h3>
     <p class="mt-1 text-sm text-body" data-role="result-note"></p>
 
+    <p data-role="native-grade" class="mt-3 text-body" hidden></p>
     <div class="tt-result-grid">
       <div class="tt-result-cell">
         <span data-role="r-wpm" class="tt-stat-value">0</span>
@@ -436,7 +454,7 @@ const strings = raw(lang, 'tutor');
       <div data-role="missed" class="kb-hints mt-2" translate="no"></div>
     </div>
 
-    <section class="mt-4" aria-labelledby="tt-coach-title">
+    <section data-role="coach-panel" class="mt-4" aria-labelledby="tt-coach-title">
       <h4 id="tt-coach-title" class="font-medium">{t('tutor.coachTitle')}</h4>
       <p data-role="coach-advice" class="mt-2 text-sm text-body"></p>
       <ol data-role="coach-explanations" class="mt-2 space-y-2 text-sm text-body"></ol>
@@ -543,10 +561,12 @@ const strings = raw(lang, 'tutor');
 <script type="application/json" data-tutor-i18n set:html={JSON.stringify(strings)} />
 
 <script>
+  import { CHSL_HINDI_2026, evaluateHindiPractice } from '../lib/examProfiles.js';
   import { mistakeUnits, targetedDrill, nextPractice } from '../lib/tutorCoaching.js';
-  import { clusterStates, formatClock } from '../lib/typing.js';
+  import { clusters, clusterStates, formatClock } from '../lib/typing.js';
   import {
     unitsToKeys,
+    unitsToText,
     unitKeyRuns,
     nextKey,
     missedKeys,
@@ -577,7 +597,7 @@ const strings = raw(lang, 'tutor');
    * passages: one of the free practice page's 30 passages, picked by the
    * typist; the clock counts up and stops when the passage is typed.
    */
-  type Mode = 'lesson' | 'practice' | 'daily' | 'exam' | 'passages' | 'targeted';
+  type Mode = 'lesson' | 'practice' | 'daily' | 'exam' | 'passages' | 'targeted' | 'unicode';
   type Practice = { n: number; units: Unit[] };
   /** Best try at each of the 30 passages, by number. This browser only. */
   type PracticeRecord = Record<string, { pct: number; wpm: number; acc: number }>;
@@ -712,6 +732,7 @@ const strings = raw(lang, 'tutor');
       levelChips.set(chip.dataset.level!, chip);
     }
 
+    let nativeSeconds: number = CHSL_HINDI_2026.seconds;
     let coachingUnits: Unit[] = [];
     let recommendedLevel = LEVELS[0].id;
     let mode: Mode = 'lesson';
@@ -727,8 +748,8 @@ const strings = raw(lang, 'tutor');
     let ppFailed = false;
     let seconds = DURATIONS[0].value;
     /** The two modes that run on a clock and end when it runs out. */
-    const timed = () => mode === 'practice' || mode === 'exam';
-    const testSeconds = () => (mode === 'exam' ? EXAM_SECONDS : seconds);
+    const timed = () => mode === 'practice' || mode === 'exam' || mode === 'unicode';
+    const testSeconds = () => (mode === 'unicode' ? nativeSeconds : mode === 'exam' ? EXAM_SECONDS : seconds);
 
     /** The lesson: aksharas to read, keystrokes to press. */
     let units: Unit[] = [];
@@ -849,7 +870,11 @@ const strings = raw(lang, 'tutor');
     // ----------------------------------------------------------------------
 
     function buildLesson() {
-      if (mode === 'targeted') {
+      if (mode === 'unicode') {
+        const text = PASSAGES.map(p => unitsToText(p.units)).join(' ').split(/\s+/u).slice(0, 300).join(' ');
+        units = clusters(text).map(deva => ({ deva, keys: deva }));
+        titleEl.textContent = L.nativeLabel;
+      } else if (mode === 'targeted') {
         units = coachingUnits;
         titleEl.textContent = L.coachDrill;
       } else if (mode === 'lesson') {
@@ -1040,7 +1065,7 @@ const strings = raw(lang, 'tutor');
       litFingers = [];
 
       // Highlighting off: no key, no finger, no Hindi glyph to aim for.
-      if (!highlightOn()) {
+      if (mode === 'unicode' || !highlightOn()) {
         promptKeys.textContent = '';
         promptDeva.textContent = '';
         promptFinger.textContent = ch ? L.highlightOffPrompt : L.finished;
@@ -1250,9 +1275,10 @@ const strings = raw(lang, 'tutor');
       if (e.key === 'Escape') {
         e.preventDefault();
         // An exam, like the real one, cannot be paused.
-        if (mode !== 'exam') pause();
+        if (mode !== 'exam' && mode !== 'unicode') pause();
         return;
       }
+      if (mode === 'unicode') return;
       if (e.key === 'Enter') e.preventDefault();
       if (!backspaceOn() && (e.key === 'Backspace' || e.key === 'Delete')) {
         e.preventDefault();
@@ -1279,7 +1305,7 @@ const strings = raw(lang, 'tutor');
     const rulesNote = q<HTMLElement>('rules-note');
     const typedWrap = q<HTMLElement>('typed-wrap');
     const typedEl = q<HTMLElement>('typed');
-    const backspaceOn = () => backspaceBox.checked;
+    const backspaceOn = () => mode === 'unicode' || backspaceBox.checked;
     const highlightOn = () => highlightBox.checked;
 
     function readRule(key: string) {
@@ -1299,13 +1325,13 @@ const strings = raw(lang, 'tutor');
     }
 
     function applyRules() {
-      root.dataset.highlight = highlightOn() ? 'on' : 'off';
-      typedWrap.hidden = highlightOn();
+      root.dataset.highlight = mode !== 'unicode' && highlightOn() ? 'on' : 'off';
+      typedWrap.hidden = mode === 'unicode' || highlightOn();
       typedEl.textContent = capture.value;
       updateStats();
       const off = [!backspaceOn() && L.backspaceOffNote, !highlightOn() && L.highlightOffNote].filter(Boolean);
       rulesNote.textContent = off.join(' ');
-      rulesNote.hidden = off.length === 0;
+      rulesNote.hidden = mode === 'unicode' || off.length === 0;
       showNextKey(capture.value);
     }
 
@@ -1360,7 +1386,7 @@ const strings = raw(lang, 'tutor');
       paused = false;
       segmentStart = Date.now();
       root.dataset.state = 'running';
-      pauseBtn.hidden = mode === 'exam';
+      pauseBtn.hidden = mode === 'exam' || mode === 'unicode';
       pauseBtn.textContent = L.pause;
       ticker = setInterval(tick, TICK_MS);
     }
@@ -1464,6 +1490,11 @@ const strings = raw(lang, 'tutor');
           ? L.allTyped
           : fill(L.left, { left, words: Math.max(1, Math.round(left / 5)) });
 
+      if (mode === 'unicode') {
+        progressLeft.textContent = fill(L.nativeProgress, { left });
+        progressTrack.setAttribute('aria-valuetext', progressLeft.textContent);
+      }
+
       // Nothing typed means nothing to score, so there is nothing to submit.
       submitBtn.disabled = done || s.typed === 0;
       return s;
@@ -1472,6 +1503,22 @@ const strings = raw(lang, 'tutor');
     function showResult(reason: 'time' | 'passage' | 'submitted') {
       const s = summarise(expected, capture.value, elapsed() || 1);
       const net = Math.round(s.net);
+      q('native-grade').hidden = mode !== 'unicode';
+      if (mode === 'unicode') {
+        q('result-title').textContent = L.nativeHeading;
+        q('result-note').textContent = L.nativeEstimate;
+        try {
+          const estimate = evaluateHindiPractice(unitsToText(units), capture.value);
+          q('native-grade').textContent = fill(L.nativeSummary, { full: estimate.fullMistakes, half: estimate.halfMistakes, weighted: estimate.weightedMistakes });
+        } catch {
+          q('native-grade').textContent = L.nativeTooLong;
+        }
+        shareBtn.hidden = true;
+        nextLevelBtn.hidden = true;
+        result.hidden = false;
+        result.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      }
 
       q('r-wpm').textContent = String(net);
       q('r-gross').textContent = String(Math.round(s.gross));
@@ -1907,6 +1954,20 @@ const strings = raw(lang, 'tutor');
       const lesson = next === 'lesson';
       levelsWrap.hidden = !lesson;
       q('exam-presets').hidden = next !== 'exam';
+      q('native-profile').hidden = next !== 'unicode';
+      q('coach-unicode').setAttribute('aria-pressed', String(next === 'unicode'));
+      q('coach-panel').hidden = next === 'unicode';
+      root.querySelector('label[for="tt-capture"]')!.textContent = next === 'unicode' ? L.nativeLabel : L.captureLabel;
+      capture.setAttribute('aria-describedby', next === 'unicode' ? 'tt-native-help' : 'tt-prompt-text');
+      if (next === 'unicode') {
+        capture.lang = 'hi'; capture.maxLength = 20000;
+        passage.tabIndex = 0; passage.setAttribute('role', 'region'); passage.setAttribute('aria-labelledby', 'tt-passage-title');
+      }
+      else {
+        capture.removeAttribute('lang'); capture.removeAttribute('maxlength');
+        passage.removeAttribute('tabindex'); passage.removeAttribute('role'); passage.removeAttribute('aria-labelledby');
+      }
+
       ppWrap.hidden = next !== 'passages';
       if (next === 'passages') {
         if (!ppN) ppN = firstUndone();
@@ -1921,7 +1982,7 @@ const strings = raw(lang, 'tutor');
       // "New passage" makes no sense on a fixed drill - a lesson is the same
       // text every time, which is the point of practising it - nor on
       // today's passage, which is the one for today.
-      newBtn.hidden = lesson || next === 'targeted' || next === 'daily' || next === 'passages';
+      newBtn.hidden = lesson || next === 'targeted' || next === 'unicode' || next === 'daily' || next === 'passages';
       modeNote.hidden = next !== 'daily' && next !== 'exam' && next !== 'passages';
       modeNote.textContent =
         next === 'passages'
@@ -1934,6 +1995,7 @@ const strings = raw(lang, 'tutor');
 
       renderLevels();
       reset({ newPassage: true });
+      applyRules();
     }
 
     function setLevel(id: string) {
@@ -1948,6 +2010,22 @@ const strings = raw(lang, 'tutor');
     // Wiring
     // ----------------------------------------------------------------------
 
+    q('coach-unicode').addEventListener('click', () => { setMode('unicode'); capture.focus(); });
+    q<HTMLSelectElement>('native-duration').addEventListener('change', event => {
+      nativeSeconds = Number((event.target as HTMLSelectElement).value) === CHSL_HINDI_2026.eligibleSeconds ? CHSL_HINDI_2026.eligibleSeconds : CHSL_HINDI_2026.seconds;
+      reset({ newPassage: true }); capture.focus();
+    });
+    q('native-tab').addEventListener('click', () => {
+      if (mode !== 'unicode' || done || paused) return;
+      capture.setRangeText('\t', capture.selectionStart, capture.selectionEnd, 'end');
+      capture.dispatchEvent(new Event('input')); capture.focus();
+    });
+    capture.addEventListener('compositionstart', () => {
+      if (mode === 'unicode' && !running && !paused && !done) start();
+    });
+    capture.addEventListener('compositionend', () => {
+      if (mode === 'unicode') capture.dispatchEvent(new Event('input'));
+    });
     q('coach-drill').addEventListener('click', () => {
       if (!coachingUnits.length) return;
       setMode('targeted');
@@ -2014,7 +2092,8 @@ const strings = raw(lang, 'tutor');
       }
     }, true);
 
-    capture.addEventListener('input', () => {
+    capture.addEventListener('input', (event) => {
+      if (mode === 'unicode' && (event as InputEvent).isComposing) return;
       // Paused disables the field, so this cannot normally fire - but an
       // autofill or an IME commit can still deliver one, and a paused test
       // must not silently restart its own clock.
@@ -2031,7 +2110,7 @@ const strings = raw(lang, 'tutor');
 
       // Finishing the passage ends the run early: there is nothing left to
       // type, and leaving the clock going only punishes a fast typist.
-      if (s.complete) finish('passage');
+      if (s.complete && mode !== 'unicode') finish('passage');
     });
 
     capture.addEventListener('focus', () => (root.dataset.focused = 'true'));
