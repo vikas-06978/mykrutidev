@@ -4,6 +4,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
+import { CHSL_HINDI_2026 } from '../src/lib/examProfiles.js';
 
 const PRINTABLES = [
   { path: '/kruti-dev-keyboard', pdf: 'kruti-dev-keyboard-chart', landscape: true, pages: 1 },
@@ -97,18 +98,32 @@ test('the Typing Tutor and Hindi Keyboard list every PDF, and the menu reaches t
   await expect(page).toHaveURL(/\/kruti-dev-keyboard\/?$/);
 });
 
-// Every "Download PDF" link on every page that has one, English and Hindi:
-// the file is really there, is served as a PDF, and is not a stub.
+// Our downloadable PDFs must be real files. The tutor also cites two official
+// SSC reference PDFs: those are external sources, not downloads hosted by us.
 const WITH_PDFS = [...PRINTABLES.map((p) => p.path), '/hindi-typing-test', '/hindi-keyboard'];
 for (const path of WITH_PDFS) {
   for (const url of [path, `/hi${path}`]) {
-    test(`${url}: every PDF link returns a PDF (200, application/pdf, > 10 KB)`, async ({ page, request }) => {
+    test(`${url}: local PDF downloads are real and official references are identified`, async ({ page, request }) => {
       await page.goto(url);
       const links = await page.locator('a[href$=".pdf"]').evaluateAll((as) =>
-        as.map((a) => ({ href: a.getAttribute('href'), download: a.getAttribute('download') })),
+        as.map((a) => ({ href: a.getAttribute('href'), download: a.getAttribute('download'), type: a.getAttribute('type'), target: a.getAttribute('target'), rel: a.getAttribute('rel') })),
       );
       expect(links.length).toBeGreaterThan(0);
-      for (const { href, download } of links) {
+      const references = [];
+      let downloads = 0;
+      for (const { href, download, type, target, rel } of links) {
+        if (href.startsWith('https:')) {
+          expect([CHSL_HINDI_2026.notice, CHSL_HINDI_2026.evaluation]).toContain(href);
+          expect(new URL(href).origin).toBe('https://ssc.gov.in');
+          expect(download).toBeNull();
+          expect(type).toBe('application/pdf');
+          expect(target).toBe('_blank');
+          expect(rel.split(/\s+/)).toEqual(expect.arrayContaining(['noopener', 'noreferrer']));
+          references.push(href);
+          continue;
+        }
+        downloads++;
+        expect(href).toMatch(/^\/downloads\//);
         expect(download, href).toBe(href.split('/').pop());
         const res = await request.get(href);
         expect(res.status(), href).toBe(200);
@@ -117,6 +132,9 @@ for (const path of WITH_PDFS) {
         expect(body.length, href).toBeGreaterThan(10 * 1024);
         expect(body.subarray(0, 5).toString(), href).toBe('%PDF-');
       }
+      expect(downloads).toBeGreaterThan(0);
+      expect(references.sort()).toEqual(path === '/hindi-typing-test'
+        ? [CHSL_HINDI_2026.notice, CHSL_HINDI_2026.evaluation].sort() : []);
     });
   }
 }
