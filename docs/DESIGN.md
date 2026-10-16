@@ -1,7 +1,8 @@
 ---
 version: 1.0
 name: MyKrutiDev Design System
-description: The visual language of mykrutidev.com - a government-trusted Hindi utility. Deep navy ink and a muted brick accent on warm off-white paper, structured with 1px hairline cards and a restrained radius ladder. Built to feel like a well-made official form rather than a consumer app: calm, legible, and obviously not trying to sell anything. Noto Sans Devanagari carries all Hindi; the Latin chrome runs on the system stack so the page costs almost nothing to load.
+description: >-
+  The visual language of mykrutidev.com - a government-trusted Hindi utility. Deep navy ink and a muted brick accent on warm off-white paper, structured with 1px hairline cards and a restrained radius ladder. Built to feel like a well-made official form rather than a consumer app: calm, legible, and obviously not trying to sell anything. Noto Sans Devanagari carries all Hindi; the Latin chrome runs on the system stack so the page costs almost nothing to load.
 
 colors:
   paper: "#faf7f2"
