@@ -66,7 +66,8 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   down to the menu's offset parent may set overflow to anything but visible.
 */}
 <header class="relative z-50 border-b border-hairline bg-paper">
-  <div class="wrap flex items-center justify-between gap-4 py-3">
+  {/* Reserve the final control height even while the header HTML is arriving. */}
+  <div class="wrap flex min-h-17 items-center justify-between gap-4 py-3 md:min-h-15">
     {/*
       "Install app" sits right after the logo, never among the controls on the
       right: those are right-aligned, so anything appearing among them would
