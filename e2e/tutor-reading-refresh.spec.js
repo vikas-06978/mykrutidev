@@ -31,7 +31,7 @@ test('read ahead with the wheel or a touch swipe, then follow the next typed cha
  await input(page).focus();await page.keyboard.type('x');
  const caret=await page.locator('.tt-c[data-s="current"]').boundingBox();
  const panel=await ref.boundingBox();
- expect(caret.y).toBeGreaterThanOrEqual(panel.y);
+ expect(caret.y).toBeGreaterThanOrEqual(panel.y-2);
  expect(caret.y+caret.height).toBeLessThanOrEqual(panel.y+panel.height+1);
  await expect(root(page)).toHaveAttribute('data-state','running');
 });

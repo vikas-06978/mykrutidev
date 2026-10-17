@@ -1034,8 +1034,17 @@ const strings = raw(lang, 'tutor');
     passage.addEventListener('keydown', event => {
       // Handle reading keys only in the reference. The textarea keeps native
       // caret/selection keys, and modified browser/assistive shortcuts pass through.
-      if (event.target !== passage || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
-      if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) return;
+      if (event.target !== passage || event.ctrlKey || event.metaKey || event.altKey) return;
+      // A desktop reader can start typing without hunting for the invisible
+      // textarea after clicking the reference. Preserve the first keystroke.
+      if (event.key.length === 1 && mode !== 'unicode' && !paused && !done) {
+        event.preventDefault();
+        capture.focus();
+        capture.setRangeText(event.key, capture.selectionStart, capture.selectionEnd, 'end');
+        capture.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+      if (event.shiftKey || !['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
       const line = parseFloat(getComputedStyle(lineEl).lineHeight) || 44;
       const page = Math.max(line, passage.clientHeight - line);
@@ -2193,14 +2202,12 @@ const strings = raw(lang, 'tutor');
     passage.addEventListener('focus', () => (root.dataset.focused = 'true'));
     passage.addEventListener('blur', () => (root.dataset.focused = 'false'));
 
-    // The veil does not take pointer events, so a click on the passage lands
-    // on the textarea underneath and focuses it. This only covers the case of
-    // clicking the passage panel's padding.
+    // On desktop a click selects the reading panel, so arrow/Page keys scroll
+    // it. Touch keeps opening the input and the device keyboard as expected.
     passage.addEventListener('click', () => {
-      // While paused the field is disabled and focusing it does nothing, so
-      // the click means the obvious thing instead.
       if (paused) return resume();
-      capture.focus();
+      if (mode === 'unicode' || matchMedia('(pointer: coarse)').matches) capture.focus();
+      else passage.focus();
     });
     root.querySelector('.tt-stage')!.addEventListener('click', event => {
       // The start hint sits outside the reference in Focus view.

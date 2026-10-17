@@ -50,3 +50,15 @@ test('End reaches the true end of a long reference and typing returns to the cur
  const caret=await page.locator('.tt-c[data-s="current"]').boundingBox(),panel=await ref.boundingBox();
  expect(caret.y).toBeGreaterThanOrEqual(panel.y);expect(caret.y+caret.height).toBeLessThanOrEqual(panel.y+panel.height+1);
 });
+test('clicking a desktop Remington reference scrolls with keys and keeps the first typed key',async({page,isMobile})=>{
+ test.skip(isMobile, 'touch taps open the on-screen keyboard');
+ await page.goto('/hindi-typing-test/?exam=remington');
+ const ref=page.locator('[data-role="passage"]'),input=page.locator('[data-role="capture"]');
+ await ref.click({position:{x:100,y:100}});
+ await expect(ref).toBeFocused();
+ await page.keyboard.press('PageDown');
+ await expect.poll(()=>ref.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+ await page.keyboard.type('D');
+ await expect(input).toBeFocused();
+ await expect(input).toHaveValue('D');
+});
