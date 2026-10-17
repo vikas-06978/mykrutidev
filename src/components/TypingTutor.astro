@@ -172,7 +172,7 @@ const strings = raw(lang, 'tutor');
           <span>{t('tutor.sound')}</span>
         </label>
       </div>
-      <button type="button" data-role="start-typing" class="btn btn-primary tt-start-typing">{t('tutor.startTyping')}</button>
+      <button type="button" data-role="start-typing" class="btn btn-primary tt-start-typing" hidden>{t('tutor.startTyping')}</button>
     </div>
     {/* Shown only while a rule is off, so nobody wonders where the hints went. */}
     <p data-role="rules-note" class="tt-mode-note" hidden></p>
@@ -2029,6 +2029,7 @@ const strings = raw(lang, 'tutor');
       }
 
       const lesson = next === 'lesson';
+      q<HTMLButtonElement>('start-typing').hidden = lesson;
       levelsWrap.hidden = !lesson;
       q('exam-profiles').hidden = next !== 'exam' && next !== 'unicode';
       q('exam-presets').hidden = next !== 'exam';
