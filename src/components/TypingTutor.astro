@@ -75,13 +75,13 @@ const strings = raw(lang, 'tutor');
 
 <div class="tt card" data-tutor data-state="idle" data-focused="false">
   {/* ------------------------------ Settings ----------------------------- */}
-  <div class="cv-strip bg-inset">
+  <div class="cv-strip bg-inset tt-settings">
     <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-      <div data-role="mode" role="group" aria-labelledby="tt-mode" class="cv-seg">
-        <span id="tt-mode" class="cv-seg-label">{t('tutor.mode')}</span>
+      <div data-role="mode" role="group" aria-labelledby="tt-mode" class="cv-seg tt-mode-picker">
+        <span id="tt-mode" class="sr-only">{t('tutor.mode')}</span>
         <button type="button" data-mode="lesson" aria-pressed="true">{t('tutor.lessons')}</button>
         <button type="button" data-mode="practice" aria-pressed="false">{t('tutor.practice')}</button>
-        {/* Second after Practice test: on a 390px phone this keeps the row at two lines. */}
+        {/* Keep the same entry points in a balanced two-row picker on phones. */}
         <button type="button" data-mode="passages" aria-pressed="false">{t('tutor.passages')}</button>
         <button type="button" data-mode="daily" aria-pressed="false">{t('tutor.today')}</button>
         <button type="button" data-mode="exam" aria-pressed="false">{t('tutor.exam')}</button>
@@ -105,6 +105,19 @@ const strings = raw(lang, 'tutor');
         }
       </div>
     </div>
+    <section data-role="exam-profiles" class="tt-exams" aria-labelledby="tt-exam-choice" hidden>
+      <p id="tt-exam-choice" class="cv-eyebrow">{t('tutor.examProfiles')}</p>
+      <div class="tt-exam-cards" role="group" aria-labelledby="tt-exam-choice">
+        <button type="button" class="tt-exam-card" data-role="exam-remington" aria-pressed="true">
+          <strong>{t('tutor.examRemington')}</strong>
+          <span set:html={render(t('tutor.examRemingtonMeta'))} />
+        </button>
+        <button type="button" class="tt-exam-card" data-role="coach-unicode" aria-pressed="false">
+          <strong>{t('tutor.nativeLabel')}</strong>
+          <span set:html={render(t('tutor.examUnicodeMeta'))} />
+        </button>
+      </div>
+    </section>
     <div data-role="exam-presets" class="mt-3" hidden>
       <label class="text-sm" for="tt-preset">{t('tutor.coachPreset')}</label>
       <select id="tt-preset" data-role="exam-preset" class="mt-2 block max-w-full rounded border border-hairline bg-surface p-2 text-ink">
@@ -114,21 +127,14 @@ const strings = raw(lang, 'tutor');
       </select>
     </div>
     <section data-role="native-profile" class="mt-3" hidden>
-      <label for="tt-native-duration" class="text-sm font-medium">{t('tutor.nativeHeading')}</label>
+      <label for="tt-native-duration" class="text-sm font-medium">{t('tutor.length')}</label>
       <select id="tt-native-duration" data-role="native-duration" class="mt-2 block max-w-full rounded border border-hairline bg-surface p-2 text-ink">
         <option value={CHSL_HINDI_2026.seconds}>{t('tutor.nativeStandard')}</option>
         <option value={CHSL_HINDI_2026.eligibleSeconds}>{t('tutor.nativeEligible')}</option>
       </select>
       <p id="tt-native-help" class="mt-2 text-sm text-body" set:html={render(t('tutor.nativeInstructions'))} />
-      <p class="mt-2 text-xs text-mute" set:html={render(t('tutor.nativeTarget'))} />
-      <p class="mt-2 flex flex-wrap gap-3 text-sm">
-        <a href={CHSL_HINDI_2026.notice} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeNotice')}</a>
-        <a href={CHSL_HINDI_2026.evaluation} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeEvaluation')}</a>
-      </p>
-      <button type="button" data-role="native-tab" class="btn btn-outline mt-2">{t('tutor.nativeTab')}</button>
+      <p class="mt-2 text-xs text-mute">{t('tutor.nativeIndependent')}</p>
     </section>
-    {/* What Today's practice and the Exam are, shown in those modes only. */}
-    <p data-role="mode-note" class="tt-mode-note" hidden></p>
     {/*
       Today's practice: the last days, each with its passage and how far it
       got. Tap one to type that day's passage. Filled by the script; kept in
@@ -141,9 +147,7 @@ const strings = raw(lang, 'tutor');
       <ol data-role="days-list" class="tt-days-list"></ol>
       <p class="tt-days-note">{t('tutor.daysNote')}</p>
     </details>
-    <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-      <p class="text-xs text-mute">{t('tutor.layoutNote')}</p>
-
+    <div data-role="rule-controls" class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
       {/*
         Off by default and stays off until asked for. A page that starts making
         noise is a page people close, and a tutor is used in offices and
@@ -171,6 +175,18 @@ const strings = raw(lang, 'tutor');
     </div>
     {/* Shown only while a rule is off, so nobody wonders where the hints went. */}
     <p data-role="rules-note" class="tt-mode-note" hidden></p>
+    <details class="tt-help" data-role="mode-help">
+      <summary>{t('tutor.practiceHelp')}</summary>
+      <p data-role="mode-note" class="tt-mode-note" hidden></p>
+      <p data-role="layout-note" class="mt-2 text-sm text-body">{t('tutor.layoutNote')}</p>
+      <div data-role="native-source" hidden>
+        <p class="mt-2 text-sm text-body" set:html={render(t('tutor.nativeTarget'))} />
+        <p class="mt-2 flex flex-wrap gap-3 text-sm">
+          <a href={CHSL_HINDI_2026.notice} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeNotice')}</a>
+          <a href={CHSL_HINDI_2026.evaluation} type="application/pdf" target="_blank" rel="noopener noreferrer">{t('tutor.nativeEvaluation')}</a>
+        </p>
+      </div>
+    </details>
   </div>
 
   {/* ------------------------------ Levels ------------------------------- */}
@@ -207,10 +223,12 @@ const strings = raw(lang, 'tutor');
     <p data-role="level-focus" class="tt-level-focus"></p>
   </div>
 
-  <div class="cv-strip tt-focusbar flex flex-wrap items-center justify-between gap-3">
-    <span class="text-sm text-body">{t('tutor.coachFocusHint')}</span>
-    <button type="button" class="btn btn-outline" data-role="focus-toggle" aria-pressed="false">{t('tutor.coachFocus')}</button>
-    <button type="button" class="btn btn-outline" data-role="coach-unicode" aria-pressed="false">{t('tutor.nativeLabel')}</button>
+  <div class="tt-session-toolbar">
+    <button type="button" data-role="native-tab" class="tt-utility" hidden>{t('tutor.nativeTab')}</button>
+    <button type="button" class="tt-utility tt-focus-toggle" data-role="focus-toggle" aria-pressed="false" title={t('tutor.coachFocusHint')}>
+      <svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <span data-role="focus-label">{t('tutor.coachFocus')}</span>
+    </button>
   </div>
 
   {/* --------------------------- 30 passages ----------------------------- */}
@@ -331,7 +349,7 @@ const strings = raw(lang, 'tutor');
   </div>
 
   <div class="tt-stage">
-    <div class="tt-passage" data-role="passage" translate="no">
+    <div class="tt-passage" data-role="passage" translate="no" tabindex="0" role="region" aria-labelledby="tt-passage-title">
       {/* Filled by the client: the passage is chosen at random per visit, so
           rendering one here would give every visitor the same paragraph. */}
       <p data-role="line" class="tt-line">
@@ -736,6 +754,7 @@ const strings = raw(lang, 'tutor');
     let coachingUnits: Unit[] = [];
     let recommendedLevel = LEVELS[0].id;
     let mode: Mode = 'lesson';
+    let examMode: 'exam' | 'unicode' = 'exam';
     /** Today's practice: whose date's passage is on screen (today, or one picked from the list). */
     let dailyDay = dayKey();
     let levelId = LEVELS[0].id;
@@ -1340,12 +1359,10 @@ const strings = raw(lang, 'tutor');
     backspaceBox.addEventListener('change', () => {
       writeRule(BACKSPACE_KEY, backspaceBox.checked);
       applyRules();
-      capture.focus();
     });
     highlightBox.addEventListener('change', () => {
       writeRule(HIGHLIGHT_KEY, highlightBox.checked);
       applyRules();
-      capture.focus();
     });
 
     // No Backspace means no correction of any kind: phone keyboards delete
@@ -1824,6 +1841,8 @@ const strings = raw(lang, 'tutor');
     // The free practice page links each passage here: ?passage=<1-30>. Read
     // before the first setMode, which tidies the address.
     const askedPassage = Number(new URLSearchParams(location.search).get('passage'));
+    const askedExam = new URLSearchParams(location.search).get('exam');
+    const examEntry = askedExam === CHSL_HINDI_2026.id ? 'unicode' : askedExam === 'remington' ? 'exam' : undefined;
     const ppLevelOf = (n: number) => Number(ppChips.get(n)?.dataset.ppOf ?? 1);
     const ppTitleOf = (n: number) => ppChips.get(n)?.querySelector('.tt-level-name')?.textContent ?? '';
     const ppParam = () => (mode === 'passages' ? { passage: ppN } : {});
@@ -1912,6 +1931,8 @@ const strings = raw(lang, 'tutor');
         const url = new URL(location.href);
         if (mode === 'passages' && ppN) url.searchParams.set('passage', String(ppN));
         else url.searchParams.delete('passage');
+        if (mode === 'exam' || mode === 'unicode') url.searchParams.set('exam', mode === 'unicode' ? CHSL_HINDI_2026.id : 'remington');
+        else url.searchParams.delete('exam');
         if (url.href !== location.href) history.replaceState(history.state, '', url);
       } catch {
         // Older browser: the address simply stays as it was.
@@ -1941,6 +1962,7 @@ const strings = raw(lang, 'tutor');
     /** Swap between the ladder and the timed test, and re-dress the UI for it. */
     function setMode(next: Mode) {
       mode = next;
+      if (next === 'exam' || next === 'unicode') examMode = next;
       root.dataset.mode = next;
       // Today's practice always opens on today's passage.
       dailyDay = dayKey();
@@ -1948,24 +1970,29 @@ const strings = raw(lang, 'tutor');
       if (next === 'daily') renderDays();
 
       for (const b of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
-        b.setAttribute('aria-pressed', String(b.dataset.mode === next));
+        b.setAttribute('aria-pressed', String(b.dataset.mode === next || (next === 'unicode' && b.dataset.mode === 'exam')));
       }
 
       const lesson = next === 'lesson';
       levelsWrap.hidden = !lesson;
+      q('exam-profiles').hidden = next !== 'exam' && next !== 'unicode';
       q('exam-presets').hidden = next !== 'exam';
       q('native-profile').hidden = next !== 'unicode';
       q('coach-unicode').setAttribute('aria-pressed', String(next === 'unicode'));
+      q('exam-remington').setAttribute('aria-pressed', String(next === 'exam'));
+      q('native-tab').hidden = next !== 'unicode';
+      q('native-source').hidden = next !== 'unicode';
+      q('layout-note').hidden = next === 'unicode';
+      q('rule-controls').hidden = next === 'unicode';
+      q<HTMLDetailsElement>('mode-help').open = false;
       q('coach-panel').hidden = next === 'unicode';
       root.querySelector('label[for="tt-capture"]')!.textContent = next === 'unicode' ? L.nativeLabel : L.captureLabel;
       capture.setAttribute('aria-describedby', next === 'unicode' ? 'tt-native-help' : 'tt-prompt-text');
       if (next === 'unicode') {
         capture.lang = 'hi'; capture.maxLength = 20000;
-        passage.tabIndex = 0; passage.setAttribute('role', 'region'); passage.setAttribute('aria-labelledby', 'tt-passage-title');
       }
       else {
         capture.removeAttribute('lang'); capture.removeAttribute('maxlength');
-        passage.removeAttribute('tabindex'); passage.removeAttribute('role'); passage.removeAttribute('aria-labelledby');
       }
 
       ppWrap.hidden = next !== 'passages';
@@ -2010,10 +2037,11 @@ const strings = raw(lang, 'tutor');
     // Wiring
     // ----------------------------------------------------------------------
 
-    q('coach-unicode').addEventListener('click', () => { setMode('unicode'); capture.focus(); });
+    q('coach-unicode').addEventListener('click', () => { if (mode !== 'unicode') setMode('unicode'); });
+    q('exam-remington').addEventListener('click', () => { if (mode !== 'exam') setMode('exam'); });
     q<HTMLSelectElement>('native-duration').addEventListener('change', event => {
       nativeSeconds = Number((event.target as HTMLSelectElement).value) === CHSL_HINDI_2026.eligibleSeconds ? CHSL_HINDI_2026.eligibleSeconds : CHSL_HINDI_2026.seconds;
-      reset({ newPassage: true }); capture.focus();
+      reset({ newPassage: true });
     });
     q('native-tab').addEventListener('click', () => {
       if (mode !== 'unicode' || done || paused) return;
@@ -2041,11 +2069,11 @@ const strings = raw(lang, 'tutor');
       for (const role of ['backspace', 'highlight']) {
         const box = q<HTMLInputElement>(role);
         box.checked = preset === 'guided';
-        box.dispatchEvent(new Event('change'));
+        writeRule(role === 'backspace' ? BACKSPACE_KEY : HIGHLIGHT_KEY, box.checked);
       }
+      applyRules();
       q<HTMLSelectElement>('exam-preset').value = preset;
       reset({ newPassage: true });
-      capture.focus();
     });
     for (const role of ['backspace', 'highlight']) q(role).addEventListener('change', () => {
       q<HTMLSelectElement>('exam-preset').value = 'custom';
@@ -2056,10 +2084,11 @@ const strings = raw(lang, 'tutor');
     function focusMode(on: boolean) {
       root.dataset.focusMode = String(on);
       focusButton.setAttribute('aria-pressed', String(on));
-      focusButton.textContent = on ? L.coachExitFocus : L.coachFocus;
+      q('focus-label').textContent = on ? L.coachExitFocus : L.coachFocus;
       if (on) {
         previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
+        root.scrollTop = 0;
         let node: HTMLElement = root;
         while (node.parentElement) {
           for (const sibling of node.parentElement.children) {
@@ -2084,7 +2113,7 @@ const strings = raw(lang, 'tutor');
       if (event.key === 'Escape') {
         event.preventDefault(); event.stopPropagation(); focusMode(false);
       } else if (event.key === 'Tab') {
-        const controls = [...root.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], summary')]
+        const controls = [...root.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], summary, [tabindex]:not([tabindex="-1"])')]
           .filter(el => !el.closest('[hidden]') && !el.matches(':disabled') && el.getClientRects().length);
         const first = controls[0], last = controls[controls.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
@@ -2115,6 +2144,8 @@ const strings = raw(lang, 'tutor');
 
     capture.addEventListener('focus', () => (root.dataset.focused = 'true'));
     capture.addEventListener('blur', () => (root.dataset.focused = 'false'));
+    passage.addEventListener('focus', () => (root.dataset.focused = 'true'));
+    passage.addEventListener('blur', () => (root.dataset.focused = 'false'));
 
     // The veil does not take pointer events, so a click on the passage lands
     // on the textarea underneath and focuses it. This only covers the case of
@@ -2164,7 +2195,7 @@ const strings = raw(lang, 'tutor');
 
     for (const btn of root.querySelectorAll<HTMLButtonElement>('[data-role="mode"] button')) {
       btn.addEventListener('click', () => {
-        const next = btn.dataset.mode as Mode;
+        const next = btn.dataset.mode === 'exam' ? examMode : btn.dataset.mode as Mode;
         if (next !== mode) setMode(next);
       });
     }
@@ -2255,12 +2286,14 @@ const strings = raw(lang, 'tutor');
     // The QR code on a printed practice sheet opens its lesson: #lesson-<id>.
     // A lesson this device has not unlocked yet stays locked - the ladder is
     // the same however the page was opened - so the furthest open one starts.
-    if (ppChips.has(askedPassage)) {
+    if (examEntry) {
+      setMode(examEntry);
+    } else if (ppChips.has(askedPassage)) {
       ppN = askedPassage;
       setMode('passages');
     }
 
-    const wanted = /^#lesson-([a-z]+)$/.exec(location.hash)?.[1];
+    const wanted = !examEntry && /^#lesson-([a-z]+)$/.exec(location.hash)?.[1];
     if (wanted && LEVELS.some((l) => l.id === wanted)) {
       const open = unlocked(wanted) ? wanted : [...LEVELS].reverse().find((l) => unlocked(l.id))!.id;
       if (open !== levelId) {

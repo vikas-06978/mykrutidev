@@ -931,11 +931,14 @@
   border-radius: 0;
   background: var(--color-paper);
 }
-.tt[data-focus-mode='true'] .tt-focusbar {
+.tt[data-focus-mode='true'] .tt-session-toolbar {
   position: sticky;
   top: 0;
   z-index: 2;
   background: var(--color-paper);
+}
+.tt[data-focus-mode='true'] :is(.tt-settings, .tt-levels-wrap, .tt-pp) {
+  display: none !important;
 }
 .tt button[data-role^='coach-'],
 .tt [data-role='focus-toggle'] {
@@ -970,4 +973,99 @@
 }
 .tt[data-mode='unicode'] .tt-capture:focus-visible { outline: 2px solid var(--color-brick); outline-offset: -2px; }
 .tt[data-mode='unicode'] .tt-capture::selection { background: var(--color-inset); }
+.tt-passage:focus-visible { outline: 2px solid var(--color-brick); outline-offset: -2px; }
 .tt [data-role='native-tab'] { max-width: 100%; white-space: normal; }
+
+/* A consistent mode picker, followed only by the selected mode's settings. */
+.tt-mode-picker.cv-seg {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: 100%;
+}
+.tt-mode-picker button {
+  grid-column: span 2;
+  min-width: 0;
+  min-height: 44px;
+  padding: .5rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.tt-mode-picker button:nth-of-type(n + 4) { grid-column: span 3; }
+@media (width >= 40rem) {
+  .tt-mode-picker.cv-seg { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .tt-mode-picker button:nth-of-type(n) { grid-column: span 1; }
+}
+.tt-exams { margin-top: 1rem; }
+.tt-settings select { min-height: 44px; }
+.tt-exam-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .625rem;
+  margin-top: .5rem;
+}
+.tt button.tt-exam-card {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  min-width: 0;
+  padding: .75rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-chrome);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.tt-exam-card strong { font-size: .875rem; line-height: 1.4; font-weight: 600; }
+.tt-exam-card > span { font-size: .75rem; line-height: 1.5; color: var(--color-body); }
+.tt button.tt-exam-card:hover { border-color: var(--color-mute); }
+.tt button.tt-exam-card[aria-pressed='true'] {
+  border-color: var(--color-brick);
+  background: var(--color-inset);
+  box-shadow: inset 0 0 0 1px var(--color-brick);
+}
+.tt-help { margin-top: .5rem; }
+.tt-help > summary {
+  display: list-item;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding-block: .75rem;
+  font-size: .75rem;
+  line-height: 1.5;
+  color: var(--color-body);
+  cursor: pointer;
+}
+.tt-session-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem 1rem;
+  border-bottom: 1px solid var(--color-hairline);
+}
+.tt .tt-utility {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .375rem;
+  min-height: 44px;
+  max-width: 100%;
+  padding: .5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-chrome);
+  background: transparent;
+  color: var(--color-body);
+  font-size: .75rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.tt-utility svg { flex-shrink: 0; }
+.tt .tt-utility:hover, .tt .tt-utility[aria-pressed='true'] {
+  border-color: var(--color-hairline);
+  background: var(--color-inset);
+  color: var(--color-ink);
+}
+.tt-focus-toggle { margin-inline-start: auto; }

@@ -1,6 +1,25 @@
 import { createServer } from 'node:http';
 import { test, expect } from '@playwright/test';
 
+test('tablet navigation fits and closes its panel when switching to desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page.goto('/hindi-typing-test/');
+  for (const width of [768, 900]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('[data-burger]')).toBeVisible();
+    await expect(page.locator('[data-desktop-nav]')).toBeHidden();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.locator('[data-burger]').click();
+  await expect(page.locator('[data-mobile-nav]')).toBeVisible();
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect(page.locator('[data-desktop-nav]')).toBeVisible();
+  await expect(page.locator('[data-burger]')).toBeHidden();
+  await expect(page.locator('[data-burger]')).toHaveAttribute('aria-expanded', 'false');
+  await page.setViewportSize({ width: 768, height: 900 });
+  await expect(page.locator('[data-mobile-nav]')).toBeHidden();
+});
+
 for (const prefix of ['', '/hi', '/bn', '/gu', '/mr', '/pa', '/ta']) {
   test(`${prefix || '/en'}: logo stays in place when header controls arrive after its first paint`, async ({ page, request, baseURL }) => {
     const response = await request.get(`${prefix}/hindi-typing-test/`);
