@@ -8,7 +8,17 @@
  * popup, and × hides it for good on this device.
  */
 
+import { track } from './track.js';
+
 const DISMISS_KEY = 'mkd-install-dismissed';
+
+// Count app page views without storing an installation ID or user content.
+// Safari's standalone flag also covers Home Screen launches on iOS.
+const inApp = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+if (inApp()) track('pwa_page_view');
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && inApp()) track('pwa_page_view');
+});
 
 // ---------------------------------------------------------------------------
 // Service worker
@@ -63,6 +73,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 window.addEventListener('appinstalled', () => {
+  track('pwa_install');
   deferred = null;
   show(false);
 });
@@ -72,9 +83,13 @@ for (const box of boxes) {
     if (!deferred) return show(false);
     const event = deferred;
     deferred = null;
+    track('pwa_install_click');
     try {
       await event.prompt();
-      await event.userChoice;
+      const choice = await event.userChoice;
+      if (choice?.outcome === 'accepted' || choice?.outcome === 'dismissed') {
+        track('pwa_install_choice', { outcome: choice.outcome });
+      }
     } catch {
       // The browser declined to show its dialog; nothing to do.
     }

@@ -86,3 +86,32 @@ test('reference text is keyboard-scrollable and presets do not open the typing f
   await expect(page.locator('[data-tutor]')).toHaveAttribute('data-state', 'idle');
   await expect(page.locator('[data-role="time"]')).toHaveText('10:00');
 });
+
+test('focus view keeps a readable centred workspace on wide screens', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'wide workspace regression');
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/hindi-typing-test/');
+  await page.locator('[data-role="focus-toggle"]').click();
+  const stage = page.locator('.tt-stage');
+  const box = await stage.boundingBox();
+  expect(box.width).toBeLessThanOrEqual(1152);
+  expect(Math.abs(box.x - (1920 - box.width) / 2)).toBeLessThan(3);
+  expect(await page.locator('.tt-veil').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
+  await page.locator('[data-role="capture"]').focus();
+  await page.keyboard.type('d');
+  await expect(page.locator('[data-tutor]')).toHaveAttribute('data-state', 'running');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-tutor]')).toHaveAttribute('data-focus-mode', 'false');
+  await expect(page.locator('[data-role="capture"]')).toHaveValue('d');
+});
+
+test('focus start hint sits below the reference text on phones and computers', async ({ page }) => {
+  await page.goto('/hindi-typing-test/');
+  await page.locator('[data-role="focus-toggle"]').click();
+  const passage = await page.locator('.tt-passage').boundingBox();
+  const hint = await page.locator('.tt-veil').boundingBox();
+  expect(hint.y).toBeGreaterThanOrEqual(passage.y + passage.height - 1);
+  expect(await page.locator('[data-tutor]').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await page.locator('[data-role="capture"]').focus();
+  await expect(page.locator('.tt-veil')).toBeHidden();
+});

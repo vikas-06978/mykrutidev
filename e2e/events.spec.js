@@ -98,3 +98,28 @@ test('a purchase kept in this browser: the product page offers the download agai
   await expect(page.locator('[data-sb-owned]')).toContainText('Removed from this device');
   expect(await page.evaluate(() => localStorage.getItem('mkd-bought'))).toBe('{}');
 });
+
+test('app install funnel distinguishes button choice from confirmed installation', async ({ page }) => {
+  await page.goto('/');
+  for (const outcome of ['dismissed', 'accepted']) {
+    await page.evaluate((outcome) => {
+      const event = new Event('beforeinstallprompt', { cancelable: true });
+      Object.assign(event, { prompt: async () => {}, userChoice: Promise.resolve({ outcome }) });
+      window.dispatchEvent(event);
+    }, outcome);
+    await page.locator('.mkd-install-bar [data-install-go]').click();
+    await expect.poll(() => events(page, 'pwa_install_choice')).toHaveLength(outcome === 'dismissed' ? 1 : 2);
+  }
+  expect(await events(page, 'pwa_install_click')).toHaveLength(2);
+  expect(await events(page, 'pwa_install')).toHaveLength(0);
+  await page.evaluate(() => window.dispatchEvent(new Event('appinstalled')));
+  expect(await events(page, 'pwa_install')).toEqual([{ name: 'pwa_install', params: {} }]);
+});
+
+test('installed app page views cover standalone and iOS launches', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'standalone', { value: true }));
+  await page.goto('/');
+  await expect.poll(() => events(page, 'pwa_page_view')).toHaveLength(1);
+  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+  expect(await events(page, 'pwa_page_view')).toHaveLength(2);
+});
