@@ -11,7 +11,12 @@
  * @param {{ focus?: boolean, onEnd?: () => void }} [opts]
  */
 export function runTour(steps, L, { focus = false, auto = false, onEnd } = {}) {
-  const live = steps.filter((s) => document.querySelector(s.target));
+  // A control can exist in the DOM while its mode is hidden. A tour must
+  // never point to that invisible panel or leave a bubble at the viewport edge.
+  const live = steps.filter((s) => {
+    const el = document.querySelector(s.target);
+    return el && el.getClientRects().length > 0;
+  });
   if (!live.length) return () => {};
   // Started on its own: only if the first control is already on screen, so
   // the page is never scrolled for it. (The "?" button always starts it.)
@@ -65,7 +70,7 @@ export function runTour(steps, L, { focus = false, auto = false, onEnd } = {}) {
     // Only after the visitor pressed Next, and only if the control is wholly
     // off screen, bring it into view. The tour never moves the page by itself.
     const r = target.getBoundingClientRect();
-    if (n > 0 && (r.bottom < 0 || r.top > window.innerHeight)) {
+    if ((n > 0 || !auto) && (r.bottom < 0 || r.top > window.innerHeight)) {
       target.scrollIntoView({ block: 'nearest', behavior: 'instant' });
     }
     text.textContent = live[i].text;
