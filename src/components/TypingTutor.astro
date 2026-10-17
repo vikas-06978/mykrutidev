@@ -596,6 +596,7 @@ const strings = raw(lang, 'tutor');
   import { dailyIndex, dayKey, lastDays } from '../lib/habit.js';
   import { progressPanel, shareResult } from '../scripts/progress.js';
   import { track } from '../scripts/track.js';
+  import { readTutorDraft, recoveredTime, DRAFT_LIMIT } from '../lib/tutorSession.js';
 
   type Unit = { deva: string; keys: string };
   type Passage = { id: string; title: string; units: Unit[] };
@@ -765,6 +766,7 @@ const strings = raw(lang, 'tutor');
     let ppData: Practice[] | null = null;
     let ppLoading = false;
     let ppFailed = false;
+    let keepRestoredPassage = false;
     let seconds = DURATIONS[0].value;
     /** The two modes that run on a clock and end when it runs out. */
     const timed = () => mode === 'practice' || mode === 'exam' || mode === 'unicode';
@@ -796,6 +798,14 @@ const strings = raw(lang, 'tutor');
     let running = false;
     let paused = false;
     let done = false;
+    const sessionKey = `mykrutidev:tutor-draft:${location.pathname.replace(/\/+$/, '')}`;
+    let restoring = true;
+    let pendingDraft: ReturnType<typeof readTutorDraft> = null;
+    try {
+      if ((performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'reload') {
+        pendingDraft = readTutorDraft(sessionStorage.getItem(sessionKey));
+      }
+    } catch { /* Recovery is optional when storage is blocked. */ }
 
     // ----------------------------------------------------------------------
     // localStorage, which may throw or lie
@@ -1012,6 +1022,14 @@ const strings = raw(lang, 'tutor');
       // added, and clusterStates() is called on every character typed.
       renderedRuns = runs.slice(0, rendered);
     }
+
+    // Reading ahead never moves the typing caret or the clock. Long tests
+    // reveal the next chunk as the reader approaches the current end.
+    passage.addEventListener('scroll', () => {
+      if (passage.scrollTop + passage.clientHeight >= passage.scrollHeight - 100) {
+        extendTo(rendered + CHUNK_UNITS);
+      }
+    }, { passive: true });
 
     function paint(typed: string) {
       // Extend before painting, so the caret always has a span to land on.
@@ -1464,6 +1482,7 @@ const strings = raw(lang, 'tutor');
       pauseBtn.hidden = true;
       updateStats();
       showResult(reason);
+      saveSession();
       // Which lesson or test was finished: counted, never what was typed.
       if (mode !== 'lesson') track('test_finish', { mode, minutes: timed() ? Math.round(testSeconds() / 60) : 0, ...ppParam() });
     }
@@ -1725,6 +1744,7 @@ const strings = raw(lang, 'tutor');
     // ----------------------------------------------------------------------
 
     function reset({ newPassage = true } = {}) {
+      keepRestoredPassage = false;
       clearInterval(ticker);
       running = false;
       paused = false;
@@ -1763,6 +1783,7 @@ const strings = raw(lang, 'tutor');
         showNextKey('');
         promptFinger.textContent = '';
         if (!ppFailed) loadPractice();
+        saveSession();
         return;
       }
 
@@ -1770,6 +1791,7 @@ const strings = raw(lang, 'tutor');
       renderPassage();
       updateStats();
       showNextKey('');
+      saveSession();
     }
 
     /** A date as this page's language writes it short: "10 Oct", "10 अक्टू॰". */
@@ -1921,7 +1943,8 @@ const strings = raw(lang, 'tutor');
         })
         .finally(() => {
           ppLoading = false;
-          if (mode === 'passages') reset({ newPassage: true });
+          if (mode === 'passages' && !keepRestoredPassage) reset({ newPassage: true });
+          keepRestoredPassage = false;
         });
     }
 
@@ -2106,6 +2129,7 @@ const strings = raw(lang, 'tutor');
         document.body.style.overflow = previousOverflow;
       }
       focusButton.focus();
+      saveSession();
     }
     focusButton.addEventListener('click', () => focusMode(root.dataset.focusMode !== 'true'));
     root.addEventListener('keydown', event => {
@@ -2155,6 +2179,12 @@ const strings = raw(lang, 'tutor');
       // the click means the obvious thing instead.
       if (paused) return resume();
       capture.focus();
+    });
+    root.querySelector('.tt-stage')!.addEventListener('click', event => {
+      // The start hint sits outside the reference in Focus view.
+      if (event.target !== event.currentTarget) return;
+      if (paused) resume();
+      else capture.focus();
     });
 
     pauseBtn.addEventListener('click', () => {
@@ -2302,5 +2332,93 @@ const strings = raw(lang, 'tutor');
         reset({ newPassage: true });
       }
     }
+
+    function saveSession() {
+      if (restoring) return;
+      try {
+        if (!units.length) { sessionStorage.removeItem(sessionKey); return; }
+        const draft = JSON.stringify({
+          v: 1, savedAt: Date.now(), mode, focus: root.dataset.focusMode === 'true',
+          state: done ? 'idle' : running ? 'running' : paused ? 'paused' : 'idle',
+          elapsed: done ? 0 : elapsed(), typed: done ? '' : capture.value,
+          units, title: titleEl.textContent, level: levelId, passage: ppN, day: dailyDay,
+          seconds, nativeSeconds, backspace: backspaceBox.checked, highlight: highlightBox.checked,
+          preset: q<HTMLSelectElement>('exam-preset').value,
+        });
+        if (draft.length <= DRAFT_LIMIT) sessionStorage.setItem(sessionKey, draft);
+        else sessionStorage.removeItem(sessionKey);
+      } catch {
+        // A failed write must not revive an older, out-of-date attempt.
+        try { sessionStorage.removeItem(sessionKey); } catch { /* Storage blocked. */ }
+      }
+    }
+
+    const draft = pendingDraft;
+    pendingDraft = null;
+    if (draft && LEVELS.some(level => level.id === draft.level) &&
+      (draft.mode !== 'lesson' || unlocked(draft.level)) &&
+      (!examEntry || draft.mode === examEntry) &&
+      (!ppChips.has(askedPassage) || (draft.mode === 'passages' && draft.passage === askedPassage)) &&
+      (draft.mode !== 'passages' || ppChips.has(draft.passage)) &&
+      (!wanted || draft.level === levelId)) {
+      levelId = draft.level;
+      ppN = draft.passage;
+      seconds = draft.seconds;
+      nativeSeconds = draft.nativeSeconds;
+      if (draft.mode === 'targeted') coachingUnits = draft.units;
+      setMode(draft.mode);
+      dailyDay = draft.day;
+      units = draft.units;
+      runs = unitKeyRuns(units);
+      expected = unitsToKeys(units);
+      titleEl.textContent = draft.title;
+      keepRestoredPassage = draft.mode === 'passages' && !ppData;
+      backspaceBox.checked = draft.backspace;
+      highlightBox.checked = draft.highlight;
+      q<HTMLSelectElement>('exam-preset').value = draft.preset;
+      q<HTMLSelectElement>('native-duration').value = String(nativeSeconds);
+      for (const button of root.querySelectorAll<HTMLButtonElement>('[data-seconds]')) {
+        button.setAttribute('aria-pressed', String(Number(button.dataset.seconds) === seconds));
+      }
+      capture.value = draft.typed;
+      capture.disabled = false;
+      capture.setSelectionRange(capture.value.length, capture.value.length);
+      renderPassage();
+      paint(capture.value);
+      applyRules();
+      const recovered = recoveredTime(draft);
+      accumulated = recovered.elapsed;
+      if (draft.mode === 'exam' || draft.mode === 'unicode') accumulated = Math.min(accumulated, testSeconds() * 1000);
+      if (recovered.state === 'running') {
+        running = true;
+        segmentStart = Date.now();
+        root.dataset.state = 'running';
+        ticker = setInterval(tick, TICK_MS);
+      } else if (recovered.state === 'paused') {
+        paused = true;
+        capture.disabled = true;
+        root.dataset.state = 'paused';
+        pauseBtn.hidden = false;
+        pauseBtn.textContent = L.resume;
+        veilText.textContent = L.veilPaused;
+      }
+      updateStats();
+      if (draft.focus) focusMode(true);
+      if (recovered.state === 'running' && timed() && remaining() <= 0) finish('time');
+    }
+    restoring = false;
+    saveSession();
+    // pagehide catches refresh/navigation; a short debounce and hidden-page
+    // checkpoint also protect mobile tabs that the OS later discards.
+    let checkpoint: ReturnType<typeof setTimeout> | undefined;
+    root.addEventListener('input', () => {
+      clearTimeout(checkpoint);
+      checkpoint = setTimeout(saveSession, 300);
+    });
+    root.addEventListener('change', saveSession);
+    window.addEventListener('pagehide', saveSession);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') saveSession();
+    });
   }
 </script>
