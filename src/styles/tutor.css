@@ -930,6 +930,22 @@
   overscroll-behavior: contain;
   border-radius: 0;
   background: var(--color-paper);
+  padding-inline: max(0px, calc((100% - 72rem) / 2));
+}
+.tt[data-focus-mode='true'] > :not([hidden]) {
+  background-color: var(--color-surface);
+}
+.tt[data-focus-mode='true'] .tt-veil {
+  position: relative;
+  inset: auto;
+  background: transparent;
+  padding: .5rem 1rem .75rem;
+}
+.tt[data-focus-mode='true'] .tt-line {
+  color: var(--color-body);
+}
+.tt[data-focus-mode='true'] .kbd-row {
+  justify-content: center;
 }
 .tt[data-focus-mode='true'] .tt-session-toolbar {
   position: sticky;
