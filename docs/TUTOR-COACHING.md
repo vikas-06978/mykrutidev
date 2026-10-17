@@ -84,3 +84,11 @@ Draft reads validate schema/version/age, enum values, unit and text sizes before
 rendering. Invalid or oversized snapshots are ignored; blocked/full storage does
 not stop typing. The checkpoint is debounced after input and saved on pagehide
 and when the page becomes hidden, without reloading an active attempt for updates.
+
+When the reference has keyboard focus (Tab/Shift+Tab), Up/Down move one text
+line, Page Up/Down move a viewport with one line of overlap, and Home/End reach
+the beginning/end of the full reference. End reveals all remaining reference
+chunks. Reading keys stay inside the reference even at its boundaries and never
+start the timer or type text. Tab moves to the real typing field; its normal
+caret/editing keys and modified browser/assistive shortcuts remain available.
+The next typed character returns the reference to the typing position.

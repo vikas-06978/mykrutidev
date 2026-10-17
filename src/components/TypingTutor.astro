@@ -349,7 +349,7 @@ const strings = raw(lang, 'tutor');
   </div>
 
   <div class="tt-stage">
-    <div class="tt-passage" data-role="passage" translate="no" tabindex="0" role="region" aria-labelledby="tt-passage-title">
+    <div class="tt-passage" data-role="passage" translate="no" tabindex="0" role="region" aria-labelledby="tt-passage-title" aria-keyshortcuts="ArrowUp ArrowDown PageUp PageDown Home End">
       {/* Filled by the client: the passage is chosen at random per visit, so
           rendering one here would give every visitor the same paragraph. */}
       <p data-role="line" class="tt-line">
@@ -1030,6 +1030,28 @@ const strings = raw(lang, 'tutor');
         extendTo(rendered + CHUNK_UNITS);
       }
     }, { passive: true });
+
+    passage.addEventListener('keydown', event => {
+      // Handle reading keys only in the reference. The textarea keeps native
+      // caret/selection keys, and modified browser/assistive shortcuts pass through.
+      if (event.target !== passage || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const line = parseFloat(getComputedStyle(lineEl).lineHeight) || 44;
+      const page = Math.max(line, passage.clientHeight - line);
+      if (event.key === 'End') {
+        extendTo(units.length);
+        passage.scrollTop = passage.scrollHeight;
+      } else if (event.key === 'Home') {
+        passage.scrollTop = 0;
+      } else {
+        const down = event.key === 'ArrowDown' || event.key === 'PageDown';
+        if (down && passage.scrollTop + passage.clientHeight + page >= passage.scrollHeight) {
+          extendTo(rendered + CHUNK_UNITS);
+        }
+        passage.scrollTop += (down ? 1 : -1) * (event.key.startsWith('Page') ? page : line);
+      }
+    });
 
     function paint(typed: string) {
       // Extend before painting, so the caret always has a span to land on.
