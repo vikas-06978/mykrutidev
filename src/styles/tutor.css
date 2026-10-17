@@ -77,6 +77,11 @@
 .tt-capture:disabled {
   cursor: default;
 }
+/* Legacy typing draws its own caret. Let the reference receive wheel, touch
+   and scrollbar gestures; clicking it still focuses the real input. */
+.tt:not([data-mode='unicode']) .tt-capture {
+  pointer-events: none;
+}
 
 /*
   Until it has focus, typing goes nowhere. Saying so is not decoration: a tutor

@@ -52,3 +52,35 @@ tutor page. Only these values are accepted; unknown values fall back to the
 normal tutor. The canonical remains the base page. Instructions/scoring and
 official references are available in an expandable help section; the SSC
 independent-practice caption and input/font setup instructions remain visible.
+
+## Reading and refresh recovery
+
+The legacy reference accepts native mouse-wheel, scrollbar and touch scrolling;
+its transparent capture field no longer intercepts pointer gestures. Clicking
+the reference (or the Focus start hint) still focuses the labelled real input.
+Reading does not start the timer or alter the caret. The next input event scrolls
+the current character into view inside the reference only. Long references append
+another rendering chunk near the bottom so readers can continue beyond the
+initial 900 units. The native Unicode editor retains its normal pointer and
+selection behaviour.
+
+An unfinished attempt is checkpointed in this tab's `sessionStorage`, scoped to
+the localized tutor path. It includes selected mode/passage/duration/rules,
+reference units, typed text, elapsed time and Focus preference. Nothing in this
+draft is uploaded or added to GA4. Reload restores it for up to24hours. This is
+refresh recovery, not a cross-device or permanent save: new navigation does not
+silently resume an old tab draft, and storage restrictions can disable recovery.
+
+Ordinary lesson/practice/passage/daily/targeted attempts return paused, ready for
+Resume, without charging reload downtime. Non-pausable Remington/SSC exam modes
+keep their wall-clock deadline; time away is included and expired attempts finish.
+Completed attempts restore a fresh empty attempt in the same mode, not a second
+result, so reloading cannot duplicate history, streaks or lesson credit. Restart,
+new passage, mode changes and progress reset replace the checkpoint. Restoring a
+previously locked lesson is refused. Explicit exam/passage/lesson links take
+precedence over a mismatched checkpoint.
+
+Draft reads validate schema/version/age, enum values, unit and text sizes before
+rendering. Invalid or oversized snapshots are ignored; blocked/full storage does
+not stop typing. The checkpoint is debounced after input and saved on pagehide
+and when the page becomes hidden, without reloading an active attempt for updates.
