@@ -3,13 +3,14 @@ import { test, expect } from '@playwright/test';
 test.beforeEach(async ({page}) => {
   await page.addInitScript(()=>localStorage.setItem('mkd-tour:/hindi-typing-test','1'));
   await page.goto('/hindi-typing-test/');
+  await page.locator('[data-mode="exam"]').click();
   await page.locator('[data-role="coach-unicode"]').click();
 });
 
 test('source-backed Hindi profile uses native Unicode, sourced times and corrections',async({page})=>{
   await expect(page.locator('[data-role="time"]')).toHaveText('10:00');
-  await expect(page.locator('[data-role="native-profile"]')).toContainText('30 WPM');
-  await expect(page.locator('[data-role="native-profile"] a').first()).toHaveAttribute('href',/ssc.gov.in.*Notice_of_adv_chsle_2026.pdf/);
+  await expect(page.locator('[data-role="native-source"]')).toContainText('30 WPM');
+  await expect(page.locator('[data-role="native-source"] a').first()).toHaveAttribute('href',/ssc.gov.in.*Notice_of_adv_chsle_2026.pdf/);
   await page.locator('[data-role="native-duration"]').selectOption('900');
   await expect(page.locator('[data-role="time"]')).toHaveText('15:00');
   const input=page.locator('[data-role="capture"]');

@@ -66,7 +66,8 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   down to the menu's offset parent may set overflow to anything but visible.
 */}
 <header class="relative z-50 border-b border-hairline bg-paper">
-  <div class="wrap flex items-center justify-between gap-4 py-3">
+  {/* Reserve the final control height even while the header HTML is arriving. */}
+  <div class="wrap flex min-h-17 items-center justify-between gap-4 py-3 lg:min-h-15">
     {/*
       "Install app" sits right after the logo, never among the controls on the
       right: those are right-aligned, so anything appearing among them would
@@ -107,7 +108,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
     <div class="flex min-w-0 items-center gap-2 lg:gap-3">
 
     <!-- ===================== Desktop: dropdown menubar ===================== -->
-    <nav aria-label={t('nav.aria')} class="hidden md:block" data-desktop-nav>
+    <nav aria-label={t('nav.aria')} class="hidden lg:block" data-desktop-nav>
       <ul class="flex items-center gap-1 text-sm">
         {
           menus.map((m) => (
@@ -324,7 +325,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       "System" that is light or dark, from the device. On phones the same
       choice sits in the menu panel instead, where there is room for words.
     */}
-    <div class="relative hidden md:block" data-theme-switch data-i18n={JSON.stringify(themeStrings)}>
+    <div class="relative hidden lg:block" data-theme-switch data-i18n={JSON.stringify(themeStrings)}>
       <button
         type="button"
         id="theme-trigger"
@@ -387,7 +388,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
       data-burger
       aria-expanded="false"
       aria-controls="mobile-nav"
-      class="relative -me-1 grid size-11 shrink-0 place-items-center rounded-(--radius-chrome) text-ink md:hidden"
+      class="relative -me-1 grid size-11 shrink-0 place-items-center rounded-(--radius-chrome) text-ink lg:hidden"
     >
       <span class="sr-only">{t('nav.menu')}</span>
       {anyBadge && <span data-new-badge={anyBadge} class={`absolute end-2 top-2 ${DOT}`} aria-hidden="true" />}
@@ -410,7 +411,7 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
     aria-label={t('nav.aria')}
     hidden
     data-mobile-nav
-    class="border-t border-hairline bg-surface md:hidden"
+    class="border-t border-hairline bg-surface lg:hidden"
   >
     <ul class="wrap divide-y divide-hairline-soft py-1">
       {/* The same offer as the desktop bar's, where a phone has room for it. */}
@@ -651,6 +652,11 @@ const groupHasCurrent = (pages: { path: string }[]) => pages.some((p) => isCurre
   }
 
   const closeAll = () => groups.forEach(close);
+  // Tablets use the compact panel; reset open menus when changing layouts.
+  window.matchMedia('(min-width: 64rem)').addEventListener('change', () => {
+    closeAll();
+    closeMobile();
+  });
   const isOpen = (g: Group) => !g.menu.hidden;
 
   for (const g of groups) {
