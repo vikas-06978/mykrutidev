@@ -1,15 +1,12 @@
 /**
  * Google AdSense, ready but OFF until the site owner switches it on.
  *
- * Nothing here runs, loads or changes a page until Cloudflare Pages passes the
- * build these environment variables (Settings -> Variables and Secrets, then a
- * new deployment). Without them the site is byte for byte what it was:
- * tests/dist.test.js checks there is no AdSense code, no ads.txt and no ad
- * address in the Content-Security-Policy.
+ * The public publisher ID below adds only the ownership meta tag, ads.txt and
+ * privacy disclosure. It never loads ad code. Showing ads requires the
+ * separate PUBLIC_ADSENSE_ADS build variable and a new deployment.
  *
- *  PUBLIC_ADSENSE_CLIENT  the publisher ID, ca-pub- and 16 digits, from AdSense
- *                         (Account -> Settings -> Account information). On its
- *                         own it is the "apply" step: every page gets
+ *  PUBLIC_ADSENSE_CLIENT  optional override of the owner's publisher ID.
+ *                         Verification gives every page
  *                         <meta name="google-adsense-account">, which is how
  *                         AdSense checks the site is yours, the site gets its
  *                         /ads.txt, and the privacy policy gets its section on
@@ -35,6 +32,8 @@
 
 /** ca-pub- and 16 digits, exactly as AdSense writes it. */
 const CLIENT_RE = /^ca-pub-\d{16}$/;
+// Public publisher ID for site verification. This does not load or show ads.
+const SITE_CLIENT = 'ca-pub-4508143583458824';
 /** An ad unit's data-ad-slot: 10 digits. */
 const SLOT_RE = /^\d{10}$/;
 
@@ -57,7 +56,7 @@ export const GOOGLE_TAG_ID = 'f08c47fec0942fa0';
  * @returns {Ads | null}
  */
 export function readAds(env) {
-  const client = (env?.PUBLIC_ADSENSE_CLIENT ?? '').trim();
+  const client = (env?.PUBLIC_ADSENSE_CLIENT ?? SITE_CLIENT).trim();
   if (!client) return null;
   if (!CLIENT_RE.test(client)) {
     console.warn(`[ads] PUBLIC_ADSENSE_CLIENT "${client}" is not ca-pub- and 16 digits: AdSense stays off`);

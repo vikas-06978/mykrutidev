@@ -1030,7 +1030,7 @@ describe('the ToolMitra links page (/links)', () => {
 // ---------------------------------------------------------------------------
 
 describe('AdSense follows its build variables', () => {
-  const ads = readAds(process.env);
+  const ads = readAds(import.meta.env ?? process.env);
   const headers = () => readFileSync(join(DIST, '_headers'), 'utf8');
 
   test('without a publisher ID: no AdSense code, no ads.txt, no ad address in the CSP', { skip: Boolean(ads) }, () => {
