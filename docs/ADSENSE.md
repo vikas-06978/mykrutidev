@@ -2,9 +2,8 @@
 
 ## Current plan: product sales, advertising off
 
-Product sales do not require AdSense. Leave `PUBLIC_ADSENSE_CLIENT`,
-`PUBLIC_ADSENSE_ADS` and `PUBLIC_ADSENSE_SLOT` unset while the site is funded
-through the store. Do not use a sample publisher ID on production.
+The owner's publisher ID is configured in the site for ownership verification.
+`PUBLIC_ADSENSE_ADS` and `PUBLIC_ADSENSE_SLOT` remain unset, so no ads appear.
 
 The existing integration supports applying and enabling advertising through
 deployment settings, without editing source files. The policy introduction
@@ -25,11 +24,10 @@ Follow the steps below when you decide to apply. Keep the ad switch off until
 approval and the applicable consent setup are complete. Switching to ads does
 not change product pricing, checkout or download access.
 
-The optional AdSense integration is in the site, and all of it is **off**. Three
-Cloudflare Pages variables turn it on in steps. Without them the site is the
-same as it is today: no ad code, no `/ads.txt`, no ad addresses in the
-Content-Security-Policy, and no advertising section in the privacy policy.
-`tests/dist.test.js` checks this on every build.
+The verification-only setup adds the ownership meta tag, `/ads.txt`, and the
+advertising disclosure. It does not load ad code or display ads. The optional
+AdSense integration can later show ads through Cloudflare Pages variables.
+`tests/dist.test.js` checks the built output.
 
 The code is in `src/lib/ads.js`. The fixed ad box is in
 `src/components/AdSlot.astro`. The headers and `/ads.txt` come from
@@ -37,7 +35,7 @@ The code is in `src/lib/ads.js`. The fixed ad box is in
 
 | Variable | Value | What it does |
 | --- | --- | --- |
-| `PUBLIC_ADSENSE_CLIENT` | `ca-pub-` + 16 digits | Adds the AdSense site check (`<meta name="google-adsense-account">`) to every page and writes `/ads.txt`. It also adds the advertising section to the privacy policy in all 7 languages. **No ads yet.** |
+| `PUBLIC_ADSENSE_CLIENT` | `ca-pub-` + 16 digits (optional override) | Overrides the configured publisher ID. An empty value disables verification. The ID alone never loads ads. |
 | `PUBLIC_ADSENSE_ADS` | `on` | Loads the AdSense script after the page has loaded, on mykrutidev.com only. It also allows Google's ad addresses in the CSP. Ads are then Auto ads, placed as set in the AdSense dashboard. |
 | `PUBLIC_ADSENSE_SLOT` | 10 digits (optional) | Shows one display ad unit in two fixed places: under a page's "how to use" steps, and at the end of each guide. Never above a tool. |
 
@@ -54,11 +52,9 @@ AdSense does not allow ads on pages with no content of their own.
 1. **Apply.** Sign in at <https://adsense.google.com> with the site's Google
    account and add the site `mykrutidev.com`. AdSense shows your publisher ID,
    `ca-pub-XXXXXXXXXXXXXXXX`.
-2. **Set the publisher ID.** In Cloudflare: Workers & Pages → mykrutidev →
-   Settings → Variables and Secrets → **Production** → add
-   `PUBLIC_ADSENSE_CLIENT` = your `ca-pub-…` ID. Then deploy again: Deployments
-   → the latest production deployment → Retry deployment. A variable only
-   reaches the site through a new build.
+2. **Verify the publisher ID.** Once the verification-only deployment is live,
+   open the home page and confirm its `google-adsense-account` meta tag contains
+   your `ca-pub-…` ID. No Cloudflare variable is needed for this publisher ID.
 3. **Verify.** Open `https://mykrutidev.com/ads.txt`. It should show one line:
    `google.com, pub-…, DIRECT, f08c47fec0942fa0`. In AdSense, choose the
    **Meta tag** (or ads.txt) way of verifying the site, and request a review.
@@ -77,7 +73,8 @@ AdSense does not allow ads on pages with no content of their own.
    should sit below the tools. In the browser's developer console there
    should be no red "Content-Security-Policy" errors.
 
-To switch AdSense off again, delete the variables and deploy again.
+To switch ads off again, remove `PUBLIC_ADSENSE_ADS` and `PUBLIC_ADSENSE_SLOT`
+and deploy again. The ownership tag and ads.txt may remain for later use.
 
 ## Worth knowing
 

@@ -7,10 +7,11 @@ import { contentSecurityPolicy, headersFile } from '../security/integration.mjs'
 const CLIENT = 'ca-pub-1234567890123456';
 
 describe('AdSense settings', () => {
-  test('off unless a publisher ID is set, and off in this test run', () => {
-    assert.equal(readAds({}), null);
-    assert.equal(readAds({ PUBLIC_ADSENSE_ADS: 'on' }), null);
-    assert.equal(ADS, null);
+  test('site verification is configured by default but ads remain off', () => {
+    assert.equal(readAds({}).client, 'ca-pub-4508143583458824');
+    assert.equal(readAds({}).show, false);
+    assert.equal(ADS.show, false);
+    assert.equal(readAds({ PUBLIC_ADSENSE_CLIENT: '' }), null);
   });
 
   test('a malformed publisher ID keeps AdSense off', () => {
