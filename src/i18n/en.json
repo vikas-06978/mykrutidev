@@ -176,6 +176,7 @@
     "docxTitle": "Word file with the {font} font already applied",
     "unicodeDocx": "Unicode .docx",
     "unicodeDocxTitle": "Word file in Unicode Hindi, readable without any legacy font",
+    "unicodeDocxTitleOther": "Word file in {unicode}, readable without any legacy font",
     "unicodeDocxTitleMr": "Word file in Unicode Marathi, readable without any legacy font",
     "whatsapp": "WhatsApp",
     "keepEnglish": "Keep English words and numbers unchanged",
@@ -183,21 +184,26 @@
     "wordsKept": "Kept as English (untick a word to convert it):",
     "wordsMaybe": "May be English (tick a word to keep it):",
     "review": "<span class=\"font-medium text-body\">Please review the output.</span> Matra order and the common conjuncts (<span lang=\"hi\">क्ष, त्र, ज्ञ, श्र</span>) are handled, but rare characters in very old documents may still differ. Nothing you type is uploaded. This page converts entirely inside your browser.",
+    "reviewOther": "<span class=\"font-medium text-body\">Please review the output.</span> Rare characters in old documents may differ. Nothing you type is uploaded. conversion runs in your browser.",
     "worksWithFrom": "Works with text in Kruti Dev 010, 011, 012, 014, 016 and 055, which share one keyboard. From a Word file, Word’s curly quotes and dashes and the Hindi digits of Kruti Dev 055 are read too. Kruti Dev 020 has another layout: use <a href=\"/devlys-020-to-unicode\">DevLys 020 to Unicode</a>.",
     "worksWithTo": "The result is for Kruti Dev 010, 011, 012, 014 or 016: set one of them as the font in Word. Hindi digits are written with Kruti Dev’s Alt-code characters.",
     "cut055": "My text is in Kruti Dev 055",
     "cut055Help": "Tick this only for text typed in Kruti Dev 055. Its number keys type Hindi digits (1 is १), and some Alt codes type other letters (Alt+0131 is घ). Text in Kruti Dev 010 to 016 needs no tick.",
     "otherDirection": "Need the other direction? {title}",
     "hintUnicodeLead": "This looks like Unicode Hindi, not {from}. ",
+    "hintUnicodeLeadOther": "This looks like {unicode}, not {from}. ",
     "hintUnicodeLeadMr": "This looks like Unicode Marathi, not {from}. ",
     "hintUnicodeBody": "You may want the converter that goes the other way",
     "reverseLink": "{to} to {from}",
     "hintEnglishLead": "This doesn't look like {from} text. ",
     "hintEnglishBody": "{from} stores Hindi as ASCII, so a real {from} document looks like gibberish here. Try the example button below the box.",
+    "hintEnglishBodyOther": "{from} stores text as legacy character codes, so its text may look like symbols here. Try the example button below the box.",
     "hintEnglishBodyMr": "{from} stores Marathi as legacy character codes, so a real {from} document may look like symbols here. Try the example button below the box.",
     "hintLatinLead": "This doesn't look like Hindi text. ",
+    "hintLatinLeadOther": "This does not look like {unicode} text. ",
     "hintLatinLeadMr": "This doesn't look like Marathi text. ",
     "hintLatinBody": "Type or paste Hindi in the box, or use the example button to see what this page expects.",
+    "hintLatinBodyOther": "Type or paste {unicode} text in the box, or use the example button to see what this page expects.",
     "hintLatinBodyMr": "Type or paste Marathi in the box, or use the example button to see what this page expects.",
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
@@ -211,6 +217,7 @@
     "title": "Convert a document",
     "introLegacy": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file typed in {from}. Only the {from} text is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
     "introUnicode": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file in Unicode Hindi. Only the Hindi is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
+    "introUnicodeOther": "Upload a Word (.docx), Excel (.xlsx, .csv) or text (.txt) file in {unicode}. Only its text is converted. Bold, colours, tables, numbers, formulas and the rest of the formatting stay exactly as they are.",
     "private": "Your file never leaves your computer.",
     "drag": "Drag a file here, or ",
     "choose": "Choose file",
@@ -2052,7 +2059,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Shivaji code. Press <strong>Preview (Hindi)</strong> to see it in the font here, or set the font to <strong>Shivaji01</strong> in Word."
+          "a": "Yes. That is Shivaji code. Press <strong>Preview (Marathi)</strong> to see it in the font here, or set the font to <strong>Shivaji01</strong> in Word."
         },
         {
           "q": "What about the danda (।)?",
@@ -2134,7 +2141,7 @@
         },
         {
           "q": "The output looks like random English letters. Is that a bug?",
-          "a": "No, that is what Preeti text is. It becomes Nepali once the font is applied. Press <strong>Preview (Hindi)</strong> to see it in Preeti here, or set the font to <strong>Preeti</strong> in Word."
+          "a": "No, that is what Preeti text is. It becomes Nepali once the font is applied. Press <strong>Preview (Nepali)</strong> to see it in Preeti here, or set the font to <strong>Preeti</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -2221,7 +2228,7 @@
         },
         {
           "q": "How do I see the Preeti text as letters?",
-          "a": "Press <strong>Preview (Hindi)</strong> above the output, or paste into Word and set the font to <strong>Preeti</strong>. The <strong>Download .docx</strong> button sets the font for you."
+          "a": "Press <strong>Preview (Nepali)</strong> above the output, or paste into Word and set the font to <strong>Preeti</strong>. The <strong>Download .docx</strong> button sets the font for you."
         },
         {
           "q": "Does my document leave my computer?",
@@ -4475,7 +4482,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Himalaya code. Press <strong>Preview (Hindi)</strong> to see it in the Himalaya font here, or set the font to <strong>HIMALAYA TT FONT</strong> in Word."
+          "a": "Yes. That is Himalaya code. Press <strong>Preview (Nepali)</strong> to see it in the Himalaya font here, or set the font to <strong>HIMALAYA TT FONT</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4557,7 +4564,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Akshar code. Press <strong>Preview (Hindi)</strong> to see it in the Akshar font here, or set the font to <strong>Akshar</strong> in Word."
+          "a": "Yes. That is Akshar code. Press <strong>Preview (Nepali)</strong> to see it in the Akshar font here, or set the font to <strong>Akshar</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4639,7 +4646,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is DINA code. Press <strong>Preview (Hindi)</strong> to see it in the DINA font here, or set the font to <strong>DINA-A</strong> in Word."
+          "a": "Yes. That is DINA code. Press <strong>Preview (Nepali)</strong> to see it in the DINA font here, or set the font to <strong>DINA-A</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4721,7 +4728,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Devanagari Bold code. Press <strong>Preview (Hindi)</strong> to see it in the Devanagari Bold font here, or set the font to <strong>DevanagariBold</strong> in Word."
+          "a": "Yes. That is Devanagari Bold code. Press <strong>Preview (Nepali)</strong> to see it in the Devanagari Bold font here, or set the font to <strong>DevanagariBold</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4803,7 +4810,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Narad code. Press <strong>Preview (Hindi)</strong> to see it in the Narad font here, or set the font to <strong>Narad</strong> in Word."
+          "a": "Yes. That is Narad code. Press <strong>Preview (Nepali)</strong> to see it in the Narad font here, or set the font to <strong>Narad</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4885,7 +4892,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Aakriti code. Press <strong>Preview (Hindi)</strong> to see it in the Aakriti font here, or set the font to <strong>Aakriti</strong> in Word."
+          "a": "Yes. That is Aakriti code. Press <strong>Preview (Nepali)</strong> to see it in the Aakriti font here, or set the font to <strong>Aakriti</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -4967,7 +4974,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Anjali code. Press <strong>Preview (Hindi)</strong> to see it in the Anjali font here, or set the font to <strong>Anjali</strong> in Word."
+          "a": "Yes. That is Anjali code. Press <strong>Preview (Nepali)</strong> to see it in the Anjali font here, or set the font to <strong>Anjali</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",
@@ -5131,7 +5138,7 @@
         },
         {
           "q": "The output looks like English letters. Is that right?",
-          "a": "Yes. That is Shivaji02 code. Press <strong>Preview (Hindi)</strong> to see it in the Shivaji02 font here, or set the font to <strong>Shivaji02</strong> in Word."
+          "a": "Yes. That is Shivaji02 code. Press <strong>Preview (Marathi)</strong> to see it in the Shivaji02 font here, or set the font to <strong>Shivaji02</strong> in Word."
         },
         {
           "q": "Some characters were left as they were. Why?",

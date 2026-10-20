@@ -52,13 +52,14 @@ const placeholder = (
 // Every string the script below shows, in this page's language.
 const strings = {
   conversionFailed: t('common.conversionFailed'),
-  hintUnicodeLead: t(`converter.hintUnicodeLead${suffix === 'Mr' ? 'Mr' : ''}`),
+  unicodeLabel: boxName('unicode'),
+  hintUnicodeLead: t(`converter.hintUnicodeLead${suffix && suffix !== 'Mr' ? 'Other' : suffix}`),
   hintUnicodeBody: t('converter.hintUnicodeBody'),
   reverseLink: t('converter.reverseLink'),
   hintEnglishLead: t('converter.hintEnglishLead'),
-  hintEnglishBody: t(`converter.hintEnglishBody${suffix === 'Mr' ? 'Mr' : ''}`),
-  hintLatinLead: t(`converter.hintLatinLead${suffix === 'Mr' ? 'Mr' : ''}`),
-  hintLatinBody: t(`converter.hintLatinBody${suffix === 'Mr' ? 'Mr' : ''}`),
+  hintEnglishBody: t(`converter.hintEnglishBody${suffix && suffix !== 'Mr' ? 'Other' : suffix}`),
+  hintLatinLead: t(`converter.hintLatinLead${suffix && suffix !== 'Mr' ? 'Other' : suffix}`),
+  hintLatinBody: t(`converter.hintLatinBody${suffix && suffix !== 'Mr' ? 'Other' : suffix}`),
   fontMissing: t('converter.fontMissing'),
   nothingToCopy: t('common.nothingToCopy'),
   copied: t('common.copied'),
@@ -274,7 +275,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
                   type="button"
                   data-role="docx-unicode"
                   class="btn btn-ghost"
-                  title={t(`converter.unicodeDocxTitle${suffix === 'Mr' ? 'Mr' : ''}`)}
+                  title={t(`converter.unicodeDocxTitle${suffix && suffix !== 'Mr' ? 'Other' : suffix}`, { unicode: boxName('unicode') })}
                 >
                   <span set:html={render(t('converter.unicodeDocx'))} />
                 </button>
@@ -387,7 +388,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
   }
   <p
     class="cv-strip bg-surface text-xs leading-relaxed text-mute"
-    set:html={render(t('converter.review'))}
+    set:html={render(t(suffix ? 'converter.reviewOther' : 'converter.review'))}
   />
 </div>
 
@@ -476,7 +477,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
       lead.className = 'font-medium text-ink';
 
       if (code === 'expected-legacy-got-unicode') {
-        lead.textContent = fill(L.hintUnicodeLead, { from: fromLabel });
+        lead.textContent = fill(L.hintUnicodeLead, { from: fromLabel, unicode: L.unicodeLabel });
         hint.append(lead, L.hintUnicodeBody);
         if (reversePath) {
           hint.append(': ');
@@ -489,10 +490,10 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
         }
       } else if (code === 'expected-legacy-got-english') {
         lead.textContent = fill(L.hintEnglishLead, { from: fromLabel });
-        hint.append(lead, fill(L.hintEnglishBody, { from: fromLabel }));
+        hint.append(lead, fill(L.hintEnglishBody, { from: fromLabel, unicode: L.unicodeLabel }));
       } else {
-        lead.textContent = L.hintLatinLead;
-        hint.append(lead, L.hintLatinBody);
+        lead.textContent = fill(L.hintLatinLead, { unicode: L.unicodeLabel });
+        hint.append(lead, fill(L.hintLatinBody, { unicode: L.unicodeLabel }));
       }
     }
 

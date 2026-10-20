@@ -11,7 +11,7 @@
 import { langOf, useT, raw } from '../i18n/index.js';
 import { FONTS } from '../lib/fontMaps.js';
 import { WORD_FONTS, isUnicodeKey, docLabel } from '../lib/wordFonts.js';
-import { SCRIPTS, scriptOfFont, scriptOfPage } from '../lib/scripts.js';
+import { SCRIPTS, scriptOfFont, scriptOfPage, devaLangOfPage } from '../lib/scripts.js';
 
 interface Props {
   /** The page's fonts: the document is read as FROM, converted to TO by default. */
@@ -59,7 +59,12 @@ const targetGroups = [
     .filter((g) => g.options.length > 0),
 ];
 const selected = isUnicodeKey(to) ? `unicode|${to === 'mangal' ? 'Mangal' : unicodeFonts[0]}` : `${to}|${WORD_FONTS[to].name}`;
-const intro = fromUnicode ? t('doc.introUnicode') : t('doc.introLegacy', { from: docLabel(from, strings) });
+const devaLang = devaLangOfPage(from, to);
+const unicodeSuffix = devaLang?.suffix ?? SCRIPTS[pageScript].suffix;
+const unicodeLabel = t(unicodeSuffix ? `converter.unicode${unicodeSuffix}` : 'fontBox.unicode');
+const intro = fromUnicode
+  ? t(pageScript !== 'deva' || devaLang ? 'doc.introUnicodeOther' : 'doc.introUnicode', { unicode: unicodeLabel })
+  : t('doc.introLegacy', { from: docLabel(from, strings) });
 ---
 
 <section

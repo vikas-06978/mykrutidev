@@ -23,6 +23,7 @@ import { checkValue } from './check.js';
 import { localizeDocMessage, localizeSummary, TOO_LARGE_EN, ONLY_TYPES_EN } from './docMessages.js';
 import { PAGES, getPage, isIndexable, routeOf, SITE } from '../lib/routes.js';
 import { FONTS, boxLabel } from '../lib/fontMaps.js';
+import { scriptOfPage, devaLangOfPage } from '../lib/scripts.js';
 import { LEVELS } from '../lib/lessons.js';
 import { FINGERS } from '../lib/remington.js';
 import { HANDS } from '../lib/hands.js';
@@ -32,6 +33,22 @@ import * as docConvert from '../lib/docConvert.js';
 
 const { en, hi } = DICTS;
 const RE_DEVA = /[ऀ-ॿ]/;
+
+test('non-Hindi converter FAQs name the preview button actually shown', () => {
+  const suffixes = { mr: 'Mr', ne: 'Ne', gu: 'Gu', ta: 'Ta', bn: 'Bn' };
+  for (const lang of LOCALES) {
+    const dict = DICTS[lang];
+    for (const page of PAGES) {
+      if (!page.from || !page.to) continue;
+      const script = scriptOfPage(page.from, page.to);
+      const contentLang = devaLangOfPage(page.from, page.to)?.lang ?? script;
+      const suffix = suffixes[contentLang];
+      if (!suffix) continue;
+      const faq = JSON.stringify(dict.pages[page.path]?.faq ?? []);
+      assert.ok(!faq.includes(dict.converter.preview), `${lang} ${page.path}: stale Hindi preview label`);
+    }
+  }
+});
 
 // ---------------------------------------------------------------------------
 // The language registry (locales.js)
