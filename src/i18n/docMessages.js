@@ -60,9 +60,10 @@ const fmt = (n) => n.toLocaleString('en-IN');
  * @param {{ paragraphs: number, tables: number, convertedChars: number, alreadyChars: number }} stats
  * @param {'to-unicode' | 'to-kruti' | { from: string, to: string }} direction
  * @param {Record<string, string>} L
+ * @param {{ otherLanguage?: boolean, unicodeLabel?: string }} [options]
  * @returns {{ line: string, share: string | null, warning: string | null }}
  */
-export function localizeSummary(stats, direction, L) {
+export function localizeSummary(stats, direction, L, options = {}) {
   const pair = pairOf(direction);
   const count = (n, one, many) => fill(n === 1 ? one : many, { n: fmt(n) });
   // A spreadsheet counts cells and sheets (sheetConvert.js); a document, paragraphs and tables.
@@ -81,12 +82,14 @@ export function localizeSummary(stats, direction, L) {
   const { convertedChars: c, alreadyChars: a } = stats;
 
   if (c === 0) {
-    const base = fromUnicode ? fill(L.noUnicode, { font: docLabel(pair.to, L) }) : fill(L.noLegacy, { font: from });
+    const base = fromUnicode
+      ? fill(options.otherLanguage ? L.noUnicodeOther : L.noUnicode, { font: docLabel(pair.to, L), unicode: options.unicodeLabel })
+      : fill(L.noLegacy, { font: from });
     const fonts = stats.fonts?.length ? ` ${fill(L.fontsUsed, { fonts: stats.fonts.join(', ') })}` : '';
     return { line, share: null, warning: base + fonts };
   }
-  if (a === 0) return { line, share: L.allConverted, warning: null };
+  if (a === 0) return { line, share: options.otherLanguage ? L.allConvertedOther : L.allConverted, warning: null };
 
   const pct = Math.max(1, Math.floor((100 * c) / (c + a)));
-  return { line, share: fill(L.partial, { pct, rest: 100 - pct, from, to }), warning: null };
+  return { line, share: fill(options.otherLanguage ? L.partialOther : L.partial, { pct, rest: 100 - pct, from, to }), warning: null };
 }

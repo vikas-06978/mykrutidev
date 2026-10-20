@@ -262,9 +262,12 @@
     "fontUnicode": "Unicode",
     "noLegacy": "No {font} text found in this document. Is it already Unicode?",
     "noUnicode": "No Unicode Hindi text found in this document. Is it already in {font}?",
+    "noUnicodeOther": "No {unicode} text found in this document. Is it already in {font}?",
     "fontsUsed": "Fonts used in the cells: {fonts}.",
     "allConverted": "All Hindi text converted.",
-    "partial": "{pct}% of the Hindi text was in {from} and has been converted. {rest}% was already {to} and was left as it is."
+    "allConvertedOther": "All matching text converted.",
+    "partial": "{pct}% of the Hindi text was in {from} and has been converted. {rest}% was already {to} and was left as it is.",
+    "partialOther": "{pct}% of the text was in {from} and has been converted. {rest}% was already {to} and was left as it is."
   },
   "ads": {
     "label": "Advertisement"

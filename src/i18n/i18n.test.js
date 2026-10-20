@@ -434,6 +434,22 @@ describe('document messages', () => {
     assert.match(s.share, /^हिंदी टेक्स्ट का 99% हिस्सा कृतिदेव में था/);
     assert.match(s.share, /1% पहले से यूनिकोड में था/);
   });
+
+  test('other-language document results do not call the text Hindi', () => {
+    const options = { otherLanguage: true, unicodeLabel: 'Unicode / Gujarati' };
+    const direction = { from: 'unicode', to: 'lmg-arun' };
+    const empty = localizeSummary({ paragraphs: 1, tables: 0, convertedChars: 0, alreadyChars: 0 }, direction, L.en, options);
+    assert.match(empty.warning, /Unicode \/ Gujarati/);
+    assert.doesNotMatch(empty.warning, /Hindi/);
+
+    const full = localizeSummary({ paragraphs: 1, tables: 0, convertedChars: 100, alreadyChars: 0 }, direction, L.en, options);
+    assert.equal(full.share, 'All matching text converted.');
+
+    const partial = localizeSummary({ paragraphs: 1, tables: 0, convertedChars: 90, alreadyChars: 10 }, direction, L.en, options);
+    assert.match(partial.share, /90%/);
+    assert.match(partial.share, /10%/);
+    assert.doesNotMatch(partial.share, /Hindi/);
+  });
 });
 
 // ---------------------------------------------------------------------------

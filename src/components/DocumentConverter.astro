@@ -72,6 +72,8 @@ const intro = fromUnicode
   class:list={['doc card scroll-mt-4', !embedded && 'mt-8']}
   data-doc-converter
   data-from={from}
+  data-unicode-label={unicodeLabel}
+  data-other-language={pageScript !== 'deva' || !!devaLang ? 'true' : 'false'}
   data-i18n={JSON.stringify(strings)}
   aria-labelledby={`${id}-title`}
 >
@@ -360,7 +362,10 @@ const intro = fromUnicode
         track('convert_file', { file: checked.kind, from: pair.from, to: pair.to });
 
         // Same stats, same arithmetic as m.summarize(), in this page's words.
-        const s = localizeSummary(stats, pair, L);
+        const s = localizeSummary(stats, pair, L, {
+          otherLanguage: root.dataset.otherLanguage === 'true',
+          unicodeLabel: root.dataset.unicodeLabel,
+        });
         summary.textContent = s.line;
         share.textContent = s.share ?? '';
         share.hidden = !s.share;
