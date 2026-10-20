@@ -110,6 +110,19 @@ test.describe('converter: saves time', () => {
     expect(await clip()).toBe('unchanged');
   });
 
+  test('a rejected clipboard and failed fallback do not report a successful copy', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('denied')) } });
+      document.execCommand = () => false;
+    });
+    await page.goto('/unicode-to-kruti-dev');
+    await input(page).fill('कमल');
+    const copy = page.locator('[data-role="copy-raw"]');
+    await copy.click();
+    await expect(copy).not.toHaveAttribute('data-copied', 'true');
+    await expect(page.locator('[data-converter] [role="status"]')).toContainText('Could not copy');
+  });
+
   test('the shortcut tip names Alt+Shift+C, in English and in Hindi', async ({ page, isMobile }) => {
     test.skip(isMobile, 'the tip is for keyboards; hidden on touch screens');
     for (const [path, words] of [
