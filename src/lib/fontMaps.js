@@ -4155,7 +4155,10 @@ export function isPairUnavailable(fromKey, toKey) {
 // UI to phrase. It never blocks, and it stays quiet unless it is fairly sure -
 // a false alarm on correct input is worse than saying nothing.
 
-const RE_DEVANAGARI = /[ऀ-ॿ]/g;
+// A Unicode box can contain any of the scripts our converters support.
+// Checking only Devanagari misses Gujarati, Bengali and Tamil pasted into
+// their legacy-font boxes, and mislabels mixed-script Unicode as plain Latin.
+const RE_INDIC = /[\u0900-\u0D7F]/g;
 const RE_LATIN_LETTER = /[A-Za-z]/g;
 const count = (s, re) => (s.match(re) || []).length;
 
@@ -4183,18 +4186,17 @@ export function describeMismatch(text, fromKey) {
   // Too little to judge. Nobody wants a warning after two keystrokes.
   if (t.length < 4) return null;
 
-  const deva = count(t, RE_DEVANAGARI);
+  const indic = count(t, RE_INDIC);
   const latin = count(t, RE_LATIN_LETTER);
 
   if (from.kind === 'unicode') {
-    // Devanagari present means they are typing Hindi - fine, whatever else is
-    // in there. Only pure Latin is worth mentioning.
-    return deva === 0 && latin >= 4 ? 'expected-unicode-got-latin' : null;
+    // An Indic script is present: this is not plain Latin input.
+    return indic === 0 && latin >= 4 ? 'expected-unicode-got-latin' : null;
   }
 
-  // Legacy source. Devanagari in the box means they pasted Unicode into the
+  // Legacy source. Indic letters in the box mean they pasted Unicode into the
   // wrong page - this is the single most common misuse.
-  if (deva > 0 && deva >= latin) return 'expected-legacy-got-unicode';
+  if (indic > 0 && indic >= latin) return 'expected-legacy-got-unicode';
   if (looksLikePlainEnglish(t)) return 'expected-legacy-got-english';
   // Chanakya and Patrika keep their letters on the accented codes (क is `·`),
   // so text that is mostly plain ASCII letters is Kruti Dev or Walkman-

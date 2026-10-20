@@ -531,6 +531,23 @@ describe('describeMismatch - the wrong-page hint', () => {
     );
   });
 
+  test('catches Unicode from every supported Indic script in a legacy box', () => {
+    for (const [text, font] of [
+      ['ગુજરાત સરકાર', 'lmg-arun'],
+      ['தமிழ்நாடு அரசு', 'bamini'],
+      ['বাংলাদেশ সরকার', 'sutonny'],
+      ['नेपाल सरकार', 'preeti'],
+    ]) {
+      assert.equal(describeMismatch(text, font), 'expected-legacy-got-unicode', font);
+    }
+  });
+
+  test('Indic text is not mistaken for plain Latin on a Unicode page', () => {
+    assert.equal(describeMismatch('ગુજરાત PAN નંબર', 'unicode'), null);
+    assert.equal(describeMismatch('தமிழ் PAN எண்', 'unicode'), null);
+    assert.equal(describeMismatch('বাংলা PAN নম্বর', 'unicode'), null);
+  });
+
   test('catches plain English on a legacy page', () => {
     assert.equal(
       describeMismatch('this is the report for the office', 'kruti-dev'),
