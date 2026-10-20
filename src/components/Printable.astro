@@ -80,6 +80,12 @@ const circleBareMarks = (text: string) =>
   <span class="pr-note">{pagesNote}</span>
 </div>
 
+{/* A phone reader sees Alt codes before the long chart. The printable itself
+    retains its full instructions and PDF layout below. */}
+{(p.kind === 'alphabet' || p.kind === 'altcodes') && (
+  <p class="mt-3 text-sm text-body sm:hidden" set:html={render(t('print.alpha.alt'))} />
+)}
+
 <div class="pr-area" id="tool" data-kind={p.kind} data-wide={p.landscape ? '' : undefined}>
   {/* On paper the page's own h1 and intro are hidden, so the sheet carries its own. */}
   <div class="pr-only pr-head">
