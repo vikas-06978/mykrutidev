@@ -62,6 +62,7 @@ const strings = {
   hintLatinBody: t(`converter.hintLatinBody${suffix && suffix !== 'Mr' ? 'Other' : suffix}`),
   fontMissing: t('converter.fontMissing'),
   nothingToCopy: t('common.nothingToCopy'),
+  copyFailed: t('tools.copyFailed'),
   copied: t('common.copied'),
   copiedToClipboard: t('common.copiedToClipboard'),
   nothingToDownload: t('common.nothingToDownload'),
@@ -729,7 +730,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
         document.body.append(scratch);
         scratch.select();
         try {
-          document.execCommand('copy');
+          if (!document.execCommand('copy')) throw new Error('Clipboard copy was rejected');
         } finally {
           scratch.remove();
         }
@@ -748,7 +749,11 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
         flush();
         const value = text();
         if (!value) return say(L.nothingToCopy);
-        await writeClipboard(value);
+        try {
+          await writeClipboard(value);
+        } catch {
+          return say(L.copyFailed);
+        }
         // Which button on which converter: never the text itself.
         track('copy_text', { from, to, box: role });
 
