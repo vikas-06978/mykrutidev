@@ -995,6 +995,20 @@ describe('/admin/orders: the organised view', () => {
     ]);
   });
 
+  test('net sales subtract a partial refund and distinguish buyer mail from owner alerts', async () => {
+    const now = Date.parse('2026-10-15T03:30:00Z');
+    const id = await row({ amount: 3900, created: '2026-10-15T03:00:00Z', paid: '2026-10-15T03:00:00Z' });
+    await DB.prepare('UPDATE orders SET refunded_amount = 1000 WHERE id = ?').bind(id).run();
+    const html = await get('/admin/orders', ENV(), undefined, { now });
+    assert.match(html, /Net sales/);
+    assert.match(html, /after recorded refunds, before payment fees/);
+    assert.match(html, /fa-tile-n">₹29 <span class="fa-sub">· 1<\/span><\/span><span class="fa-tile-l">Today/);
+    assert.match(html, /buyer download email failed/);
+    assert.match(html, /Owner sale alerts are separate/);
+    const liveHtml = await get('/admin/orders?mode=live', ENV(), 'https://mykrutidev.com', { now });
+    assert.match(liveHtml, /GA “Purchasers” counts active visitors who have purchased before/);
+  });
+
   test('filters by status, product and a search for an order id, a payment id or part of an email', async () => {
     const a = await row({ email: 'ram@example.com', payment: 'pay_ABC123' });
     const b = await row({ status: 'created', email: 'shyam@example.com' });
@@ -1030,7 +1044,7 @@ describe('/admin/orders: the organised view', () => {
     await row({ mail: 'failed' });
     const html = await get('/admin/orders');
     assert.match(html, /<span class="fa-flag">failed<\/span>/);
-    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email not delivered/);
+    assert.match(html, /1<\/span><span class="fa-tile-l">buyer download email failed/);
   });
 
   test('"Mark refunded" needs the box ticked; every action says what it did', async () => {
@@ -1487,7 +1501,7 @@ describe('/admin/orders: phone, WhatsApp, delivery and a changed email', () => {
     html = await get();
     assert.match(html, /<span class="fa-flag">bounced<\/span>/);
     assert.match(texts()[0], /सही नहीं लग रहा/);
-    assert.match(html, /1<\/span><span class="fa-tile-l">paid, email not delivered/);
+    assert.match(html, /1<\/span><span class="fa-tile-l">buyer download email failed/);
     await DB.prepare("UPDATE orders SET mail_status = 'delivered' WHERE id = ?").bind(id).run();
     assert.match(await get(), /<span class="fa-good">delivered<\/span>/);
   });
