@@ -389,6 +389,8 @@ describe('font links under each converter', async () => {
     }
     assert.ok(!fontLinksFor(page('/')).some((l) => l.key === 'kruti-dev'));
     assert.ok(fontLinksFor(page('/')).some((l) => l.key === 'preeti'));
+    assert.equal(fontLinksFor(page('/marathi-font-converter'))[0].key, 'shivaji');
+    assert.equal(fontLinksFor(page('/unicode-to-dvtt-surekh'))[0].key, 'shivaji');
   });
 
   test('the tool count is every live page All tools lists', () => {

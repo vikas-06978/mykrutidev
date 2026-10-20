@@ -1550,8 +1550,17 @@ export const FONT_LINKS = [
 
 /** FONT_LINKS for one page: live targets only, minus the fonts it converts. */
 export function fontLinksFor(page) {
-  return FONT_LINKS.filter(
+  const links = FONT_LINKS.filter(
     (l) => l.path !== page.path && !l.fonts.includes(page.from) && !l.fonts.includes(page.to) && isLive(getPage(l.path)),
+  );
+  // On a Marathi converter the other Marathi layout is the useful first
+  // alternative. Keep the registry order for the remaining fonts.
+  const legacy = [page.from, page.to].find((key) => FONTS[key]?.kind === 'legacy');
+  const language = FONTS[legacy]?.lang;
+  if (!language || language === 'hi') return links;
+  return links.sort((a, b) =>
+    Number(b.fonts.some((key) => FONTS[key]?.lang === language)) -
+    Number(a.fonts.some((key) => FONTS[key]?.lang === language)),
   );
 }
 
