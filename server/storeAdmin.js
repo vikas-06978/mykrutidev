@@ -288,7 +288,8 @@ ${attention(attn)}
 ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a preview, or before the live keys). No real money moved, and they are never counted in the live totals.</p>' : ''}
 
 <section aria-labelledby="h-totals">
-  <h2 id="h-totals">Money in <span class="fa-sub">${test ? 'TEST orders only: no real money' : 'live orders only'}, paid, India time; refunds not counted</span></h2>
+  <h2 id="h-totals">Net sales <span class="fa-sub">${test ? 'TEST orders only: no real money' : 'live orders only'}, India time, after recorded refunds, before payment fees</span></h2>
+  ${test ? '' : '<p class="fa-sub">These are recorded orders, not your Razorpay payout balance. GA “Purchasers” counts active visitors who have purchased before; it does not confirm a new order today.</p>'}
   <div class="fa-tiles">
     ${periods.map((p) => tile(`${esc(price(p.revenue))} <span class="fa-sub">· ${p.count}</span>`, p.label)).join('')}
   </div>
@@ -296,8 +297,9 @@ ${test ? '<p class="fa-banner">Test orders: made with Razorpay test keys (on a p
     ${tile(totals.paid, 'paid orders')}
     ${tile(totals.refunded, 'refunded')}
     ${tile(totals.open, 'started, not paid (kept 7 days)')}
-    ${tile(totals.mailFailed, 'paid, email not delivered')}
+    ${tile(totals.mailFailed, 'buyer download email failed')}
   </div>
+  <p class="fa-sub">The email tile tracks the buyer’s download email. Owner sale alerts are separate and are not counted here.</p>
 </section>
 
 <section aria-labelledby="h-products">
@@ -505,13 +507,13 @@ export async function handleAdminOrders(request, env, deps = {}) {
       .first(),
     db
       .prepare(
-        `SELECT ${PERIODS.map((_, i) => `COALESCE(SUM(CASE WHEN paid_at >= ?${i + 1} THEN amount END), 0) AS r${i}, SUM(paid_at >= ?${i + 1}) AS c${i}`).join(', ')} FROM orders WHERE status = 'paid' AND ${MODE_SQL.replace('?', `?${PERIODS.length + 1}`)}`,
+        `SELECT ${PERIODS.map((_, i) => `COALESCE(SUM(CASE WHEN paid_at >= ?${i + 1} THEN MAX(amount - COALESCE(refunded_amount, 0), 0) END), 0) AS r${i}, SUM(paid_at >= ?${i + 1}) AS c${i}`).join(', ')} FROM orders WHERE status = 'paid' AND ${MODE_SQL.replace('?', `?${PERIODS.length + 1}`)}`,
       )
       .bind(...PERIODS.map(([, t]) => t), filter.mode)
       .first(),
     db
       .prepare(
-        `SELECT product_id, SUM(status = 'paid') AS paid, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS revenue, SUM(status = 'refunded') AS refunded FROM orders WHERE ${MODE_SQL} GROUP BY product_id`,
+        `SELECT product_id, SUM(status = 'paid') AS paid, COALESCE(SUM(CASE WHEN status = 'paid' THEN MAX(amount - COALESCE(refunded_amount, 0), 0) END), 0) AS revenue, SUM(status = 'refunded') AS refunded FROM orders WHERE ${MODE_SQL} GROUP BY product_id`,
       )
       .bind(filter.mode)
       .all(),
