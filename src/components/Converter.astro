@@ -52,13 +52,13 @@ const placeholder = (
 // Every string the script below shows, in this page's language.
 const strings = {
   conversionFailed: t('common.conversionFailed'),
-  hintUnicodeLead: t('converter.hintUnicodeLead'),
+  hintUnicodeLead: t(`converter.hintUnicodeLead${suffix === 'Mr' ? 'Mr' : ''}`),
   hintUnicodeBody: t('converter.hintUnicodeBody'),
   reverseLink: t('converter.reverseLink'),
   hintEnglishLead: t('converter.hintEnglishLead'),
-  hintEnglishBody: t('converter.hintEnglishBody'),
-  hintLatinLead: t('converter.hintLatinLead'),
-  hintLatinBody: t('converter.hintLatinBody'),
+  hintEnglishBody: t(`converter.hintEnglishBody${suffix === 'Mr' ? 'Mr' : ''}`),
+  hintLatinLead: t(`converter.hintLatinLead${suffix === 'Mr' ? 'Mr' : ''}`),
+  hintLatinBody: t(`converter.hintLatinBody${suffix === 'Mr' ? 'Mr' : ''}`),
   fontMissing: t('converter.fontMissing'),
   nothingToCopy: t('common.nothingToCopy'),
   copied: t('common.copied'),
@@ -274,7 +274,7 @@ const inputCss = inputIsUnicode && otherScript ? script.css : fromFont.css;
                   type="button"
                   data-role="docx-unicode"
                   class="btn btn-ghost"
-                  title={t('converter.unicodeDocxTitle')}
+                  title={t(`converter.unicodeDocxTitle${suffix === 'Mr' ? 'Mr' : ''}`)}
                 >
                   <span set:html={render(t('converter.unicodeDocx'))} />
                 </button>

@@ -176,6 +176,7 @@
     "docxTitle": "Word file with the {font} font already applied",
     "unicodeDocx": "Unicode .docx",
     "unicodeDocxTitle": "Word file in Unicode Hindi, readable without any legacy font",
+    "unicodeDocxTitleMr": "Word file in Unicode Marathi, readable without any legacy font",
     "whatsapp": "WhatsApp",
     "keepEnglish": "Keep English words and numbers unchanged",
     "keepEnglishHelp": "While this is ticked, dates, numbers and percentages are kept as they are, and English words are detected and kept. URLs and email addresses are never changed. Detection is a best guess: because a legacy font stores Hindi as plain ASCII, an unusual proper noun can still slip through.",
@@ -188,12 +189,16 @@
     "cut055Help": "Tick this only for text typed in Kruti Dev 055. Its number keys type Hindi digits (1 is १), and some Alt codes type other letters (Alt+0131 is घ). Text in Kruti Dev 010 to 016 needs no tick.",
     "otherDirection": "Need the other direction? {title}",
     "hintUnicodeLead": "This looks like Unicode Hindi, not {from}. ",
+    "hintUnicodeLeadMr": "This looks like Unicode Marathi, not {from}. ",
     "hintUnicodeBody": "You may want the converter that goes the other way",
     "reverseLink": "{to} to {from}",
     "hintEnglishLead": "This doesn't look like {from} text. ",
     "hintEnglishBody": "{from} stores Hindi as ASCII, so a real {from} document looks like gibberish here. Try the example button below the box.",
+    "hintEnglishBodyMr": "{from} stores Marathi as legacy character codes, so a real {from} document may look like symbols here. Try the example button below the box.",
     "hintLatinLead": "This doesn't look like Hindi text. ",
+    "hintLatinLeadMr": "This doesn't look like Marathi text. ",
     "hintLatinBody": "Type or paste Hindi in the box, or use the example button to see what this page expects.",
+    "hintLatinBodyMr": "Type or paste Marathi in the box, or use the example button to see what this page expects.",
     "fontMissing": "{font} not available",
     "sharingFirst": "Sharing the first {n} characters",
     "previewGu": "Preview (Gujarati)",
@@ -2298,7 +2303,7 @@
         },
         {
           "q": "The output looks like symbols. Is that right?",
-          "a": "Yes. That is DV-TT code. Press <strong>Preview (Hindi)</strong> to see it in the font here, or set the font to <strong>DV-TTSurekh</strong> in Word."
+          "a": "Yes. That is DV-TT code. Press <strong>Preview (Marathi)</strong> to see it in the font here, or set the font to <strong>DV-TTSurekh</strong> in Word."
         },
         {
           "q": "Does it work with DV-TT Yogesh?",
