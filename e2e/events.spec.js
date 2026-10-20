@@ -70,6 +70,23 @@ test('shop: product view and the Starter card, with product and price only', asy
   expect(p.params).toEqual({ promotion_id: 'practice-passages', items: [{ item_id: 'kruti-dev-7-day-starter' }] });
 });
 
+test('store listing tracks its product and a card selection without visitor data', async ({ page }) => {
+  await page.goto('/store/');
+  await expect.poll(() => events(page, 'view_item_list')).toHaveLength(1);
+  expect((await events(page, 'view_item_list'))[0].params).toEqual({
+    item_list_id: 'store',
+    items: [{ item_id: 'kruti-dev-7-day-starter', price: 39 }],
+  });
+  await page.locator('[data-store-list] .store-product-copy a').first().evaluate((link) => {
+    link.addEventListener('click', (event) => event.preventDefault());
+  });
+  await page.locator('[data-store-list] .store-product-copy a').first().click();
+  expect((await events(page, 'select_item'))[0].params).toEqual({
+    item_list_id: 'store',
+    items: [{ item_id: 'kruti-dev-7-day-starter', price: 39 }],
+  });
+});
+
 test('a purchase kept in this browser: the product page offers the download again, and puts the price aside', async ({ page }) => {
   const o = 'o' + 'a'.repeat(24);
   const t = 'tok_' + 'x'.repeat(30);

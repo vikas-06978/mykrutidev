@@ -20,7 +20,7 @@ const products = shownProducts();
   ) : (
     <ul class="mt-8 grid gap-4 sm:grid-cols-2" data-store-list data-count={products.length}>
       {products.map((p) => (
-        <li class="card store-product p-5">
+        <li class="card store-product p-5" data-item-id={p.id} data-price={String(p.pricePaise / 100)}>
           {p.images && (
             <a href={to(`/store/${p.id}`)} tabindex="-1" aria-hidden="true" class="store-product-cover block overflow-hidden rounded-md border border-hairline">
               <img src={`/store-img/${p.images.cover}`} alt={t('store.previewCover')} width="640" height="906" loading="lazy" decoding="async" class="block w-full object-contain" />
@@ -42,6 +42,28 @@ const products = shownProducts();
     </ul>
   )
 }
+
+<script>
+  import { track } from '../scripts/track.js';
+
+  const list = document.querySelector<HTMLElement>('[data-store-list]');
+  if (list) {
+    const items = Array.from(list.querySelectorAll<HTMLElement>('[data-item-id]'), (card) => ({
+      item_id: card.dataset.itemId,
+      price: Number(card.dataset.price),
+    }));
+    track('view_item_list', { item_list_id: 'store', items });
+    list.addEventListener('click', (event) => {
+      const link = event.target instanceof Element ? event.target.closest('a') : null;
+      const card = link?.closest<HTMLElement>('[data-item-id]');
+      if (!card || !list.contains(card)) return;
+      track('select_item', {
+        item_list_id: 'store',
+        items: [{ item_id: card.dataset.itemId, price: Number(card.dataset.price) }],
+      });
+    });
+  }
+</script>
 
 <style>
   .store-product { display: flex; flex-direction: column; min-width: 0; }
