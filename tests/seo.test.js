@@ -326,6 +326,13 @@ describe('sharing previews and structured data', () => {
         assert.ok(article, `${u}: no Article`);
         assert.equal(article.dateModified, g.updated, u);
         assert.ok(article.author?.name && article.headline && article.image, `${u}: Article fields`);
+        // One named maintainer, as the About page says: not an organisation called a "team".
+        assert.equal(article.author['@type'], 'Person', `${u}: author type`);
+      }
+      // The visible byline names the same person in every language.
+      for (const l of LOCALES) {
+        const name = DICTS[l].article.author;
+        assert.ok(pages.get(`${l === 'en' ? '' : `/${l}`}${guidePath(g)}/`).includes(name), `${l}: ${guidePath(g)} names ${name}`);
       }
     }
   });
