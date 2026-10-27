@@ -9,7 +9,7 @@ Google gave no page and no reason beyond "low value content". **This audit does 
 | Limit | Effect |
 | --- | --- |
 | `https://mykrutidev.com` is unreachable from the audit environment (the HTTPS proxy refuses it). | **Nothing was checked on the live site.** Whether any fix, or any earlier fix, is live is **unverified**. Everything below was measured on a local production build of `origin/main` (`npm run build`), served with the real `_headers` and `_redirects`. |
-| The official AdSense and Google Publisher policy pages could not be fetched (`support.google.com` and `developers.google.com` are refused). | No official policy text is quoted. The only sources found were third-party and community pages (links in section 7). Read the official **AdSense Program policies** and **Google Publisher Policies** yourself before reapplying. |
+| The AdSense and Publisher Policy pages were blocked at first and read later, once `support.google.com` was allowed. `developers.google.com` is still blocked. | Section 7 quotes the pages that were read. The Google Search spam-policy page itself was not read. |
 | No Search Console access. | Indexing, crawl status, coverage and any manual action are **unverified**. |
 | `fix/adsense-content-quality` and commit `ac766cf` are not in this repository (`git branch -a`, `git cat-file`). | They were not reviewed. Nothing was assumed deployed. See section 6. |
 | Translations were checked by script only. | No human-language review. Section 3, finding P5. |
@@ -111,15 +111,28 @@ The added examples are data, not prose: every row is a legacy-font string and it
 | Ad eligibility restrictions | Present (`NO_ADS`, `adsAllowedOn`, loader guarded by it); hubs missing (F4) | Completed |
 | Privacy-policy array mutation | Present and unfixed (F2) | Fixed |
 
-## 7. Policy sources
+## 7. Policy sources (read on 27 October 2026, after the first pass)
 
-Not opened by this audit (blocked): <https://support.google.com/adsense/answer/48182> (AdSense Program policies) and <https://support.google.com/adsense/answer/10502938> (Google Publisher Policies). The addresses are from memory and must be checked.
+The pages below were fetched and read in full once the network policy allowed `support.google.com`. `developers.google.com` (Search spam policies) was still blocked, so that page is **not** read; the thin-content text comes from the Search Console manual-actions page.
 
-What was found instead, none of it official policy text:
+- AdSense content and user experience: <https://support.google.com/adsense/answer/10015918>
+  - "make sure that your pages have enough unique content so that we can determine what your site is about"
+  - "If you have many pages that are similar or have very similar content, consider expanding each page or consolidating the pages into one."
+  - "Continually adding new and unique content will keep your site fresh and generate more returning visitors."
+  - Spam policies "recommend that you do not use cloaking and doorway pages, pages with little to no content, or pages optimized for specific keywords or phrases."
+- Inventory value, ads on screens without publisher content: <https://support.google.com/publisherpolicies/answer/11112688>
+  - "We do not allow Google-served ads on screens without publisher-content or with low-value content"; "Ads should not be placed on 'dead end' or no content screens (e.g., Thank You, Exit, Error pages)"; "Don't place ads on automatically generated content without manual review or curation."
+- Replicated content: <https://support.google.com/publisherpolicies/answer/11190248> ("Automatically generated content without manual review or curation"; "Sites that copy content ... modify it slightly ... using automated techniques").
+- Spam policies tip page: <https://support.google.com/publisherpolicies/answer/11035931> ("doorway pages ... or other 'cookie cutter' approaches ... with little or no original content").
+- Unsupported languages: <https://support.google.com/publisherpolicies/answer/10436912>. English, Hindi, Bengali, Marathi, Tamil, Gujarati and Punjabi are all on the supported list, so **language is not a blocker**.
+- Publisher Policies index: <https://support.google.com/adsense/answer/10502938>. Thin content with little or no added value (Search Console manual actions): <https://support.google.com/webmasters/answer/9044175> (examples: thin affiliate pages, scraped content, doorways).
 
-- <https://support.google.com/adsense/community-guide/241032356/how-can-you-solve-the-low-value-content-adsense-disapproval-challenge?hl=en> (community guide)
-- <https://support.google.com/adsense/thread/139861501/low-value-content-error-fix?hl=en> (community thread)
-- <https://services.google.com/fh/files/misc/all-in-one-adsense-policy-compliant-guide_2016.pdf> (Google, 2016)
+What the text means for this site, as a reading and not as Google's decision:
+
+- It supports P1 and P4: similar pages should be expanded or consolidated, and pages with little content are a stated concern.
+- It supports keeping ads off Thank-you and error pages (the site already does).
+- **New caution on this change.** "Automatically generated content without manual review or curation" is named. The Worked-examples rows are generated by code, but every row is checked by tests and an independent fixture, and a person reviewed the design. The five newer languages' strings and the machine-drafted translations have no native review (P5). Treat them as a risk until reviewed.
+- None of the pages states a numeric threshold, and none says anything about traffic. The rejection message's "consistent presence" and "sustained user interest" cannot be fixed in code.
 
 ## 8. Tests
 
