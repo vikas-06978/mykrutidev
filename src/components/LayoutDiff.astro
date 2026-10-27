@@ -1,0 +1,87 @@
+---
+/**
+ * "How {font} compares with {Kruti Dev / Preeti / Shusha}", under the worked
+ * examples on a Unicode <-> legacy font page. Read from the two fonts' key maps
+ * by src/lib/layoutDiff.js, so it cannot say anything the converter does not do.
+ * Plain HTML, no script.
+ */
+import { layoutDiffFor, display } from '../lib/layoutDiff.js';
+import { SCRIPTS, scriptOfPage, devaLangOfPage } from '../lib/scripts.js';
+import { langOf, useT, fill } from '../i18n/index.js';
+
+interface Props {
+  from: string;
+  to: string;
+}
+const { from, to } = Astro.props;
+const { t } = useT(langOf(Astro.url));
+
+const d = layoutDiffFor(from, to);
+const scriptKey = scriptOfPage(from, to);
+const devaLang = scriptKey === 'deva' ? devaLangOfPage(from, to) : null;
+const textLang = scriptKey !== 'deva' ? SCRIPTS[scriptKey].lang : devaLang ? devaLang.lang : 'hi';
+const vars = d
+  ? {
+      font: t(`fontBox.${d.font}`),
+      ref: t(`fontBox.${d.ref}`),
+      total: String(d.total),
+      same: String(d.same),
+      diff: String(d.diff.length),
+      extra: String(d.extra.length),
+      count: String(d.missing),
+    }
+  : {};
+---
+
+{
+  d && (
+    <section aria-labelledby="layout-diff-heading" class="mt-10" data-layout-diff>
+      <h2 id="layout-diff-heading" class="text-xl">{fill(t('layoutDiff.heading'), vars)}</h2>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-body">{fill(t('layoutDiff.intro'), vars)}</p>
+      {d.diff.length > 0 && (
+        <div class="mt-5" data-layout-diff-differs>
+          <h3 class="text-base font-semibold text-ink">{t('layoutDiff.diffHeading')}</h3>
+          <div class="mt-2 overflow-x-auto">
+            <table class="w-full max-w-xl text-sm">
+              <thead>
+                <tr class="text-left text-xs font-semibold tracking-wide text-mute uppercase">
+                  <th class="py-1.5 pr-4 font-semibold">{t('layoutDiff.colKey')}</th>
+                  <th class="py-1.5 pr-4 font-semibold" translate="no">{vars.ref}</th>
+                  <th class="py-1.5 font-semibold" translate="no">{vars.font}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.diff.map((r) => (
+                  <tr class="border-t border-line">
+                    <td class="py-1.5 pr-4"><code translate="no">{r.key}</code></td>
+                    <td class="py-1.5 pr-4"><span lang={textLang} translate="no">{display(r.ref)}</span></td>
+                    <td class="py-1.5"><span lang={textLang} translate="no">{display(r.own)}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      {d.extra.length > 0 && (
+        <div class="mt-5" data-layout-diff-extra>
+          <h3 class="text-base font-semibold text-ink">{fill(t('layoutDiff.extraHeading'), vars)}</h3>
+          <ul class="mt-2 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 md:grid-cols-4">
+            {d.extra.map((r) => (
+              <li>
+                <code translate="no">{r.key}</code>
+                <span aria-hidden="true"> → </span>
+                <span lang={textLang} translate="no">{display(r.own)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {d.missing > 0 && (
+        <p class="mt-4 max-w-2xl text-sm leading-relaxed text-body" data-layout-diff-missing>
+          {fill(t('layoutDiff.missing'), vars)}
+        </p>
+      )}
+    </section>
+  )
+}

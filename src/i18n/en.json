@@ -6193,5 +6193,13 @@
     "colonToUnicode": "In this font the colon in a heading such as <span lang=\"hi\" translate=\"no\">विषय:</span> is typed with the visarga key. It converts to the visarga <span lang=\"hi\" translate=\"no\">ः</span>, which looks like a colon but is a different character. If a portal or a search needs a real colon, replace it.",
     "colonFromUnicode": "In this font a colon after a word is typed with the visarga key, because the colon key draws <span lang=\"hi\" translate=\"no\">रू</span> here. Pasted into a program without the font, it shows as a percent sign.",
     "unmapped": "This font has no key for these letters and signs: {list}. They are left unchanged and flagged under the output box, and Word draws them in another font."
+  },
+  "layoutDiff": {
+    "heading": "How {font} compares with {ref}",
+    "intro": "{font} types {same} of the {total} keys of {ref} the same way. Keys with a different letter: {diff}. Keys only {font} has: {extra}. That is why many documents convert alike in both, and why the keys below are worth knowing. All of it is read from the same key maps the converter uses.",
+    "diffHeading": "Keys that type something different",
+    "extraHeading": "Keys only {font} has",
+    "colKey": "Key",
+    "missing": "Keys of {ref} missing from the map of {font}: {count}. They stay as they were typed."
   }
 }

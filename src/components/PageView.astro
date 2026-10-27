@@ -8,6 +8,7 @@ import TypingTutor from './TypingTutor.astro';
 import Faq from './Faq.astro';
 import HowTo from './HowTo.astro';
 import ConverterExamples from './ConverterExamples.astro';
+import LayoutDiff from './LayoutDiff.astro';
 import HomeTasks from './HomeTasks.astro';
 import GuidedTour from './GuidedTour.astro';
 import Printable from './Printable.astro';
@@ -237,6 +238,7 @@ const productLd =
 
     {/* Real phrases run through this converter, and what to know before trusting its output. */}
     {live && page.from && page.to && <ConverterExamples from={page.from} to={page.to} />}
+    {live && page.from && page.to && <LayoutDiff from={page.from} to={page.to} />}
 
     {/* An ad, only once AdSense is switched on: under the tool and its steps, never above them. */}
     {live && <AdSlot />}
