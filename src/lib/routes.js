@@ -38,7 +38,7 @@
 
 import { FONTS, isPairAccurate } from './fontMaps.js';
 import { guideRoutes } from './guides.js';
-import { PREFIXED_LOCALES } from '../i18n/locales.js';
+import { PREFIXED_LOCALES, DEFAULT_LOCALE, isIndexedLocale } from '../i18n/locales.js';
 import { TOOL_PATHS, TYPING_PATHS } from './toolPages.js';
 import { PRODUCTS, shownProducts, hasPage } from './store.js';
 import { WORD_FONTS, isUnicodeKey } from './wordFonts.js';
@@ -1483,9 +1483,20 @@ export function routeOf(urlPath) {
   return m && PREFIXED_LOCALES.includes(m[1]) ? m[2] || '/' : clean;
 }
 
-/** Used by the sitemap integration's `filter()`. Every language alike. */
+/** The language of a URL path: "/hi/x/" -> "hi", "/x/" -> "en". */
+const localeOfUrlPath = (urlPath) => {
+  const m = urlPath.match(/^\/([a-z]{2})(?:\/|$)/);
+  return m && PREFIXED_LOCALES.includes(m[1]) ? m[1] : DEFAULT_LOCALE;
+};
+
+/**
+ * Used by the sitemap integration's `filter()`. The same rule for every
+ * language, and only in the languages put forward for indexing (locales.js).
+ */
 export function isIndexable(absoluteUrl) {
-  const path = routeOf(new URL(absoluteUrl).pathname);
+  const pathname = new URL(absoluteUrl).pathname;
+  if (!isIndexedLocale(localeOfUrlPath(pathname))) return false;
+  const path = routeOf(pathname);
   if (GUIDE_ROUTES.has(path)) return true;
   const page = BY_PATH.get(path);
   return page ? isSelfCanonical(page) : false;

@@ -28,7 +28,7 @@ import { readAds, adsTxt, adsAllowedOn } from '../src/lib/ads.js';
 import { examplesFor, limitsFor, MIN_ROWS } from '../src/lib/converterExamples.js';
 import { layoutDiffFor, display } from '../src/lib/layoutDiff.js';
 import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
-import { LOCALES, PREFIXED_LOCALES, LOCALE_META } from '../src/i18n/locales.js';
+import { LOCALES, PREFIXED_LOCALES, LOCALE_META, INDEXED_LOCALES, isIndexedLocale } from '../src/i18n/locales.js';
 import { DICTS } from '../src/i18n/index.js';
 
 /** The language of a built page path: "/bn/x" -> "bn", "/x" -> "en". */
@@ -131,18 +131,19 @@ describe('language and SEO tags', () => {
     }
   });
 
-  test('hreflang for every language and x-default on every page, pointing at the same set', () => {
+  test('hreflang for every indexed language and x-default on every indexed page, pointing at the same set', () => {
     for (const p of english()) {
       // Canonical elsewhere: no hreflang set at all (Base.astro).
       const want = PAGES.find((x) => x.path === p)?.canonical ? {} : {
-        ...Object.fromEntries(LOCALES.map((l) => [LOCALE_META[l].hreflang, abs(inLocale(p, l))])),
+        ...Object.fromEntries(INDEXED_LOCALES.map((l) => [LOCALE_META[l].hreflang, abs(inLocale(p, l))])),
         'x-default': abs(p),
       };
       for (const l of LOCALES) {
         const q = inLocale(p, l);
         const links = [...pages.get(q).matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"/g)];
         const got = Object.fromEntries(links.map((m) => [m[1], m[2]]));
-        assert.deepEqual(got, want, q);
+        // A language held back from indexing (locales.js) carries no set.
+        assert.deepEqual(got, isIndexedLocale(l) ? want : {}, q);
       }
     }
   });
@@ -177,16 +178,17 @@ describe('language and SEO tags', () => {
     }
   });
 
-  test('noindex is the same in every language', () => {
+  test('noindex is the same in every indexed language, and on in every held-back one', () => {
     for (const p of english()) {
       const want = pages.get(p).includes('name="robots" content="noindex');
       for (const l of PREFIXED_LOCALES) {
-        assert.equal(pages.get(inLocale(p, l)).includes('name="robots" content="noindex'), want, inLocale(p, l));
+        const got = pages.get(inLocale(p, l)).includes('name="robots" content="noindex');
+        assert.equal(got, isIndexedLocale(l) ? want : true, inLocale(p, l));
       }
     }
   });
 
-  test('the sitemap lists every indexable page in every language, with hreflang', () => {
+  test('the sitemap lists every indexable page in every indexed language, with hreflang', () => {
     const xml = readdirSync(DIST)
       .filter((f) => /^sitemap-\d+\.xml$/.test(f))
       .map((f) => readFileSync(join(DIST, f), 'utf8'))
@@ -194,9 +196,13 @@ describe('language and SEO tags', () => {
     const locs = new Set([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/\/$/, '')));
     for (const p of PAGES) {
       const inSitemap = (u) => locs.has(abs(u).replace(/\/$/, ''));
-      for (const l of LOCALES) assert.equal(inSitemap(inLocale(p.path, l)), isIndexable(abs(p.path)), `${l} ${p.path}`);
+      for (const l of LOCALES) {
+        assert.equal(inSitemap(inLocale(p.path, l)), isIndexedLocale(l) && isIndexable(abs(p.path)), `${l} ${p.path}`);
+      }
     }
-    for (const l of LOCALES) assert.match(xml, new RegExp(`hreflang="${LOCALE_META[l].hreflang}"`));
+    for (const l of LOCALES) {
+      assert.equal(new RegExp(`hreflang="${LOCALE_META[l].hreflang}"`).test(xml), isIndexedLocale(l), `sitemap hreflang ${l}`);
+    }
   });
 });
 

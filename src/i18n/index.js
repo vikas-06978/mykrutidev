@@ -25,9 +25,9 @@ import ta from './ta.json' with { type: 'json' };
 import gu from './gu.json' with { type: 'json' };
 import pa from './pa.json' with { type: 'json' };
 import { fill } from './fill.js';
-import { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES, isLocale } from './locales.js';
+import { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES, INDEXED_LOCALES, isIndexedLocale, isLocale } from './locales.js';
 
-export { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES };
+export { LOCALES, DEFAULT_LOCALE, LOCALE_META, PREFIXED_LOCALES, INDEXED_LOCALES, isIndexedLocale };
 
 /** One dictionary per language in LOCALES (see locales.js to add one). */
 export const DICTS = { en, hi, bn, mr, ta, gu, pa };
