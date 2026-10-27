@@ -3503,7 +3503,7 @@
       "nav": "Contact",
       "h1": "Contact MyKrutiDev",
       "title": "Contact MyKrutiDev | Report a Conversion Error",
-      "description": "Email the MyKrutiDev team to report a wrong conversion, a typing tutor problem or a mistake in a guide. We read every message.",
+      "description": "Email MyKrutiDev to report a wrong conversion, a typing tutor problem or a mistake in a guide. We read every message.",
       "lede": "The quickest way to reach us is email. We read every message, and a report of a wrong conversion is the most useful thing you can send.",
       "body": [
         "<h2>Email</h2>",
@@ -5544,15 +5544,15 @@
     "h1": "Hindi Typing and Font Guides",
     "title": "Hindi Typing & Kruti Dev Guides | Install, Convert, Type Faster",
     "description": "Practical guides to Kruti Dev and Unicode Hindi: installing the font, fixing English letters and boxes, converting Word files, and passing typing exams.",
-    "lede": "Step-by-step answers to the problems people bring to this site, each with a link to the tool that fixes it. Written and kept up to date by the MyKrutiDev team."
+    "lede": "Step-by-step answers to the problems people bring to this site, each with a link to the tool that fixes it. Written and kept up to date by the site's independent maintainer."
   },
   "article": {
-    "author": "MyKrutiDev team",
+    "author": "Vikas Rathore",
     "by": "By",
     "updated": "Updated",
     "useTool": "Open the tool: {tool}",
     "aboutAuthor": "About the author",
-    "authorBio": "the people who build and test the converters and the typing tutor on this site. Every rule in these guides is checked against the Kruti Dev 010 font and the converter's test suite before it is published.",
+    "authorBio": "the independent developer and maintainer of MyKrutiDev. The converters and the typing tutor on this site are built and tested by the same person, and the Kruti Dev keyboard chart is read out of the Kruti Dev 010 font file.",
     "corrections": "Found a mistake? <a href=\"/contact\">Tell us</a> and we will fix it.",
     "toolsHeading": "Tools for this",
     "moreGuides": "More guides"
@@ -6177,5 +6177,21 @@
     "cardHelp": "Lost the link or need help? Write to us at {contact} with your order number.",
     "forget": "Forget this purchase on this device",
     "forgotten": "Removed from this device. The link in your email still works."
+  },
+  "examples": {
+    "heading": "Worked examples",
+    "intro": "Real phrases run through this converter, so you can compare them with your own text and see what the page does before you paste anything.",
+    "note": "Each example comes from this converter's own rules and is checked in both directions every time the site is built. A phrase that fails the check is left out.",
+    "imatra": "The short i sign is typed before its letter in the old font",
+    "reph": "The reph (<span lang=\"hi\" translate=\"no\">र्</span>) is typed after its syllable in the old font",
+    "rakar": "A letter with <span lang=\"hi\" translate=\"no\">र</span> (ra) joined underneath",
+    "conjunct": "Letters that join into one shape",
+    "sentence": "A whole sentence with its full stop",
+    "word": "A single word",
+    "phrase": "A short phrase",
+    "limitsHeading": "Good to know",
+    "colonToUnicode": "In this font the colon in a heading such as <span lang=\"hi\" translate=\"no\">विषय:</span> is typed with the visarga key. It converts to the visarga <span lang=\"hi\" translate=\"no\">ः</span>, which looks like a colon but is a different character. If a portal or a search needs a real colon, replace it.",
+    "colonFromUnicode": "In this font a colon after a word is typed with the visarga key, because the colon key draws <span lang=\"hi\" translate=\"no\">रू</span> here. Pasted into a program without the font, it shows as a percent sign.",
+    "unmapped": "This font has no key for these letters and signs: {list}. They are left unchanged and flagged under the output box, and Word draws them in another font."
   }
 }

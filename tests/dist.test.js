@@ -25,6 +25,7 @@ import jsQR from 'jsqr';
 import { readSupport, QUIET_ZONE } from '../src/lib/support.build.js';
 import { GA_ID, analyticsScript } from '../src/lib/analytics.js';
 import { readAds, adsTxt, adsAllowedOn } from '../src/lib/ads.js';
+import { examplesFor, limitsFor, MIN_ROWS } from '../src/lib/converterExamples.js';
 import { APPS, INSTAGRAM, LINKED_TOOLS, appHref, instagramUrl } from '../src/lib/brand.js';
 import { LOCALES, PREFIXED_LOCALES, LOCALE_META } from '../src/i18n/locales.js';
 import { DICTS } from '../src/i18n/index.js';
@@ -1055,6 +1056,44 @@ describe('AdSense follows its build variables', () => {
       assert.equal(/adsbygoogle\.js/.test(html), adsAllowedOn(route), u);
     }
     assert.match(headers(), /pagead2\.googlesyndication\.com/);
+  });
+});
+
+describe('worked examples under every converter', () => {
+  const converterPages = PAGES.filter((p) => p.from && p.to && isLive(p));
+  const decode = (t) => t.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const cells = (html, role) => [...html.matchAll(new RegExp(`data-role="${role}"[^>]*>([^<]*)<`, 'g'))].map((m) => decode(m[1]));
+
+  for (const l of LOCALES) {
+    test(`${l}: each converter page shows the same checked rows the library produces, in its own language`, () => {
+      for (const p of converterPages) {
+        const url = inLocale(p.path, l);
+        const html = pages.get(url);
+        assert.ok(html, `${url} was built`);
+        const want = examplesFor(p.from, p.to);
+        assert.ok(want && want.length >= MIN_ROWS, `${url}: rows`);
+        assert.equal((html.match(/<li[^>]*\bdata-example\b/g) ?? []).length, want.length, `${url}: number of rows`);
+        assert.deepEqual(cells(html, 'example-source'), want.map((r) => r.source), `${url}: source column`);
+        assert.deepEqual(cells(html, 'example-result'), want.map((r) => r.result), `${url}: result column`);
+        assert.ok(html.includes(DICTS[l].examples.heading), `${url}: heading in ${l}`);
+        // "Good to know" appears exactly when the code has something to say
+        const limits = limitsFor(p.from, p.to);
+        const has = Boolean(limits.colon) || limits.unmapped.length > 0;
+        assert.equal(/\bdata-limits\b/.test(html), has, `${url}: limits block`);
+        if (limits.colon === 'toUnicode') assert.ok(html.includes(DICTS[l].examples.colonToUnicode.slice(0, 30)), `${url}: colon note`);
+        if (limits.colon === 'fromUnicode') assert.ok(html.includes(DICTS[l].examples.colonFromUnicode.slice(0, 30)), `${url}: colon note`);
+      }
+    });
+  }
+
+  test('pages that are not converters show none', () => {
+    const converters = new Set(converterPages.map((p) => p.path));
+    for (const p of PAGES.filter((q) => isLive(q) && !converters.has(q.path))) {
+      for (const l of LOCALES) {
+        const html = pages.get(inLocale(p.path, l));
+        if (html) assert.doesNotMatch(html, /\bdata-examples\b/, inLocale(p.path, l));
+      }
+    }
   });
 });
 

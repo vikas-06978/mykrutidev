@@ -112,6 +112,33 @@ Two things to know about that table:
 (including case), and sniffs each file's magic bytes
 against its declared format.
 
+## A font Chrome refuses to load (and how that is checked)
+
+Chrome runs every downloaded font through its sanitizer (OTS) and silently drops
+one it dislikes. A page that previews its output in that font then shows the
+raw legacy keys (`Hkkjr`) in a Latin font instead of Hindi, with only a console
+line, "Failed to decode downloaded font". Word and Windows accept the same file.
+
+Three files shipped that way until October 2026: `ajay.woff`, `aman.woff` and
+`ruchi.woff` (the Unicode-to-Ajay, -Aman and -Ruchi pages, in every language).
+
+| File | What Chrome refused | Repair |
+| --- | --- | --- |
+| `ajay.woff`, `aman.woff` | every `cmap` subtable had `language` 1, not 0 ("cmap: language id should be zero") | the two `language` fields set to 0 |
+| `ruchi.woff` | the same, plus a `kern` entry selector of 1 for 4 pairs (needs 2) | the same, and the three `kern` search fields recomputed |
+
+The repair (`node scripts/webfont.mjs fix`) rewrites only those header bytes and
+the checksums that cover them. Glyph outlines, metrics, names and every other
+table keep their bytes; the character map entries are identical. Check any font
+you add with `node scripts/webfont.mjs check`. `npm test` runs the same check on
+every file here (`src/lib/fontFiles.test.js`), and `e2e/fonts.spec.js` loads each
+one in Chromium, so a new font with the same mistake fails the build.
+
+The check reports only what makes OTS refuse a font. `dvtt-surekh.woff` and
+`narad.woff` have a wrong kern `searchRange`, which OTS corrects by itself, and
+several of the older fonts carry stale table checksums that Chrome ignores, so
+neither is reported.
+
 ## Fonts on another font's keyboard
 
 Arjun, Kundli, Krishna, New Delhi, Ruchi, DevLys 020, Ajay, Aman and Agra type
