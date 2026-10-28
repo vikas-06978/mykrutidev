@@ -33,22 +33,6 @@ export const LOCALE_META = {
   pa: { htmlLang: 'pa', hreflang: 'pa', ogLocale: 'pa_IN', label: 'ਪੰਜਾਬੀ', english: 'Punjabi', dateLocale: 'pa-IN', script: 'guru' },
 };
 
-/**
- * The languages search engines are asked to index. Every language in LOCALES
- * is built and works (the switcher links to all of them), but a page in a
- * language outside this list says noindex, stays out of the sitemap and is
- * left out of every hreflang set.
- *
- * Why: the five newer languages were drafted without a native speaker's
- * review (docs/TRANSLATIONS-REVIEW.md), and Google's publisher policies name
- * "automatically generated content without manual review" as low-value
- * content. Until a language has been read by someone who speaks it, it is
- * offered to visitors but not put forward to Google. To index one again,
- * add its code here; nothing else changes.
- */
-export const INDEXED_LOCALES = /** @type {const} */ (['en', 'hi']);
-export const isIndexedLocale = (l) => INDEXED_LOCALES.includes(l);
-
 /** The languages that live under a prefix: /hi/, /bn/, ... */
 export const PREFIXED_LOCALES = LOCALES.filter((l) => l !== DEFAULT_LOCALE);
 

@@ -16,8 +16,6 @@ import { brandTitle } from '../lib/seoTitle.js';
 import { ogImagePath, OG_SIZE } from '../lib/og.js';
 import {
   LOCALES,
-  INDEXED_LOCALES,
-  isIndexedLocale,
   DEFAULT_LOCALE,
   LOCALE_META,
   splitLocale,
@@ -79,13 +77,10 @@ const canonical = page?.canonical ? abs(localizePath(page.canonical, lang)) : se
 // page whose canonical points elsewhere: Google reads hreflang only between
 // canonical pages, and a set naming non-canonical URLs is a mixed signal.
 // The page it points to carries the set instead.
-// Only the languages put forward for indexing (locales.js) are in the set,
-// and a page in another language carries none: it says noindex.
-const localeIndexed = isIndexedLocale(lang);
-const alternates = page?.canonical || !localeIndexed
+const alternates = page?.canonical
   ? []
   : [
-      ...INDEXED_LOCALES.map((l) => ({ hreflang: LOCALE_META[l].hreflang, href: abs(localizePath(path, l)) })),
+      ...LOCALES.map((l) => ({ hreflang: LOCALE_META[l].hreflang, href: abs(localizePath(path, l)) })),
       { hreflang: 'x-default', href: abs(localizePath(path, DEFAULT_LOCALE)) },
     ];
 
@@ -320,7 +315,7 @@ const body = localizeHtml(await Astro.slots.render('default'), lang);
     <meta name="description" content={description} />
     {!notFound && <link rel="canonical" href={canonical} />}
     {!notFound && alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
-    {(noindex || notFound || !localeIndexed) && <meta name="robots" content="noindex,follow" />}
+    {(noindex || notFound) && <meta name="robots" content="noindex,follow" />}
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:type" content={ogType} />

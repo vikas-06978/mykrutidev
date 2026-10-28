@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
 import { SITE, isIndexable } from './src/lib/routes.js';
-import { LOCALES, DEFAULT_LOCALE, LOCALE_META, INDEXED_LOCALES } from './src/i18n/locales.js';
+import { LOCALES, DEFAULT_LOCALE, LOCALE_META } from './src/i18n/locales.js';
 import pwa from './src/pwa/integration.mjs';
 import securityHeaders from './src/security/integration.mjs';
 
@@ -31,10 +31,10 @@ export default defineConfig({
       // we never ask Google to crawl a page we are telling it to ignore. The
       // filter strips the language prefix, so the rule is the same in every language.
       filter: isIndexable,
-      // Each entry lists its twin in every other indexed language (hreflang).
+      // Each entry lists its twin in every other language (hreflang).
       i18n: {
         defaultLocale: DEFAULT_LOCALE,
-        locales: Object.fromEntries(INDEXED_LOCALES.map((l) => [l, LOCALE_META[l].hreflang])),
+        locales: Object.fromEntries(LOCALES.map((l) => [l, LOCALE_META[l].hreflang])),
       },
     }),
     // Installable app: writes dist/sw.js, which keeps every page, font and

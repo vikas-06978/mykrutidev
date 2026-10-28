@@ -96,14 +96,3 @@ and deploy again. The ownership tag and ads.txt may remain for later use.
 - **Preview builds.** The script runs only on `mykrutidev.com`, so a
   `pages.dev` preview shows the empty ad box (when a unit is set) but asks
   Google for nothing.
-
-## Languages put forward for review
-
-Only English and Hindi are indexed (`INDEXED_LOCALES` in `src/i18n/locales.js`).
-Bengali, Marathi, Tamil, Gujarati and Punjabi pages are still built and linked
-from the language switcher, but they say `noindex`, are left out of the sitemap
-and carry no hreflang. They were drafted without a native speaker's review, and
-the Publisher Policies name "automatically generated content without manual
-review" as low-value content. When someone who speaks a language has read it,
-add its code to `INDEXED_LOCALES` and deploy.
-

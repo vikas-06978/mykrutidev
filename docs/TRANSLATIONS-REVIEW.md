@@ -3602,10 +3602,3 @@ These are data, not website text, and stay the same on English and Hindi pages:
 | `tools.dateFormats.numeric` | Numeric | अंकों में |  |
 | `tools.dateFormats.numericHindiDigits` | Numeric, Hindi digits | हिंदी अंकों में, अंकों वाली |  |
 | `tools.dateFormats.words` | In words | शब्दों में |  |
-
-## Indexing follows review
-
-Search engines are asked to index only the languages in `INDEXED_LOCALES`
-(`src/i18n/locales.js`): today English and Hindi. A language joins that list
-once a native speaker has read its pages.
-

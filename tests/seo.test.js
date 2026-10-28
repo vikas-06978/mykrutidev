@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { SITE } from '../src/lib/routes.js';
 import { parseRedirects } from '../scripts/serve-dist.mjs';
 import { GUIDES, guidePath } from '../src/lib/guides.js';
-import { DICTS, LOCALES, LOCALE_META, INDEXED_LOCALES } from '../src/i18n/index.js';
+import { DICTS, LOCALES, LOCALE_META } from '../src/i18n/index.js';
 import { BRAND, fits, visibleLength } from '../src/lib/seoTitle.js';
 
 const { en, hi } = DICTS;
@@ -221,26 +221,8 @@ describe('sitemap, canonical and hreflang', () => {
     });
     for (const u of want) assert.ok(sitemap.has(abs(u)), `${u} is missing from the sitemap`);
     for (const url of sitemap) assert.ok(want.includes(pathOf(url)), `sitemap lists ${url}, which is not an indexable page`);
-    for (const l of INDEXED_LOCALES.filter((x) => x !== 'en')) {
+    for (const l of LOCALES.filter((x) => x !== 'en')) {
       assert.ok(want.some((u) => u.startsWith(`/${l}/`)), `no ${l} pages in the sitemap`);
-    }
-  });
-
-  test('a language not put forward for indexing is built, says noindex, and stays out of the sitemap', () => {
-    const held = LOCALES.filter((l) => !INDEXED_LOCALES.includes(l));
-    for (const l of held) {
-      const own = [...pages.keys()].filter((u) => u.startsWith(`/${l}/`));
-      assert.ok(own.length > 100, `${l}: ${own.length} pages built`);
-      for (const u of own) {
-        assert.match(pages.get(u), /<meta name="robots" content="noindex,follow"/, `${u}: noindex`);
-        assert.ok(!sitemap.has(abs(u)), `${u} is in the sitemap`);
-      }
-    }
-    // ...and no indexed page points at one through hreflang.
-    for (const u of indexable) {
-      for (const t of linkRel(pages.get(u), 'alternate')) {
-        assert.ok(INDEXED_LOCALES.map((l) => LOCALE_META[l].hreflang).concat('x-default').includes(attr(t, 'hreflang')), `${u}: hreflang ${attr(t, 'hreflang')}`);
-      }
     }
   });
 
@@ -255,17 +237,11 @@ describe('sitemap, canonical and hreflang', () => {
     }
   });
 
-  test('hreflang: every indexed language and x-default on every indexed page, each set pointing at each other', () => {
-    const codes = INDEXED_LOCALES.map((l) => LOCALE_META[l].hreflang);
+  test('hreflang: every language and x-default on every page, each set pointing at each other', () => {
+    const codes = LOCALES.map((l) => LOCALE_META[l].hreflang);
     for (const [u, html] of pages) {
       if (u === '/404.html') continue;
       const alt = Object.fromEntries(linkRel(html, 'alternate').map((t) => [attr(t, 'hreflang'), attr(t, 'href')]));
-      // A page in a language held back from indexing carries no set at all.
-      const lang = (u.match(/^\/([a-z]{2})\//) ?? [])[1];
-      if (lang && LOCALES.includes(lang) && !INDEXED_LOCALES.includes(lang)) {
-        assert.deepEqual(alt, {}, `${u}: a held-back language with hreflang`);
-        continue;
-      }
       // A page that hands its ranking to another URL carries no hreflang set:
       // hreflang belongs between canonical pages only.
       if (attr(linkRel(html, 'canonical')[0] ?? '', 'href') !== abs(u)) {
