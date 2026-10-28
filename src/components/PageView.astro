@@ -7,6 +7,8 @@ import HindiKeyboard from './HindiKeyboard.astro';
 import TypingTutor from './TypingTutor.astro';
 import Faq from './Faq.astro';
 import HowTo from './HowTo.astro';
+import ConverterExamples from './ConverterExamples.astro';
+import LayoutDiff from './LayoutDiff.astro';
 import HomeTasks from './HomeTasks.astro';
 import GuidedTour from './GuidedTour.astro';
 import Printable from './Printable.astro';
@@ -30,7 +32,7 @@ import StoreThanks from './StoreThanks.astro';
 import StoreFind from './StoreFind.astro';
 import { STORE, productById, rupees } from '../lib/store.js';
 import { BUSINESS, businessLines } from '../lib/business.js';
-import { ADS } from '../lib/ads.js';
+import { ADS, withAdsBody } from '../lib/ads.js';
 import { FONTS } from '../lib/fontMaps.js';
 import { langOf, useT } from '../i18n/index.js';
 
@@ -112,14 +114,9 @@ if (path === '/privacy-policy') {
   STORE_VARS['{cookiesLine}'] = text(ADS ? 'cookiesWithAds' : 'cookiesGaOnly');
 }
 const fillVars = (s: string) => Object.entries(STORE_VARS).reduce((acc, [k, v]) => acc.replaceAll(k, v), s);
-const rawBody: string[] = maybe(`pages.${path}.body`) ?? [];
 const adsBody: string[] = ADS ? (maybe(`pages.${path}.adsBody`) ?? []) : [];
-if (adsBody.length) {
-  // Right after the Google Analytics section, which ends with its opt-out link.
-  const at = rawBody.findIndex((b) => b.includes('tools.google.com/dlpage/gaoptout')) + 1;
-  rawBody.splice(at > 0 ? at : rawBody.length, 0, ...adsBody);
-}
-const body: string[] = rawBody.map(fillVars);
+// withAdsBody() returns a new list: the dictionary's own array is shared by every render.
+const body: string[] = withAdsBody(maybe(`pages.${path}.body`) ?? [], adsBody).map(fillVars);
 // Who sells: printed on /contact once src/lib/business.js is filled in.
 const seller = path === '/contact' ? businessLines(BUSINESS) : [];
 const problems: { problem: string; fix: string }[] = maybe(`pages.${path}.problems`) ?? [];
@@ -238,6 +235,10 @@ const productLd =
 
     {/* Help sits UNDER the tool, never over it: the tool is the first thing on the page. */}
     {live && howTo && <HowTo steps={howTo.steps} tip={howTo.tip} />}
+
+    {/* Real phrases run through this converter, and what to know before trusting its output. */}
+    {live && page.from && page.to && <ConverterExamples from={page.from} to={page.to} />}
+    {live && page.from && page.to && <LayoutDiff from={page.from} to={page.to} />}
 
     {/* An ad, only once AdSense is switched on: under the tool and its steps, never above them. */}
     {live && <AdSlot />}

@@ -3027,6 +3027,8 @@
       "description": "Who runs MyKrutiDev, how the Kruti Dev converters and typing tutor are built and tested, and why your text never leaves your browser.",
       "lede": "MyKrutiDev is a small, independent site that converts Hindi between legacy fonts and Unicode and teaches Hindi typing - accurately, for free, and without uploading anything.",
       "body": [
+        "<h2>Why this site exists</h2>",
+        "<p>MyKrutiDev began in a startup office, where part of the daily work of Vikas Rathore was turning ordinary Hindi documents into Kruti Dev. The converters available then were slow, cluttered and hard to use, and people in the office were frustrated, with work still not getting done. So the converter on this site was built for that job, and it is still used for it. Colleagues from that office use it for office drafts and government forms, and people who work in courts have used it too.</p>",
         "<h2>What we make</h2>",
         "<p>We make converters between Kruti Dev, DevLys, Mangal and Unicode, a Hindi typing tutor with timed tests on the Remington layout, an on-screen Hindi keyboard, English to Hindi typing, printable charts and <a href=\"/guides\">guides</a> to the problems people bring us. Everything is free and needs no account.</p>",
         "<h2>How we check it</h2>",
@@ -3503,7 +3505,7 @@
       "nav": "Contact",
       "h1": "Contact MyKrutiDev",
       "title": "Contact MyKrutiDev | Report a Conversion Error",
-      "description": "Email the MyKrutiDev team to report a wrong conversion, a typing tutor problem or a mistake in a guide. We read every message.",
+      "description": "Email MyKrutiDev to report a wrong conversion, a typing tutor problem or a mistake in a guide. We read every message.",
       "lede": "The quickest way to reach us is email. We read every message, and a report of a wrong conversion is the most useful thing you can send.",
       "body": [
         "<h2>Email</h2>",
@@ -5544,15 +5546,15 @@
     "h1": "Hindi Typing and Font Guides",
     "title": "Hindi Typing & Kruti Dev Guides | Install, Convert, Type Faster",
     "description": "Practical guides to Kruti Dev and Unicode Hindi: installing the font, fixing English letters and boxes, converting Word files, and passing typing exams.",
-    "lede": "Step-by-step answers to the problems people bring to this site, each with a link to the tool that fixes it. Written and kept up to date by the MyKrutiDev team."
+    "lede": "Step-by-step answers to the problems people bring to this site, each with a link to the tool that fixes it. Written and kept up to date by the site's independent maintainer."
   },
   "article": {
-    "author": "MyKrutiDev team",
+    "author": "Vikas Rathore",
     "by": "By",
     "updated": "Updated",
     "useTool": "Open the tool: {tool}",
     "aboutAuthor": "About the author",
-    "authorBio": "the people who build and test the converters and the typing tutor on this site. Every rule in these guides is checked against the Kruti Dev 010 font and the converter's test suite before it is published.",
+    "authorBio": "the independent developer and maintainer of MyKrutiDev. The converters and the typing tutor on this site are built and tested by the same person, and the Kruti Dev keyboard chart is read out of the Kruti Dev 010 font file.",
     "corrections": "Found a mistake? <a href=\"/contact\">Tell us</a> and we will fix it.",
     "toolsHeading": "Tools for this",
     "moreGuides": "More guides"
@@ -5875,6 +5877,61 @@
         "<h2>Practising them</h2>",
         "<p>The <a href=\"/kruti-dev-matra-chart\">matra and conjunct chart</a> lists twenty signs and conjuncts with their exact keys, and prints on one page. The <a href=\"/hindi-typing-test\">typing tutor</a> drills them in lessons 6 to 8. And the <a href=\"/remington-hindi-keyboard\">Remington Hindi keyboard</a> lets you type any word and see its Unicode immediately.</p>"
       ]
+    },
+    "unicode-to-kruti-dev-office-forms": {
+      "crumb": "Unicode to Kruti Dev for office work",
+      "h1": "Converting Unicode Hindi to Kruti Dev for Office Drafts and Government Forms",
+      "title": "Unicode to Kruti Dev for Office Work and Forms",
+      "description": "Turn a Unicode Hindi draft into Kruti Dev 010 for an office template or form: paste or upload, keep English in its own font, check punctuation and numbers.",
+      "lede": "A draft arrives in Unicode Hindi, from a phone, an email or a portal, and the office template, the form or the press needs it in Kruti Dev 010. The conversion takes seconds. The care goes into a handful of things that look right on screen and go wrong on paper.",
+      "body": [
+        "<h2>Where this guide comes from</h2>",
+        "<p>MyKrutiDev began in an office. Part of the daily work of its maintainer, at a startup, was turning ordinary Hindi documents into Kruti Dev, and the free converters of the time were slow, cluttered and left people frustrated with the work still not done. The converter on this site was built for that job and is still used for it. The checklist below is what the work taught. It is the same work many visitors do: office drafts, government forms, and court papers that keep Kruti Dev templates.</p>",
+        "<h2>First, choose how the text goes in</h2>",
+        "<p>There are two ways in, and they behave differently when a document mixes Hindi and English.</p>",
+        "<ul><li><strong>Paste into the box.</strong> Quick for a paragraph or a form field. The result is one stream of Kruti Dev code, and the <strong>Download .docx</strong> button under the boxes sets every line in Kruti Dev 010, English words included.</li><li><strong>Upload the Word file.</strong> The <a href=\"/unicode-to-kruti-dev?mode=file\">Upload Word file</a> tab converts a whole .docx. A run that mixes the two scripts is split: the English keeps its own font and only the Hindi becomes Kruti Dev 010. Tables, headers and formatting stay where they were.</li></ul>",
+        "<p>So a letter with a reference number, an email address or an English name in it is best uploaded as a file. A block of plain Hindi can simply be pasted.</p>",
+        "<h2>Why English words need their own font</h2>",
+        "<p>Kruti Dev draws Hindi on the English keys. Set an English word in Kruti Dev 010 and the font draws each of its letters as a Hindi shape, so the word turns into nonsense. After pasting and applying Kruti Dev, select each English word, email address and web address and set it back to Arial or Times New Roman.</p>",
+        "<h2>Punctuation sits on other keys</h2>",
+        "<p>Kruti Dev keeps several punctuation marks on unexpected keys, and the converter writes them where the font expects them. In Kruti Dev they look right. The trouble starts when some of that text is later shown in an English font, because then the keys show through:</p>",
+        "<ul><li>a full stop becomes <code>-</code> and the danda <span lang=\"hi\" translate=\"no\">।</span> becomes <code>A</code></li><li>a comma becomes <code>]</code>, a hyphen <code>&amp;</code>, and brackets <code>¼</code> and <code>½</code></li><li>a colon, as in <span lang=\"hi\" translate=\"no\">विषय:</span>, becomes <code>%</code>, because the colon key of Kruti Dev draws <span lang=\"hi\" translate=\"no\">रू</span> and the colon you see is really the visarga</li></ul>",
+        "<p>So if the subject line <code>fo\"k;%</code> lands in an online form field that does not use Kruti Dev, it reads as code. A portal field needs the Unicode original, not the converted text.</p>",
+        "<h2>Numbers and dates</h2>",
+        "<p>English digits are never changed, so an amount or a file number keeps its value, and Kruti Dev 010 draws them as English digits. Hindi digits such as <span lang=\"hi\" translate=\"no\">१२३</span> are written as the Alt-code characters Kruti Dev 010 draws them on, <code>ƒ„…</code>. They show as Hindi digits in the font and as odd symbols anywhere else. The <a href=\"/kruti-dev-alt-codes\">Kruti Dev Alt codes</a> page lists every one.</p>",
+        "<p>With the checkbox under the boxes ticked, which is the default, a date such as 15/08/2024 is kept exactly as typed, for text that stays in an English font. If the whole document will be in Kruti Dev, untick it, and the slash is typed with the Kruti Dev key that draws it.</p>",
+        "<h2>Before you send it: five checks</h2>",
+        "<ol><li><strong>The font.</strong> Click into the Hindi and read the font box. It should say Kruti Dev 010. Text that shows letters like <code>Hkkjr</code> has lost its font, as the guide to <a href=\"/guides/kruti-dev-text-shows-english-letters\">Kruti Dev text in English letters</a> explains.</li><li><strong>The English parts.</strong> Every English word, address and email in an English font.</li><li><strong>Half letters and matras.</strong> Read a few words with joined letters against the Unicode draft, such as <span lang=\"hi\" translate=\"no\">कार्यालय</span> and <span lang=\"hi\" translate=\"no\">प्रार्थना-पत्र</span>. The short i sign should sit before its letter and the reph over the right one.</li><li><strong>The numbers.</strong> Amounts, dates and file numbers, one at a time.</li><li><strong>The next computer.</strong> Kruti Dev text reads as Hindi only where the font is installed. If the file goes to another office, make sure they have Kruti Dev 010, or send a PDF with it. The <a href=\"/guides/install-kruti-dev-010-font-windows\">installation guide</a> covers the font.</li></ol>",
+        "<h2>Correcting the result by hand</h2>",
+        "<p>In Kruti Dev the apostrophe is part of letters: <code>'k</code> is <span lang=\"hi\" translate=\"no\">श</span>. Word's AutoCorrect can turn it into a curly quote as you type. If you fix words by typing Kruti Dev keys, switch that off under File, Options, Proofing, AutoCorrect Options, AutoFormat As You Type, so the keys stay exactly as the font expects. This converter reads either form when you convert back.</p>",
+        "<h2>When to leave it in Unicode</h2>",
+        "<p>A document going to a website, a portal, e-Office, an email or a phone should stay in Unicode. Kruti Dev is for templates, printing and the offices that still ask for it, and the <a href=\"/guides/kruti-dev-vs-unicode-government-work\">Kruti Dev or Unicode</a> guide sets out which to use where.</p>"
+      ]
+    },
+    "which-font-is-my-hindi-document-in": {
+      "crumb": "Which font is it?",
+      "h1": "Kruti Dev, Preeti or Chanakya? How to Tell Which Font a Document Uses",
+      "title": "Which Font Is This Hindi Document In?",
+      "description": "Find the font a Hindi file was typed in: read it in Word, or tell it from the letters of Kruti Dev, Preeti, Shusha, Chanakya and DV-TT, and their cousins.",
+      "lede": "A converter can only be right if it knows the font the text was typed in. Usually Word tells you the name. When it cannot, because the file came without its fonts or as a PDF, the scrambled letters give the font away.",
+      "body": [
+        "<h2>Start with the font box</h2>",
+        "<p>Click inside the Hindi text in Word and read the font name on the Home tab. In LibreOffice Writer it is the box at the left of the formatting toolbar. Check three or four places, such as a heading, a table and a paragraph from the middle, because a document passed between offices often carries more than one font.</p>",
+        "<p>If the name is greyed out, names a font you do not have, or the file is a PDF, the name cannot be trusted. Then look at the letters.</p>",
+        "<h2>What the same words look like in each font</h2>",
+        "<p>Here is <span lang=\"hi\" translate=\"no\">भारत सरकार</span> as the keys of each font store it. Your text will say other words, but the look of the letters is a strong clue.</p>",
+        "<ul><li><strong>Kruti Dev and DevLys:</strong> <code>Hkkjr ljdkj</code>. Plain English letters, plenty of <code>k</code> for the long aa sign, and short words such as <code>dk</code>, <code>gS</code>, <code>vkSj</code> and <code>esa</code>. Use <a href=\"/\">Kruti Dev to Unicode</a>.</li><li><strong>Abbasi Chanakya:</strong> <code>Òkjr ljdkj</code>. Close to Kruti Dev, with an accented letter here and there. Use <a href=\"/abbasi-chanakya-to-unicode\">Abbasi Chanakya to Unicode</a>.</li><li><strong>Preeti and the Nepali fonts:</strong> <code>ef/t ;/sf/</code>. Slashes and semicolons inside words. Use <a href=\"/preeti-to-unicode\">Preeti to Unicode</a>.</li><li><strong>Shusha and Shivaji:</strong> <code>Baart sarkar</code>. The letters nearly spell the Hindi in English, because the keyboard is phonetic. Use <a href=\"/shusha-to-unicode\">Shusha to Unicode</a>.</li><li><strong>Chanakya, the newspaper font:</strong> <code>ÖæÚÌ âÚ·¤æÚ</code>. Accented capitals and signs such as <code>æ</code> and <code>¤</code> in almost every word. Use <a href=\"/chanakya-to-unicode\">Chanakya to Unicode</a>.</li><li><strong>DV-TT Surekh and Yogesh, for Marathi:</strong> <code>¦ÉÉ®iÉ ºÉ®CÉ®</code>. The letter <code>É</code> again and again, since most letters are a half form plus that bar. Use the <a href=\"/marathi-font-converter\">Marathi font converter</a>.</li></ul>",
+        "<p>Other scripts work the same way. <span lang=\"bn\" translate=\"no\">বাংলাদেশ সরকার</span> in SutonnyMJ is <code>evsjv†`k miKvi</code>, <span lang=\"ta\" translate=\"no\">தமிழ்நாடு அரசு</span> in Bamini is <code>jkpo;ehL muR</code>, and <span lang=\"gu\" translate=\"no\">ગુજરાત સરકાર</span> in Terafont or LMG Arun is <code>U]HZFT ;ZSFZ</code>.</p>",
+        "<h2>Same keyboard, different name</h2>",
+        "<p>Many fonts were made by copying a well-known keyboard and changing a few keys. A file in one of them converts almost right with the parent font and wrong in exactly those keys. The figures below are read from the converters' own key maps.</p>",
+        "<ul><li><strong>DevLys 010</strong> types every key the same as Kruti Dev 010, so the Kruti Dev converter is right for it.</li><li><strong>Ajay, Arjun, Kundli, Krishna, Aman, Agra, New Delhi, Ruchi and DevLys 020</strong> share between 144 and 151 of the 152 Kruti Dev keys and add 21 to 44 keys of their own. In Ajay, Arjun, New Delhi and Agra the <code>=</code> key types a half <span lang=\"hi\" translate=\"no\">त्र्</span> where Kruti Dev types a full <span lang=\"hi\" translate=\"no\">त्र</span>.</li><li><strong>Narad, Aakriti, Devanagari Bold, Anjali and Dina</strong> follow Preeti closely. <strong>Himalaya and Akshar</strong> swap its number row: in Preeti the number keys type letters, so <code>1</code> is <span lang=\"hi\" translate=\"no\">ज्ञ</span> and <code>0</code> is <span lang=\"hi\" translate=\"no\">ण्</span>, while in Himalaya and Akshar they type digits.</li><li><strong>Shivaji, Shusha02 and Shivaji02</strong> follow Shusha, with at most five keys different.</li></ul>",
+        "<p>Each of these fonts has its own converter page, and each page lists the keys where the font parts ways with its parent.</p>",
+        "<h2>A quick test when you are unsure</h2>",
+        "<p>Paste one line into the converter you think is right and read the result slowly. If almost everything is correct and the same one or two letters come out wrong every time, the font is probably a cousin of the one you picked. Open the cousin's page and compare its list of different keys with the letters that went wrong.</p>",
+        "<p>If nothing reads as Hindi at all, the text may be in a font this site does not convert yet. The <a href=\"/all-converters\">list of all converters</a> shows every font it handles, including those still marked as coming soon.</p>",
+        "<h2>What this cannot identify</h2>",
+        "<p>A scanned page or a photo is a picture, so there are no keys to read, and it needs Hindi OCR first. Unicode Hindi, the kind typed on a phone or with the Hindi keyboard built into Windows, needs no detective work at all: it already shows as Hindi in any font with Devanagari and does not need converting.</p>"
+      ]
     }
   },
   "workspace": {
@@ -6177,5 +6234,29 @@
     "cardHelp": "Lost the link or need help? Write to us at {contact} with your order number.",
     "forget": "Forget this purchase on this device",
     "forgotten": "Removed from this device. The link in your email still works."
+  },
+  "examples": {
+    "heading": "Worked examples",
+    "intro": "Real phrases run through this converter, so you can compare them with your own text and see what the page does before you paste anything.",
+    "note": "Each example comes from this converter's own rules and is checked in both directions every time the site is built. A phrase that fails the check is left out.",
+    "imatra": "The short i sign is typed before its letter in the old font",
+    "reph": "The reph (<span lang=\"hi\" translate=\"no\">र्</span>) is typed after its syllable in the old font",
+    "rakar": "A letter with <span lang=\"hi\" translate=\"no\">र</span> (ra) joined underneath",
+    "conjunct": "Letters that join into one shape",
+    "sentence": "A whole sentence with its full stop",
+    "word": "A single word",
+    "phrase": "A short phrase",
+    "limitsHeading": "Good to know",
+    "colonToUnicode": "In this font the colon in a heading such as <span lang=\"hi\" translate=\"no\">विषय:</span> is typed with the visarga key. It converts to the visarga <span lang=\"hi\" translate=\"no\">ः</span>, which looks like a colon but is a different character. If a portal or a search needs a real colon, replace it.",
+    "colonFromUnicode": "In this font a colon after a word is typed with the visarga key, because the colon key draws <span lang=\"hi\" translate=\"no\">रू</span> here. Pasted into a program without the font, it shows as a percent sign.",
+    "unmapped": "This font has no key for these letters and signs: {list}. They are left unchanged and flagged under the output box, and Word draws them in another font."
+  },
+  "layoutDiff": {
+    "heading": "How {font} compares with {ref}",
+    "intro": "{font} types {same} of the {total} keys of {ref} the same way. Keys with a different letter: {diff}. Keys only {font} has: {extra}. That is why many documents convert alike in both, and why the keys below are worth knowing. All of it is read from the same key maps the converter uses.",
+    "diffHeading": "Keys that type something different",
+    "extraHeading": "Keys only {font} has",
+    "colKey": "Key",
+    "missing": "Keys of {ref} missing from the map of {font}: {count}. They stay as they were typed."
   }
 }

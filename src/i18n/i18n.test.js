@@ -534,3 +534,23 @@ describe('paths', () => {
     assert.equal(markNoTranslate('<code>.docx</code>'), '<code translate="no">.docx</code>');
   });
 });
+
+describe('who the guides say wrote them', () => {
+  test('the byline names the maintainer the About page names, in every language', () => {
+    for (const lang of LOCALES) {
+      const about = DICTS[lang].pages['/about'].body.join(' ');
+      const name = DICTS[lang].article.author;
+      assert.ok(about.includes(name), `${lang}: About does not name "${name}"`);
+    }
+  });
+
+  test('nothing claims a team or an organisation of authors', () => {
+    // The site is run by one independent maintainer (About, docs/ADSENSE.md).
+    for (const lang of LOCALES) {
+      const d = DICTS[lang];
+      for (const s of [d.article.author, d.article.authorBio, d.guidesIndex.lede, d.pages['/contact'].description]) {
+        assert.doesNotMatch(s, /MyKrutiDev\s*(team|टीम|টিম|দল|ટીમ|ਟੀਮ|குழு)/i, `${lang}: ${s.slice(0, 60)}`);
+      }
+    }
+  });
+});

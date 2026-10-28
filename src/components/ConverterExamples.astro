@@ -1,0 +1,97 @@
+---
+/**
+ * "Worked examples" and "Good to know", under a converter's How-to steps.
+ *
+ * The rows come from src/lib/converterExamples.js, which runs the real
+ * conversion code on a few phrases and drops any row that does not check out
+ * in both directions. The limits are read off the same code: the colon rule of
+ * the Kruti Dev keyboard, and the letters an output font has no key for. So
+ * nothing on this block is typed by hand, and it cannot say something the
+ * converter does not do.
+ *
+ * Plain HTML, no script.
+ */
+import { FONTS } from '../lib/fontMaps.js';
+import { examplesFor, limitsFor } from '../lib/converterExamples.js';
+import { SCRIPTS, scriptOfPage, devaLangOfPage } from '../lib/scripts.js';
+import { langOf, useT, fill } from '../i18n/index.js';
+
+interface Props {
+  from: string;
+  to: string;
+}
+const { from, to } = Astro.props;
+const { t, render } = useT(langOf(Astro.url));
+
+const rows = examplesFor(from, to);
+const limits = limitsFor(from, to);
+
+// The same box names the converter above uses, so a column says what its box says.
+const scriptKey = scriptOfPage(from, to);
+const script = SCRIPTS[scriptKey];
+const otherScript = scriptKey !== 'deva';
+const devaLang = otherScript ? null : devaLangOfPage(from, to);
+const suffix = devaLang ? devaLang.suffix : script.suffix;
+const boxName = (k: string) =>
+  (otherScript || (devaLang && k === 'unicode')) && FONTS[k].kind === 'unicode' ? t(`converter.unicode${suffix}`) : t(`fontBox.${k}`);
+const isLegacy = (k: string) => FONTS[k].kind === 'legacy';
+// The language of the Unicode text, for screen readers and the right font.
+const unicodeLang = otherScript ? script.lang : devaLang ? devaLang.lang : 'hi';
+const unmappedList = limits.unmapped.length
+  ? `<span lang="hi" translate="no">${limits.unmapped.join(' ')}</span>`
+  : '';
+const notes = [
+  limits.colon === 'toUnicode' ? t('examples.colonToUnicode') : '',
+  limits.colon === 'fromUnicode' ? t('examples.colonFromUnicode') : '',
+  limits.unmapped.length ? fill(t('examples.unmapped'), { list: unmappedList }) : '',
+].filter(Boolean);
+---
+
+{
+  rows && (
+    <section aria-labelledby="examples-heading" class="mt-10" data-examples>
+      <h2 id="examples-heading" class="text-xl">{t('examples.heading')}</h2>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-body">{t('examples.intro')}</p>
+      <ol class="mt-4 grid gap-3 md:grid-cols-2">
+        {rows.map((r) => (
+          <li class="card p-4" data-example>
+            <p class="text-sm font-medium text-ink" set:html={render(t(`examples.${r.id}`))} />
+            <dl class="mt-3 grid gap-2.5 text-sm">
+              <div>
+                <dt class="text-xs font-semibold tracking-wide text-mute uppercase" translate="no">{boxName(from)}</dt>
+                <dd class="mt-0.5">
+                  {isLegacy(from) ? (
+                    <code translate="no" class="break-all" data-role="example-source">{r.source}</code>
+                  ) : (
+                    <span lang={unicodeLang} translate="no" class="text-base" data-role="example-source">{r.source}</span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold tracking-wide text-mute uppercase" translate="no">{boxName(to)}</dt>
+                <dd class="mt-0.5">
+                  {isLegacy(to) ? (
+                    <code translate="no" class="break-all" data-role="example-result">{r.result}</code>
+                  ) : (
+                    <span lang={unicodeLang} translate="no" class="text-base" data-role="example-result">{r.result}</span>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ol>
+      <p class="mt-3 max-w-2xl text-xs leading-relaxed text-mute">{t('examples.note')}</p>
+      {notes.length > 0 && (
+        <div class="mt-5" data-limits>
+          <h3 class="text-base font-semibold text-ink">{t('examples.limitsHeading')}</h3>
+          <ul class="mt-2 grid max-w-3xl list-disc gap-2 pl-5 text-sm leading-relaxed text-body">
+            {notes.map((n) => (
+              <li set:html={render(n)} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  )
+}

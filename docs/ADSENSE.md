@@ -43,9 +43,17 @@ Ads never appear on these pages, whatever the settings:
 - the store and its product and thank-you pages
 - the privacy, terms, refund and delivery policies
 - contact, support and links
+- the two pages that are only a list of links to other pages: `/all-converters`
+  and the guides index `/guides` (a guide itself can carry an ad)
 - the 404 page
 
 AdSense does not allow ads on pages with no content of their own.
+
+## Content review
+
+A "low value content" decision names no page, so the useful work is the site's
+real usefulness and reliability. The October 2026 review, what it found and what
+was changed are in [qa/ADSENSE-CONTENT-AUDIT-2026-10-27.md](qa/ADSENSE-CONTENT-AUDIT-2026-10-27.md).
 
 ## Steps
 

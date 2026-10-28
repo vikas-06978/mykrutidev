@@ -54,7 +54,7 @@ const article = {
   image: abs(ogImagePath(guidePath(guide), lang)),
   datePublished: guide.updated,
   dateModified: guide.updated,
-  author: { '@type': 'Organization', name: t('article.author'), url: abs(localizePath('/about', lang)) },
+  author: { '@type': 'Person', name: t('article.author'), url: abs(localizePath('/about', lang)) },
   publisher: { '@id': `${SITE}/#organization`, '@type': 'Organization', name: 'MyKrutiDev', logo: { '@type': 'ImageObject', url: abs('/og/logo.png') } },
 };
 

@@ -59,6 +59,16 @@ export const GUIDES = [
     updated: '2026-09-25',
     tools: ['/hindi-typing-test', '/kruti-dev-matra-chart', '/remington-hindi-keyboard'],
   },
+  {
+    slug: 'unicode-to-kruti-dev-office-forms',
+    updated: '2026-10-27',
+    tools: ['/unicode-to-kruti-dev', '/kruti-dev-alt-codes', '/kruti-dev-010-font'],
+  },
+  {
+    slug: 'which-font-is-my-hindi-document-in',
+    updated: '2026-10-27',
+    tools: ['/all-converters', '/', '/preeti-to-unicode'],
+  },
 ];
 
 export const guidePath = (g) => `${GUIDES_PATH}/${g.slug}`;

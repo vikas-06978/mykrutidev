@@ -1,0 +1,50 @@
+{
+  "_comment": "Kruti Dev 010 <-> Unicode pairs written from the Kruti Dev keyboard rules (the key chart in docs/FONTS.md and the typing guide), NOT copied from the converter's output. They are the phrases src/lib/converterExamples.js shows on the Kruti Dev and DevLys pages, so those pages' examples are compared with something that did not come from the code under test. DevLys 010 uses the same keys for all of these (docs/FONTS.md).",
+  "examples": [
+    { "k": "fgUnh Hkk\"kk", "u": "हिन्दी भाषा", "why": "short i typed before its letter, U is half na, \"k is the letter ssa" },
+    { "k": "dk;kZy; esa deZpkjh", "u": "कार्यालय में कर्मचारी", "why": "reph is Z typed after the syllable, e + s + a for mem + e-matra + anusvara" },
+    { "k": "iz'u dk mRrj", "u": "प्रश्न का उत्तर", "why": "z is ra under pa, 'u is half sha + na, R is half ta" },
+    { "k": "{ks=h; Kku", "u": "क्षेत्रीय ज्ञान", "why": "{ is ksha, = is tra, K is jna" },
+    { "k": "Hkkjr dh jkt/kkuh ubZ fnYyh gSA", "u": "भारत की राजधानी नई दिल्ली है।", "why": "/k is dha, bZ is ii, Y is half la, A is the danda" }
+  ],
+  "words": [
+    { "k": "Hkkjr", "u": "भारत" },
+    { "k": "fgUnh", "u": "हिन्दी" },
+    { "k": "ljdkj", "u": "सरकार" },
+    { "k": "fo|ky;", "u": "विद्यालय" },
+    { "k": "izdk'k", "u": "प्रकाश" },
+    { "k": "jk\"Vªh;", "u": "राष्ट्रीय" },
+    { "k": "'kCn", "u": "शब्द" },
+    { "k": "/keZ", "u": "धर्म" },
+    { "k": "Kku", "u": "ज्ञान" },
+    { "k": "Jh jke", "u": "श्री राम" },
+    { "k": "dks\"k", "u": "कोष" },
+    { "k": "eq[;ea=h", "u": "मुख्यमंत्री" },
+    { "k": "cPpk", "u": "बच्चा" },
+    { "k": "fnYyh", "u": "दिल्ली" },
+    { "k": "laln", "u": "संसद" },
+    { "k": "vkSj", "u": "और" },
+    { "k": "LokfHkeku", "u": "स्वाभिमान" },
+    { "k": "'kfDr", "u": "शक्ति" },
+    { "k": "/kU;okn", "u": "धन्यवाद" },
+    { "k": "lEeku", "u": "सम्मान" },
+    { "k": "Ñi;k", "u": "कृपया" },
+    { "k": "bZ'oj", "u": "ईश्वर" },
+    { "k": "dkWyst", "u": "कॉलेज" },
+    { "k": "vkWfQl", "u": "ऑफिस" },
+    { "k": "fo'o", "u": "विश्व" },
+    { "k": "jk\"Vª fuekZ.k", "u": "राष्ट्र निर्माण" },
+    { "k": "dqN lh[kuk gSA", "u": "कुछ सीखना है।" },
+    { "k": "esjk uke jkgqy gSA", "u": "मेरा नाम राहुल है।" },
+    { "k": "gekjk ns'k Hkkjr gSA", "u": "हमारा देश भारत है।" },
+    { "k": "vkt dk fnu cgqr vPNk gSA", "u": "आज का दिन बहुत अच्छा है।" },
+    { "k": "izkFkZuk i=", "u": "प्रार्थना पत्र" },
+    { "k": "ijh{kk ifj.kke", "u": "परीक्षा परिणाम" },
+    { "k": "Hkkjr dk lafo/kku", "u": "भारत का संविधान" }
+  ],
+  "english_kept": [
+    { "k": "Hkkjr the 2024", "u": "भारत the 2024" },
+    { "k": "fnukad 15/08/1947 dks PAN", "u": "दिनांक 15/08/1947 को PAN" },
+    { "k": "dk;kZy; esa 25 deZpkjh", "u": "कार्यालय में 25 कर्मचारी" }
+  ]
+}

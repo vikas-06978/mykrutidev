@@ -89,7 +89,28 @@ const NO_ADS = new Set([
   '/contact',
   '/support',
   '/links',
+  // Pages that are a list of links to other pages: no content of their own to sit beside an ad.
+  '/all-converters',
+  '/guides',
 ]);
+
+/**
+ * The privacy policy's advertising section goes in right after the Google
+ * Analytics one. Returns a NEW list: the page's body comes straight out of the
+ * language dictionary, which every render of the page shares, so editing it in
+ * place would add the section again on the next render (the dev server, or any
+ * second build of the same page in one process).
+ *
+ * @param {readonly string[]} body    the page's body blocks
+ * @param {readonly string[]} adsBody the blocks to add (empty when there is no AdSense setup)
+ * @returns {string[]}
+ */
+export function withAdsBody(body, adsBody) {
+  if (!adsBody.length) return [...body];
+  const after = body.findIndex((b) => b.includes('tools.google.com/dlpage/gaoptout')) + 1;
+  const at = after > 0 ? after : body.length;
+  return [...body.slice(0, at), ...adsBody, ...body.slice(at)];
+}
 
 /** Whether a page may show ads. */
 export const adsAllowedOn = (path) => !NO_ADS.has(path) && !path.startsWith('/store/');
